@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+.env
+.idea/
+.vscode/
+.claude/
+
+# Generated experiment outputs and model checkpoints.
+results/**
+!results/
+!results/make_report_figs.py
