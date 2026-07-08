@@ -17,6 +17,7 @@ from compare_common import build_micro_step_metrics
 from compare_common import compute_cumulative_little_delays
 from compare_common import load_macro_checkpoint
 from compare_common import make_env_from_args
+from compare_common import parse_zone_loads
 from compare_common import prepare_results_dirs
 from hrl_uav.plot_utils import (
     plot_macro_diagnostics,
@@ -127,6 +128,15 @@ def parse_args():
         help="Multiplier on per-zone target load (ZONE_TARGET_LOAD_MBPS); the real demand knob",
     )
     parser.add_argument(
+        "--zone_loads",
+        type=str,
+        default="",
+        help=(
+            "Comma-separated base offered load per zone in Mbps, before "
+            "load_scale. Empty keeps the built-in default."
+        ),
+    )
+    parser.add_argument(
         "--arrival_dt",
         type=float,
         default=0.1,
@@ -153,7 +163,14 @@ def parse_args():
     parser.add_argument(
         "--cpu_alloc_mode",
         type=str,
-        choices=["legacy_kkt", "priority_kkt", "fixed_full", "fixed_average"],
+        choices=[
+            "legacy_kkt",
+            "priority_kkt",
+            "fixed_full",
+            "fixed_average",
+            "fixed_demand",
+            "priority_demand",
+        ],
         default="priority_kkt",
         help="CPU resource allocation rule",
     )
@@ -187,6 +204,51 @@ def parse_args():
         choices=["pressure", "legacy"],
         default="pressure",
         help="Micro-state normalization mode",
+    )
+    parser.add_argument(
+        "--macro_comm_weight",
+        type=float,
+        default=2.0,
+        help="Weight of flow-aware communication cost in macro shaping",
+    )
+    parser.add_argument(
+        "--macro_comm_flow_ema",
+        type=float,
+        default=0.8,
+        help="EMA coefficient for recent macro routing flow",
+    )
+    parser.add_argument(
+        "--macro_flow_state",
+        type=int,
+        choices=[0, 1],
+        default=1,
+        help="Whether macro observations include flow summary features",
+    )
+    parser.add_argument(
+        "--macro_load_state",
+        type=int,
+        choices=[0, 1],
+        default=1,
+        help="Whether macro observations include absolute expected load features",
+    )
+    parser.add_argument(
+        "--macro_u2g_cost_weight",
+        type=float,
+        default=2.0,
+        help="Weight of legacy centroid-distance macro cost",
+    )
+    parser.add_argument(
+        "--macro_zone_ingress_weight",
+        type=float,
+        default=0.5,
+        help="Weight of legacy outside-zone macro cost",
+    )
+    parser.add_argument(
+        "--macro_action_mode",
+        type=str,
+        choices=["polar", "delta"],
+        default="polar",
+        help="Macro action interpretation in HRL_Wrapper",
     )
     parser.add_argument(
         "--eval_interval",
@@ -286,6 +348,7 @@ def evaluate_policy(eval_env, ppo_actors, sac_actor, args):
     [MAPPO UPGRADE]
     浣跨敤鍙傛暟鍏变韩 MAPPO Actor 鍋氱‘瀹氭€ц瘎浼般€?    """
     eval_scores = []
+    eval_legacy_scores = []
     eval_q_high = []
     eval_q_low = []
     eval_energy = []
@@ -591,9 +654,16 @@ def evaluate_policy(eval_env, ppo_actors, sac_actor, args):
 
         # [UNIFIED J] 评估打分 = 训练目标 J 的负值 (×100 仅为可读性, 不影响 argmax)。
         # 这彻底消除“训练信号涨而评估指标恶化”的错位:reward 曲线与该 score 同源。
+        legacy_score = -(
+            EVAL_W_HIGH * avg_q_high
+            + EVAL_W_LOW * avg_q_low
+            + EVAL_W_ENERGY * avg_energy
+            + EVAL_W_U2G * avg_u2g
+        )
         score = -avg_J * 100.0
 
         eval_scores.append(score)
+        eval_legacy_scores.append(legacy_score)
         eval_q_high.append(avg_q_high)
         eval_q_low.append(avg_q_low)
         eval_energy.append(avg_energy)
@@ -701,6 +771,7 @@ def evaluate_policy(eval_env, ppo_actors, sac_actor, args):
     return {
         "score": float(np.mean(eval_scores)),
         "J": float(np.mean(eval_J)),
+        "legacy_score": float(np.mean(eval_legacy_scores)),
         "q_high": float(np.mean(eval_q_high)),
         "q_low": float(np.mean(eval_q_low)),
         "energy": float(np.mean(eval_energy)),
@@ -874,6 +945,9 @@ def save_macro_diagnostics_with_verification(
     position_cost,
     position_improvement,
     macro_reward,
+    projected_comm_cost=None,
+    projected_comm_uplink_time=None,
+    projected_comm_u2u_time=None,
 ):
     """Save per-macro-step diagnostics plot and CSV for one episode."""
     macro_steps = np.arange(1, len(move_distance) + 1, dtype=np.int32)
@@ -881,6 +955,13 @@ def save_macro_diagnostics_with_verification(
         return
 
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
+    if projected_comm_cost is None:
+        projected_comm_cost = np.zeros_like(macro_steps, dtype=np.float64)
+    if projected_comm_uplink_time is None:
+        projected_comm_uplink_time = np.zeros_like(macro_steps, dtype=np.float64)
+    if projected_comm_u2u_time is None:
+        projected_comm_u2u_time = np.zeros_like(macro_steps, dtype=np.float64)
+
     plot_macro_diagnostics(
         macro_steps=macro_steps,
         move_distance=move_distance,
@@ -908,6 +989,9 @@ def save_macro_diagnostics_with_verification(
             np.asarray(position_cost, dtype=np.float64),
             np.asarray(position_improvement, dtype=np.float64),
             np.asarray(macro_reward, dtype=np.float64),
+            np.asarray(projected_comm_cost, dtype=np.float64),
+            np.asarray(projected_comm_uplink_time, dtype=np.float64),
+            np.asarray(projected_comm_u2u_time, dtype=np.float64),
         ]
     )
     np.savetxt(
@@ -918,7 +1002,8 @@ def save_macro_diagnostics_with_verification(
             "macro_step,move_distance_m,action_norm,hover_ratio,"
             "projected_mean_u2g_distance_m,projected_mean_u2u_rate_mbps,"
             "avg_upload_delay_penalty,position_cost,position_improvement,"
-            "macro_reward"
+            "macro_reward,projected_comm_cost,"
+            "projected_comm_uplink_time_s,projected_comm_u2u_time_s"
         ),
         comments="",
     )
@@ -1038,6 +1123,9 @@ def main():
                 "num_users": args.num_users,
                 "traffic_profile": args.traffic_profile,
                 "traffic_scale": args.traffic_scale,
+                "load_scale": args.load_scale,
+                "zone_loads": args.zone_loads,
+                "zone_target_load_mbps": parse_zone_loads(args.zone_loads),
                 "arrival_dt": args.arrival_dt,
                 "uplink_bandwidth_mhz": args.uplink_bandwidth_mhz,
                 "u2u_bandwidth_mhz": args.u2u_bandwidth_mhz,
@@ -1048,6 +1136,13 @@ def main():
                 "micro_diag_bias": args.micro_diag_bias,
                 "micro_action_scale": args.micro_action_scale,
                 "micro_state_mode": args.micro_state_mode,
+                "macro_comm_weight": args.macro_comm_weight,
+                "macro_comm_flow_ema": args.macro_comm_flow_ema,
+                "macro_flow_state": args.macro_flow_state,
+                "macro_load_state": args.macro_load_state,
+                "macro_u2g_cost_weight": args.macro_u2g_cost_weight,
+                "macro_zone_ingress_weight": args.macro_zone_ingress_weight,
+                "macro_action_mode": args.macro_action_mode,
                 "episodes": args.episodes,
                 "macro_steps": args.macro_steps,
                 "micro_steps": args.micro_steps,
@@ -1079,6 +1174,8 @@ def main():
 
     eval_history_steps = []
     eval_history_scores = []
+    eval_history_J = []
+    eval_history_legacy_scores = []
     eval_history_q_high = []
     eval_history_q_low = []
     eval_history_energy = []
@@ -1199,6 +1296,9 @@ def main():
         ep_macro_avg_upload_delay_penalty = []
         ep_macro_position_cost = []
         ep_macro_position_improvement = []
+        ep_macro_projected_comm_cost = []
+        ep_macro_projected_comm_uplink_time = []
+        ep_macro_projected_comm_u2u_time = []
         ep_macro_rewards = []
 
         # 褰撳墠 Episode 鐨勪复鏃?buffer
@@ -1263,12 +1363,24 @@ def main():
                 ep_macro_projected_u2g.append(
                     mac_info.get("projected_mean_u2g_distance_m", 0.0)
                 )
+                ep_macro_projected_comm_cost.append(
+                    mac_info.get("projected_macro_comm_cost", 0.0)
+                )
+                ep_macro_projected_comm_uplink_time.append(
+                    mac_info.get("projected_comm_uplink_time_s", 0.0)
+                )
+                ep_macro_projected_comm_u2u_time.append(
+                    mac_info.get("projected_comm_u2u_time_s", 0.0)
+                )
             else:
                 ep_macro_move_distance.append(0.0)
                 ep_macro_hover_ratio.append(1.0)
                 ep_macro_action_norm.append(0.0)
                 ep_macro_u2u_rate.append(0.0)
                 ep_macro_projected_u2g.append(0.0)
+                ep_macro_projected_comm_cost.append(0.0)
+                ep_macro_projected_comm_uplink_time.append(0.0)
+                ep_macro_projected_comm_u2u_time.append(0.0)
 
             # ========== [MICRO: SAC Control] ==========
             for micro_step in range(args.micro_steps):
@@ -1730,6 +1842,21 @@ def main():
             if ep_macro_position_improvement
             else 0.0
         )
+        avg_macro_projected_comm_cost = (
+            np.mean(ep_macro_projected_comm_cost)
+            if ep_macro_projected_comm_cost
+            else 0.0
+        )
+        avg_macro_projected_comm_uplink_time = (
+            np.mean(ep_macro_projected_comm_uplink_time)
+            if ep_macro_projected_comm_uplink_time
+            else 0.0
+        )
+        avg_macro_projected_comm_u2u_time = (
+            np.mean(ep_macro_projected_comm_u2u_time)
+            if ep_macro_projected_comm_u2u_time
+            else 0.0
+        )
         avg_energy_per_step = (
             np.mean(ep_energy_consumed) if ep_energy_consumed else 0.0
         )
@@ -1777,7 +1904,10 @@ def main():
             f"Hover ratio: {avg_macro_hover_ratio:.2f} | "
             f"Nominal U2U: {avg_macro_u2u_rate:.2f} Mbps | "
             f"Pos cost: {avg_macro_position_cost:.3f} | "
-            f"Improve: {avg_macro_position_improvement:.3f}"
+            f"Improve: {avg_macro_position_improvement:.3f} | "
+            f"Comm: {avg_macro_projected_comm_cost:.3f} "
+            f"(UL {avg_macro_projected_comm_uplink_time:.2f}s, "
+            f"U2U {avg_macro_projected_comm_u2u_time:.2f}s)"
         )
         print(
             f"  Task delay(ms) H/L/S/C/V: "
@@ -1822,6 +1952,11 @@ def main():
                 position_cost=ep_macro_position_cost,
                 position_improvement=ep_macro_position_improvement,
                 macro_reward=ep_macro_rewards,
+                projected_comm_cost=ep_macro_projected_comm_cost,
+                projected_comm_uplink_time=(
+                    ep_macro_projected_comm_uplink_time
+                ),
+                projected_comm_u2u_time=ep_macro_projected_comm_u2u_time,
             )
 
         if args.eval_interval > 0 and (episode + 1) % args.eval_interval == 0:
@@ -1834,6 +1969,8 @@ def main():
 
             eval_history_steps.append(episode + 1)
             eval_history_scores.append(eval_metrics["score"])
+            eval_history_J.append(eval_metrics["J"])
+            eval_history_legacy_scores.append(eval_metrics["legacy_score"])
             eval_history_q_high.append(eval_metrics["q_high"])
             eval_history_q_low.append(eval_metrics["q_low"])
             eval_history_energy.append(eval_metrics["energy"])
@@ -1991,6 +2128,7 @@ def main():
             print(
                 f"  Eval@{episode + 1} | "
                 f"Score: {eval_metrics['score']:.2f} | "
+                f"J: {eval_metrics['J']:.4f} | "
                 f"Dh(ms): {eval_metrics['delay_high']:.1f} | "
                 f"Dl(ms): {eval_metrics['delay_low']:.1f} | "
                 f"Dw(ms): {eval_metrics['delay_weighted_ms']:.1f} | "
@@ -2004,7 +2142,7 @@ def main():
                 f"Coop: {eval_metrics['coop_ratio']:.2f} | "
                 f"CPU sat: {eval_metrics['cpu_saturation']:.2f} | "
                 f"Press imbal: {eval_metrics['pressure_imbalance']:.2f} | "
-                f"KKT fh/fl(GHz): {eval_metrics['f_high_ghz']:.2f}/"
+                f"CPU fh/fl(GHz): {eval_metrics['f_high_ghz']:.2f}/"
                 f"{eval_metrics['f_low_ghz']:.2f} | "
                 f"U2G: {eval_metrics['u2g']:.2f}"
             )
@@ -2078,6 +2216,8 @@ def main():
             [
                 "episode",
                 "score",
+                "J",
+                "legacy_score",
                 "q_high",
                 "q_low",
                 "energy",
@@ -2120,6 +2260,8 @@ def main():
                 [
                     eval_history_steps[idx],
                     eval_history_scores[idx],
+                    eval_history_J[idx],
+                    eval_history_legacy_scores[idx],
                     eval_history_q_high[idx],
                     eval_history_q_low[idx],
                     eval_history_energy[idx],
@@ -2162,6 +2304,8 @@ def main():
     eval_detail_payload = {
         "steps": np.asarray(eval_history_steps, dtype=np.int32),
         "score": np.asarray(eval_history_scores, dtype=np.float32),
+        "J": np.asarray(eval_history_J, dtype=np.float32),
+        "legacy_score": np.asarray(eval_history_legacy_scores, dtype=np.float32),
         "energy_per_step": np.asarray(eval_history_energy, dtype=np.float32),
         "energy_total_episode": np.asarray(
             eval_history_energy_total_episode,

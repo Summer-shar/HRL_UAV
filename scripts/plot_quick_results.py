@@ -45,8 +45,9 @@ LABELS = {
 }
 
 
-CPU_PATTERN = re.compile(r"(?:^|_)cpu(?P<cpu>\d+(?:\.\d+)?)")
+CPU_PATTERN = re.compile(r"(?:^|_)cpu(?P<cpu>\d+(?:[.\-p]\d+)?)")
 TRAFFIC_PATTERN = re.compile(r"(?:^|_)ts(?P<traffic>\d+(?:\.\d+)?)")
+LOAD_PATTERN = re.compile(r"(?:^|_)(?:ls|load)(?P<load>\d+(?:[.\-p]\d+)?)")
 
 
 def parse_args():
@@ -92,15 +93,15 @@ def parse_args():
 
 def infer_algorithm(result_dir_name):
     name = result_dir_name.lower()
-    if name.startswith("micro_ppo"):
+    if name.startswith("micro_ppo") or "_micro_ppo" in name:
         return "micro_ppo"
-    if name.startswith("no_coop"):
+    if name.startswith("no_coop") or "_no_coop" in name:
         return "no_coop"
-    if name.startswith("random"):
+    if name.startswith("random") or "_random" in name:
         return "random"
-    if name.startswith("sca"):
+    if name.startswith("sca") or "_sca" in name:
         return "sca"
-    if name.startswith("sac"):
+    if name.startswith("sac") or "_sac" in name:
         return "sac"
     return None
 
@@ -109,7 +110,11 @@ def parse_cpu_ghz(result_dir_name):
     match = CPU_PATTERN.search(result_dir_name.lower())
     if not match:
         return None
-    return float(match.group("cpu"))
+    raw = match.group("cpu").replace("p", ".").replace("-", ".")
+    value = float(raw)
+    if "." not in raw and value > 30.0:
+        value /= 10.0
+    return value
 
 
 def parse_traffic_scale(result_dir_name):
@@ -117,6 +122,17 @@ def parse_traffic_scale(result_dir_name):
     if not match:
         return None
     return float(match.group("traffic"))
+
+
+def parse_load_scale(result_dir_name):
+    match = LOAD_PATTERN.search(result_dir_name.lower())
+    if not match:
+        return None
+    raw = match.group("load").replace("p", ".").replace("-", ".")
+    value = float(raw)
+    if "." not in raw and value > 10.0:
+        value /= 100.0
+    return value
 
 
 def compact_float(value):
@@ -368,7 +384,7 @@ def plot_kkt_cpu_curves(rows, output_path, smooth_window, show_markers=False):
         linestyle="--",
         linewidth=1.8,
     )
-    axes[0].set_title("KKT CPU utilization")
+    axes[0].set_title("CPU utilization")
     axes[0].set_xlabel("Episode")
     axes[0].set_ylabel("Ratio")
     axes[0].grid(True, alpha=0.35)
@@ -402,14 +418,14 @@ def plot_kkt_cpu_curves(rows, output_path, smooth_window, show_markers=False):
             va="center",
             transform=axes[1].transAxes,
         )
-    axes[1].set_title("KKT allocated CPU frequency")
+    axes[1].set_title("Allocated CPU frequency")
     axes[1].set_xlabel("Episode")
     axes[1].set_ylabel("GHz")
     axes[1].grid(True, alpha=0.35)
     if has_frequency:
         axes[1].legend(frameon=False, fontsize=8)
 
-    fig.suptitle("KKT CPU Allocation Diagnostics")
+    fig.suptitle("CPU Allocation Diagnostics")
     fig.tight_layout()
     fig.savefig(output_path)
     plt.close(fig)
@@ -514,13 +530,26 @@ def plot_cpu_sweep_summary(summaries, output_dir):
 
     grouped = {}
     for item in cpu_rows:
+        load_scale = item.get("load_scale")
         traffic_scale = item.get("traffic_scale")
-        grouped.setdefault(traffic_scale, []).append(item)
+        if load_scale in ("", None):
+            load_scale = (
+                f"ts{compact_float(traffic_scale)}"
+                if traffic_scale not in ("", None)
+                else None
+            )
+        grouped.setdefault(load_scale, []).append(item)
 
     saved_paths = []
-    for traffic_scale, rows in sorted(
+    for load_group, rows in sorted(
         grouped.items(),
-        key=lambda pair: -1.0 if pair[0] in ("", None) else float(pair[0]),
+        key=lambda pair: (
+            -1.0
+            if pair[0] in ("", None)
+            else float(str(pair[0])[2:])
+            if isinstance(pair[0], str) and pair[0].startswith("ts")
+            else float(pair[0])
+        ),
     ):
         rows = sorted(rows, key=lambda item: float(item["cpu_ghz"]))
         by_algorithm = {}
@@ -574,9 +603,13 @@ def plot_cpu_sweep_summary(summaries, output_dir):
 
         title = "CPU Frequency Sweep"
         suffix = "unknown"
-        if traffic_scale not in ("", None):
-            title += f" (traffic scale = {compact_float(traffic_scale)})"
-            suffix = f"ts{compact_float(traffic_scale)}"
+        if load_group not in ("", None):
+            if isinstance(load_group, str) and load_group.startswith("ts"):
+                title += f" (traffic scale = {load_group[2:]})"
+                suffix = load_group
+            else:
+                title += f" (load scale = {compact_float(load_group)})"
+                suffix = f"ls{compact_float(load_group)}"
         fig.suptitle(title)
         fig.tight_layout()
 
@@ -609,15 +642,26 @@ def plot_detail_figures(detail_records, output_dir, convergence_window=3):
     grouped = {}
     for record in detail_records:
         cpu = record.get("cpu_ghz")
+        load = record.get("load_scale")
         traffic = record.get("traffic_scale")
         if cpu in ("", None):
             continue
-        grouped.setdefault((traffic, cpu), []).append(record)
+        if load in ("", None):
+            load = (
+                f"ts{compact_float(traffic)}"
+                if traffic not in ("", None)
+                else None
+            )
+        grouped.setdefault((load, cpu), []).append(record)
 
-    for (traffic_scale, cpu_ghz), records in sorted(
+    for (load_group, cpu_ghz), records in sorted(
         grouped.items(),
         key=lambda pair: (
-            -1.0 if pair[0][0] in ("", None) else float(pair[0][0]),
+            -1.0
+            if pair[0][0] in ("", None)
+            else float(str(pair[0][0])[2:])
+            if isinstance(pair[0][0], str) and pair[0][0].startswith("ts")
+            else float(pair[0][0]),
             float(pair[0][1]),
         ),
     ):
@@ -627,8 +671,11 @@ def plot_detail_figures(detail_records, output_dir, convergence_window=3):
 
         records = sorted(records, key=lambda item: item["label"])
         suffix = f"cpu{compact_float(cpu_ghz)}"
-        if traffic_scale not in ("", None):
-            suffix += f"_ts{compact_float(traffic_scale)}"
+        if load_group not in ("", None):
+            if isinstance(load_group, str) and load_group.startswith("ts"):
+                suffix += f"_{load_group}"
+            else:
+                suffix += f"_ls{compact_float(load_group)}"
 
         labels = [record["label"] for record in records]
         num_uavs = max(
@@ -934,6 +981,8 @@ def build_convergence_summary(result_dir_name, algorithm, rows, window):
 
     fields = {
         "score": [to_float(row, "score") for row in tail],
+        "J": [to_float(row, "J") for row in tail],
+        "legacy_score": [to_float(row, "legacy_score") for row in tail],
         "delay_weighted_ms": [
             to_float(row, "delay_weighted_ms") for row in tail
         ],
@@ -1004,11 +1053,14 @@ def build_convergence_summary(result_dir_name, algorithm, rows, window):
         "label": LABELS.get(algorithm, algorithm),
         "cpu_ghz": parse_cpu_ghz(result_dir_name),
         "traffic_scale": parse_traffic_scale(result_dir_name),
+        "load_scale": parse_load_scale(result_dir_name),
         "num_eval_points": len(rows),
         "convergence_window": len(tail),
         "start_episode": to_float(tail[0], "episode"),
         "end_episode": to_float(tail[-1], "episode"),
         "final_score": to_float(final, "score"),
+        "final_J": to_float(final, "J"),
+        "final_legacy_score": to_float(final, "legacy_score"),
         "final_delay_weighted_ms": to_float(final, "delay_weighted_ms"),
         "final_task_delay_avg_ms": to_float(final, "task_delay_avg_ms"),
         "final_task_delay_weighted_ms": to_float(final, "task_delay_weighted_ms"),
@@ -1055,11 +1107,14 @@ def save_summary_csv(path, summaries):
         "label",
         "cpu_ghz",
         "traffic_scale",
+        "load_scale",
         "num_eval_points",
         "convergence_window",
         "start_episode",
         "end_episode",
         "final_score",
+        "final_J",
+        "final_legacy_score",
         "final_delay_weighted_ms",
         "final_task_delay_avg_ms",
         "final_task_delay_weighted_ms",
@@ -1084,6 +1139,10 @@ def save_summary_csv(path, summaries):
         "final_pressure_imbalance",
         "score_mean",
         "score_std",
+        "J_mean",
+        "J_std",
+        "legacy_score_mean",
+        "legacy_score_std",
         "delay_weighted_ms_mean",
         "delay_weighted_ms_std",
         "task_delay_avg_ms_mean",
@@ -1185,6 +1244,7 @@ def main():
                 "label": LABELS.get(algorithm, algorithm),
                 "cpu_ghz": convergence_summary.get("cpu_ghz"),
                 "traffic_scale": convergence_summary.get("traffic_scale"),
+                "load_scale": convergence_summary.get("load_scale"),
                 "detail": detail,
                 "detail_path": detail_path,
                 "coop_ratio": convergence_summary.get("final_coop_ratio", 0.0),

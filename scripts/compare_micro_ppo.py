@@ -23,6 +23,7 @@ from compare_common import prepare_results_dirs
 from compare_common import print_episode_summary
 from compare_common import print_evaluation_summary
 from compare_common import save_experiment_artifacts
+from compare_common import save_scenario_metadata
 from compare_common import set_global_seeds
 from compare_macro_ppo import MacroPPOTrainer
 from hrl_uav.agents.ppo_micro_agent import MicroPPOAgent
@@ -149,6 +150,7 @@ def main():
     args = parse_args()
     set_global_seeds(args.seed)
     results_dirs = prepare_results_dirs(args.results_subdir)
+    save_scenario_metadata(results_dirs, args, "micro_ppo")
 
     env = make_env_from_args(
         args,

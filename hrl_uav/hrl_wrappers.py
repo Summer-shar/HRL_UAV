@@ -33,6 +33,14 @@ class HRL_Wrapper(gym.Env):
         kkt_v=1.0,
         fixed_cpu_util=0.5,
         load_scale=1.0,
+        zone_loads=None,
+        macro_comm_weight=2.0,
+        macro_comm_flow_ema=0.8,
+        macro_flow_state=True,
+        macro_load_state=False,
+        macro_u2g_cost_weight=2.0,
+        macro_zone_ingress_weight=0.5,
+        macro_action_mode="polar",
     ):
         super(HRL_Wrapper, self).__init__()
 
@@ -49,6 +57,7 @@ class HRL_Wrapper(gym.Env):
             kkt_v=kkt_v,
             fixed_cpu_util=fixed_cpu_util,
             load_scale=load_scale,
+            zone_loads=zone_loads,
         )
 
         self.N = num_uavs
@@ -115,10 +124,21 @@ class HRL_Wrapper(gym.Env):
 
         # [REWARD SHAPING FIX] 削弱排队成本的支配地位，增强地面和队友的空间几何引导
         self.macro_queue_cost_weight = 1
-        self.macro_u2g_cost_weight = 5
+        self.macro_u2g_cost_weight = float(macro_u2g_cost_weight)
         self.macro_u2u_cost_weight = 0
         self.macro_anchor_cost_weight = 0.0
-        self.macro_zone_ingress_weight = 2.5
+        self.macro_zone_ingress_weight = float(macro_zone_ingress_weight)
+        self.macro_action_mode = str(macro_action_mode).lower()
+        if self.macro_action_mode not in ("polar", "delta"):
+            raise ValueError("macro_action_mode must be 'polar' or 'delta'.")
+        self.macro_comm_weight = float(macro_comm_weight)
+        self.macro_comm_flow_ema = float(
+            np.clip(macro_comm_flow_ema, 0.0, 0.999)
+        )
+        self.macro_comm_cost_norm_s = max(float(self.env.macro_dt), 1e-8)
+        self.macro_flow_state = bool(macro_flow_state)
+        self.macro_load_state = bool(macro_load_state)
+        self.macro_flow_norm_mbits = 100.0
 
         # 行动空间定义（统一归一化到 [-1, 1]）
         # Macro Action: normalized [rho, theta] for N UAVs
@@ -145,6 +165,12 @@ class HRL_Wrapper(gym.Env):
         self.macro_base_pos_dim = 2
         self.macro_own_summary_dim = 5
         self.macro_teammate_feature_dim = 4
+        if self.macro_flow_state:
+            self.macro_own_summary_dim += 2
+            self.macro_teammate_feature_dim += 2
+        if self.macro_load_state:
+            self.macro_own_summary_dim += 1
+            self.macro_teammate_feature_dim += 1
         self.macro_local_obs_dim = (
             self.macro_base_pos_dim
             + self.macro_own_summary_dim
@@ -210,6 +236,24 @@ class HRL_Wrapper(gym.Env):
         self.curr_macro_stat_count = 0
         self.curr_macro_stats_dirty = False
 
+        self.prev_macro_flow_ema_mbits = np.zeros(
+            (self.N, self.N),
+            dtype=np.float32,
+        )
+        self.curr_macro_flow_mbits = np.zeros(
+            (self.N, self.N),
+            dtype=np.float32,
+        )
+        self.current_macro_flow_reference_mbits = np.zeros(
+            (self.N, self.N),
+            dtype=np.float32,
+        )
+        self._last_coop_flow_mbits = np.zeros(
+            (self.N, self.N),
+            dtype=np.float32,
+        )
+        self.curr_macro_flow_dirty = False
+
         # U2U 拓扑缓存：UAV 坐标不变时复用上次结果
         self._u2u_cache_coords = None
         self._u2u_cache_result = None
@@ -249,6 +293,166 @@ class HRL_Wrapper(gym.Env):
         ).astype(np.float32)
 
         self._reset_macro_summary_accumulator()
+
+    def _expected_macro_upload_mbits(self):
+        expected_mbps = np.asarray(
+            getattr(
+                self.env,
+                "zone_expected_offered_load_mbps",
+                np.zeros(self.N, dtype=np.float32),
+            ),
+            dtype=np.float32,
+        )
+        if expected_mbps.shape[0] != self.N or np.sum(expected_mbps) <= 1e-8:
+            expected_mbps = np.zeros(self.N, dtype=np.float32)
+            for i in range(self.N):
+                if hasattr(self.env, "_get_zone_target_load_mbps"):
+                    expected_mbps[i] = float(self.env._get_zone_target_load_mbps(i))
+                else:
+                    expected_mbps[i] = 1.0
+
+        expected = expected_mbps * float(self.env.macro_dt)
+        expected = np.maximum(expected, 1e-6).astype(np.float32)
+        self.macro_flow_norm_mbits = float(max(np.max(expected), 1.0))
+        return expected
+
+    def _reset_macro_flow_accumulator(self):
+        self.curr_macro_flow_mbits.fill(0.0)
+        self.curr_macro_flow_dirty = False
+        current_flow = np.asarray(
+            getattr(self.env, "coop_flow_mbits", np.zeros((self.N, self.N))),
+            dtype=np.float32,
+        )
+        if current_flow.shape == (self.N, self.N):
+            self._last_coop_flow_mbits = current_flow.copy()
+        else:
+            self._last_coop_flow_mbits.fill(0.0)
+
+    def _estimate_macro_flow_reference(self, raw_state):
+        q_tx = (
+            np.asarray(raw_state["Q_tx_high"], dtype=np.float32)
+            + np.asarray(raw_state["Q_tx_low"], dtype=np.float32)
+        )
+        recent_flow = np.asarray(
+            self.prev_macro_flow_ema_mbits,
+            dtype=np.float32,
+        )
+        observed = 0.7 * recent_flow + 0.3 * np.maximum(q_tx, 0.0)
+        expected_upload = self._expected_macro_upload_mbits()
+
+        flow = np.zeros((self.N, self.N), dtype=np.float32)
+        for i in range(self.N):
+            row = np.maximum(observed[i], 0.0).astype(np.float32)
+            row_sum = float(np.sum(row))
+            if row_sum <= 1e-8:
+                flow[i, i] = expected_upload[i]
+            else:
+                flow[i] = row * (expected_upload[i] / row_sum)
+        return flow
+
+    def _compute_uplink_rates_mbps(self, raw_state, positions):
+        positions = np.asarray(positions, dtype=np.float64)
+        user_coords = np.asarray(
+            raw_state.get("user_coords", self.env.user_coords),
+            dtype=np.float64,
+        )
+        assigned = np.asarray(self.env.user_allocations, dtype=np.int64)
+        assigned = np.clip(assigned, 0, self.N - 1)
+
+        diff = user_coords - positions[assigned]
+        dist_sq = np.sum(diff ** 2, axis=1) + float(self.env.H) ** 2
+        channel_gain = float(self.env.beta_0) / np.maximum(dist_sq, 1e-8)
+        user_bandwidth = float(self.env.B_gt_total) / max(self.env.M, 1)
+        user_rate_mbps = (
+            user_bandwidth
+            * np.log2(
+                1.0
+                + (float(self.env.p_gt) * channel_gain)
+                / float(self.env.noise_power)
+            )
+            / 1e6
+        )
+
+        zone_rates = np.zeros(self.N, dtype=np.float64)
+        np.add.at(zone_rates, assigned, user_rate_mbps)
+        return np.maximum(zone_rates, 1e-9).astype(np.float32)
+
+    def _compute_flow_u2u_rates_mbps(self, positions, flow_mbits):
+        positions = np.asarray(positions, dtype=np.float64)
+        flow = np.asarray(flow_mbits, dtype=np.float64)
+        active = flow > 1e-9
+        np.fill_diagonal(active, False)
+
+        rates = np.zeros((self.N, self.N), dtype=np.float64)
+        active_count = int(np.count_nonzero(active))
+        if active_count <= 0:
+            return rates.astype(np.float32)
+
+        diff = positions[:, None, :] - positions[None, :, :]
+        dist_sq = np.sum(diff ** 2, axis=-1)
+        np.fill_diagonal(dist_sq, np.inf)
+        channel_gain = float(self.env.beta_0) / np.maximum(dist_sq, 1e-8)
+        bandwidth_hz = float(self.env.B_u2u_total) / max(active_count, 1)
+        rates_bps = bandwidth_hz * np.log2(
+            1.0
+            + (float(self.env.p_u2u) * channel_gain)
+            / float(self.env.noise_power)
+        )
+        rates[active] = rates_bps[active] / 1e6
+        return rates.astype(np.float32)
+
+    def _compute_flow_aware_comm_cost(self, raw_state, flow_mbits):
+        positions = np.asarray(raw_state["uav_coords"], dtype=np.float32)
+        flow = np.asarray(flow_mbits, dtype=np.float32).copy()
+        if flow.shape != (self.N, self.N):
+            flow = self._estimate_macro_flow_reference(raw_state)
+        flow = np.maximum(flow, 0.0)
+
+        uplink_rates = self._compute_uplink_rates_mbps(raw_state, positions)
+        upload_volume = np.sum(flow, axis=1).astype(np.float32)
+        uplink_time = upload_volume / np.maximum(uplink_rates, 1e-9)
+
+        u2u_rates = self._compute_flow_u2u_rates_mbps(positions, flow)
+        offdiag = ~np.eye(self.N, dtype=bool)
+        active = offdiag & (flow > 1e-9)
+        u2u_time_matrix = np.zeros((self.N, self.N), dtype=np.float32)
+        u2u_time_matrix[active] = flow[active] / np.maximum(
+            u2u_rates[active],
+            1e-9,
+        )
+
+        u2u_time_out = np.sum(u2u_time_matrix, axis=1)
+        u2u_time_in = np.sum(u2u_time_matrix, axis=0)
+        comm_time_per_uav = (
+            uplink_time + 0.5 * (u2u_time_out + u2u_time_in)
+        ).astype(np.float32)
+        comm_time = float(np.sum(uplink_time) + np.sum(u2u_time_matrix))
+
+        norm = max(float(self.macro_comm_cost_norm_s), 1e-8)
+        return {
+            "comm_cost": float(comm_time / norm),
+            "comm_cost_per_uav": (comm_time_per_uav / norm).astype(np.float32),
+            "comm_time_s": float(comm_time),
+            "comm_uplink_time_s": float(np.sum(uplink_time)),
+            "comm_u2u_time_s": float(np.sum(u2u_time_matrix)),
+            "comm_uplink_time_per_uav_s": uplink_time.astype(np.float32),
+            "comm_u2u_time_matrix_s": u2u_time_matrix.astype(np.float32),
+            "comm_uplink_rates_mbps": uplink_rates.astype(np.float32),
+            "comm_u2u_rates_mbps": u2u_rates.astype(np.float32),
+            "flow_reference_mbits": flow.astype(np.float32),
+        }
+
+    def _update_macro_flow_ema(self):
+        if not self.curr_macro_flow_dirty:
+            return
+        realized = np.maximum(self.curr_macro_flow_mbits, 0.0).astype(np.float32)
+        if float(np.sum(realized)) <= 1e-8:
+            return
+        beta = self.macro_comm_flow_ema
+        self.prev_macro_flow_ema_mbits = (
+            beta * self.prev_macro_flow_ema_mbits
+            + (1.0 - beta) * realized
+        ).astype(np.float32)
 
     def _compute_u2u_topology_metrics(self, uav_coords, q_tx_matrix):
         """
@@ -360,9 +564,12 @@ class HRL_Wrapper(gym.Env):
         _, per_uav_info = self._compute_macro_costs(raw_state)
         return per_uav_info
 
-    def _compute_macro_costs(self, raw_state):
+    def _compute_macro_costs(self, raw_state, flow_mbits=None):
         # 合并版本：一次 snapshot，同时返回全局代价和 per-uav 代价。
         snapshot = self._build_macro_snapshot(raw_state)
+        if flow_mbits is None:
+            flow_mbits = self._estimate_macro_flow_reference(raw_state)
+        comm_info = self._compute_flow_aware_comm_cost(raw_state, flow_mbits)
 
         # --- 全局量 ---
         q_loc_h = float(np.sum(raw_state["Q_loc_high"]))
@@ -445,6 +652,7 @@ class HRL_Wrapper(gym.Env):
             + self.macro_u2u_cost_weight * u2u_cost
             + self.macro_anchor_cost_weight * anchor_cost
             + self.macro_zone_ingress_weight * zone_ingress_cost
+            + self.macro_comm_weight * comm_info["comm_cost"]
         )
 
         global_info = {
@@ -452,6 +660,19 @@ class HRL_Wrapper(gym.Env):
             "queue_cost": float(queue_cost),
             "u2g_cost": float(u2g_cost),
             "u2u_cost": float(u2u_cost),
+            "comm_cost": float(comm_info["comm_cost"]),
+            "comm_time_s": float(comm_info["comm_time_s"]),
+            "comm_uplink_time_s": float(comm_info["comm_uplink_time_s"]),
+            "comm_u2u_time_s": float(comm_info["comm_u2u_time_s"]),
+            "macro_comm_weight": float(self.macro_comm_weight),
+            "flow_reference_mbits": comm_info["flow_reference_mbits"].copy(),
+            "comm_uplink_rates_mbps": comm_info[
+                "comm_uplink_rates_mbps"
+            ].copy(),
+            "comm_u2u_rates_mbps": comm_info["comm_u2u_rates_mbps"].copy(),
+            "comm_u2u_time_matrix_s": comm_info[
+                "comm_u2u_time_matrix_s"
+            ].copy(),
             "anchor_cost": float(anchor_cost),
             "zone_ingress_cost": float(zone_ingress_cost),
             "mean_u2g_distance_m": float(np.mean(snapshot["u2g_distance"])),
@@ -494,6 +715,7 @@ class HRL_Wrapper(gym.Env):
             + self.macro_u2u_cost_weight * u2u_cost_per_uav
             + self.macro_anchor_cost_weight * anchor_cost_per_uav
             + self.macro_zone_ingress_weight * zone_ingress_cost_per_uav
+            + self.macro_comm_weight * comm_info["comm_cost_per_uav"]
         ).astype(np.float32)
 
         per_uav_info = {
@@ -501,6 +723,10 @@ class HRL_Wrapper(gym.Env):
             "queue_cost_per_uav": queue_cost_per_uav.copy(),
             "u2g_cost_per_uav": u2g_cost_per_uav.copy(),
             "u2u_cost_per_uav": u2u_cost_per_uav.copy(),
+            "comm_cost_per_uav": comm_info["comm_cost_per_uav"].copy(),
+            "comm_uplink_time_per_uav_s": comm_info[
+                "comm_uplink_time_per_uav_s"
+            ].copy(),
             "anchor_cost_per_uav": anchor_cost_per_uav.copy(),
             "zone_ingress_cost_per_uav": zone_ingress_cost_per_uav.copy(),
             "mean_u2g_distance_m": float(np.mean(snapshot["u2g_distance"])),
@@ -536,6 +762,12 @@ class HRL_Wrapper(gym.Env):
         self.prev_macro_u2g_mean.fill(0.0)
 
         self._reset_macro_summary_accumulator()
+        expected_flow = np.diag(self._expected_macro_upload_mbits()).astype(
+            np.float32,
+        )
+        self.prev_macro_flow_ema_mbits = expected_flow.copy()
+        self.current_macro_flow_reference_mbits = expected_flow.copy()
+        self._reset_macro_flow_accumulator()
 
         initial_cost_info, initial_cost_info_per_uav = self._compute_macro_costs(
             self.env.get_raw_state()
@@ -644,34 +876,74 @@ class HRL_Wrapper(gym.Env):
         norm_u2u_mean = np.clip(
             own_u2u_mean / max(self.max_u2u_rate_mbps, 1e-8), 0.0, 1.0
         )
+        flow_ref = self._estimate_macro_flow_reference(raw_state)
+        flow_norm = max(float(self.macro_flow_norm_mbits), 1e-8)
+        norm_flow = np.clip(flow_ref / flow_norm, 0.0, 1.0)
+        norm_flow_out = np.clip(
+            np.sum(flow_ref, axis=1) / flow_norm,
+            0.0,
+            1.0,
+        ).astype(np.float32)
+        norm_flow_in = np.clip(
+            np.sum(flow_ref, axis=0) / flow_norm,
+            0.0,
+            1.0,
+        ).astype(np.float32)
+        expected_upload = self._expected_macro_upload_mbits()
+        current_load_scale = max(
+            float(getattr(self.env, "load_scale", 1.0)),
+            1e-6,
+        )
+        base_expected = expected_upload / current_load_scale
+        base_expected_norm = max(float(np.max(base_expected)), 1e-8)
+        norm_expected_load = np.clip(
+            expected_upload / base_expected_norm,
+            0.0,
+            2.0,
+        ).astype(np.float32)
 
         local_obs_list = []
         for i in range(self.N):
             delta_centroid = centroids[i] - uav_coords[i]
 
-            own_summary = np.array(
-                [
-                    norm_q_high[i],
-                    norm_q_low[i],
-                    norm_arrival[i],
-                    norm_outside[i],
-                    norm_u2u_mean[i],
-                ],
-                dtype=np.float32,
-            )
+            own_summary_values = [
+                norm_q_high[i],
+                norm_q_low[i],
+                norm_arrival[i],
+                norm_outside[i],
+                norm_u2u_mean[i],
+            ]
+            if self.macro_flow_state:
+                own_summary_values.extend(
+                    [
+                        norm_flow_out[i],
+                        norm_flow_in[i],
+                    ]
+                )
+            if self.macro_load_state:
+                own_summary_values.append(norm_expected_load[i])
+            own_summary = np.asarray(own_summary_values, dtype=np.float32)
 
             teammate_feature = []
             for j in range(self.N):
                 if j == i:
                     continue
-                teammate_feature.extend(
-                    [
-                        uav_coords[j, 0] - uav_coords[i, 0],
-                        uav_coords[j, 1] - uav_coords[i, 1],
-                        norm_q_high[j],
-                        norm_q_low[j],
-                    ]
-                )
+                teammate_values = [
+                    uav_coords[j, 0] - uav_coords[i, 0],
+                    uav_coords[j, 1] - uav_coords[i, 1],
+                    norm_q_high[j],
+                    norm_q_low[j],
+                ]
+                if self.macro_flow_state:
+                    teammate_values.extend(
+                        [
+                            norm_flow[i, j],
+                            norm_flow[j, i],
+                        ]
+                    )
+                if self.macro_load_state:
+                    teammate_values.append(norm_expected_load[j])
+                teammate_feature.extend(teammate_values)
 
             obs = np.concatenate(
                 [
@@ -699,8 +971,11 @@ class HRL_Wrapper(gym.Env):
         Map normalized macro actions [rho, theta] to per-slot [dx, dy].
         """
         raw_state_before = self.env.get_raw_state()
+        flow_ref = self._estimate_macro_flow_reference(raw_state_before)
+        self.current_macro_flow_reference_mbits = flow_ref.copy()
         pre_macro_cost_info, pre_macro_cost_info_per_uav = self._compute_macro_costs(
-            raw_state_before
+            raw_state_before,
+            flow_ref,
         )
         self.prev_macro_positioning_cost = pre_macro_cost_info["total_cost"]
         self.prev_macro_positioning_cost_per_uav = pre_macro_cost_info_per_uav[
@@ -710,22 +985,34 @@ class HRL_Wrapper(gym.Env):
         action = np.asarray(action, dtype=np.float32)
         action = np.clip(action, -1.0, 1.0)
 
-        rho_raw = action[:, 0]
-        theta_raw = action[:, 1]
+        if self.macro_action_mode == "delta":
+            action_norm = np.linalg.norm(action, axis=1, keepdims=True)
+            safe_norm = np.maximum(action_norm, 1.0)
+            direction = action / safe_norm
+            command_norm = np.minimum(action_norm[:, 0], 1.0)
+            hover_mask = command_norm < self.macro_action_deadzone
+            direction[hover_mask] = 0.0
+            command_norm = np.where(hover_mask, 0.0, command_norm)
+            macro_actions = (
+                direction * self.max_macro_displacement
+            ).astype(np.float32)
+        else:
+            rho_raw = action[:, 0]
+            theta_raw = action[:, 1]
 
-        rho = np.abs(rho_raw)
-        hover_mask = rho < self.macro_action_deadzone
-        rho = np.where(hover_mask, 0.0, rho)
-        theta = np.pi * theta_raw
+            rho = np.abs(rho_raw)
+            hover_mask = rho < self.macro_action_deadzone
+            rho = np.where(hover_mask, 0.0, rho)
+            theta = np.pi * theta_raw
 
-        command_norm = rho
-        macro_actions = np.stack(
-            [
-                rho * self.max_macro_displacement * np.cos(theta),
-                rho * self.max_macro_displacement * np.sin(theta),
-            ],
-            axis=1,
-        ).astype(np.float32)
+            command_norm = rho
+            macro_actions = np.stack(
+                [
+                    rho * self.max_macro_displacement * np.cos(theta),
+                    rho * self.max_macro_displacement * np.sin(theta),
+                ],
+                axis=1,
+            ).astype(np.float32)
 
         _, h_flying_penalty, mac_info = self.env.macro_step(macro_actions)
 
@@ -745,7 +1032,8 @@ class HRL_Wrapper(gym.Env):
         projected_state = dict(raw_state_before)
         projected_state["uav_coords"] = projected_uav_coords.copy()
         projected_cost_info, projected_cost_info_per_uav = self._compute_macro_costs(
-            projected_state
+            projected_state,
+            flow_ref,
         )
 
         self.current_flying_penalty = h_flying_penalty
@@ -766,6 +1054,7 @@ class HRL_Wrapper(gym.Env):
         self.accumulated_upload_delay_penalty = 0.0
         self.accumulated_upload_delay_penalty_per_uav.fill(0.0)
         self.current_macro_micro_steps = 0
+        self._reset_macro_flow_accumulator()
 
         mac_info["macro_action_norm_mean"] = self.current_macro_action_norm_mean
         mac_info["macro_move_distance_mean"] = float(
@@ -790,6 +1079,15 @@ class HRL_Wrapper(gym.Env):
         mac_info["projected_mean_u2u_rate_mbps"] = projected_cost_info[
             "mean_nominal_u2u_rate_mbps"
         ]
+        mac_info["pre_macro_comm_cost"] = pre_macro_cost_info["comm_cost"]
+        mac_info["projected_macro_comm_cost"] = projected_cost_info["comm_cost"]
+        mac_info["projected_comm_uplink_time_s"] = projected_cost_info[
+            "comm_uplink_time_s"
+        ]
+        mac_info["projected_comm_u2u_time_s"] = projected_cost_info[
+            "comm_u2u_time_s"
+        ]
+        mac_info["flow_reference_mbits"] = flow_ref.copy()
 
         return self.get_macro_state(), h_flying_penalty, mac_info
 
@@ -1026,6 +1324,19 @@ class HRL_Wrapper(gym.Env):
         cost_holding = cost_delay
 
         info = dict(info)
+        current_coop_flow = np.asarray(
+            info.get("coop_flow_mbits", self._last_coop_flow_mbits),
+            dtype=np.float32,
+        )
+        if current_coop_flow.shape == (self.N, self.N):
+            delta_flow = np.maximum(
+                current_coop_flow - self._last_coop_flow_mbits,
+                0.0,
+            )
+            if float(np.sum(delta_flow)) > 1e-9:
+                self.curr_macro_flow_mbits += delta_flow.astype(np.float32)
+                self.curr_macro_flow_dirty = True
+            self._last_coop_flow_mbits = current_coop_flow.copy()
         info["q_total_current"] = q_total_current
         info["max_Q_threshold"] = self.max_Q_threshold
         info["cost_delay"] = cost_delay
@@ -1178,8 +1489,10 @@ class HRL_Wrapper(gym.Env):
             / effective_micro_steps
         ).astype(np.float32)
 
+        flow_ref = self.current_macro_flow_reference_mbits.copy()
         current_macro_cost_info, current_macro_cost_info_per_uav = self._compute_macro_costs(
-            self.env.get_raw_state()
+            self.env.get_raw_state(),
+            flow_ref,
         )
         self.current_macro_positioning_cost = current_macro_cost_info[
             "total_cost"
@@ -1221,6 +1534,9 @@ class HRL_Wrapper(gym.Env):
         ).astype(np.float32)
         macro_reward = float(np.mean(macro_reward_per_uav))
 
+        realized_macro_flow_mbits = self.curr_macro_flow_mbits.copy()
+        self._update_macro_flow_ema()
+
         self.last_macro_reward_info = {
             "macro_reward": float(macro_reward),
             "macro_rewards_per_uav": macro_reward_per_uav.copy(),
@@ -1249,6 +1565,8 @@ class HRL_Wrapper(gym.Env):
             ),
             "macro_hover_ratio": float(self.current_macro_hover_ratio),
             "env_flying_penalty": float(self.current_flying_penalty),
+            "realized_macro_flow_mbits": realized_macro_flow_mbits,
+            "macro_flow_ema_mbits": self.prev_macro_flow_ema_mbits.copy(),
             **current_macro_cost_info,
             **current_macro_cost_info_per_uav,
         }

@@ -1,5 +1,6 @@
 import argparse
 import csv
+import json
 import os
 import sys
 from dataclasses import dataclass, field
@@ -102,6 +103,15 @@ def add_common_args(
         help="Multiplier on per-zone target load (ZONE_TARGET_LOAD_MBPS); the real demand knob",
     )
     parser.add_argument(
+        "--zone_loads",
+        type=str,
+        default="",
+        help=(
+            "Comma-separated base offered load per zone in Mbps, before "
+            "load_scale. Empty keeps the built-in default."
+        ),
+    )
+    parser.add_argument(
         "--arrival_dt",
         type=float,
         default=0.1,
@@ -128,7 +138,14 @@ def add_common_args(
     parser.add_argument(
         "--cpu_alloc_mode",
         type=str,
-        choices=["legacy_kkt", "priority_kkt", "fixed_full", "fixed_average"],
+        choices=[
+            "legacy_kkt",
+            "priority_kkt",
+            "fixed_full",
+            "fixed_average",
+            "fixed_demand",
+            "priority_demand",
+        ],
         default="priority_kkt",
         help="CPU resource allocation rule",
     )
@@ -162,6 +179,51 @@ def add_common_args(
         choices=["pressure", "legacy"],
         default="pressure",
         help="Micro-state normalization mode",
+    )
+    parser.add_argument(
+        "--macro_comm_weight",
+        type=float,
+        default=2.0,
+        help="Weight of flow-aware communication cost in macro shaping",
+    )
+    parser.add_argument(
+        "--macro_comm_flow_ema",
+        type=float,
+        default=0.8,
+        help="EMA coefficient for recent macro routing flow",
+    )
+    parser.add_argument(
+        "--macro_flow_state",
+        type=int,
+        choices=[0, 1],
+        default=1,
+        help="Whether macro observations include flow summary features",
+    )
+    parser.add_argument(
+        "--macro_load_state",
+        type=int,
+        choices=[0, 1],
+        default=1,
+        help="Whether macro observations include absolute expected load features",
+    )
+    parser.add_argument(
+        "--macro_u2g_cost_weight",
+        type=float,
+        default=2.0,
+        help="Weight of legacy centroid-distance macro cost",
+    )
+    parser.add_argument(
+        "--macro_zone_ingress_weight",
+        type=float,
+        default=0.5,
+        help="Weight of legacy outside-zone macro cost",
+    )
+    parser.add_argument(
+        "--macro_action_mode",
+        type=str,
+        choices=["polar", "delta"],
+        default="polar",
+        help="Macro action interpretation in HRL_Wrapper",
     )
     parser.add_argument(
         "--macro_ckpt",
@@ -243,6 +305,18 @@ def resolve_project_path(path: str) -> str:
     return os.path.join(BASE_DIR, path)
 
 
+def parse_zone_loads(text: str) -> Optional[List[float]]:
+    if text is None:
+        return None
+    values = [item.strip() for item in str(text).split(",") if item.strip()]
+    if not values:
+        return None
+    loads = [float(item) for item in values]
+    if any((not np.isfinite(item)) or item <= 0.0 for item in loads):
+        raise ValueError("zone_loads must contain finite positive Mbps values.")
+    return loads
+
+
 def torch_load_checkpoint(path: str) -> Dict:
     import torch
 
@@ -318,6 +392,18 @@ def make_env_from_args(
         kkt_v=float(getattr(args, "kkt_v", 1.0)),
         fixed_cpu_util=float(getattr(args, "fixed_cpu_util", 0.5)),
         load_scale=float(getattr(args, "load_scale", 1.0)),
+        zone_loads=parse_zone_loads(getattr(args, "zone_loads", "")),
+        macro_comm_weight=float(getattr(args, "macro_comm_weight", 2.0)),
+        macro_comm_flow_ema=float(getattr(args, "macro_comm_flow_ema", 0.8)),
+        macro_flow_state=bool(int(getattr(args, "macro_flow_state", 1))),
+        macro_load_state=bool(int(getattr(args, "macro_load_state", 0))),
+        macro_u2g_cost_weight=float(
+            getattr(args, "macro_u2g_cost_weight", 2.0)
+        ),
+        macro_zone_ingress_weight=float(
+            getattr(args, "macro_zone_ingress_weight", 0.5)
+        ),
+        macro_action_mode=str(getattr(args, "macro_action_mode", "polar")),
     )
     return apply_env_config(env, args)
 
@@ -346,6 +432,76 @@ def prepare_results_dirs(results_subdir: str) -> Dict[str, str]:
         "fig_dir": fig_dir,
         "meta_dir": meta_dir,
     }
+
+
+def save_scenario_metadata(
+    results_dirs: Dict[str, str],
+    args: argparse.Namespace,
+    experiment_label: str = "",
+) -> str:
+    meta_dir = results_dirs["meta_dir"]
+    os.makedirs(meta_dir, exist_ok=True)
+    scenario_path = os.path.join(meta_dir, "scenario.json")
+    zone_loads = parse_zone_loads(getattr(args, "zone_loads", ""))
+    payload = {
+        "experiment_label": experiment_label,
+        "num_agents": int(getattr(args, "num_agents", 3)),
+        "num_users": int(getattr(args, "num_users", 39)),
+        "traffic_profile": getattr(args, "traffic_profile", "normal"),
+        "traffic_scale": float(getattr(args, "traffic_scale", 1.0)),
+        "load_scale": float(getattr(args, "load_scale", 1.0)),
+        "zone_loads": getattr(args, "zone_loads", ""),
+        "zone_target_load_mbps": zone_loads,
+        "arrival_dt": float(getattr(args, "arrival_dt", 0.1)),
+        "uplink_bandwidth_mhz": float(
+            getattr(args, "uplink_bandwidth_mhz", 20.0)
+        ),
+        "u2u_bandwidth_mhz": float(getattr(args, "u2u_bandwidth_mhz", 3.0)),
+        "cpu_ghz": float(getattr(args, "cpu_ghz", 16.0)),
+        "cpu_alloc_mode": getattr(args, "cpu_alloc_mode", "priority_kkt"),
+        "kkt_v": float(getattr(args, "kkt_v", 1.0)),
+        "fixed_cpu_util": float(getattr(args, "fixed_cpu_util", 0.5)),
+        "micro_diag_bias": float(getattr(args, "micro_diag_bias", 0.5)),
+        "micro_action_scale": float(getattr(args, "micro_action_scale", 1.0)),
+        "micro_state_mode": getattr(args, "micro_state_mode", "pressure"),
+        "macro_comm_weight": float(getattr(args, "macro_comm_weight", 2.0)),
+        "macro_comm_flow_ema": float(
+            getattr(args, "macro_comm_flow_ema", 0.8)
+        ),
+        "macro_flow_state": int(getattr(args, "macro_flow_state", 1)),
+        "macro_load_state": int(getattr(args, "macro_load_state", 0)),
+        "macro_u2g_cost_weight": float(
+            getattr(args, "macro_u2g_cost_weight", 2.0)
+        ),
+        "macro_zone_ingress_weight": float(
+            getattr(args, "macro_zone_ingress_weight", 0.5)
+        ),
+        "macro_action_mode": getattr(args, "macro_action_mode", "polar"),
+        "advisor_weight": float(getattr(args, "advisor_weight", 0.0)),
+        "advisor_final_weight": float(
+            getattr(args, "advisor_final_weight", 0.0)
+        ),
+        "advisor_decay_episodes": int(
+            getattr(args, "advisor_decay_episodes", 0)
+        ),
+        "advisor_steps": int(getattr(args, "advisor_steps", 0)),
+        "advisor_lr": float(getattr(args, "advisor_lr", 0.0)),
+        "advisor_min_separation_m": float(
+            getattr(args, "advisor_min_separation_m", 0.0)
+        ),
+        "train_load_min": float(getattr(args, "train_load_min", 0.0)),
+        "train_load_max": float(getattr(args, "train_load_max", 0.0)),
+        "episodes": int(getattr(args, "episodes", 0)),
+        "macro_steps": int(getattr(args, "macro_steps", 0)),
+        "micro_steps": int(getattr(args, "micro_steps", 0)),
+        "eval_interval": int(getattr(args, "eval_interval", 0)),
+        "eval_episodes": int(getattr(args, "eval_episodes", 0)),
+        "eval_base_seed": int(getattr(args, "eval_base_seed", 1000)),
+        "seed": int(getattr(args, "seed", 0)),
+    }
+    with open(scenario_path, "w", encoding="utf-8") as fp:
+        json.dump(payload, fp, indent=2)
+    return scenario_path
 
 
 def build_local_only_micro_action(
@@ -463,6 +619,9 @@ class EpisodeTrace:
     macro_avg_upload_delay_penalty: List[float] = field(default_factory=list)
     macro_position_cost: List[float] = field(default_factory=list)
     macro_position_improvement: List[float] = field(default_factory=list)
+    macro_projected_comm_cost: List[float] = field(default_factory=list)
+    macro_projected_comm_uplink_time: List[float] = field(default_factory=list)
+    macro_projected_comm_u2u_time: List[float] = field(default_factory=list)
     macro_rewards: List[float] = field(default_factory=list)
 
     def record_macro_info(self, mac_info: Optional[Dict[str, float]]) -> None:
@@ -476,6 +635,15 @@ class EpisodeTrace:
             self.macro_action_norm.append(mac_info.get("macro_action_norm_mean", 0.0))
             self.macro_u2u_rate.append(mac_info.get("projected_mean_u2u_rate_mbps", 0.0))
             self.macro_projected_u2g.append(mac_info.get("projected_mean_u2g_distance_m", 0.0))
+            self.macro_projected_comm_cost.append(
+                mac_info.get("projected_macro_comm_cost", 0.0)
+            )
+            self.macro_projected_comm_uplink_time.append(
+                mac_info.get("projected_comm_uplink_time_s", 0.0)
+            )
+            self.macro_projected_comm_u2u_time.append(
+                mac_info.get("projected_comm_u2u_time_s", 0.0)
+            )
             return
 
         self.macro_move_distance.append(0.0)
@@ -483,6 +651,9 @@ class EpisodeTrace:
         self.macro_action_norm.append(0.0)
         self.macro_u2u_rate.append(0.0)
         self.macro_projected_u2g.append(0.0)
+        self.macro_projected_comm_cost.append(0.0)
+        self.macro_projected_comm_uplink_time.append(0.0)
+        self.macro_projected_comm_u2u_time.append(0.0)
 
     def record_micro_info(self, mic_info: Optional[Dict[str, float]]) -> None:
         if not isinstance(mic_info, dict):
@@ -698,6 +869,8 @@ class EpisodeTrace:
 class EvaluationHistory:
     steps: List[int] = field(default_factory=list)
     scores: List[float] = field(default_factory=list)
+    J: List[float] = field(default_factory=list)
+    legacy_scores: List[float] = field(default_factory=list)
     q_high: List[float] = field(default_factory=list)
     q_low: List[float] = field(default_factory=list)
     energy: List[float] = field(default_factory=list)
@@ -763,6 +936,10 @@ class EvaluationHistory:
     def append(self, step: int, metrics: Dict[str, float]) -> None:
         self.steps.append(int(step))
         self.scores.append(float(metrics["score"]))
+        self.J.append(float(metrics.get("J", 0.0)))
+        self.legacy_scores.append(
+            float(metrics.get("legacy_score", metrics["score"]))
+        )
         self.q_high.append(float(metrics["q_high"]))
         self.q_low.append(float(metrics["q_low"]))
         self.energy.append(float(metrics["energy"]))
@@ -858,6 +1035,8 @@ class EvaluationHistory:
                 [
                     "episode",
                     "score",
+                    "J",
+                    "legacy_score",
                     "q_high",
                     "q_low",
                     "energy",
@@ -900,6 +1079,8 @@ class EvaluationHistory:
                     [
                         self.steps[idx],
                         self.scores[idx],
+                        self.J[idx],
+                        self.legacy_scores[idx],
                         self.q_high[idx],
                         self.q_low[idx],
                         self.energy[idx],
@@ -942,6 +1123,8 @@ class EvaluationHistory:
         payload = {
             "steps": np.asarray(self.steps, dtype=np.int32),
             "scores": np.asarray(self.scores, dtype=np.float32),
+            "J": np.asarray(self.J, dtype=np.float32),
+            "legacy_scores": np.asarray(self.legacy_scores, dtype=np.float32),
             "delay_high_ms": np.asarray(self.delay_high, dtype=np.float32),
             "delay_low_ms": np.asarray(self.delay_low, dtype=np.float32),
             "delay_mean_ms": np.asarray(self.delay_mean_ms, dtype=np.float32),
@@ -1108,12 +1291,22 @@ def save_macro_diagnostics_with_verification(
     position_cost: List[float],
     position_improvement: List[float],
     macro_reward: List[float],
+    projected_comm_cost: Optional[List[float]] = None,
+    projected_comm_uplink_time: Optional[List[float]] = None,
+    projected_comm_u2u_time: Optional[List[float]] = None,
 ) -> None:
     macro_steps = np.arange(1, len(move_distance) + 1, dtype=np.int32)
     if len(macro_steps) == 0:
         return
 
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
+    if projected_comm_cost is None:
+        projected_comm_cost = np.zeros_like(macro_steps, dtype=np.float64)
+    if projected_comm_uplink_time is None:
+        projected_comm_uplink_time = np.zeros_like(macro_steps, dtype=np.float64)
+    if projected_comm_u2u_time is None:
+        projected_comm_u2u_time = np.zeros_like(macro_steps, dtype=np.float64)
+
     plot_macro_diagnostics(
         macro_steps=macro_steps,
         move_distance=move_distance,
@@ -1141,6 +1334,9 @@ def save_macro_diagnostics_with_verification(
             np.asarray(position_cost, dtype=np.float64),
             np.asarray(position_improvement, dtype=np.float64),
             np.asarray(macro_reward, dtype=np.float64),
+            np.asarray(projected_comm_cost, dtype=np.float64),
+            np.asarray(projected_comm_uplink_time, dtype=np.float64),
+            np.asarray(projected_comm_u2u_time, dtype=np.float64),
         ]
     )
     np.savetxt(
@@ -1151,7 +1347,8 @@ def save_macro_diagnostics_with_verification(
             "macro_step,move_distance_m,action_norm,hover_ratio,"
             "projected_mean_u2g_distance_m,projected_mean_u2u_rate_mbps,"
             "avg_upload_delay_penalty,position_cost,position_improvement,"
-            "macro_reward"
+            "macro_reward,projected_comm_cost,"
+            "projected_comm_uplink_time_s,projected_comm_u2u_time_s"
         ),
         comments="",
     )
@@ -1202,6 +1399,9 @@ def maybe_save_episode_snapshots(
         position_cost=trace.macro_position_cost,
         position_improvement=trace.macro_position_improvement,
         macro_reward=trace.macro_rewards,
+        projected_comm_cost=trace.macro_projected_comm_cost,
+        projected_comm_uplink_time=trace.macro_projected_comm_uplink_time,
+        projected_comm_u2u_time=trace.macro_projected_comm_u2u_time,
     )
 
 
@@ -1642,6 +1842,7 @@ def print_evaluation_summary(step: int, metrics: Dict[str, float]) -> None:
     print(
         f"  Eval@{step} | "
         f"Score: {metrics['score']:.2f} | "
+        f"J: {metrics.get('J', 0.0):.4f} | "
         f"Dh(ms): {metrics['delay_high']:.1f} | "
         f"Dl(ms): {metrics['delay_low']:.1f} | "
         f"Dw(ms): {metrics.get('delay_weighted_ms', 0.0):.1f} | "
@@ -1681,6 +1882,8 @@ def evaluate_policy(
     on_episode_start: Optional[EpisodeStartHook] = None,
 ) -> Dict[str, float]:
     eval_scores: List[float] = []
+    eval_J: List[float] = []
+    eval_legacy_scores: List[float] = []
     eval_q_high: List[float] = []
     eval_q_low: List[float] = []
     eval_energy: List[float] = []
@@ -1751,6 +1954,7 @@ def evaluate_policy(
 
         ep_q_high: List[float] = []
         ep_q_low: List[float] = []
+        ep_J: List[float] = []
         ep_energy: List[float] = []
         ep_u2g: List[float] = []
         ep_cpu_util: List[float] = []
@@ -1827,6 +2031,7 @@ def evaluate_policy(
 
                 ep_q_high.append(micro_metrics["q_high_tot"])
                 ep_q_low.append(micro_metrics["q_low_tot"])
+                ep_J.append(float(mic_info.get("J_step", 0.0)))
                 ep_energy.append(
                     micro_metrics["energy_uplink"]
                     + micro_metrics["energy_trans"]
@@ -1881,6 +2086,7 @@ def evaluate_policy(
         avg_q_low = float(np.mean(ep_q_low)) if ep_q_low else 0.0
         avg_energy = float(np.mean(ep_energy)) if ep_energy else 0.0
         avg_u2g = float(np.mean(ep_u2g)) if ep_u2g else 0.0
+        avg_J = float(np.mean(ep_J)) if ep_J else 0.0
         avg_cpu = float(np.mean(ep_cpu_util)) if ep_cpu_util else 0.0
         avg_cpu_saturation = (
             float(np.mean(ep_cpu_saturation)) if ep_cpu_saturation else 0.0
@@ -1990,14 +2196,17 @@ def evaluate_policy(
         delay_max_ms = float(little["delay_max_ms"])
         task_stats = eval_env.env.get_task_delay_stats()
 
-        score = -(
+        legacy_score = -(
             EVAL_W_HIGH * avg_q_high
             + EVAL_W_LOW * avg_q_low
             + EVAL_W_ENERGY * avg_energy
             + EVAL_W_U2G * avg_u2g
         )
+        score = -avg_J * 100.0
 
         eval_scores.append(score)
+        eval_J.append(avg_J)
+        eval_legacy_scores.append(legacy_score)
         eval_q_high.append(avg_q_high)
         eval_q_low.append(avg_q_low)
         eval_energy.append(avg_energy)
@@ -2109,6 +2318,8 @@ def evaluate_policy(
 
     return {
         "score": float(np.mean(eval_scores)),
+        "J": float(np.mean(eval_J)),
+        "legacy_score": float(np.mean(eval_legacy_scores)),
         "q_high": float(np.mean(eval_q_high)),
         "q_low": float(np.mean(eval_q_low)),
         "energy": float(np.mean(eval_energy)),
@@ -2278,6 +2489,7 @@ def run_fixed_policy_benchmark(
 ) -> Dict[str, str]:
     set_global_seeds(args.seed)
     results_dirs = prepare_results_dirs(args.results_subdir)
+    save_scenario_metadata(results_dirs, args, experiment_label)
 
     env = make_env_from_args(
         args,

@@ -130,6 +130,7 @@ class UAV_MEC_Env:
         kkt_v=1.0,
         fixed_cpu_util=0.5,
         load_scale=1.0,
+        zone_loads=None,
     ):
 
         # ================== 1. 系统物理设定与参数 ==================
@@ -200,11 +201,14 @@ class UAV_MEC_Env:
         self.kkt_bisection_iters = 24
         self.fixed_cpu_util = float(fixed_cpu_util)
         self.load_scale = float(load_scale)
+        self.zone_target_load_mbps = self._normalize_zone_loads(zone_loads)
         self.valid_cpu_alloc_modes = {
             "legacy_kkt",
             "priority_kkt",
             "fixed_full",
             "fixed_average",
+            "fixed_demand",
+            "priority_demand",
         }
         if self.cpu_alloc_mode not in self.valid_cpu_alloc_modes:
             raise ValueError(
@@ -224,25 +228,13 @@ class UAV_MEC_Env:
             self.base_anchor_points = np.vstack([self.base_anchor_points, extra])
         self.anchor_points = self.base_anchor_points.copy()
 
-        # 无人机初始部署位置：以 (500,500) 为中心，在区域外围呈三角形分布
-        # 三角形外接圆半径 ~120m，顶点朝上，位于地图中央附近
-        _r = 120.0
-        self.uav_initial_positions = np.array([
-            [500.0 + _r * np.cos(np.pi / 2 + 2*np.pi/3), 500.0 + _r * np.sin(np.pi / 2 + 2*np.pi/3)],  # 左下  (~396, 440)
-            [500.0 + _r * np.cos(np.pi / 2), 500.0 + _r * np.sin(np.pi / 2)],  # 上顶点 (500, 620)
-            [500.0 + _r * np.cos(np.pi / 2 + 4*np.pi/3), 500.0 + _r * np.sin(np.pi / 2 + 4*np.pi/3)],  # 右下  (~604, 440)
-        ])
-        # 手动对齐索引，让出生点和管辖区匹配
-        # self.uav_initial_positions = np.array([
-        #     [450.0, 450.0],  # 靠近蓝区 (Zone 1)
-        #     [450.0, 550.0],  # 靠近橙区 (Zone 2)
-        #     [500.0, 500.0],  # 靠近绿区 (Zone 3)
-        # ])
+        # 无人机初始部署位置：直接部署在各自管辖区锚点
+        # 这样 RL 学习的是"在服务区内如何微调站位"（兼顾上行 vs U2U），
+        # 而不是"如何从远处飞回服务区"。
+        self.uav_initial_positions = self.base_anchor_points.copy()
         if self.N > 3:
-            # 超过3台时均匀分布在同一外接圆上
-            extra_angles = [np.pi / 2 + 2 * np.pi * k / self.N for k in range(3, self.N)]
-            extra_pos = np.array([[500.0 + _r * np.cos(a), 500.0 + _r * np.sin(a)] for a in extra_angles])
-            self.uav_initial_positions = np.vstack([self.uav_initial_positions, extra_pos])
+            # 超过 3 台时，额外的 UAV 初始位置已由 base_anchor_points 提供
+            pass
 
         # 为每个用户预先划定归属管辖区 (确保总是精确分配到 M 个用户，兼容无法整除)
         self.user_allocations = np.repeat(np.arange(self.N), int(np.ceil(self.M / self.N)))[:self.M]
@@ -826,13 +818,55 @@ class UAV_MEC_Env:
             return ZONE_DEVICE_MIXES[0]
         return ZONE_DEVICE_MIXES[1 + ((zone_idx - 1) % 2)]
 
+    def _normalize_zone_loads(self, zone_loads):
+        if zone_loads is None or (
+            isinstance(zone_loads, str) and not zone_loads.strip()
+        ):
+            values = [
+                ZONE_TARGET_LOAD_MBPS.get(
+                    idx,
+                    ZONE_TARGET_LOAD_MBPS[1 + ((idx - 1) % 2)]
+                    if idx > 0
+                    else ZONE_TARGET_LOAD_MBPS[0],
+                )
+                for idx in range(self.N)
+            ]
+        elif isinstance(zone_loads, str):
+            values = [
+                float(item.strip())
+                for item in zone_loads.split(",")
+                if item.strip()
+            ]
+        else:
+            values = [float(item) for item in zone_loads]
+
+        if not values:
+            raise ValueError("zone_loads must contain at least one positive value.")
+
+        arr = np.asarray(values, dtype=np.float32)
+        if np.any(~np.isfinite(arr)) or np.any(arr <= 0.0):
+            raise ValueError("zone_loads must be finite positive Mbps values.")
+
+        if arr.size < self.N:
+            arr = np.asarray(
+                [arr[idx % arr.size] for idx in range(self.N)],
+                dtype=np.float32,
+            )
+        elif arr.size > self.N:
+            arr = arr[: self.N].astype(np.float32)
+
+        return arr.astype(np.float32)
+
     def _get_zone_target_load_mbps(self, zone_idx):
         scale = float(getattr(self, "load_scale", 1.0))
+        zone_loads = getattr(self, "zone_target_load_mbps", None)
+        if zone_loads is not None and len(zone_loads) > 0:
+            return float(zone_loads[zone_idx % len(zone_loads)]) * scale
         if zone_idx in ZONE_TARGET_LOAD_MBPS:
-            return ZONE_TARGET_LOAD_MBPS[zone_idx] * scale
+            return float(ZONE_TARGET_LOAD_MBPS[zone_idx]) * scale
         if zone_idx == 0:
-            return ZONE_TARGET_LOAD_MBPS[0] * scale
-        return ZONE_TARGET_LOAD_MBPS[1 + ((zone_idx - 1) % 2)] * scale
+            return float(ZONE_TARGET_LOAD_MBPS[0]) * scale
+        return float(ZONE_TARGET_LOAD_MBPS[1 + ((zone_idx - 1) % 2)]) * scale
 
     def _configure_industrial_device_profiles(self):
         self.user_lambda_high.fill(0.0)
@@ -1254,6 +1288,34 @@ class UAV_MEC_Env:
             )
             f_high = 0.8 * f_total
             f_low = 0.2 * f_total
+            return f_high, f_low, f_total, energy_model
+
+        if self.cpu_alloc_mode == "fixed_demand":
+            need_high = self._queue_to_frequency_need(self.Q_loc_high)
+            need_low = self._queue_to_frequency_need(self.Q_loc_low)
+            need_total = need_high + need_low
+            f_total = np.minimum(
+                need_total,
+                self.F_max_array.astype(np.float64),
+            )
+            scale = np.divide(
+                f_total,
+                np.maximum(need_total, 1e-12),
+                out=np.zeros_like(f_total),
+                where=need_total > 1e-12,
+            )
+            f_high = need_high * scale
+            f_low = need_low * scale
+            return f_high, f_low, f_total, energy_model
+
+        if self.cpu_alloc_mode == "priority_demand":
+            need_high = self._queue_to_frequency_need(self.Q_loc_high)
+            need_low = self._queue_to_frequency_need(self.Q_loc_low)
+            cap = self.F_max_array.astype(np.float64)
+            f_high = np.minimum(need_high, cap)
+            remaining = np.maximum(cap - f_high, 0.0)
+            f_low = np.minimum(need_low, remaining)
+            f_total = f_high + f_low
             return f_high, f_low, f_total, energy_model
 
         if self.cpu_alloc_mode in ("fixed_full", "fixed_average"):
