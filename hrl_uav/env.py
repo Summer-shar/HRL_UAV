@@ -1,5 +1,4 @@
-import os
-from collections import defaultdict, deque
+from collections import deque
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -123,20 +122,81 @@ class UAV_MEC_Env:
         record_trajectory=False,
         traffic_profile="normal",
         traffic_scale=1.0,
-        arrival_dt=0.1,
+        arrival_dt=0.5,
+        resource_frame_dt=0.5,
+        deployment_dt=1.0,
+        deployment_transient_energy_mode="none",
+        uav_mass_kg=20.0 / 9.81,
         uplink_bandwidth_mhz=20.0,
         u2u_bandwidth_mhz=3.0,
         cpu_alloc_mode="priority_kkt",
         kkt_v=1.0,
+        cpu_energy_prices=None,
         fixed_cpu_util=0.5,
+        cpu_power_cap_w=0.0,
         load_scale=1.0,
         zone_loads=None,
+        uav_initial_positions=None,
+        pause_service_during_flight=True,
+        arrivals_during_deployment=False,
+        users_static=False,
+        gm_mean_speed_mps=0.5,
+        gm_mean_heading_rad=np.pi / 4.0,
+        gm_speed_memory=0.5,
+        gm_heading_memory=0.5,
+        gm_speed_noise_std=0.1,
+        gm_heading_noise_std=0.1,
+        user_zone_radius=80.0,
     ):
 
         # ================== 1. 系统物理设定与参数 ==================
-        self.macro_dt = 10.0   # 宏观时隙 10 秒
-        self.micro_dt = 0.1    # 微观时隙 0.1 秒
+        self.macro_dt = 10.0   # 宏观周期 10 秒
+        self.micro_dt = 0.1    # 物理积分步长 0.1 秒
         self.micro_steps_per_macro = int(self.macro_dt / self.micro_dt)
+        self.resource_frame_dt = float(resource_frame_dt)
+        self.deployment_dt = float(deployment_dt)
+        self.deployment_transient_energy_mode = str(
+            deployment_transient_energy_mode
+        ).lower()
+        if self.deployment_transient_energy_mode not in (
+            "none",
+            "kinetic_lower_bound",
+        ):
+            raise ValueError(
+                "deployment_transient_energy_mode must be 'none' or "
+                "'kinetic_lower_bound'."
+            )
+        self.uav_mass_kg = float(uav_mass_kg)
+        if self.uav_mass_kg <= 0.0:
+            raise ValueError("uav_mass_kg must be positive.")
+        if self.resource_frame_dt <= 0.0 or self.deployment_dt <= 0.0:
+            raise ValueError("resource_frame_dt and deployment_dt must be positive.")
+        self.resource_frame_steps = int(
+            round(self.resource_frame_dt / self.micro_dt)
+        )
+        self.deployment_steps = int(round(self.deployment_dt / self.micro_dt))
+        if not np.isclose(
+            self.resource_frame_steps * self.micro_dt,
+            self.resource_frame_dt,
+        ):
+            raise ValueError("resource_frame_dt must be an integer multiple of micro_dt.")
+        if not np.isclose(
+            self.deployment_steps * self.micro_dt,
+            self.deployment_dt,
+        ):
+            raise ValueError("deployment_dt must be an integer multiple of micro_dt.")
+        if self.deployment_steps % self.resource_frame_steps != 0:
+            raise ValueError("deployment_dt must contain whole resource frames.")
+        service_steps = self.micro_steps_per_macro - self.deployment_steps
+        if service_steps <= 0 or service_steps % self.resource_frame_steps != 0:
+            raise ValueError("The service phase must contain whole resource frames.")
+        self.deployment_resource_frames = (
+            self.deployment_steps // self.resource_frame_steps
+        )
+        self.service_resource_frames = service_steps // self.resource_frame_steps
+        self.resource_frames_per_macro = (
+            self.deployment_resource_frames + self.service_resource_frames
+        )
         
         self.N = num_uavs      # 无人机数量 (默认 3)
         self.M = num_users     # 真实地面用户总数量 (默认 39)
@@ -154,12 +214,19 @@ class UAV_MEC_Env:
         self.p_gt = float(p_gt_power)
         self.p_u2u = float(p_u2u_power)
         self.traffic_profile = str(traffic_profile).lower()
-        self.arrival_dt = max(float(arrival_dt), float(self.micro_dt))
+        self.arrival_dt = max(float(arrival_dt), self.resource_frame_dt)
+        # Legacy experiments pause both arrivals and service during deployment.
+        # The long-term queueing protocol can instead keep exogenous arrivals
+        # active while U2G/U2U/CPU service remains paused.
+        self.pause_service_during_flight = bool(pause_service_during_flight)
+        self.arrivals_during_deployment = bool(arrivals_during_deployment)
         self.arrival_interval_steps = max(
-            1,
+            self.resource_frame_steps,
             int(round(self.arrival_dt / self.micro_dt)),
         )
         self.arrival_dt = self.arrival_interval_steps * float(self.micro_dt)
+        if self.arrival_interval_steps % self.resource_frame_steps != 0:
+            raise ValueError("arrival_dt must be an integer multiple of resource_frame_dt.")
         if self.traffic_profile not in TRAFFIC_PROFILES:
             raise ValueError(
                 f"Unknown traffic_profile '{traffic_profile}'. "
@@ -171,8 +238,6 @@ class UAV_MEC_Env:
         self.lambda_hot_low = profile["hot_low"] * self.traffic_scale
         self.lambda_cold_high = profile["cold_high"] * self.traffic_scale
         self.lambda_cold_low = profile["cold_low"] * self.traffic_scale
-        self.task_size_high_mbits = 1.0
-        self.task_size_low_mbits = 1.0
         self.device_type_names = tuple(DEVICE_PROFILES.keys())
         self.user_device_type_ids = np.zeros(self.M, dtype=np.int32)
         self.user_lambda_high = np.zeros(self.M, dtype=np.float32)
@@ -198,8 +263,29 @@ class UAV_MEC_Env:
         }
         self.cpu_alloc_mode = str(cpu_alloc_mode).lower()
         self.kkt_v = float(kkt_v)
+        if cpu_energy_prices is None:
+            cpu_energy_prices = self.kkt_v
+        cpu_energy_prices = np.asarray(cpu_energy_prices, dtype=np.float64)
+        if cpu_energy_prices.ndim == 0:
+            cpu_energy_prices = np.full(self.N, float(cpu_energy_prices))
+        elif cpu_energy_prices.shape == (1,):
+            cpu_energy_prices = np.full(self.N, float(cpu_energy_prices[0]))
+        if cpu_energy_prices.shape != (self.N,):
+            raise ValueError(
+                "cpu_energy_prices must be a scalar or have shape "
+                f"({self.N},), got {cpu_energy_prices.shape}."
+            )
+        if not np.all(np.isfinite(cpu_energy_prices)) or np.any(
+            cpu_energy_prices < 0.0
+        ):
+            raise ValueError("cpu_energy_prices must be finite and non-negative.")
+        self.cpu_energy_prices = cpu_energy_prices.copy()
         self.kkt_bisection_iters = 24
         self.fixed_cpu_util = float(fixed_cpu_util)
+        self.cpu_power_cap_w = max(float(cpu_power_cap_w), 0.0)
+        self.last_cpu_power_uncapped_w = 0.0
+        self.last_cpu_power_allocated_w = 0.0
+        self.last_cpu_power_cap_active = False
         self.load_scale = float(load_scale)
         self.zone_target_load_mbps = self._normalize_zone_loads(zone_loads)
         self.valid_cpu_alloc_modes = {
@@ -209,6 +295,7 @@ class UAV_MEC_Env:
             "fixed_average",
             "fixed_demand",
             "priority_demand",
+            "priced_maxweight",
         }
         if self.cpu_alloc_mode not in self.valid_cpu_alloc_modes:
             raise ValueError(
@@ -231,7 +318,23 @@ class UAV_MEC_Env:
         # 无人机初始部署位置：直接部署在各自管辖区锚点
         # 这样 RL 学习的是"在服务区内如何微调站位"（兼顾上行 vs U2U），
         # 而不是"如何从远处飞回服务区"。
-        self.uav_initial_positions = self.base_anchor_points.copy()
+        if uav_initial_positions is None:
+            self.uav_initial_positions = self.base_anchor_points.copy()
+        else:
+            initial_positions = np.asarray(
+                uav_initial_positions,
+                dtype=np.float64,
+            )
+            if initial_positions.shape != (self.N, 2):
+                raise ValueError(
+                    "uav_initial_positions must have shape "
+                    f"({self.N}, 2), got {initial_positions.shape}."
+                )
+            if not np.all(np.isfinite(initial_positions)):
+                raise ValueError("uav_initial_positions must be finite.")
+            if np.any(initial_positions < 0.0) or np.any(initial_positions > 1000.0):
+                raise ValueError("uav_initial_positions must lie in [0, 1000] m.")
+            self.uav_initial_positions = initial_positions.copy()
         if self.N > 3:
             # 超过 3 台时，额外的 UAV 初始位置已由 base_anchor_points 提供
             pass
@@ -244,24 +347,40 @@ class UAV_MEC_Env:
         # 流量加权质心 (给每架飞机的观测值)
         self.weighted_centroids = np.zeros((self.N, 2))
         self.instantaneous_centroids = np.zeros((self.N, 2))
-        self.centroid_ema_beta = 0.99
+        # Preserve the historical 0.1 s EMA time constant after moving
+        # exogenous updates to 0.5 s resource-frame boundaries.
+        self.centroid_ema_beta = 0.99 ** self.resource_frame_steps
 
         self.uav_coords = np.zeros((self.N, 2))
         
-        # [军事物理升级] 高斯-马尔可夫移动模型 (GMMM) 参数
-        self.alpha_gmmm = 0.8                     # 速度记忆衰减系数
-        self.max_infantry_speed = 3.0             # 步兵最大战术推进速度 3m/s
-        self.user_velocities = np.zeros((self.M, 2)) # 记录用户的当前速度向量
-        self.users_static = True
-        self.user_zone_radius = 80.0
+        # Ground-terminal Gauss-Markov mobility. The speed and heading are
+        # updated once per 0.5 s resource frame; coordinates are integrated at
+        # the 0.1 s physical step.
+        self.gm_mean_speed_mps = float(gm_mean_speed_mps)
+        self.gm_mean_heading_rad = float(gm_mean_heading_rad)
+        self.gm_speed_memory = float(gm_speed_memory)
+        self.gm_heading_memory = float(gm_heading_memory)
+        self.gm_speed_noise_std = max(float(gm_speed_noise_std), 0.0)
+        self.gm_heading_noise_std = max(float(gm_heading_noise_std), 0.0)
+        for name, value in (
+            ("gm_speed_memory", self.gm_speed_memory),
+            ("gm_heading_memory", self.gm_heading_memory),
+        ):
+            if not 0.0 <= value <= 1.0:
+                raise ValueError(f"{name} must be in [0, 1].")
+        self.alpha_gmmm = self.gm_speed_memory
+        self.max_infantry_speed = 3.0
+        self.user_speeds = np.full(self.M, self.gm_mean_speed_mps)
+        self.user_headings = np.full(self.M, self.gm_mean_heading_rad)
+        self.user_velocities = np.zeros((self.M, 2))
+        self.users_static = bool(users_static)
+        self.user_zone_radius = float(user_zone_radius)
         self.user_zone_scatter_std = 40.0
-        self.user_zone_restore_gain = 0.015
-        self.user_zone_restore_gain_gain = 0.015 # Just in case
-        
         # 用于宏观-微观时隙解耦的缓存向量
         self.current_macro_v = np.zeros(self.N)
         self.current_macro_theta = np.zeros(self.N)
         self.macro_fly_steps_remaining = 0
+        self.macro_service_pause_steps_remaining = 0
         
         # 【双轨优先级流体队列】
         # _high: 存放 30% 到达的高优先紧急数据
@@ -273,10 +392,12 @@ class UAV_MEC_Env:
         self.Q_tx_low = np.zeros((self.N, self.N))
         self.pending_upload_jobs = []
         self.global_micro_step = 0
+        self._resource_frame_prepared = False
+        self.resource_frame_prepare_count = 0
+        self.deployment_arrival_prepare_count = 0
+        self.mobility_update_count = 0
         self._u2u_spectral_cache_coords = None
         self._u2u_spectral_cache_result = None
-        self.current_arrival_high = np.zeros(self.N)
-        self.current_arrival_low = np.zeros(self.N)
         self.current_arrival_active_users = np.zeros(self.N)
         
         self.A_t_high = np.zeros(self.N)
@@ -510,23 +631,67 @@ class UAV_MEC_Env:
 
         return stats
 
-    def _sync_aggregate_queues_from_tasks(self):
-        for i in range(self.N):
-            self.Q_loc_high[i] = sum(
-                chunk.remaining_mbits for chunk in self.Q_loc_high_tasks[i]
-            )
-            self.Q_loc_low[i] = sum(
-                chunk.remaining_mbits for chunk in self.Q_loc_low_tasks[i]
-            )
-
-        for i in range(self.N):
-            for j in range(self.N):
-                self.Q_tx_high[i, j] = sum(
-                    chunk.remaining_mbits for chunk in self.Q_tx_high_tasks[i][j]
-                )
-                self.Q_tx_low[i, j] = sum(
-                    chunk.remaining_mbits for chunk in self.Q_tx_low_tasks[i][j]
-                )
+    def get_task_cumulative_counters(self):
+        """Return a copy of cumulative task counters for windowed evaluation."""
+        alive = self.get_alive_task_wait_info()
+        queue_high = self.Q_loc_high + np.sum(self.Q_tx_high, axis=1)
+        queue_low = self.Q_loc_low + np.sum(self.Q_tx_low, axis=1)
+        return {
+            "time_s": self._current_time(),
+            "arrived_count": int(self.arrived_task_count),
+            "arrived_high_count": int(self.arrived_priority_count.get("high", 0)),
+            "arrived_low_count": int(self.arrived_priority_count.get("low", 0)),
+            "completed_count": int(self.completed_task_count),
+            "completed_delay_sum_s": float(self.completed_task_delay_sum),
+            "completed_high_count": int(
+                self.completed_priority_count.get("high", 0)
+            ),
+            "completed_low_count": int(
+                self.completed_priority_count.get("low", 0)
+            ),
+            "completed_high_delay_sum_s": float(
+                self.completed_priority_delay_sum.get("high", 0.0)
+            ),
+            "completed_low_delay_sum_s": float(
+                self.completed_priority_delay_sum.get("low", 0.0)
+            ),
+            "qos_violation_count": int(self.qos_violation_count),
+            "qos_violation_high_count": int(
+                self.qos_violation_priority_count.get("high", 0)
+            ),
+            "qos_violation_low_count": int(
+                self.qos_violation_priority_count.get("low", 0)
+            ),
+            "arrived_source_count": self.arrived_source_count.copy(),
+            "completed_source_count": self.completed_source_count.copy(),
+            "completed_source_delay_sum_s": self.completed_source_delay_sum.copy(),
+            "arrived_source_high_count": self.arrived_source_priority_count[
+                "high"
+            ].copy(),
+            "arrived_source_low_count": self.arrived_source_priority_count[
+                "low"
+            ].copy(),
+            "completed_source_high_count": self.completed_source_priority_count[
+                "high"
+            ].copy(),
+            "completed_source_low_count": self.completed_source_priority_count[
+                "low"
+            ].copy(),
+            "completed_source_high_delay_sum_s": (
+                self.completed_source_priority_delay_sum["high"].copy()
+            ),
+            "completed_source_low_delay_sum_s": (
+                self.completed_source_priority_delay_sum["low"].copy()
+            ),
+            "alive_count": int(alive["task_alive_count"]),
+            "alive_high_count": int(alive["task_alive_high_count"]),
+            "alive_low_count": int(alive["task_alive_low_count"]),
+            "queue_high_mbits_per_uav": queue_high.astype(np.float64).copy(),
+            "queue_low_mbits_per_uav": queue_low.astype(np.float64).copy(),
+            "queue_total_mbits_per_uav": (
+                queue_high + queue_low
+            ).astype(np.float64).copy(),
+        }
 
     def _create_parent_task(self, user_id, priority, size_mbits):
         task_id = self.next_task_id
@@ -857,6 +1022,51 @@ class UAV_MEC_Env:
 
         return arr.astype(np.float32)
 
+    def set_zone_target_loads(self, zone_loads):
+        """Update future task-arrival rates without touching existing queues."""
+        self.zone_target_load_mbps = self._normalize_zone_loads(zone_loads)
+        self._configure_industrial_device_profiles()
+        return self.zone_expected_offered_load_mbps.copy()
+
+    def get_compute_capacity_audit(self):
+        """Return the deterministic arrival/service envelope per macro period."""
+        arrival_duration_s = (
+            self.macro_dt
+            if self.arrivals_during_deployment
+            else self.macro_dt - self.deployment_dt
+        )
+        service_duration_s = self.macro_dt - self.deployment_dt
+        offered_load_mbps = np.asarray(
+            [self._get_zone_target_load_mbps(i) for i in range(self.N)],
+            dtype=np.float64,
+        )
+        arrival_mbits_per_macro = offered_load_mbps * arrival_duration_s
+        compute_capacity_mbits_per_macro = (
+            self.F_max_array.astype(np.float64)
+            * service_duration_s
+            / max(float(self.C) * 1e6, 1e-12)
+        )
+        local_margin_mbits = (
+            compute_capacity_mbits_per_macro - arrival_mbits_per_macro
+        )
+        global_margin_mbits = float(
+            np.sum(compute_capacity_mbits_per_macro)
+            - np.sum(arrival_mbits_per_macro)
+        )
+        return {
+            "arrival_duration_s": float(arrival_duration_s),
+            "service_duration_s": float(service_duration_s),
+            "offered_load_mbps": offered_load_mbps.copy(),
+            "arrival_mbits_per_macro": arrival_mbits_per_macro.copy(),
+            "compute_capacity_mbits_per_macro": (
+                compute_capacity_mbits_per_macro.copy()
+            ),
+            "local_margin_mbits": local_margin_mbits.copy(),
+            "locally_overloaded": (local_margin_mbits < 0.0),
+            "global_margin_mbits": global_margin_mbits,
+            "globally_feasible": bool(global_margin_mbits >= 0.0),
+        }
+
     def _get_zone_target_load_mbps(self, zone_idx):
         scale = float(getattr(self, "load_scale", 1.0))
         zone_loads = getattr(self, "zone_target_load_mbps", None)
@@ -968,6 +1178,21 @@ class UAV_MEC_Env:
             + U5
         )
 
+    def _compute_deployment_transient_energy(self, v):
+        """Lower-bound start-up energy for a fly-then-hover deployment leg.
+
+        Every macro period starts and ends its deployment leg at hover.  The
+        steady-flight power curve does not include the kinetic energy needed
+        to accelerate from rest.  With no regenerative recovery during the
+        subsequent stop, 0.5*m*v^2 is a conservative battery-energy lower
+        bound.  Deceleration and finite-time acceleration losses are omitted,
+        so this term does not overstate manoeuvre losses.
+        """
+        v = np.asarray(v, dtype=np.float64)
+        if self.deployment_transient_energy_mode == "none":
+            return np.zeros_like(v, dtype=np.float64)
+        return 0.5 * self.uav_mass_kg * np.square(v)
+
     def reset(self, seed=None, options=None):
         
         # [解耦修复]: 自行维护 Numpy Random Generator，不再依赖 gym
@@ -983,14 +1208,18 @@ class UAV_MEC_Env:
         assigned_anchors = self.anchor_points[self.user_allocations] 
         self.user_offsets = self.np_random.standard_normal((self.M, 2)) * self.user_zone_scatter_std
         
-        # 限制在各自的管辖半径内
-        zone_dist = np.linalg.norm(self.user_offsets, axis=1, keepdims=True)
-        safe_zone_dist = np.maximum(zone_dist, 1e-8)
-        self.user_offsets = np.where(
-            zone_dist > self.user_zone_radius,
-            self.user_offsets / safe_zone_dist * self.user_zone_radius,
-            self.user_offsets,
-        )
+        if self.user_zone_radius > 0.0:
+            zone_dist = np.linalg.norm(
+                self.user_offsets,
+                axis=1,
+                keepdims=True,
+            )
+            safe_zone_dist = np.maximum(zone_dist, 1e-8)
+            self.user_offsets = np.where(
+                zone_dist > self.user_zone_radius,
+                self.user_offsets / safe_zone_dist * self.user_zone_radius,
+                self.user_offsets,
+            )
         
         self.user_coords = assigned_anchors + self.user_offsets
         self.user_coords = np.clip(self.user_coords, 0.0, 1000.0)
@@ -1010,19 +1239,23 @@ class UAV_MEC_Env:
         # 4. 初始化 GMMM 战术移动初速度
         self.instantaneous_centroids = self.weighted_centroids.copy()
 
-        if self.users_static:
-            self.user_velocities = np.zeros((self.M, 2))
-        else:
-            self.user_velocities = self.np_random.uniform(
-                -self.max_infantry_speed / 2,
-                self.max_infantry_speed / 2,
-                size=(self.M, 2),
-            )
+        self.user_speeds = np.full(
+            self.M,
+            0.0 if self.users_static else self.gm_mean_speed_mps,
+            dtype=np.float64,
+        )
+        self.user_headings = np.full(
+            self.M,
+            self.gm_mean_heading_rad,
+            dtype=np.float64,
+        )
+        self._sync_user_velocity_vectors()
         
         # 5. 清空控制指令缓存与流水队列
         self.current_macro_v = np.zeros(self.N)
         self.current_macro_theta = np.zeros(self.N)
         self.macro_fly_steps_remaining = 0
+        self.macro_service_pause_steps_remaining = 0
 
         self.Q_loc_high = np.zeros(self.N)
         self.Q_loc_low = np.zeros(self.N)
@@ -1030,10 +1263,12 @@ class UAV_MEC_Env:
         self.Q_tx_low = np.zeros((self.N, self.N))
         self.pending_upload_jobs = []
         self.global_micro_step = 0
+        self._resource_frame_prepared = False
+        self.resource_frame_prepare_count = 0
+        self.deployment_arrival_prepare_count = 0
+        self.mobility_update_count = 0
         self._u2u_spectral_cache_coords = None
         self._u2u_spectral_cache_result = None
-        self.current_arrival_high = np.zeros(self.N)
-        self.current_arrival_low = np.zeros(self.N)
         self.current_arrival_active_users = np.zeros(self.N)
         self.A_t_high = np.zeros(self.N)
         self.A_t_low = np.zeros(self.N)
@@ -1065,8 +1300,134 @@ class UAV_MEC_Env:
             'A_t_low': getattr(self, 'A_t_low', np.zeros(self.N)).copy()
         }
 
-    def _generate_traffic(self):
-        self._discard_current_arrival_tasks()
+    @staticmethod
+    def _wrap_angle(angle):
+        return (np.asarray(angle, dtype=np.float64) + np.pi) % (2.0 * np.pi) - np.pi
+
+    def _sync_user_velocity_vectors(self):
+        self.user_velocities = np.column_stack(
+            [
+                self.user_speeds * np.cos(self.user_headings),
+                self.user_speeds * np.sin(self.user_headings),
+            ]
+        )
+
+    def _update_gauss_markov_mobility(self):
+        if self.users_static:
+            self.user_speeds.fill(0.0)
+            self.user_headings.fill(self.gm_mean_heading_rad)
+            self._sync_user_velocity_vectors()
+            return
+
+        speed_noise = self.np_random.normal(
+            0.0,
+            self.gm_speed_noise_std,
+            size=self.M,
+        )
+        heading_noise = self.np_random.normal(
+            0.0,
+            self.gm_heading_noise_std,
+            size=self.M,
+        )
+        c_speed = self.gm_speed_memory
+        c_heading = self.gm_heading_memory
+        self.user_speeds = (
+            c_speed * self.user_speeds
+            + (1.0 - c_speed) * self.gm_mean_speed_mps
+            + np.sqrt(max(1.0 - c_speed**2, 0.0)) * speed_noise
+        )
+        self.user_speeds = np.clip(
+            self.user_speeds,
+            0.0,
+            self.max_infantry_speed,
+        )
+        self.user_headings = self._wrap_angle(
+            c_heading * self.user_headings
+            + (1.0 - c_heading) * self.gm_mean_heading_rad
+            + np.sqrt(max(1.0 - c_heading**2, 0.0)) * heading_noise
+        )
+        self._sync_user_velocity_vectors()
+        self.mobility_update_count += 1
+
+    def _integrate_user_positions(self):
+        assigned_anchors = self.anchor_points[self.user_allocations]
+        if self.users_static:
+            self.user_coords = np.clip(
+                assigned_anchors + self.user_offsets,
+                0.0,
+                1000.0,
+            )
+            return
+
+        if self.user_zone_radius <= 0.0:
+            proposed_coords = (
+                self.user_coords + self.user_velocities * self.micro_dt
+            )
+            boundary_hits = (
+                (proposed_coords < 0.0) | (proposed_coords > 1000.0)
+            )
+            if np.any(boundary_hits):
+                self.user_velocities[boundary_hits] *= -1.0
+                affected_users = np.any(boundary_hits, axis=1)
+                reflected = self.user_velocities[affected_users]
+                self.user_speeds[affected_users] = np.linalg.norm(
+                    reflected,
+                    axis=1,
+                )
+                self.user_headings[affected_users] = np.arctan2(
+                    reflected[:, 1],
+                    reflected[:, 0],
+                )
+            self.user_coords = np.clip(proposed_coords, 0.0, 1000.0)
+            self.user_offsets = self.user_coords - assigned_anchors
+            return
+
+        proposed_offsets = self.user_offsets + self.user_velocities * self.micro_dt
+        distances = np.linalg.norm(proposed_offsets, axis=1)
+        outside = distances > self.user_zone_radius
+        if np.any(outside):
+            normals = proposed_offsets[outside] / np.maximum(
+                distances[outside, None],
+                1e-12,
+            )
+            velocities = self.user_velocities[outside]
+            outward_speed = np.sum(velocities * normals, axis=1, keepdims=True)
+            reflected = velocities - 2.0 * np.maximum(outward_speed, 0.0) * normals
+            self.user_velocities[outside] = reflected
+            self.user_speeds[outside] = np.linalg.norm(reflected, axis=1)
+            self.user_headings[outside] = np.arctan2(
+                reflected[:, 1],
+                reflected[:, 0],
+            )
+            proposed_offsets[outside] = normals * self.user_zone_radius
+
+        self.user_offsets = proposed_offsets
+        self.user_coords = np.clip(
+            assigned_anchors + self.user_offsets,
+            0.0,
+            1000.0,
+        )
+
+    def prepare_service_resource_frame(self):
+        """Apply exogenous events before a 0.5 s service-frame action."""
+        if self.macro_service_pause_steps_remaining > 0:
+            raise RuntimeError("Cannot prepare a service frame during deployment.")
+        if self.global_micro_step % self.resource_frame_steps != 0:
+            raise RuntimeError("Service frames must start on resource-frame boundaries.")
+        if self._resource_frame_prepared:
+            return self.get_raw_state()
+
+        self._update_gauss_markov_mobility()
+        self._generate_traffic(
+            append_to_ground_buffer=self.arrivals_during_deployment
+        )
+        self._resource_frame_prepared = True
+        self.resource_frame_prepare_count += 1
+        return self.get_raw_state()
+
+    def _generate_traffic(self, append_to_ground_buffer=False):
+        if not append_to_ground_buffer:
+            self._discard_current_arrival_tasks()
 
         counts_high = np.zeros(self.M, dtype=np.float32)
         counts_low = np.zeros(self.M, dtype=np.float32)
@@ -1126,32 +1487,53 @@ class UAV_MEC_Env:
             A_t_total_low[i] = np.sum(low_bits[zone_mask])
             active_users_total[i] = np.sum((counts_high[zone_mask] + counts_low[zone_mask]) > 0)
             
-        self.current_arrival_high = A_t_total_high
-        self.current_arrival_low = A_t_total_low
-        self.current_arrival_active_users = active_users_total
-        self.A_t_high = A_t_total_high
-        self.A_t_low = A_t_total_low
+        if append_to_ground_buffer:
+            self.current_arrival_active_users += active_users_total
+            self.A_t_high += A_t_total_high
+            self.A_t_low += A_t_total_low
+        else:
+            self.current_arrival_active_users = active_users_total
+            self.A_t_high = A_t_total_high
+            self.A_t_low = A_t_total_low
+
+        return {
+            "high_per_uav": A_t_total_high.copy(),
+            "low_per_uav": A_t_total_low.copy(),
+            "active_users_per_uav": active_users_total.copy(),
+        }
 
     def _clear_current_arrivals(self, discard_tasks=True):
         if discard_tasks:
             self._discard_current_arrival_tasks()
         else:
             self.current_arrival_tasks_by_uav = [[] for _ in range(self.N)]
-        self.current_arrival_high = np.zeros(self.N)
-        self.current_arrival_low = np.zeros(self.N)
         self.current_arrival_active_users = np.zeros(self.N)
         self.A_t_high = np.zeros(self.N)
         self.A_t_low = np.zeros(self.N)
 
-    def _build_paused_service_info(self):
+    def _build_paused_service_info(self, flight_phase, arrival_event=None):
         zeros_n = np.zeros(self.N, dtype=np.float32)
+        arrival_event = arrival_event or {}
+        arrival_high = np.asarray(
+            arrival_event.get("high_per_uav", zeros_n),
+            dtype=np.float32,
+        )
+        arrival_low = np.asarray(
+            arrival_event.get("low_per_uav", zeros_n),
+            dtype=np.float32,
+        )
+        arrival_active_users = np.asarray(
+            arrival_event.get("active_users_per_uav", zeros_n),
+            dtype=np.float32,
+        )
 
         q_high_tot = np.sum(self.Q_loc_high) + np.sum(self.Q_tx_high)
         q_low_tot = np.sum(self.Q_loc_low) + np.sum(self.Q_tx_low)
 
         info = {
             'service_paused': True,
-            'flight_phase': True,
+            'flight_phase': bool(flight_phase),
+            'macro_transition_phase': True,
             'queue_length': q_high_tot + q_low_tot,
             'q_high_tot': q_high_tot,
             'q_low_tot': q_low_tot,
@@ -1163,6 +1545,9 @@ class UAV_MEC_Env:
             'energy_uplink_per_uav': zeros_n.copy(),
             'energy_trans_per_uav': zeros_n.copy(),
             'energy_total_per_uav': zeros_n.copy(),
+            'uav_battery_energy_per_uav': zeros_n.copy(),
+            'uav_battery_service_energy': 0.0,
+            'ground_uplink_energy': 0.0,
             'upload_delay_cost': 0.0,
             'upload_delay_cost_high': 0.0,
             'upload_delay_cost_low': 0.0,
@@ -1173,11 +1558,16 @@ class UAV_MEC_Env:
             'cpu_low_utilization_per_uav': zeros_n.copy(),
             'cpu_saturation_ratio': 0.0,
             'cpu_alloc_mode': self.cpu_alloc_mode,
-            'cpu_energy_model': 'flight_paused',
+            'cpu_energy_model': 'macro_transition_paused',
             'kkt_v': float(self.kkt_v),
+            'cpu_energy_price_per_uav': self.cpu_energy_prices.copy(),
             'f_high_per_uav': zeros_n.copy(),
             'f_low_per_uav': zeros_n.copy(),
             'f_total_per_uav': zeros_n.copy(),
+            'cpu_power_cap_w': float(self.cpu_power_cap_w),
+            'cpu_power_uncapped_w': 0.0,
+            'cpu_power_allocated_w': 0.0,
+            'cpu_power_cap_active': False,
             'compute_service_high_mbits': 0.0,
             'compute_service_low_mbits': 0.0,
             'compute_service_sensor_mbits': 0.0,
@@ -1188,9 +1578,12 @@ class UAV_MEC_Env:
             'compute_service_sensor_cycles': 0.0,
             'compute_service_controller_cycles': 0.0,
             'compute_service_vision_cycles': 0.0,
-            'arrival_high_sum': 0.0,
-            'arrival_low_sum': 0.0,
-            'arrival_total_per_uav': zeros_n.copy(),
+            'arrival_high_sum': float(np.sum(arrival_high)),
+            'arrival_low_sum': float(np.sum(arrival_low)),
+            'arrival_high_per_uav': arrival_high.copy(),
+            'arrival_low_per_uav': arrival_low.copy(),
+            'arrival_total_per_uav': (arrival_high + arrival_low).copy(),
+            'arrival_active_users_per_uav': arrival_active_users.copy(),
             'Q_loc_high_sum': np.sum(self.Q_loc_high),
             'Q_loc_low_sum': np.sum(self.Q_loc_low),
             'Q_tx_high_sum': np.sum(self.Q_tx_high),
@@ -1201,22 +1594,47 @@ class UAV_MEC_Env:
         info.update(self.get_task_delay_stats())
         return info
 
-    def _advance_flight_only_step(self):
-        delta_x_uav = self.current_macro_v * np.cos(self.current_macro_theta) * self.micro_dt
-        delta_y_uav = self.current_macro_v * np.sin(self.current_macro_theta) * self.micro_dt
-        self.uav_coords[:, 0] += delta_x_uav
-        self.uav_coords[:, 1] += delta_y_uav
-        self.uav_coords = np.clip(self.uav_coords, 0.0, 1000.0)
-        self.macro_fly_steps_remaining -= 1
+    def _advance_macro_transition_step(self):
+        arrival_event = None
+        if (
+            self.arrivals_during_deployment
+            and self.global_micro_step % self.resource_frame_steps == 0
+        ):
+            self._update_gauss_markov_mobility()
+            arrival_event = self._generate_traffic(
+                append_to_ground_buffer=True
+            )
+            self.deployment_arrival_prepare_count += 1
 
-        self._clear_current_arrivals()
+        flight_phase = self.macro_fly_steps_remaining > 0
+        if flight_phase:
+            delta_x_uav = (
+                self.current_macro_v
+                * np.cos(self.current_macro_theta)
+                * self.micro_dt
+            )
+            delta_y_uav = (
+                self.current_macro_v
+                * np.sin(self.current_macro_theta)
+                * self.micro_dt
+            )
+            self.uav_coords[:, 0] += delta_x_uav
+            self.uav_coords[:, 1] += delta_y_uav
+            self.uav_coords = np.clip(self.uav_coords, 0.0, 1000.0)
+            self.macro_fly_steps_remaining -= 1
+
+        if self.arrivals_during_deployment:
+            self._integrate_user_positions()
+
+        self.macro_service_pause_steps_remaining -= 1
+        paused_info = self._build_paused_service_info(
+            flight_phase,
+            arrival_event=arrival_event,
+        )
         self.global_micro_step += 1
 
-        if self.macro_fly_steps_remaining <= 0:
-            self._generate_traffic()
-
         self.record_trajectory_snapshot()
-        return self.get_raw_state(), self._build_paused_service_info()
+        return self.get_raw_state(), paused_info
 
     def _queue_to_frequency_need(self, queue_mbits):
         return np.maximum(queue_mbits, 0.0) * self.C * 1e6 / max(self.micro_dt, 1e-12)
@@ -1267,10 +1685,154 @@ class UAV_MEC_Env:
             freqs *= float(f_max) / total
         return float(freqs[0]), float(freqs[1])
 
+    def set_cpu_energy_prices(self, prices):
+        """Set non-negative per-UAV prices used by priced MaxWeight DVFS."""
+        values = np.asarray(prices, dtype=np.float64)
+        if values.ndim == 0:
+            values = np.full(self.N, float(values))
+        elif values.shape == (1,):
+            values = np.full(self.N, float(values[0]))
+        if values.shape != (self.N,):
+            raise ValueError(
+                "CPU energy prices must be scalar or have shape "
+                f"({self.N},), got {values.shape}."
+            )
+        if not np.all(np.isfinite(values)) or np.any(values < 0.0):
+            raise ValueError("CPU energy prices must be finite and non-negative.")
+        self.cpu_energy_prices = values.copy()
+
+    def _priced_maxweight_frequency_pair(
+        self,
+        q_high,
+        q_low,
+        f_max,
+        energy_price,
+    ):
+        """Solve the unified-cubic, queue-weighted DVFS subproblem exactly.
+
+        For one UAV the per-frame problem is
+
+            max sum_c w_c (Q_c / Q_ref) (f_c / F_max)
+                - (lambda / P_budget) * kappa * (sum_c f_c)^3,
+
+        with ``Q_ref`` equal to one macro service window of compute capacity.
+        ``energy_price`` is therefore the normalized dual price
+        ``lambda / P_budget`` supplied by the wrapper, not an undocumented
+        instantaneous CPU cap. For a fixed total frequency, assigning
+        frequency in descending marginal queue-pressure order is optimal.
+        The remaining scalar objective is concave and piecewise smooth, so
+        its stationary point and segment boundaries are sufficient
+        candidates.
+        """
+        f_max = max(float(f_max), 0.0)
+        price = max(float(energy_price), 0.0)
+        service_duration_s = max(
+            float(self.macro_dt - self.deployment_dt),
+            float(self.micro_dt),
+        )
+        queue_reference_mbits = max(
+            f_max * service_duration_s / (self.C * 1e6),
+            1e-12,
+        )
+        frequency_reference_hz = max(f_max, 1e-12)
+        gains = np.asarray(
+            [
+                self.w_D_high
+                * max(float(q_high), 0.0)
+                / (queue_reference_mbits * frequency_reference_hz),
+                self.w_D_low
+                * max(float(q_low), 0.0)
+                / (queue_reference_mbits * frequency_reference_hz),
+            ],
+            dtype=np.float64,
+        )
+        demand_caps = np.minimum(
+            np.asarray(
+                [
+                    self._queue_to_frequency_need(q_high),
+                    self._queue_to_frequency_need(q_low),
+                ],
+                dtype=np.float64,
+            ),
+            f_max,
+        )
+        demand_caps = np.maximum(demand_caps, 0.0)
+        max_total = min(float(np.sum(demand_caps)), f_max)
+        if max_total <= 1e-12 or float(np.max(gains)) <= 0.0:
+            return 0.0, 0.0
+
+        order = np.argsort(-gains, kind="stable")
+
+        def allocate(total_frequency):
+            remaining = float(np.clip(total_frequency, 0.0, max_total))
+            allocation = np.zeros(2, dtype=np.float64)
+            for class_index in order:
+                allocated = min(float(demand_caps[class_index]), remaining)
+                allocation[class_index] = allocated
+                remaining -= allocated
+                if remaining <= 1e-12:
+                    break
+            return allocation
+
+        candidates = {0.0, max_total}
+        segment_lower = 0.0
+        denominator = 3.0 * price * max(float(self.kappa), 1e-30)
+        for class_index in order:
+            segment_upper = min(
+                segment_lower + float(demand_caps[class_index]),
+                max_total,
+            )
+            candidates.add(segment_lower)
+            candidates.add(segment_upper)
+            if segment_upper > segment_lower and denominator > 0.0:
+                stationary = np.sqrt(
+                    max(float(gains[class_index]), 0.0) / denominator
+                )
+                candidates.add(
+                    float(np.clip(stationary, segment_lower, segment_upper))
+                )
+            segment_lower = segment_upper
+            if segment_lower >= max_total - 1e-12:
+                break
+
+        best_allocation = np.zeros(2, dtype=np.float64)
+        best_value = 0.0
+        best_total = 0.0
+        for candidate_total in sorted(candidates):
+            allocation = allocate(candidate_total)
+            total = float(np.sum(allocation))
+            value = float(
+                np.dot(gains, allocation)
+                - price * self.kappa * total**3
+            )
+            if value > best_value + 1e-12 or (
+                abs(value - best_value) <= 1e-12 and total < best_total
+            ):
+                best_value = value
+                best_total = total
+                best_allocation = allocation
+
+        return float(best_allocation[0]), float(best_allocation[1])
+
     def _allocate_cpu_frequencies(self):
         f_high = np.zeros(self.N, dtype=np.float64)
         f_low = np.zeros(self.N, dtype=np.float64)
         energy_model = "total_cubic"
+
+        if self.cpu_alloc_mode == "priced_maxweight":
+            for i in range(self.N):
+                f_high[i], f_low[i] = self._priced_maxweight_frequency_pair(
+                    self.Q_loc_high[i],
+                    self.Q_loc_low[i],
+                    self.F_max_array[i],
+                    self.cpu_energy_prices[i],
+                )
+            f_total = f_high + f_low
+            cpu_power = float(self.kappa * np.sum(np.power(f_total, 3.0)))
+            self.last_cpu_power_uncapped_w = cpu_power
+            self.last_cpu_power_allocated_w = cpu_power
+            self.last_cpu_power_cap_active = False
+            return f_high, f_low, f_total, energy_model
 
         if self.cpu_alloc_mode == "legacy_kkt":
             weighted_Q = (
@@ -1315,6 +1877,10 @@ class UAV_MEC_Env:
             f_high = np.minimum(need_high, cap)
             remaining = np.maximum(cap - f_high, 0.0)
             f_low = np.minimum(need_low, remaining)
+            f_high, f_low = self._project_priority_cpu_power(
+                f_high,
+                f_low,
+            )
             f_total = f_high + f_low
             return f_high, f_low, f_total, energy_model
 
@@ -1339,6 +1905,60 @@ class UAV_MEC_Env:
             )
         f_total = f_high + f_low
         return f_high, f_low, f_total, energy_model
+
+    def _project_priority_cpu_power(self, f_high, f_low):
+        """Project priority-demand frequencies onto a system CPU-power cap.
+
+        Low-priority frequency is reduced first. If the high-priority demand
+        alone exceeds the cap, all high-priority frequencies are scaled by
+        the common cubic-power factor. This is a deterministic feasibility
+        projection shared by every compared routing/trajectory method.
+        """
+        f_high = np.maximum(
+            np.asarray(f_high, dtype=np.float64),
+            0.0,
+        ).copy()
+        f_low = np.maximum(
+            np.asarray(f_low, dtype=np.float64),
+            0.0,
+        ).copy()
+        uncapped_power = float(
+            self.kappa * np.sum(np.power(f_high + f_low, 3.0))
+        )
+        self.last_cpu_power_uncapped_w = uncapped_power
+        self.last_cpu_power_cap_active = False
+
+        cap_w = float(self.cpu_power_cap_w)
+        if cap_w <= 0.0 or uncapped_power <= cap_w + 1e-9:
+            self.last_cpu_power_allocated_w = uncapped_power
+            return f_high, f_low
+
+        high_power = float(self.kappa * np.sum(np.power(f_high, 3.0)))
+        if high_power >= cap_w:
+            scale = (cap_w / max(high_power, 1e-30)) ** (1.0 / 3.0)
+            f_high *= float(np.clip(scale, 0.0, 1.0))
+            f_low.fill(0.0)
+        else:
+            lo = 0.0
+            hi = 1.0
+            for _ in range(32):
+                mid = 0.5 * (lo + hi)
+                power = float(
+                    self.kappa
+                    * np.sum(np.power(f_high + mid * f_low, 3.0))
+                )
+                if power > cap_w:
+                    hi = mid
+                else:
+                    lo = mid
+            f_low *= lo
+
+        allocated_power = float(
+            self.kappa * np.sum(np.power(f_high + f_low, 3.0))
+        )
+        self.last_cpu_power_allocated_w = allocated_power
+        self.last_cpu_power_cap_active = True
+        return f_high, f_low
 
     def _get_u2u_spectral_efficiency(self):
         if (
@@ -1366,8 +1986,20 @@ class UAV_MEC_Env:
         """
         Discrete arrivals + explicit upload completion events + fluid UAV-side queues.
         """
-        if self.macro_fly_steps_remaining > 0:
-            return self._advance_flight_only_step()
+        transition_phase = self.macro_service_pause_steps_remaining > 0
+        if transition_phase and self.pause_service_during_flight:
+            return self._advance_macro_transition_step()
+        flight_phase = self.macro_fly_steps_remaining > 0
+
+        if (
+            self.global_micro_step % self.resource_frame_steps == 0
+            and not self._resource_frame_prepared
+        ):
+            self.prepare_service_resource_frame()
+
+        arrival_high_this_step = self.A_t_high.copy()
+        arrival_low_this_step = self.A_t_low.copy()
+        arrival_active_users_this_step = self.current_arrival_active_users.copy()
 
         arrived_high = np.zeros(self.N)
         arrived_low = np.zeros(self.N)
@@ -1403,46 +2035,24 @@ class UAV_MEC_Env:
                 if total_bits <= 1e-12:
                     continue
                 task_ids = list(self.current_arrival_tasks_by_uav[i])
+                active_user_ids = {
+                    int(self.parent_tasks[task_id].user_id)
+                    for task_id in task_ids
+                    if task_id in self.parent_tasks
+                }
                 upload_steps = max(1, int(np.ceil(total_bits / max(zone_capacity, 1e-8))))
                 self.pending_upload_jobs.append({
                     'target_uav': i,
                     'high_bits': float(self.A_t_high[i]),
                     'low_bits': float(self.A_t_low[i]),
                     'remaining_steps': upload_steps,
-                    'active_users': float(self.current_arrival_active_users[i]),
+                    'active_users': float(len(active_user_ids)),
                     'task_ids': task_ids,
                 })
                 self.current_arrival_tasks_by_uav[i] = []
+        self._clear_current_arrivals(discard_tasks=False)
 
-        assigned_anchors = self.anchor_points[self.user_allocations]
-        if self.users_static:
-            self.user_velocities.fill(0.0)
-            self.user_coords = assigned_anchors + self.user_offsets
-            self.user_coords = np.clip(self.user_coords, 0.0, 1000.0)
-        else:
-            # [Dynamic Group Mobility Update (RPGM)] 群体锚点现在是固定的
-            w_t = self.np_random.standard_normal((self.M, 2))
-            self.user_velocities = (self.alpha_gmmm * self.user_velocities) + \
-                                   (np.sqrt(1 - self.alpha_gmmm**2) * w_t)
-
-            speeds = np.linalg.norm(self.user_velocities, axis=1, keepdims=True)
-            self.user_velocities = np.where(
-                speeds > self.max_infantry_speed,
-                self.user_velocities * (self.max_infantry_speed / np.maximum(speeds, 1e-6)),
-                self.user_velocities
-            )
-
-            self.user_offsets += self.user_velocities * self.micro_dt
-            zone_dist = np.linalg.norm(self.user_offsets, axis=1, keepdims=True)
-            safe_zone_dist = np.maximum(zone_dist, 1e-8)
-            self.user_offsets = np.where(
-                zone_dist > self.user_zone_radius,
-                self.user_offsets / safe_zone_dist * self.user_zone_radius,
-                self.user_offsets,
-            )
-
-            self.user_coords = assigned_anchors + self.user_offsets
-            self.user_coords = np.clip(self.user_coords, 0.0, 1000.0)
+        self._integrate_user_positions()
 
         if self.macro_fly_steps_remaining > 0:
             delta_x_uav = self.current_macro_v * np.cos(self.current_macro_theta) * self.micro_dt
@@ -1542,6 +2152,9 @@ class UAV_MEC_Env:
             axis=1,
         ).astype(np.float32)
         total_E_trans = float(np.sum(energy_trans_per_uav))
+        uav_battery_energy_per_uav = (
+            energy_comp_per_uav + energy_trans_per_uav
+        )
 
         q_high_tot = np.sum(self.Q_loc_high) + np.sum(self.Q_tx_high)
         q_low_tot = np.sum(self.Q_loc_low) + np.sum(self.Q_tx_low)
@@ -1582,6 +2195,9 @@ class UAV_MEC_Env:
         )
 
         info = {
+            'service_paused': False,
+            'flight_phase': bool(flight_phase),
+            'macro_transition_phase': bool(transition_phase),
             'queue_length': q_high_tot + q_low_tot,
             'q_high_tot': q_high_tot,
             'q_low_tot': q_low_tot,
@@ -1597,6 +2213,15 @@ class UAV_MEC_Env:
                 + energy_uplink_per_uav
                 + energy_trans_per_uav
             ).copy(),
+            # Ground-user uplink transmit energy is reported separately and
+            # is not charged to an airborne battery constraint.
+            'uav_battery_energy_per_uav': (
+                uav_battery_energy_per_uav.copy()
+            ),
+            'uav_battery_service_energy': float(
+                np.sum(uav_battery_energy_per_uav)
+            ),
+            'ground_uplink_energy': float(total_E_uplink),
             'upload_delay_cost': upload_delay_cost,
             'upload_delay_cost_high': upload_delay_cost_high,
             'upload_delay_cost_low': upload_delay_cost_low,
@@ -1615,9 +2240,23 @@ class UAV_MEC_Env:
             'cpu_alloc_mode': self.cpu_alloc_mode,
             'cpu_energy_model': cpu_energy_model,
             'kkt_v': float(self.kkt_v),
+            'cpu_energy_price_per_uav': self.cpu_energy_prices.copy(),
+            'cpu_power_per_uav': (
+                self.kappa * np.power(f_opt_array, 3.0)
+            ).copy(),
             'f_high_per_uav': f_high_array.copy(),
             'f_low_per_uav': f_low_array.copy(),
             'f_total_per_uav': f_opt_array.copy(),
+            'cpu_power_cap_w': float(self.cpu_power_cap_w),
+            'cpu_power_uncapped_w': float(
+                self.last_cpu_power_uncapped_w
+            ),
+            'cpu_power_allocated_w': float(
+                self.last_cpu_power_allocated_w
+            ),
+            'cpu_power_cap_active': bool(
+                self.last_cpu_power_cap_active
+            ),
             'compute_service_high_mbits': compute_service_priority_mbits.get('high', 0.0),
             'compute_service_low_mbits': compute_service_priority_mbits.get('low', 0.0),
             'compute_service_high_cycles': compute_service_priority_cycles.get('high', 0.0),
@@ -1632,9 +2271,14 @@ class UAV_MEC_Env:
             'split_ratios_low': np.asarray(split_ratios_low, dtype=np.float32).copy(),
             'pressure_per_uav': pressure_per_uav.astype(np.float32),
             'pressure_imbalance': pressure_imbalance,
-            'arrival_high_sum': np.sum(self.A_t_high),
-            'arrival_low_sum': np.sum(self.A_t_low),
-            'arrival_total_per_uav': (self.A_t_high + self.A_t_low).copy(),
+            'arrival_high_sum': np.sum(arrival_high_this_step),
+            'arrival_low_sum': np.sum(arrival_low_this_step),
+            'arrival_high_per_uav': arrival_high_this_step.copy(),
+            'arrival_low_per_uav': arrival_low_this_step.copy(),
+            'arrival_total_per_uav': (
+                arrival_high_this_step + arrival_low_this_step
+            ).copy(),
+            'arrival_active_users_per_uav': arrival_active_users_this_step.copy(),
             'Q_loc_high_sum': np.sum(self.Q_loc_high),
             'Q_loc_low_sum': np.sum(self.Q_loc_low),
             'Q_tx_high_sum': np.sum(self.Q_tx_high),
@@ -1652,7 +2296,8 @@ class UAV_MEC_Env:
         info.update(self.get_task_delay_stats())
 
         self.global_micro_step += 1
-        self._generate_traffic()
+        if self.global_micro_step % self.resource_frame_steps == 0:
+            self._resource_frame_prepared = False
 
         self.record_trajectory_snapshot()
 
@@ -1666,8 +2311,8 @@ class UAV_MEC_Env:
         """
         macro_actions = np.asarray(macro_actions, dtype=np.float64)
         delta_xy = np.clip(macro_actions, -20.0, 20.0)
-        t_fly = 1.0
-        t_hover = 9.0
+        t_fly = self.deployment_dt
+        t_hover = self.macro_dt - self.deployment_dt
 
         current_coords = self.uav_coords.copy()
         projected_coords = np.clip(current_coords + delta_xy, 0.0, 1000.0)
@@ -1690,10 +2335,19 @@ class UAV_MEC_Env:
 
         self.current_macro_v = fly_v
         self.current_macro_theta = fly_theta
-        self.macro_fly_steps_remaining = int(round(t_fly / self.micro_dt))
-        self._clear_current_arrivals()
-
-        E_fly = self._compute_tcom_flying_power(fly_v) * t_fly
+        transition_steps = self.deployment_steps
+        self.macro_fly_steps_remaining = (
+            transition_steps if float(np.max(fly_distances)) > 1e-8 else 0
+        )
+        self.macro_service_pause_steps_remaining = (
+            transition_steps if self.pause_service_during_flight else 0
+        )
+        self._resource_frame_prepared = False
+        E_steady_fly = self._compute_tcom_flying_power(fly_v) * t_fly
+        E_deployment_transient = self._compute_deployment_transient_energy(
+            fly_v
+        )
+        E_fly = E_steady_fly + E_deployment_transient
         E_hover = self._compute_tcom_flying_power(np.zeros(self.N)) * t_hover
         E_macro_per_uav = E_fly + E_hover
         max_macro_flying_E = 3000.0
@@ -1702,9 +2356,15 @@ class UAV_MEC_Env:
 
         return self.get_raw_state(), h_flying_penalty, {
             'E_flying': np.sum(E_fly),
+            'E_steady_flying': np.sum(E_steady_fly),
+            'E_deployment_transient': np.sum(E_deployment_transient),
             'E_hover': np.sum(E_hover),
             'E_macro_total': E_macro_total,
             'E_flying_per_uav': E_fly.copy(),
+            'E_steady_flying_per_uav': E_steady_fly.copy(),
+            'E_deployment_transient_per_uav': (
+                E_deployment_transient.copy()
+            ),
             'E_hover_per_uav': E_hover.copy(),
             'E_macro_per_uav': E_macro_per_uav.copy(),
             'u2g_penalty': u2g_penalty,
@@ -1712,20 +2372,38 @@ class UAV_MEC_Env:
             'macro_penalty': h_flying_penalty,
             'u2g_distances': centroid_distances.copy(),
             'anchor_distances': anchor_distance_values.copy(),
-            'projected_uav_coords': projected_coords.copy()
+            'projected_uav_coords': projected_coords.copy(),
+            'pause_service_during_flight': self.pause_service_during_flight,
+            'macro_transition_steps': transition_steps,
+            'macro_service_pause_steps': (
+                self.macro_service_pause_steps_remaining
+            ),
         }
 
     def render_trajectory(self, save_path=None, show=False):
         if not self.record_trajectory: return
         import matplotlib.pyplot as plt
+        import matplotlib.font_manager as fm
         import os
         if save_path: os.makedirs(os.path.dirname(save_path), exist_ok=True)
+
+        installed_fonts = {font.name for font in fm.fontManager.ttflist}
+        for font_name in (
+            'Microsoft YaHei',
+            'SimHei',
+            'Noto Sans CJK SC',
+            'Source Han Sans SC',
+        ):
+            if font_name in installed_fonts:
+                plt.rcParams['font.sans-serif'] = [font_name, 'DejaVu Sans']
+                break
+        plt.rcParams['axes.unicode_minus'] = False
                 
         uav_traj = np.array(self.uav_trajectory)
         cent_traj = np.array(self.centroid_trajectory)
         users_traj = np.array(self.users_trajectory)
         
-        plt.figure(figsize=(10, 10))
+        plt.figure(figsize=(9.2, 8.2))
         colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
         
         for i in range(self.N):
@@ -1737,30 +2415,31 @@ class UAV_MEC_Env:
                 u_traj_x = users_traj[:, u_idx, 0]
                 u_traj_y = users_traj[:, u_idx, 1]
                 # 只给第一个贴图例标签防止重复
-                l = f'Ground Users (Zone {i+1})' if u_idx == zone_users_idx[0] else None
+                l = f'区域{i+1}用户轨迹' if u_idx == zone_users_idx[0] else None
                 # 加深地名用户的颜色，使得更容易看清
                 plt.plot(u_traj_x, u_traj_y, color=c, linestyle=':', linewidth=1.2, alpha=0.6, label=l)
                 # 画出最终落点小圆点
                 plt.scatter(u_traj_x[-1], u_traj_y[-1], color=c, marker='o', s=12, alpha=0.8)
             
             # 画区域引力质心点游走
-            plt.plot(cent_traj[:, i, 0], cent_traj[:, i, 1], color=c, linestyle='--', linewidth=1.0, alpha=0.8, label=f'Smoothed Flow Centroid (Zone {i+1})')
+            plt.plot(cent_traj[:, i, 0], cent_traj[:, i, 1], color=c, linestyle='--', linewidth=1.3, alpha=0.8, label=f'区域{i+1}业务质心')
             plt.scatter(cent_traj[0, i, 0], cent_traj[0, i, 1], color=c, marker='X', s=40, edgecolors='black', zorder=5) 
             plt.scatter(cent_traj[-1, i, 0], cent_traj[-1, i, 1], color=c, marker='P', s=60, edgecolors='black', zorder=5)
             
             # 飞行动作 (进一步调细线条和起落标志)
-            plt.plot(uav_traj[:, i, 0], uav_traj[:, i, 1], color=c, linestyle='-', linewidth=1.0, marker='o', markersize=2, alpha=0.9, label=f'UAV-{i+1} Traj')
+            plt.plot(uav_traj[:, i, 0], uav_traj[:, i, 1], color=c, linestyle='-', linewidth=1.8, marker='o', markersize=2.4, alpha=0.9, label=f'无人机{i+1}轨迹')
             plt.scatter(uav_traj[0, i, 0], uav_traj[0, i, 1], color=c, marker='s', s=20, edgecolors='black', zorder=5) 
             plt.scatter(uav_traj[-1, i, 0], uav_traj[-1, i, 1], color=c, marker='*', s=80, edgecolors='black', zorder=5) 
             
-        plt.scatter([], [], color='gray', marker='s', edgecolors='black', s=20, label='UAV Start')
-        plt.scatter([], [], color='gray', marker='*', edgecolors='black', s=80, label='UAV End')
-        plt.scatter([], [], color='gray', marker='X', edgecolors='black', s=40, label='Centroid Init')
-        plt.scatter([], [], color='gray', marker='P', edgecolors='black', s=60, label='Centroid Final')
+        plt.scatter([], [], color='gray', marker='s', edgecolors='black', s=20, label='无人机起点')
+        plt.scatter([], [], color='gray', marker='*', edgecolors='black', s=80, label='无人机终点')
+        plt.scatter([], [], color='gray', marker='X', edgecolors='black', s=40, label='质心初始位置')
+        plt.scatter([], [], color='gray', marker='P', edgecolors='black', s=60, label='质心最终位置')
         
-        plt.title('UAV-MEC System: Trajectories & Dynamic Duty Centroids Map', fontsize=15, fontweight='bold')
-        plt.xlabel('X Coordinate (m)', fontsize=12)
-        plt.ylabel('Y Coordinate (m)', fontsize=12)
+        title = '无人机轨迹与业务质心' if self.users_static else '无人机轨迹与动态业务质心'
+        plt.title(title, fontsize=13, fontweight='bold')
+        plt.xlabel('X坐标（m）', fontsize=11)
+        plt.ylabel('Y坐标（m）', fontsize=11)
         plt.xlim(0, 1000)
         plt.ylim(0, 1000)
         plt.gca().set_aspect('equal', adjustable='box')
@@ -1768,7 +2447,16 @@ class UAV_MEC_Env:
         
         handles, labels = plt.gca().get_legend_handles_labels()
         by_label = dict(zip(labels, handles))
-        plt.legend(by_label.values(), by_label.keys(), loc='upper left', bbox_to_anchor=(1.02, 1), borderaxespad=0.)
+        plt.legend(
+            by_label.values(),
+            by_label.keys(),
+            loc='upper center',
+            bbox_to_anchor=(0.5, -0.12),
+            ncol=4,
+            fontsize=8.2,
+            columnspacing=1.2,
+            handlelength=2.2,
+        )
         
         plt.tight_layout()
         if save_path: plt.savefig(save_path, dpi=300, bbox_inches='tight')

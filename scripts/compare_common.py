@@ -3,10 +3,12 @@ import csv
 import json
 import os
 import sys
+import time
 from dataclasses import dataclass, field
 from typing import Callable, Dict, List, Optional
 
 import numpy as np
+from scipy.stats import t as student_t
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
@@ -17,7 +19,6 @@ from hrl_uav.hrl_wrappers import HRL_Wrapper
 from hrl_uav.plot_utils import (
     plot_evaluation_metrics,
     plot_macro_diagnostics,
-    plot_system_metrics,
 )
 
 
@@ -112,10 +113,96 @@ def add_common_args(
         ),
     )
     parser.add_argument(
+        "--uav_initial_positions",
+        type=str,
+        default="",
+        help=(
+            "Optional semicolon-separated x,y start positions, for example "
+            "250,250;250,750;750,500"
+        ),
+    )
+    parser.add_argument(
         "--arrival_dt",
         type=float,
+        default=0.5,
+        help="Task-arrival interval in seconds; must align with resource frames",
+    )
+    parser.add_argument(
+        "--resource_frame_dt",
+        type=float,
+        default=0.5,
+        help="SAC/SCA decision-frame duration; actions are held within the frame",
+    )
+    parser.add_argument(
+        "--deployment_dt",
+        type=float,
+        default=1.0,
+        help="No-arrival/no-service deployment duration at each macro-period start",
+    )
+    parser.add_argument(
+        "--deployment_transient_energy_mode",
+        type=str,
+        choices=["none", "kinetic_lower_bound"],
+        default="kinetic_lower_bound",
+        help=(
+            "Deployment start/stop energy model. kinetic_lower_bound adds "
+            "0.5*m*v^2 to the steady-flight energy of each relocation leg."
+        ),
+    )
+    parser.add_argument(
+        "--uav_mass_kg",
+        type=float,
+        default=20.0 / 9.81,
+        help="UAV mass used by the deployment transient-energy model",
+    )
+    parser.add_argument(
+        "--users_static",
+        type=int,
+        choices=[0, 1],
+        default=0,
+        help="Disable (1) or enable (0) Gauss-Markov ground-user mobility",
+    )
+    parser.add_argument(
+        "--gm_mean_speed_mps",
+        type=float,
+        default=0.5,
+        help="Mean ground-user speed in the Gauss-Markov model",
+    )
+    parser.add_argument(
+        "--gm_mean_heading_rad",
+        type=float,
+        default=float(np.pi / 4.0),
+        help="Mean ground-user heading in radians",
+    )
+    parser.add_argument(
+        "--gm_speed_memory",
+        type=float,
+        default=0.5,
+        help="Gauss-Markov speed correlation coefficient c1",
+    )
+    parser.add_argument(
+        "--gm_heading_memory",
+        type=float,
+        default=0.5,
+        help="Gauss-Markov heading correlation coefficient c2",
+    )
+    parser.add_argument(
+        "--gm_speed_noise_std",
+        type=float,
         default=0.1,
-        help="Task-arrival interval in seconds; rates remain per-second",
+        help="Standard deviation of the speed innovation Phi",
+    )
+    parser.add_argument(
+        "--gm_heading_noise_std",
+        type=float,
+        default=0.1,
+        help="Standard deviation of the heading innovation Psi",
+    )
+    parser.add_argument(
+        "--user_zone_radius",
+        type=float,
+        default=80.0,
+        help="Radius constraining each user to its service zone",
     )
     parser.add_argument(
         "--uplink_bandwidth_mhz",
@@ -145,6 +232,7 @@ def add_common_args(
             "fixed_average",
             "fixed_demand",
             "priority_demand",
+            "priced_maxweight",
         ],
         default="priority_kkt",
         help="CPU resource allocation rule",
@@ -160,6 +248,15 @@ def add_common_args(
         type=float,
         default=0.5,
         help="CPU utilization for fixed_average allocation",
+    )
+    parser.add_argument(
+        "--cpu_power_cap_w",
+        type=float,
+        default=0.0,
+        help=(
+            "Optional system-wide CPU power cap applied by priority_demand; "
+            "zero disables the deterministic feasibility projection"
+        ),
     )
     parser.add_argument(
         "--micro_diag_bias",
@@ -207,6 +304,127 @@ def add_common_args(
         help="Whether macro observations include absolute expected load features",
     )
     parser.add_argument(
+        "--macro_capacity_state",
+        type=int,
+        choices=[0, 1],
+        default=1,
+        help="Whether macro observations include per-UAV CPU capacity",
+    )
+    parser.add_argument(
+        "--macro_reward_mode",
+        choices=["strict_global", "legacy_feudal"],
+        default="strict_global",
+        help="Exact global micro-return feedback or historical pressure proxy",
+    )
+    parser.add_argument(
+        "--strict_hierarchy_validation",
+        type=int,
+        choices=[0, 1],
+        default=1,
+        help="Require exactly one finalized reward per complete macro slot",
+    )
+    parser.add_argument(
+        "--pause_service_during_flight",
+        type=int,
+        choices=[0, 1],
+        default=1,
+        help=(
+            "Use the fixed 1s/9s hierarchy: the first 1s UAV deployment "
+            "phase has no U2G/U2U/CPU service. Exogenous arrivals during "
+            "that phase are controlled separately."
+        ),
+    )
+    parser.add_argument(
+        "--arrivals_during_deployment",
+        type=int,
+        choices=[0, 1],
+        default=0,
+        help=(
+            "Keep exogenous task arrivals and user mobility active during "
+            "the deployment phase while all communication/CPU service is paused"
+        ),
+    )
+    parser.add_argument(
+        "--objective_mode",
+        choices=["weighted", "constrained_delay"],
+        default="weighted",
+        help="Weighted delay-energy cost or delay minimization with a power constraint",
+    )
+    parser.add_argument(
+        "--power_budget_w",
+        type=float,
+        default=0.0,
+        help="Total three-UAV average power budget; required by constrained_delay",
+    )
+    parser.add_argument(
+        "--power_constraint_scope",
+        choices=["system", "per_uav"],
+        default="system",
+        help="Apply one system-average constraint or one battery constraint per UAV",
+    )
+    parser.add_argument(
+        "--uav_power_budgets_w",
+        type=str,
+        default="",
+        help="Scalar or comma-separated per-UAV average battery budgets in watts",
+    )
+    parser.add_argument(
+        "--energy_lagrange_multipliers",
+        type=str,
+        default="",
+        help="Optional scalar or comma-separated initial per-UAV multipliers",
+    )
+    parser.add_argument(
+        "--energy_dual_state_norm",
+        type=float,
+        default=10.0,
+        help="Normalization denominator for dual prices included in RL states",
+    )
+    parser.add_argument(
+        "--energy_dual_initial",
+        type=float,
+        default=0.0,
+        help="Initial non-negative Lagrange multiplier for the power constraint",
+    )
+    parser.add_argument(
+        "--energy_dual_lr",
+        type=float,
+        default=0.02,
+        help="Episode-level dual ascent step size",
+    )
+    parser.add_argument(
+        "--energy_dual_max",
+        type=float,
+        default=20.0,
+        help="Upper bound for the learned energy multiplier",
+    )
+    parser.add_argument(
+        "--power_budget_tolerance",
+        type=float,
+        default=0.01,
+        help="Relative feasibility tolerance used for checkpoint selection",
+    )
+    parser.add_argument(
+        "--power_constraint_margin_w",
+        type=float,
+        default=0.0,
+        help=(
+            "Non-negative training and checkpoint-selection safety margin; "
+            "the reported physical budget is unchanged"
+        ),
+    )
+    parser.add_argument(
+        "--checkpoint_power_rule",
+        type=str,
+        choices=["mean_target", "ucb95"],
+        default="mean_target",
+        help=(
+            "Checkpoint feasibility rule. ucb95 requires the one-sided "
+            "95%% Student-t upper confidence bound to satisfy the physical "
+            "power budget."
+        ),
+    )
+    parser.add_argument(
         "--macro_u2g_cost_weight",
         type=float,
         default=2.0,
@@ -221,9 +439,27 @@ def add_common_args(
     parser.add_argument(
         "--macro_action_mode",
         type=str,
-        choices=["polar", "delta"],
+        choices=["polar", "delta", "waypoint"],
         default="polar",
         help="Macro action interpretation in HRL_Wrapper",
+    )
+    parser.add_argument(
+        "--macro_action_deadzone",
+        type=float,
+        default=0.05,
+        help="Normalized macro-action magnitude below which the UAV hovers",
+    )
+    parser.add_argument(
+        "--macro_waypoint_radius_m",
+        type=float,
+        default=200.0,
+        help="Maximum target offset from each episode's initial UAV position",
+    )
+    parser.add_argument(
+        "--macro_waypoint_tolerance_m",
+        type=float,
+        default=0.5,
+        help="Distance to a learned waypoint below which the UAV hovers",
     )
     parser.add_argument(
         "--macro_ckpt",
@@ -283,6 +519,24 @@ def add_common_args(
         default=default_results_subdir,
         help="Results subdirectory under ./results",
     )
+    parser.add_argument(
+        "--train_cpu_min",
+        type=float,
+        default=0.0,
+        help="Minimum randomized training CPU GHz; <=0 disables randomization",
+    )
+    parser.add_argument(
+        "--train_cpu_max",
+        type=float,
+        default=0.0,
+        help="Maximum randomized training CPU GHz; <=0 disables randomization",
+    )
+    parser.add_argument(
+        "--train_scenario_mode",
+        choices=["independent", "axes"],
+        default="independent",
+        help="Randomize CPU/load independently or along the two paper sweep axes",
+    )
 
 
 def set_global_seeds(seed: int) -> None:
@@ -317,6 +571,41 @@ def parse_zone_loads(text: str) -> Optional[List[float]]:
     return loads
 
 
+def parse_nonnegative_vector(text: str) -> Optional[List[float]]:
+    if text is None:
+        return None
+    values = [item.strip() for item in str(text).split(",") if item.strip()]
+    if not values:
+        return None
+    parsed = [float(item) for item in values]
+    if any((not np.isfinite(item)) or item < 0.0 for item in parsed):
+        raise ValueError("Expected finite non-negative numeric values.")
+    return parsed
+
+
+def parse_uav_initial_positions(text, num_agents):
+    if text is None or not str(text).strip():
+        return None
+    rows = []
+    for group in str(text).split(";"):
+        values = [
+            float(item.strip())
+            for item in group.split(",")
+            if item.strip()
+        ]
+        if len(values) != 2:
+            raise ValueError(
+                "Each UAV start position must contain exactly x,y."
+            )
+        rows.append(values)
+    positions = np.asarray(rows, dtype=np.float64)
+    if positions.shape != (int(num_agents), 2):
+        raise ValueError(
+            "uav_initial_positions must provide one x,y pair per UAV."
+        )
+    return positions
+
+
 def torch_load_checkpoint(path: str) -> Dict:
     import torch
 
@@ -326,49 +615,12 @@ def torch_load_checkpoint(path: str) -> Dict:
         return torch.load(path, map_location="cpu")
 
 
-def load_macro_checkpoint(
-    macro_actors,
-    macro_critic,
-    checkpoint_path: str,
-) -> Optional[str]:
-    resolved_path = resolve_project_path(checkpoint_path)
-    if not resolved_path:
-        return None
-    if not os.path.isfile(resolved_path):
-        raise FileNotFoundError(f"Macro checkpoint not found: {resolved_path}")
-
-    checkpoint = torch_load_checkpoint(resolved_path)
-    actor_states = checkpoint.get("ppo_actors", None)
-    if actor_states is None:
-        actor_states = checkpoint.get("macro_actors", None)
-    if actor_states is None:
-        raise KeyError(
-            "Checkpoint does not contain 'ppo_actors' or 'macro_actors'."
-        )
-    if len(actor_states) != len(macro_actors):
-        raise ValueError(
-            f"Macro checkpoint has {len(actor_states)} actors, "
-            f"but current environment has {len(macro_actors)} agents."
-        )
-
-    for actor, state_dict in zip(macro_actors, actor_states):
-        actor.old_pi.load_state_dict(state_dict)
-        actor.new_pi.load_state_dict(state_dict)
-        actor.old_pi.eval()
-        actor.new_pi.eval()
-
-    critic_state = checkpoint.get("ppo_critic", None)
-    if critic_state is None:
-        critic_state = checkpoint.get("macro_critic", None)
-    if macro_critic is not None and critic_state is not None:
-        macro_critic.critic_v.load_state_dict(critic_state)
-
-    return resolved_path
-
-
 def apply_env_config(env: HRL_Wrapper, args: argparse.Namespace) -> HRL_Wrapper:
     cpu_ghz = float(getattr(args, "cpu_ghz", 16.0))
     env.env.F_max_array[:] = cpu_ghz * 1e9
+    env.macro_action_deadzone = float(
+        getattr(args, "macro_action_deadzone", env.macro_action_deadzone)
+    )
     return env
 
 
@@ -382,7 +634,13 @@ def make_env_from_args(
         record_trajectory=record_trajectory,
         traffic_profile=args.traffic_profile,
         traffic_scale=args.traffic_scale,
-        arrival_dt=float(getattr(args, "arrival_dt", 0.1)),
+        arrival_dt=float(getattr(args, "arrival_dt", 0.5)),
+        resource_frame_dt=float(getattr(args, "resource_frame_dt", 0.5)),
+        deployment_dt=float(getattr(args, "deployment_dt", 1.0)),
+        deployment_transient_energy_mode=str(
+            getattr(args, "deployment_transient_energy_mode", "none")
+        ),
+        uav_mass_kg=float(getattr(args, "uav_mass_kg", 20.0 / 9.81)),
         uplink_bandwidth_mhz=float(getattr(args, "uplink_bandwidth_mhz", 20.0)),
         u2u_bandwidth_mhz=float(getattr(args, "u2u_bandwidth_mhz", 3.0)),
         micro_diag_bias=float(getattr(args, "micro_diag_bias", 0.5)),
@@ -391,12 +649,20 @@ def make_env_from_args(
         cpu_alloc_mode=str(getattr(args, "cpu_alloc_mode", "priority_kkt")),
         kkt_v=float(getattr(args, "kkt_v", 1.0)),
         fixed_cpu_util=float(getattr(args, "fixed_cpu_util", 0.5)),
+        cpu_power_cap_w=float(getattr(args, "cpu_power_cap_w", 0.0)),
         load_scale=float(getattr(args, "load_scale", 1.0)),
         zone_loads=parse_zone_loads(getattr(args, "zone_loads", "")),
+        uav_initial_positions=parse_uav_initial_positions(
+            getattr(args, "uav_initial_positions", ""),
+            args.num_agents,
+        ),
         macro_comm_weight=float(getattr(args, "macro_comm_weight", 2.0)),
         macro_comm_flow_ema=float(getattr(args, "macro_comm_flow_ema", 0.8)),
         macro_flow_state=bool(int(getattr(args, "macro_flow_state", 1))),
         macro_load_state=bool(int(getattr(args, "macro_load_state", 0))),
+        macro_capacity_state=bool(
+            int(getattr(args, "macro_capacity_state", 0))
+        ),
         macro_u2g_cost_weight=float(
             getattr(args, "macro_u2g_cost_weight", 2.0)
         ),
@@ -404,6 +670,57 @@ def make_env_from_args(
             getattr(args, "macro_zone_ingress_weight", 0.5)
         ),
         macro_action_mode=str(getattr(args, "macro_action_mode", "polar")),
+        macro_waypoint_radius_m=float(
+            getattr(args, "macro_waypoint_radius_m", 200.0)
+        ),
+        macro_waypoint_tolerance_m=float(
+            getattr(args, "macro_waypoint_tolerance_m", 0.5)
+        ),
+        macro_reward_mode=str(
+            getattr(args, "macro_reward_mode", "legacy_feudal")
+        ),
+        strict_hierarchy_validation=bool(
+            int(getattr(args, "strict_hierarchy_validation", 0))
+        ),
+        pause_service_during_flight=bool(
+            int(getattr(args, "pause_service_during_flight", 1))
+        ),
+        arrivals_during_deployment=bool(
+            int(getattr(args, "arrivals_during_deployment", 0))
+        ),
+        objective_mode=str(getattr(args, "objective_mode", "weighted")),
+        power_budget_w=float(getattr(args, "power_budget_w", 0.0)),
+        energy_lagrange_multiplier=float(
+            getattr(
+                args,
+                "energy_lagrange_multiplier_current",
+                getattr(args, "energy_dual_initial", 0.0),
+            )
+        ),
+        power_constraint_scope=str(
+            getattr(args, "power_constraint_scope", "system")
+        ),
+        uav_power_budgets_w=parse_nonnegative_vector(
+            getattr(args, "uav_power_budgets_w", "")
+        ),
+        energy_lagrange_multipliers=parse_nonnegative_vector(
+            getattr(args, "energy_lagrange_multipliers", "")
+        ),
+        energy_dual_state_norm=float(
+            getattr(args, "energy_dual_state_norm", 10.0)
+        ),
+        users_static=bool(int(getattr(args, "users_static", 0))),
+        gm_mean_speed_mps=float(getattr(args, "gm_mean_speed_mps", 0.5)),
+        gm_mean_heading_rad=float(
+            getattr(args, "gm_mean_heading_rad", np.pi / 4.0)
+        ),
+        gm_speed_memory=float(getattr(args, "gm_speed_memory", 0.5)),
+        gm_heading_memory=float(getattr(args, "gm_heading_memory", 0.5)),
+        gm_speed_noise_std=float(getattr(args, "gm_speed_noise_std", 0.1)),
+        gm_heading_noise_std=float(
+            getattr(args, "gm_heading_noise_std", 0.1)
+        ),
+        user_zone_radius=float(getattr(args, "user_zone_radius", 80.0)),
     )
     return apply_env_config(env, args)
 
@@ -452,7 +769,52 @@ def save_scenario_metadata(
         "load_scale": float(getattr(args, "load_scale", 1.0)),
         "zone_loads": getattr(args, "zone_loads", ""),
         "zone_target_load_mbps": zone_loads,
-        "arrival_dt": float(getattr(args, "arrival_dt", 0.1)),
+        "uav_initial_positions": getattr(args, "uav_initial_positions", ""),
+        "arrival_dt": float(getattr(args, "arrival_dt", 0.5)),
+        "resource_frame_dt": float(
+            getattr(args, "resource_frame_dt", 0.5)
+        ),
+        "internal_integration_dt_s": MICRO_DT_SECONDS,
+        "resource_frame_substeps": int(
+            round(
+                float(getattr(args, "resource_frame_dt", 0.5))
+                / MICRO_DT_SECONDS
+            )
+        ),
+        "deployment_dt": float(getattr(args, "deployment_dt", 1.0)),
+        "deployment_resource_frames": int(
+            round(
+                float(getattr(args, "deployment_dt", 1.0))
+                / float(getattr(args, "resource_frame_dt", 0.5))
+            )
+        ),
+        "service_resource_frames": int(
+            round(
+                (
+                    10.0 - float(getattr(args, "deployment_dt", 1.0))
+                )
+                / float(getattr(args, "resource_frame_dt", 0.5))
+            )
+        ),
+        "smdp_boundary_discount_exponent": 3,
+        "users_static": int(getattr(args, "users_static", 0)),
+        "gm_mean_speed_mps": float(
+            getattr(args, "gm_mean_speed_mps", 0.5)
+        ),
+        "gm_mean_heading_rad": float(
+            getattr(args, "gm_mean_heading_rad", np.pi / 4.0)
+        ),
+        "gm_speed_memory": float(getattr(args, "gm_speed_memory", 0.5)),
+        "gm_heading_memory": float(
+            getattr(args, "gm_heading_memory", 0.5)
+        ),
+        "gm_speed_noise_std": float(
+            getattr(args, "gm_speed_noise_std", 0.1)
+        ),
+        "gm_heading_noise_std": float(
+            getattr(args, "gm_heading_noise_std", 0.1)
+        ),
+        "user_zone_radius": float(getattr(args, "user_zone_radius", 80.0)),
         "uplink_bandwidth_mhz": float(
             getattr(args, "uplink_bandwidth_mhz", 20.0)
         ),
@@ -461,15 +823,77 @@ def save_scenario_metadata(
         "cpu_alloc_mode": getattr(args, "cpu_alloc_mode", "priority_kkt"),
         "kkt_v": float(getattr(args, "kkt_v", 1.0)),
         "fixed_cpu_util": float(getattr(args, "fixed_cpu_util", 0.5)),
+        "cpu_power_cap_w": float(getattr(args, "cpu_power_cap_w", 0.0)),
+        "cpu_energy_model": "kappa_times_total_frequency_cubed",
+        "cpu_energy_price_formula": "lambda_i / average_power_budget_i",
         "micro_diag_bias": float(getattr(args, "micro_diag_bias", 0.5)),
         "micro_action_scale": float(getattr(args, "micro_action_scale", 1.0)),
         "micro_state_mode": getattr(args, "micro_state_mode", "pressure"),
+        "micro_solver": getattr(args, "micro_solver", "sac"),
+        "sac_actor_lr": float(getattr(args, "sac_actor_lr", 3e-4)),
+        "sac_critic_lr": float(getattr(args, "sac_critic_lr", 3e-4)),
+        "sac_alpha_lr": float(getattr(args, "sac_alpha_lr", 3e-4)),
+        "resume_micro_optimizer": int(
+            getattr(args, "resume_micro_optimizer", 1)
+        ),
+        "sca_update_interval": int(
+            getattr(args, "sca_update_interval", 0)
+        ),
+        "sca_max_iter": int(getattr(args, "sca_max_iter", 0)),
+        "sca_tol": float(getattr(args, "sca_tol", 0.0)),
+        "sca_solver": getattr(args, "sca_solver", ""),
+        "sca_delay_weight": float(
+            getattr(args, "sca_delay_weight", 0.0)
+        ),
+        "sca_energy_weight": float(
+            getattr(args, "sca_energy_weight", 0.0)
+        ),
+        "sca_proximal_weight": float(
+            getattr(args, "sca_proximal_weight", 0.0)
+        ),
         "macro_comm_weight": float(getattr(args, "macro_comm_weight", 2.0)),
         "macro_comm_flow_ema": float(
             getattr(args, "macro_comm_flow_ema", 0.8)
         ),
         "macro_flow_state": int(getattr(args, "macro_flow_state", 1)),
         "macro_load_state": int(getattr(args, "macro_load_state", 0)),
+        "macro_capacity_state": int(
+            getattr(args, "macro_capacity_state", 0)
+        ),
+        "objective_mode": str(getattr(args, "objective_mode", "weighted")),
+        "power_budget_w": float(getattr(args, "power_budget_w", 0.0)),
+        "power_constraint_scope": str(
+            getattr(args, "power_constraint_scope", "system")
+        ),
+        "uav_power_budgets_w": parse_nonnegative_vector(
+            getattr(args, "uav_power_budgets_w", "")
+        ),
+        "energy_lagrange_multipliers_initial": parse_nonnegative_vector(
+            getattr(args, "energy_lagrange_multipliers", "")
+        ),
+        "energy_dual_state_norm": float(
+            getattr(args, "energy_dual_state_norm", 10.0)
+        ),
+        "uav_battery_energy_scope": [
+            "propulsion",
+            "u2u_transmit",
+            "compute",
+        ],
+        "ground_uplink_energy_scope": "ground_user_only_reported_separately",
+        "energy_dual_initial": float(
+            getattr(args, "energy_dual_initial", 0.0)
+        ),
+        "energy_dual_lr": float(getattr(args, "energy_dual_lr", 0.0)),
+        "energy_dual_max": float(getattr(args, "energy_dual_max", 0.0)),
+        "train_scenario_mode": str(
+            getattr(args, "train_scenario_mode", "independent")
+        ),
+        "train_start_jitter_max_m": float(
+            getattr(args, "train_start_jitter_max_m", 0.0)
+        ),
+        "train_start_anchor_probability": float(
+            getattr(args, "train_start_anchor_probability", 0.2)
+        ),
         "macro_u2g_cost_weight": float(
             getattr(args, "macro_u2g_cost_weight", 2.0)
         ),
@@ -477,6 +901,27 @@ def save_scenario_metadata(
             getattr(args, "macro_zone_ingress_weight", 0.5)
         ),
         "macro_action_mode": getattr(args, "macro_action_mode", "polar"),
+        "macro_action_deadzone": float(
+            getattr(args, "macro_action_deadzone", 0.05)
+        ),
+        "macro_waypoint_radius_m": float(
+            getattr(args, "macro_waypoint_radius_m", 200.0)
+        ),
+        "macro_waypoint_tolerance_m": float(
+            getattr(args, "macro_waypoint_tolerance_m", 0.5)
+        ),
+        "macro_slot_duration_s": 10.0,
+        "macro_control_no_service_s": float(
+            getattr(args, "deployment_dt", 1.0)
+        ),
+        "macro_control_task_arrivals": int(
+            getattr(args, "arrivals_during_deployment", 0)
+        ),
+        "micro_service_duration_s": 10.0
+        - float(getattr(args, "deployment_dt", 1.0)),
+        "fixed_macro_control_phase": int(
+            getattr(args, "pause_service_during_flight", 1)
+        ),
         "advisor_weight": float(getattr(args, "advisor_weight", 0.0)),
         "advisor_final_weight": float(
             getattr(args, "advisor_final_weight", 0.0)
@@ -489,6 +934,29 @@ def save_scenario_metadata(
         "advisor_min_separation_m": float(
             getattr(args, "advisor_min_separation_m", 0.0)
         ),
+        "ppo_actor_lr": float(getattr(args, "ppo_actor_lr", 3e-4)),
+        "ppo_gamma": float(getattr(args, "ppo_gamma", 0.99)),
+        "ppo_gae_lambda": float(
+            getattr(args, "ppo_gae_lambda", 0.95)
+        ),
+        "ppo_target_kl": float(getattr(args, "ppo_target_kl", 0.0)),
+        "ppo_zero_inflated_actions": int(
+            getattr(args, "ppo_zero_inflated_actions", 0)
+        ),
+        "ppo_hover_gate_threshold": float(
+            getattr(args, "ppo_hover_gate_threshold", 0.05)
+        ),
+        "ppo_hover_gate_temperature": float(
+            getattr(args, "ppo_hover_gate_temperature", 10.0)
+        ),
+        "ppo_actor_final_lr": float(
+            getattr(args, "ppo_actor_final_lr", 3e-4)
+        ),
+        "ppo_lr_decay_episodes": int(
+            getattr(args, "ppo_lr_decay_episodes", 0)
+        ),
+        "freeze_micro": int(bool(getattr(args, "freeze_micro", False))),
+        "freeze_macro": int(bool(getattr(args, "freeze_macro", False))),
         "train_load_min": float(getattr(args, "train_load_min", 0.0)),
         "train_load_max": float(getattr(args, "train_load_max", 0.0)),
         "episodes": int(getattr(args, "episodes", 0)),
@@ -502,36 +970,6 @@ def save_scenario_metadata(
     with open(scenario_path, "w", encoding="utf-8") as fp:
         json.dump(payload, fp, indent=2)
     return scenario_path
-
-
-def build_local_only_micro_action(
-    num_agents: int,
-    diagonal_value: float = 20.0,
-    offdiag_value: float = -20.0,
-) -> np.ndarray:
-    action = np.full((2, num_agents, num_agents), offdiag_value, dtype=np.float32)
-    for channel in range(2):
-        np.fill_diagonal(action[channel], diagonal_value)
-    return action.reshape(-1)
-
-
-def alpha_to_micro_action(
-    alpha: np.ndarray,
-    diagonal_bias: float = 0.5,
-    action_scale: float = 1.0,
-    channels: int = 2,
-) -> np.ndarray:
-    alpha = np.asarray(alpha, dtype=np.float32)
-    alpha = np.clip(alpha, 1e-6, 1.0)
-    alpha /= np.sum(alpha, axis=1, keepdims=True)
-
-    logits = np.log(alpha)
-    logits -= np.max(logits, axis=1, keepdims=True)
-    logits -= np.eye(alpha.shape[0], dtype=np.float32) * diagonal_bias
-
-    action_matrix = np.clip(logits / action_scale, -1.0, 1.0)
-    stacked = np.stack([action_matrix] * channels, axis=0)
-    return stacked.astype(np.float32).reshape(-1)
 
 
 def compute_u2u_rate_mbps(wrapper: HRL_Wrapper, raw_state: Dict[str, np.ndarray]) -> np.ndarray:
@@ -654,25 +1092,6 @@ class EpisodeTrace:
         self.macro_projected_comm_cost.append(0.0)
         self.macro_projected_comm_uplink_time.append(0.0)
         self.macro_projected_comm_u2u_time.append(0.0)
-
-    def record_micro_info(self, mic_info: Optional[Dict[str, float]]) -> None:
-        if not isinstance(mic_info, dict):
-            return
-
-        self.queue_backlogs.append(mic_info.get("queue_length", 0.0))
-        self.energy_consumed.append(
-            mic_info.get("energy_uplink", 0.0)
-            + mic_info.get("energy_trans", 0.0)
-            + mic_info.get("energy_comp", 0.0)
-        )
-        self.micro_cost_raw.append(mic_info.get("micro_cost_raw", 0.0))
-        self.arrival_high.append(mic_info.get("arrival_high_sum", 0.0))
-        self.arrival_low.append(mic_info.get("arrival_low_sum", 0.0))
-        self.q_loc_high.append(mic_info.get("Q_loc_high_sum", 0.0))
-        self.q_tx_high.append(mic_info.get("Q_tx_high_sum", 0.0))
-        self.q_loc_low.append(mic_info.get("Q_loc_low_sum", 0.0))
-        self.q_tx_low.append(mic_info.get("Q_tx_low_sum", 0.0))
-        self.cpu_util_mean.append(mic_info.get("cpu_utilization_mean", 0.0))
 
     def record_micro_step(
         self,
@@ -870,10 +1289,50 @@ class EvaluationHistory:
     steps: List[int] = field(default_factory=list)
     scores: List[float] = field(default_factory=list)
     J: List[float] = field(default_factory=list)
+    delay_objective: List[float] = field(default_factory=list)
     legacy_scores: List[float] = field(default_factory=list)
     q_high: List[float] = field(default_factory=list)
     q_low: List[float] = field(default_factory=list)
     energy: List[float] = field(default_factory=list)
+    average_power_w: List[float] = field(default_factory=list)
+    average_power_std_w: List[float] = field(default_factory=list)
+    average_power_sem_w: List[float] = field(default_factory=list)
+    power_sample_count: List[float] = field(default_factory=list)
+    average_power_ucb95_w: List[float] = field(default_factory=list)
+    average_power_ci95_low_w: List[float] = field(default_factory=list)
+    average_power_ci95_high_w: List[float] = field(default_factory=list)
+    power_budget_w: List[float] = field(default_factory=list)
+    power_violation_w: List[float] = field(default_factory=list)
+    power_violation_ratio: List[float] = field(default_factory=list)
+    energy_feasible: List[float] = field(default_factory=list)
+    power_ucb95_violation_w: List[float] = field(default_factory=list)
+    energy_feasible_ucb95: List[float] = field(default_factory=list)
+    average_battery_power_per_uav_w: List[np.ndarray] = field(
+        default_factory=list
+    )
+    battery_power_ucb95_per_uav_w: List[np.ndarray] = field(
+        default_factory=list
+    )
+    uav_power_budgets_w: List[np.ndarray] = field(default_factory=list)
+    battery_power_violation_per_uav_w: List[np.ndarray] = field(
+        default_factory=list
+    )
+    battery_power_ucb95_violation_per_uav_w: List[np.ndarray] = field(
+        default_factory=list
+    )
+    max_battery_power_violation_w: List[float] = field(default_factory=list)
+    max_battery_power_ucb95_violation_w: List[float] = field(
+        default_factory=list
+    )
+    energy_propulsion_episode: List[float] = field(default_factory=list)
+    energy_uplink_episode: List[float] = field(default_factory=list)
+    energy_u2u_episode: List[float] = field(default_factory=list)
+    energy_compute_episode: List[float] = field(default_factory=list)
+    energy_component_residual: List[float] = field(default_factory=list)
+    micro_decision_count: List[float] = field(default_factory=list)
+    micro_decision_seconds: List[float] = field(default_factory=list)
+    micro_decision_mean_ms: List[float] = field(default_factory=list)
+    micro_decision_p95_ms: List[float] = field(default_factory=list)
     u2g: List[float] = field(default_factory=list)
     cpu_util: List[float] = field(default_factory=list)
     cpu_saturation: List[float] = field(default_factory=list)
@@ -937,12 +1396,121 @@ class EvaluationHistory:
         self.steps.append(int(step))
         self.scores.append(float(metrics["score"]))
         self.J.append(float(metrics.get("J", 0.0)))
+        self.delay_objective.append(
+            float(metrics.get("delay_objective", 0.0))
+        )
         self.legacy_scores.append(
             float(metrics.get("legacy_score", metrics["score"]))
         )
         self.q_high.append(float(metrics["q_high"]))
         self.q_low.append(float(metrics["q_low"]))
         self.energy.append(float(metrics["energy"]))
+        self.average_power_w.append(float(metrics.get("average_power_w", 0.0)))
+        self.average_power_std_w.append(
+            float(metrics.get("average_power_std_w", 0.0))
+        )
+        self.average_power_sem_w.append(
+            float(metrics.get("average_power_sem_w", 0.0))
+        )
+        self.power_sample_count.append(
+            float(metrics.get("power_sample_count", 0.0))
+        )
+        self.average_power_ucb95_w.append(
+            float(metrics.get("average_power_ucb95_w", float("inf")))
+        )
+        self.average_power_ci95_low_w.append(
+            float(metrics.get("average_power_ci95_low_w", 0.0))
+        )
+        self.average_power_ci95_high_w.append(
+            float(metrics.get("average_power_ci95_high_w", 0.0))
+        )
+        self.power_budget_w.append(float(metrics.get("power_budget_w", 0.0)))
+        self.power_violation_w.append(
+            float(metrics.get("power_violation_w", 0.0))
+        )
+        self.power_violation_ratio.append(
+            float(metrics.get("power_violation_ratio", 0.0))
+        )
+        self.energy_feasible.append(
+            float(metrics.get("energy_feasible", 1.0))
+        )
+        self.power_ucb95_violation_w.append(
+            float(metrics.get("power_ucb95_violation_w", float("inf")))
+        )
+        self.energy_feasible_ucb95.append(
+            float(metrics.get("energy_feasible_ucb95", 0.0))
+        )
+        self.average_battery_power_per_uav_w.append(
+            np.asarray(
+                metrics.get("average_battery_power_per_uav_w", []),
+                dtype=np.float32,
+            )
+        )
+        self.battery_power_ucb95_per_uav_w.append(
+            np.asarray(
+                metrics.get("battery_power_ucb95_per_uav_w", []),
+                dtype=np.float32,
+            )
+        )
+        self.uav_power_budgets_w.append(
+            np.asarray(
+                metrics.get("uav_power_budgets_w", []),
+                dtype=np.float32,
+            )
+        )
+        self.battery_power_violation_per_uav_w.append(
+            np.asarray(
+                metrics.get("battery_power_violation_per_uav_w", []),
+                dtype=np.float32,
+            )
+        )
+        self.battery_power_ucb95_violation_per_uav_w.append(
+            np.asarray(
+                metrics.get(
+                    "battery_power_ucb95_violation_per_uav_w",
+                    [],
+                ),
+                dtype=np.float32,
+            )
+        )
+        self.max_battery_power_violation_w.append(
+            float(metrics.get("max_battery_power_violation_w", 0.0))
+        )
+        self.max_battery_power_ucb95_violation_w.append(
+            float(
+                metrics.get(
+                    "max_battery_power_ucb95_violation_w",
+                    float("inf"),
+                )
+            )
+        )
+        self.energy_propulsion_episode.append(
+            float(metrics.get("energy_propulsion_episode", 0.0))
+        )
+        self.energy_uplink_episode.append(
+            float(metrics.get("energy_uplink_episode", 0.0))
+        )
+        self.energy_u2u_episode.append(
+            float(metrics.get("energy_u2u_episode", 0.0))
+        )
+        self.energy_compute_episode.append(
+            float(metrics.get("energy_compute_episode", 0.0))
+        )
+        self.energy_component_residual.append(
+            float(metrics.get("energy_component_residual", 0.0))
+        )
+        self.micro_decision_count.append(
+            float(metrics.get("micro_decision_count", 0.0))
+        )
+        self.micro_decision_seconds.append(
+            float(metrics.get("micro_decision_seconds", 0.0))
+        )
+        self.micro_decision_mean_ms.append(
+            float(metrics.get("micro_decision_mean_ms", 0.0))
+        )
+        self.micro_decision_p95_ms.append(
+            float(metrics.get("micro_decision_p95_ms", 0.0))
+        )
         self.u2g.append(float(metrics["u2g"]))
         self.cpu_util.append(float(metrics["cpu_util"]))
         self.cpu_saturation.append(float(metrics.get("cpu_saturation", 0.0)))
@@ -1036,11 +1604,41 @@ class EvaluationHistory:
                     "episode",
                     "score",
                     "J",
+                    "delay_objective",
                     "legacy_score",
                     "q_high",
                     "q_low",
                     "energy",
+                    "average_power_w",
+                    "average_power_std_w",
+                    "average_power_sem_w",
+                    "power_sample_count",
+                    "average_power_ucb95_w",
+                    "average_power_ci95_low_w",
+                    "average_power_ci95_high_w",
+                    "power_budget_w",
+                    "power_violation_w",
+                    "power_violation_ratio",
+                    "energy_feasible",
+                    "power_ucb95_violation_w",
+                    "energy_feasible_ucb95",
+                    "average_battery_power_per_uav_w",
+                    "battery_power_ucb95_per_uav_w",
+                    "uav_power_budgets_w",
+                    "battery_power_violation_per_uav_w",
+                    "battery_power_ucb95_violation_per_uav_w",
+                    "max_battery_power_violation_w",
+                    "max_battery_power_ucb95_violation_w",
                     "energy_total_episode",
+                    "energy_propulsion_episode",
+                    "energy_uplink_episode",
+                    "energy_u2u_episode",
+                    "energy_compute_episode",
+                    "energy_component_residual",
+                    "micro_decision_count",
+                    "micro_decision_seconds",
+                    "micro_decision_mean_ms",
+                    "micro_decision_p95_ms",
                     "u2g",
                     "cpu_util",
                     "cpu_saturation",
@@ -1080,11 +1678,58 @@ class EvaluationHistory:
                         self.steps[idx],
                         self.scores[idx],
                         self.J[idx],
+                        self.delay_objective[idx],
                         self.legacy_scores[idx],
                         self.q_high[idx],
                         self.q_low[idx],
                         self.energy[idx],
+                        self.average_power_w[idx],
+                        self.average_power_std_w[idx],
+                        self.average_power_sem_w[idx],
+                        self.power_sample_count[idx],
+                        self.average_power_ucb95_w[idx],
+                        self.average_power_ci95_low_w[idx],
+                        self.average_power_ci95_high_w[idx],
+                        self.power_budget_w[idx],
+                        self.power_violation_w[idx],
+                        self.power_violation_ratio[idx],
+                        self.energy_feasible[idx],
+                        self.power_ucb95_violation_w[idx],
+                        self.energy_feasible_ucb95[idx],
+                        json.dumps(
+                            self.average_battery_power_per_uav_w[idx].tolist(),
+                            separators=(",", ":"),
+                        ),
+                        json.dumps(
+                            self.battery_power_ucb95_per_uav_w[idx].tolist(),
+                            separators=(",", ":"),
+                        ),
+                        json.dumps(
+                            self.uav_power_budgets_w[idx].tolist(),
+                            separators=(",", ":"),
+                        ),
+                        json.dumps(
+                            self.battery_power_violation_per_uav_w[idx].tolist(),
+                            separators=(",", ":"),
+                        ),
+                        json.dumps(
+                            self.battery_power_ucb95_violation_per_uav_w[
+                                idx
+                            ].tolist(),
+                            separators=(",", ":"),
+                        ),
+                        self.max_battery_power_violation_w[idx],
+                        self.max_battery_power_ucb95_violation_w[idx],
                         self.energy_total_episode[idx],
+                        self.energy_propulsion_episode[idx],
+                        self.energy_uplink_episode[idx],
+                        self.energy_u2u_episode[idx],
+                        self.energy_compute_episode[idx],
+                        self.energy_component_residual[idx],
+                        self.micro_decision_count[idx],
+                        self.micro_decision_seconds[idx],
+                        self.micro_decision_mean_ms[idx],
+                        self.micro_decision_p95_ms[idx],
                         self.u2g[idx],
                         self.cpu_util[idx],
                         self.cpu_saturation[idx],
@@ -1146,7 +1791,55 @@ class EvaluationHistory:
             "compute_service_sensor_mbits": np.asarray(self.compute_service_sensor_mbits, dtype=np.float32),
             "compute_service_controller_mbits": np.asarray(self.compute_service_controller_mbits, dtype=np.float32),
             "compute_service_vision_mbits": np.asarray(self.compute_service_vision_mbits, dtype=np.float32),
+            "service_energy_per_micro_step_j": np.asarray(self.energy, dtype=np.float32),
+            "average_power_w": np.asarray(self.average_power_w, dtype=np.float32),
+            "average_power_std_w": np.asarray(
+                self.average_power_std_w, dtype=np.float32
+            ),
+            "average_power_sem_w": np.asarray(
+                self.average_power_sem_w, dtype=np.float32
+            ),
+            "power_sample_count": np.asarray(
+                self.power_sample_count, dtype=np.float32
+            ),
+            "average_power_ucb95_w": np.asarray(
+                self.average_power_ucb95_w, dtype=np.float32
+            ),
+            "average_power_ci95_low_w": np.asarray(
+                self.average_power_ci95_low_w, dtype=np.float32
+            ),
+            "average_power_ci95_high_w": np.asarray(
+                self.average_power_ci95_high_w, dtype=np.float32
+            ),
+            "power_budget_w": np.asarray(self.power_budget_w, dtype=np.float32),
+            "power_violation_w": np.asarray(self.power_violation_w, dtype=np.float32),
+            "power_violation_ratio": np.asarray(self.power_violation_ratio, dtype=np.float32),
+            "energy_feasible": np.asarray(self.energy_feasible, dtype=np.float32),
+            "power_ucb95_violation_w": np.asarray(
+                self.power_ucb95_violation_w, dtype=np.float32
+            ),
+            "energy_feasible_ucb95": np.asarray(
+                self.energy_feasible_ucb95, dtype=np.float32
+            ),
+            "max_battery_power_violation_w": np.asarray(
+                self.max_battery_power_violation_w,
+                dtype=np.float32,
+            ),
+            "max_battery_power_ucb95_violation_w": np.asarray(
+                self.max_battery_power_ucb95_violation_w,
+                dtype=np.float32,
+            ),
+            "delay_objective": np.asarray(self.delay_objective, dtype=np.float32),
             "energy_total_episode": np.asarray(self.energy_total_episode, dtype=np.float32),
+            "energy_propulsion_episode": np.asarray(self.energy_propulsion_episode, dtype=np.float32),
+            "energy_uplink_episode": np.asarray(self.energy_uplink_episode, dtype=np.float32),
+            "energy_u2u_episode": np.asarray(self.energy_u2u_episode, dtype=np.float32),
+            "energy_compute_episode": np.asarray(self.energy_compute_episode, dtype=np.float32),
+            "energy_component_residual": np.asarray(self.energy_component_residual, dtype=np.float32),
+            "micro_decision_count": np.asarray(self.micro_decision_count, dtype=np.float32),
+            "micro_decision_seconds": np.asarray(self.micro_decision_seconds, dtype=np.float32),
+            "micro_decision_mean_ms": np.asarray(self.micro_decision_mean_ms, dtype=np.float32),
+            "micro_decision_p95_ms": np.asarray(self.micro_decision_p95_ms, dtype=np.float32),
             "coop_ratio": np.asarray(self.coop_ratio, dtype=np.float32),
             "cpu_saturation": np.asarray(self.cpu_saturation, dtype=np.float32),
             "cpu_high_util": np.asarray(self.cpu_high_util, dtype=np.float32),
@@ -1158,6 +1851,32 @@ class EvaluationHistory:
         }
         if self.q_total_per_uav:
             payload["q_total_per_uav"] = np.stack(self.q_total_per_uav, axis=0)
+        if (
+            self.average_battery_power_per_uav_w
+            and self.average_battery_power_per_uav_w[0].size > 0
+        ):
+            payload["average_battery_power_per_uav_w"] = np.stack(
+                self.average_battery_power_per_uav_w,
+                axis=0,
+            )
+            payload["battery_power_ucb95_per_uav_w"] = np.stack(
+                self.battery_power_ucb95_per_uav_w,
+                axis=0,
+            )
+            payload["uav_power_budgets_w"] = np.stack(
+                self.uav_power_budgets_w,
+                axis=0,
+            )
+            payload["battery_power_violation_per_uav_w"] = np.stack(
+                self.battery_power_violation_per_uav_w,
+                axis=0,
+            )
+            payload[
+                "battery_power_ucb95_violation_per_uav_w"
+            ] = np.stack(
+                self.battery_power_ucb95_violation_per_uav_w,
+                axis=0,
+            )
         if self.arrival_total_per_uav:
             payload["arrival_total_per_uav"] = np.stack(self.arrival_total_per_uav, axis=0)
         if self.cpu_util_per_uav:
@@ -1530,8 +2249,17 @@ def build_micro_step_metrics(
     q_loc_low = np.asarray(raw_state.get("Q_loc_low", []), dtype=np.float64)
     q_tx_high = np.asarray(raw_state.get("Q_tx_high", []), dtype=np.float64)
     q_tx_low = np.asarray(raw_state.get("Q_tx_low", []), dtype=np.float64)
-    arrival_high = np.asarray(raw_state.get("A_t_high", []), dtype=np.float64)
-    arrival_low = np.asarray(raw_state.get("A_t_low", []), dtype=np.float64)
+    # Raw A_t may retain the latest service-frame batch while deployment pauses
+    # service. Step info records an arrival only when it enters upload service,
+    # so a retained batch is not counted repeatedly during the transition.
+    arrival_high = np.asarray(
+        mic_info.get("arrival_high_per_uav", raw_state.get("A_t_high", [])),
+        dtype=np.float64,
+    )
+    arrival_low = np.asarray(
+        mic_info.get("arrival_low_per_uav", raw_state.get("A_t_low", [])),
+        dtype=np.float64,
+    )
 
     if q_loc_high.size == 0:
         num_uavs = int(np.asarray(mic_info.get("cpu_utilization_per_uav", []), dtype=np.float64).size)
@@ -1839,6 +2567,31 @@ def print_episode_summary(
 
 
 def print_evaluation_summary(step: int, metrics: Dict[str, float]) -> None:
+    if metrics.get("power_constraint_scope", "system") == "per_uav":
+        battery_power = np.asarray(
+            metrics.get("average_battery_power_per_uav_w", []),
+            dtype=np.float64,
+        )
+        battery_ucb = np.asarray(
+            metrics.get("battery_power_ucb95_per_uav_w", []),
+            dtype=np.float64,
+        )
+        constrained_power_summary = (
+            f"Psys(W): {metrics.get('average_power_w', 0.0):.2f} | "
+            "Pbatt(W): "
+            f"{np.array2string(battery_power, precision=1, separator=',')} | "
+            "Pbatt-UCB95(W): "
+            f"{np.array2string(battery_ucb, precision=1, separator=',')} | "
+            "Pviol-max(W): "
+            f"{metrics.get('max_battery_power_ucb95_violation_w', 0.0):.2f}"
+        )
+    else:
+        constrained_power_summary = (
+            f"Pavg(W): {metrics.get('average_power_w', 0.0):.2f} | "
+            "Pucb95(W): "
+            f"{metrics.get('average_power_ucb95_w', float('inf')):.2f} | "
+            f"Pvio(W): {metrics.get('power_violation_w', 0.0):.2f}"
+        )
     print(
         f"  Eval@{step} | "
         f"Score: {metrics['score']:.2f} | "
@@ -1851,12 +2604,14 @@ def print_evaluation_summary(step: int, metrics: Dict[str, float]) -> None:
         f"Done: {metrics.get('task_completed_count', 0.0):.0f}/"
         f"{metrics.get('task_arrived_count', 0.0):.0f} | "
         f"Dmax(ms): {metrics.get('delay_max_ms', 0.0):.1f} | "
-        f"Energy: {metrics['energy']:.2f} | "
+        f"Eservice/step(J): {metrics['energy']:.2f} | "
+        f"{constrained_power_summary} | "
         f"Eep: {metrics.get('energy_total_episode', 0.0):.2f} | "
         f"Coop: {metrics.get('coop_ratio', 0.0):.2f} | "
         f"CPU sat: {metrics.get('cpu_saturation', 0.0):.2f} | "
         f"Press imbal: {metrics.get('pressure_imbalance', 0.0):.2f} | "
-        f"U2G: {metrics['u2g']:.2f}"
+        f"U2G: {metrics['u2g']:.2f} | "
+        f"Decision: {metrics.get('micro_decision_mean_ms', 0.0):.3f} ms"
     )
     print(
         f"  Eval task delay(ms) H/L/S/C/V: "
@@ -1881,12 +2636,23 @@ def evaluate_policy(
     micro_policy: MicroPolicy,
     on_episode_start: Optional[EpisodeStartHook] = None,
 ) -> Dict[str, float]:
+    expected_micro_steps = int(eval_env.env.micro_steps_per_macro)
+    if (
+        bool(int(getattr(args, "strict_hierarchy_validation", 0)))
+        and int(args.micro_steps) != expected_micro_steps
+    ):
+        raise ValueError(
+            f"micro_steps={args.micro_steps} does not match physical macro "
+            f"slot length {expected_micro_steps}."
+        )
     eval_scores: List[float] = []
     eval_J: List[float] = []
+    eval_delay_objective: List[float] = []
     eval_legacy_scores: List[float] = []
     eval_q_high: List[float] = []
     eval_q_low: List[float] = []
     eval_energy: List[float] = []
+    eval_average_power_w: List[float] = []
     eval_u2g: List[float] = []
     eval_cpu_util: List[float] = []
     eval_cpu_saturation: List[float] = []
@@ -1937,6 +2703,7 @@ def evaluate_policy(
     eval_energy_trans_episode_per_uav: List[np.ndarray] = []
     eval_energy_macro_episode_per_uav: List[np.ndarray] = []
     eval_energy_total_episode: List[float] = []
+    eval_average_battery_power_per_uav_w: List[np.ndarray] = []
     eval_compute_service_per_uav_mbits: List[np.ndarray] = []
     eval_coop_flow_mbits: List[np.ndarray] = []
     eval_tx_service_matrix_mbits: List[np.ndarray] = []
@@ -1945,6 +2712,9 @@ def evaluate_policy(
     eval_pressure_per_uav: List[np.ndarray] = []
     eval_pressure_imbalance: List[float] = []
     eval_coop_ratio: List[float] = []
+    micro_decision_count = 0
+    micro_decision_seconds = 0.0
+    micro_decision_durations_s: List[float] = []
 
     for eval_idx in range(args.eval_episodes):
         seed = args.eval_base_seed + eval_idx
@@ -1955,6 +2725,7 @@ def evaluate_policy(
         ep_q_high: List[float] = []
         ep_q_low: List[float] = []
         ep_J: List[float] = []
+        ep_delay_objective: List[float] = []
         ep_energy: List[float] = []
         ep_u2g: List[float] = []
         ep_cpu_util: List[float] = []
@@ -2003,7 +2774,6 @@ def evaluate_policy(
             _, _, mac_info = eval_env.macro_step(macro_action)
 
             if isinstance(mac_info, dict):
-                ep_energy.append(mac_info.get("E_macro_total", 0.0))
                 ep_energy_macro_per_uav.append(
                     np.asarray(
                         mac_info.get("E_macro_per_uav", np.zeros(args.num_agents)),
@@ -2014,70 +2784,91 @@ def evaluate_policy(
                 if u2g_distances is not None:
                     ep_u2g.append(float(np.mean(u2g_distances)))
 
-            for _ in range(args.micro_steps):
-                if eval_env.env.macro_fly_steps_remaining > 0:
+            for _ in range(eval_env.env.resource_frames_per_macro):
+                service_paused = bool(
+                    getattr(eval_env.env, "pause_service_during_flight", False)
+                    and eval_env.env.macro_service_pause_steps_remaining > 0
+                )
+                if service_paused:
                     micro_action = np.zeros(
                         2 * eval_env.N * eval_env.N,
                         dtype=np.float32,
                     )
                 else:
+                    eval_env.prepare_resource_frame()
+                    decision_started = time.perf_counter()
                     micro_action = np.asarray(
                         micro_policy(eval_env, True),
                         dtype=np.float32,
                     )
-                _, _, done, _, mic_info = eval_env.micro_step(micro_action)
-                raw_state = eval_env.env.get_raw_state()
-                micro_metrics = build_micro_step_metrics(raw_state, mic_info)
+                    decision_duration_s = time.perf_counter() - decision_started
+                    micro_decision_seconds += decision_duration_s
+                    micro_decision_durations_s.append(decision_duration_s)
+                    micro_decision_count += 1
+                frame = eval_env.step_resource_frame(micro_action)
+                done = bool(frame["done"])
+                for raw_state, mic_info in zip(
+                    frame["raw_states"],
+                    frame["infos"],
+                ):
+                    micro_metrics = build_micro_step_metrics(raw_state, mic_info)
 
-                ep_q_high.append(micro_metrics["q_high_tot"])
-                ep_q_low.append(micro_metrics["q_low_tot"])
-                ep_J.append(float(mic_info.get("J_step", 0.0)))
-                ep_energy.append(
-                    micro_metrics["energy_uplink"]
-                    + micro_metrics["energy_trans"]
-                    + micro_metrics["energy_comp"]
-                )
-                ep_cpu_util.append(micro_metrics["cpu_utilization_mean"])
-                ep_cpu_saturation.append(micro_metrics["cpu_saturation_ratio"])
-                ep_cpu_high_util.append(micro_metrics["cpu_high_utilization_mean"])
-                ep_cpu_low_util.append(micro_metrics["cpu_low_utilization_mean"])
-                ep_f_high_ghz.append(micro_metrics["f_high_mean_ghz"])
-                ep_f_low_ghz.append(micro_metrics["f_low_mean_ghz"])
-                ep_f_total_ghz.append(micro_metrics["f_total_mean_ghz"])
-                ep_arrival_high.append(float(np.sum(micro_metrics["arrival_high_per_uav"])))
-                ep_arrival_low.append(float(np.sum(micro_metrics["arrival_low_per_uav"])))
-                ep_q_total_per_uav.append(micro_metrics["q_total_per_uav"])
-                ep_arrival_total_per_uav.append(micro_metrics["arrival_total_per_uav"])
-                ep_cpu_util_per_uav.append(micro_metrics["cpu_utilization_per_uav"])
-                ep_delay_total_per_uav_ms.append(micro_metrics["delay_total_per_uav_ms"])
-                ep_upload_delay_cost_per_uav.append(micro_metrics["upload_delay_cost_per_uav"])
-                ep_upload_delay_penalty_per_uav.append(micro_metrics["upload_delay_penalty_per_uav"])
-                ep_energy_comp_per_uav.append(micro_metrics["energy_comp_per_uav"])
-                ep_energy_uplink_per_uav.append(micro_metrics["energy_uplink_per_uav"])
-                ep_energy_trans_per_uav.append(micro_metrics["energy_trans_per_uav"])
-                ep_compute_service_per_uav_mbits.append(
-                    micro_metrics["compute_service_per_uav_mbits"]
-                )
-                ep_coop_flow_mbits.append(micro_metrics["coop_flow_mbits"])
-                ep_tx_service_matrix_mbits.append(
-                    micro_metrics["tx_service_matrix_mbits"]
-                )
-                ep_split_ratios_high.append(micro_metrics["split_ratios_high"])
-                ep_split_ratios_low.append(micro_metrics["split_ratios_low"])
-                ep_pressure_per_uav.append(micro_metrics["pressure_per_uav"])
-                ep_pressure_imbalance.append(micro_metrics["pressure_imbalance"])
-                ep_coop_ratio.append(micro_metrics["coop_ratio"])
-                ep_compute_service_high_mbits.append(micro_metrics["compute_service_high_mbits"])
-                ep_compute_service_low_mbits.append(micro_metrics["compute_service_low_mbits"])
-                ep_compute_service_sensor_mbits.append(micro_metrics["compute_service_sensor_mbits"])
-                ep_compute_service_controller_mbits.append(
-                    micro_metrics["compute_service_controller_mbits"]
-                )
-                ep_compute_service_vision_mbits.append(micro_metrics["compute_service_vision_mbits"])
+                    ep_q_high.append(micro_metrics["q_high_tot"])
+                    ep_q_low.append(micro_metrics["q_low_tot"])
+                    ep_J.append(float(mic_info.get("J_step", 0.0)))
+                    ep_delay_objective.append(
+                        float(mic_info.get("delay_objective_step", 0.0))
+                    )
+                    ep_energy.append(
+                        micro_metrics["energy_uplink"]
+                        + micro_metrics["energy_trans"]
+                        + micro_metrics["energy_comp"]
+                    )
+                    ep_cpu_util.append(micro_metrics["cpu_utilization_mean"])
+                    ep_cpu_saturation.append(micro_metrics["cpu_saturation_ratio"])
+                    ep_cpu_high_util.append(micro_metrics["cpu_high_utilization_mean"])
+                    ep_cpu_low_util.append(micro_metrics["cpu_low_utilization_mean"])
+                    ep_f_high_ghz.append(micro_metrics["f_high_mean_ghz"])
+                    ep_f_low_ghz.append(micro_metrics["f_low_mean_ghz"])
+                    ep_f_total_ghz.append(micro_metrics["f_total_mean_ghz"])
+                    ep_arrival_high.append(float(np.sum(micro_metrics["arrival_high_per_uav"])))
+                    ep_arrival_low.append(float(np.sum(micro_metrics["arrival_low_per_uav"])))
+                    ep_q_total_per_uav.append(micro_metrics["q_total_per_uav"])
+                    ep_arrival_total_per_uav.append(micro_metrics["arrival_total_per_uav"])
+                    ep_cpu_util_per_uav.append(micro_metrics["cpu_utilization_per_uav"])
+                    ep_delay_total_per_uav_ms.append(micro_metrics["delay_total_per_uav_ms"])
+                    ep_upload_delay_cost_per_uav.append(micro_metrics["upload_delay_cost_per_uav"])
+                    ep_upload_delay_penalty_per_uav.append(micro_metrics["upload_delay_penalty_per_uav"])
+                    ep_energy_comp_per_uav.append(micro_metrics["energy_comp_per_uav"])
+                    ep_energy_uplink_per_uav.append(micro_metrics["energy_uplink_per_uav"])
+                    ep_energy_trans_per_uav.append(micro_metrics["energy_trans_per_uav"])
+                    ep_compute_service_per_uav_mbits.append(
+                        micro_metrics["compute_service_per_uav_mbits"]
+                    )
+                    ep_coop_flow_mbits.append(micro_metrics["coop_flow_mbits"])
+                    ep_tx_service_matrix_mbits.append(
+                        micro_metrics["tx_service_matrix_mbits"]
+                    )
+                    ep_split_ratios_high.append(micro_metrics["split_ratios_high"])
+                    ep_split_ratios_low.append(micro_metrics["split_ratios_low"])
+                    ep_pressure_per_uav.append(micro_metrics["pressure_per_uav"])
+                    ep_pressure_imbalance.append(micro_metrics["pressure_imbalance"])
+                    ep_coop_ratio.append(micro_metrics["coop_ratio"])
+                    ep_compute_service_high_mbits.append(micro_metrics["compute_service_high_mbits"])
+                    ep_compute_service_low_mbits.append(micro_metrics["compute_service_low_mbits"])
+                    ep_compute_service_sensor_mbits.append(micro_metrics["compute_service_sensor_mbits"])
+                    ep_compute_service_controller_mbits.append(
+                        micro_metrics["compute_service_controller_mbits"]
+                    )
+                    ep_compute_service_vision_mbits.append(micro_metrics["compute_service_vision_mbits"])
 
                 if done:
                     break
 
+            # Finalizing the macro reward also updates the realized-flow EMA.
+            # It must happen before constructing s_{k+1}; otherwise training
+            # sees a one-slot lag and evaluation never updates flow state.
+            eval_env.get_macro_reward()
             mappo_local_state, _ = eval_env.get_macro_state()
             if done:
                 break
@@ -2087,6 +2878,11 @@ def evaluate_policy(
         avg_energy = float(np.mean(ep_energy)) if ep_energy else 0.0
         avg_u2g = float(np.mean(ep_u2g)) if ep_u2g else 0.0
         avg_J = float(np.mean(ep_J)) if ep_J else 0.0
+        avg_delay_objective = (
+            float(np.mean(ep_delay_objective))
+            if ep_delay_objective
+            else 0.0
+        )
         avg_cpu = float(np.mean(ep_cpu_util)) if ep_cpu_util else 0.0
         avg_cpu_saturation = (
             float(np.mean(ep_cpu_saturation)) if ep_cpu_saturation else 0.0
@@ -2155,6 +2951,11 @@ def evaluate_policy(
             + sum_energy_trans_per_uav
             + sum_energy_macro_per_uav
         )
+        sum_uav_battery_energy_per_uav = (
+            sum_energy_comp_per_uav
+            + sum_energy_trans_per_uav
+            + sum_energy_macro_per_uav
+        )
         sum_compute_service_per_uav_mbits = (
             np.sum(np.stack(ep_compute_service_per_uav_mbits, axis=0), axis=0)
             if ep_compute_service_per_uav_mbits
@@ -2202,10 +3003,14 @@ def evaluate_policy(
             + EVAL_W_ENERGY * avg_energy
             + EVAL_W_U2G * avg_u2g
         )
-        score = -avg_J * 100.0
+        if str(getattr(eval_env, "objective_mode", "weighted")) == "constrained_delay":
+            score = -avg_delay_objective * 100.0
+        else:
+            score = -avg_J * 100.0
 
         eval_scores.append(score)
         eval_J.append(avg_J)
+        eval_delay_objective.append(avg_delay_objective)
         eval_legacy_scores.append(legacy_score)
         eval_q_high.append(avg_q_high)
         eval_q_low.append(avg_q_low)
@@ -2306,7 +3111,16 @@ def evaluate_policy(
         eval_energy_uplink_episode_per_uav.append(sum_energy_uplink_per_uav)
         eval_energy_trans_episode_per_uav.append(sum_energy_trans_per_uav)
         eval_energy_macro_episode_per_uav.append(sum_energy_macro_per_uav)
-        eval_energy_total_episode.append(float(np.sum(sum_energy_total_per_uav)))
+        total_episode_energy = float(np.sum(sum_energy_total_per_uav))
+        eval_energy_total_episode.append(total_episode_energy)
+        episode_duration_s = max(
+            float(args.macro_steps) * float(eval_env.env.macro_dt),
+            1e-8,
+        )
+        eval_average_power_w.append(total_episode_energy / episode_duration_s)
+        eval_average_battery_power_per_uav_w.append(
+            sum_uav_battery_energy_per_uav / episode_duration_s
+        )
         eval_compute_service_per_uav_mbits.append(sum_compute_service_per_uav_mbits)
         eval_coop_flow_mbits.append(final_coop_flow_mbits)
         eval_tx_service_matrix_mbits.append(sum_tx_service_matrix_mbits)
@@ -2316,13 +3130,207 @@ def evaluate_policy(
         eval_pressure_imbalance.append(avg_pressure_imbalance)
         eval_coop_ratio.append(final_coop_ratio)
 
+    average_power_w = (
+        float(np.mean(eval_average_power_w))
+        if eval_average_power_w
+        else 0.0
+    )
+    power_sample_count = len(eval_average_power_w)
+    average_power_std_w = (
+        float(np.std(eval_average_power_w, ddof=1))
+        if power_sample_count > 1
+        else 0.0
+    )
+    average_power_sem_w = average_power_std_w / np.sqrt(
+        max(power_sample_count, 1)
+    )
+    if power_sample_count > 1:
+        degrees_freedom = power_sample_count - 1
+        average_power_ci95_half_w = float(
+            student_t.ppf(0.975, degrees_freedom)
+        ) * average_power_sem_w
+        average_power_ucb95_w = average_power_w + float(
+            student_t.ppf(0.95, degrees_freedom)
+        ) * average_power_sem_w
+    else:
+        average_power_ci95_half_w = float("inf")
+        average_power_ucb95_w = float("inf")
+    power_budget_w = float(getattr(eval_env, "power_budget_w", 0.0))
+    power_violation_w = (
+        max(average_power_w - power_budget_w, 0.0)
+        if power_budget_w > 0.0
+        else 0.0
+    )
+    power_violation_ratio = (
+        power_violation_w / power_budget_w
+        if power_budget_w > 0.0
+        else 0.0
+    )
+    power_ucb95_violation_w = (
+        max(average_power_ucb95_w - power_budget_w, 0.0)
+        if power_budget_w > 0.0
+        else 0.0
+    )
+    if eval_average_battery_power_per_uav_w:
+        battery_power_samples = np.stack(
+            eval_average_battery_power_per_uav_w,
+            axis=0,
+        ).astype(np.float64)
+        average_battery_power_per_uav_w = np.mean(
+            battery_power_samples,
+            axis=0,
+        )
+        if battery_power_samples.shape[0] > 1:
+            battery_power_sem_per_uav_w = np.std(
+                battery_power_samples,
+                axis=0,
+                ddof=1,
+            ) / np.sqrt(battery_power_samples.shape[0])
+            battery_power_ucb95_per_uav_w = (
+                average_battery_power_per_uav_w
+                + float(
+                    student_t.ppf(
+                        0.95,
+                        battery_power_samples.shape[0] - 1,
+                    )
+                )
+                * battery_power_sem_per_uav_w
+            )
+        else:
+            battery_power_ucb95_per_uav_w = np.full(
+                args.num_agents,
+                np.inf,
+                dtype=np.float64,
+            )
+    else:
+        average_battery_power_per_uav_w = np.zeros(
+            args.num_agents,
+            dtype=np.float64,
+        )
+        battery_power_ucb95_per_uav_w = np.full(
+            args.num_agents,
+            np.inf,
+            dtype=np.float64,
+        )
+    uav_power_budgets_w = np.asarray(
+        getattr(eval_env, "uav_power_budgets_w", np.zeros(args.num_agents)),
+        dtype=np.float64,
+    )
+    battery_power_violation_per_uav_w = np.maximum(
+        average_battery_power_per_uav_w - uav_power_budgets_w,
+        0.0,
+    )
+    battery_power_ucb95_violation_per_uav_w = np.maximum(
+        battery_power_ucb95_per_uav_w - uav_power_budgets_w,
+        0.0,
+    )
+    max_battery_power_violation_w = float(
+        np.max(battery_power_violation_per_uav_w)
+    )
+    max_battery_power_ucb95_violation_w = float(
+        np.max(battery_power_ucb95_violation_per_uav_w)
+    )
+    if str(getattr(eval_env, "power_constraint_scope", "system")) == "per_uav":
+        energy_feasible = float(max_battery_power_violation_w <= 1e-8)
+        energy_feasible_ucb95 = float(
+            max_battery_power_ucb95_violation_w <= 1e-8
+        )
+    else:
+        energy_feasible = float(power_violation_w <= 1e-8)
+        energy_feasible_ucb95 = float(power_ucb95_violation_w <= 1e-8)
+    energy_propulsion_episode = (
+        float(np.mean([np.sum(item) for item in eval_energy_macro_episode_per_uav]))
+        if eval_energy_macro_episode_per_uav
+        else 0.0
+    )
+    energy_uplink_episode = (
+        float(np.mean([np.sum(item) for item in eval_energy_uplink_episode_per_uav]))
+        if eval_energy_uplink_episode_per_uav
+        else 0.0
+    )
+    energy_u2u_episode = (
+        float(np.mean([np.sum(item) for item in eval_energy_trans_episode_per_uav]))
+        if eval_energy_trans_episode_per_uav
+        else 0.0
+    )
+    energy_compute_episode = (
+        float(np.mean([np.sum(item) for item in eval_energy_comp_episode_per_uav]))
+        if eval_energy_comp_episode_per_uav
+        else 0.0
+    )
+    mean_total_episode_energy = (
+        float(np.mean(eval_energy_total_episode))
+        if eval_energy_total_episode
+        else 0.0
+    )
+    energy_component_residual = mean_total_episode_energy - (
+        energy_propulsion_episode
+        + energy_uplink_episode
+        + energy_u2u_episode
+        + energy_compute_episode
+    )
+
     return {
         "score": float(np.mean(eval_scores)),
         "J": float(np.mean(eval_J)),
+        "delay_objective": float(np.mean(eval_delay_objective)),
         "legacy_score": float(np.mean(eval_legacy_scores)),
         "q_high": float(np.mean(eval_q_high)),
         "q_low": float(np.mean(eval_q_low)),
         "energy": float(np.mean(eval_energy)),
+        "service_energy_per_micro_step_j": float(np.mean(eval_energy)),
+        "average_power_w": average_power_w,
+        "average_power_std_w": average_power_std_w,
+        "average_power_sem_w": average_power_sem_w,
+        "power_sample_count": float(power_sample_count),
+        "average_power_ucb95_w": average_power_ucb95_w,
+        "average_power_ci95_low_w": (
+            average_power_w - average_power_ci95_half_w
+        ),
+        "average_power_ci95_high_w": (
+            average_power_w + average_power_ci95_half_w
+        ),
+        "power_budget_w": power_budget_w,
+        "power_violation_w": power_violation_w,
+        "power_violation_ratio": power_violation_ratio,
+        "energy_feasible": energy_feasible,
+        "power_ucb95_violation_w": power_ucb95_violation_w,
+        "energy_feasible_ucb95": energy_feasible_ucb95,
+        "average_battery_power_per_uav_w": (
+            average_battery_power_per_uav_w.astype(np.float32)
+        ),
+        "battery_power_ucb95_per_uav_w": (
+            battery_power_ucb95_per_uav_w.astype(np.float32)
+        ),
+        "uav_power_budgets_w": uav_power_budgets_w.astype(np.float32),
+        "battery_power_violation_per_uav_w": (
+            battery_power_violation_per_uav_w.astype(np.float32)
+        ),
+        "battery_power_ucb95_violation_per_uav_w": (
+            battery_power_ucb95_violation_per_uav_w.astype(np.float32)
+        ),
+        "max_battery_power_violation_w": max_battery_power_violation_w,
+        "max_battery_power_ucb95_violation_w": (
+            max_battery_power_ucb95_violation_w
+        ),
+        "power_constraint_scope": str(
+            getattr(eval_env, "power_constraint_scope", "system")
+        ),
+        "energy_propulsion_episode": energy_propulsion_episode,
+        "energy_uplink_episode": energy_uplink_episode,
+        "energy_u2u_episode": energy_u2u_episode,
+        "energy_compute_episode": energy_compute_episode,
+        "energy_component_residual": energy_component_residual,
+        "micro_decision_count": float(micro_decision_count),
+        "micro_decision_seconds": float(micro_decision_seconds),
+        "micro_decision_mean_ms": (
+            1000.0 * micro_decision_seconds / max(micro_decision_count, 1)
+        ),
+        "micro_decision_p95_ms": (
+            1000.0 * float(np.percentile(micro_decision_durations_s, 95.0))
+            if micro_decision_durations_s
+            else 0.0
+        ),
         "u2g": float(np.mean(eval_u2g)),
         "cpu_util": float(np.mean(eval_cpu_util)),
         "cpu_saturation": float(np.mean(eval_cpu_saturation)),
@@ -2412,9 +3420,7 @@ def evaluate_policy(
         "energy_macro_episode_per_uav": np.mean(np.stack(eval_energy_macro_episode_per_uav, axis=0), axis=0)
         if eval_energy_macro_episode_per_uav
         else np.zeros(args.num_agents, dtype=np.float32),
-        "energy_total_episode": float(np.mean(eval_energy_total_episode))
-        if eval_energy_total_episode
-        else 0.0,
+        "energy_total_episode": mean_total_episode_energy,
         "compute_service_per_uav_mbits": np.mean(np.stack(eval_compute_service_per_uav_mbits, axis=0), axis=0)
         if eval_compute_service_per_uav_mbits
         else np.zeros(args.num_agents, dtype=np.float32),
@@ -2527,26 +3533,35 @@ def run_fixed_policy_benchmark(
             _, _, mac_info = env.macro_step(macro_action)
             trace.record_macro_info(mac_info)
 
-            for _ in range(args.micro_steps):
-                if env.env.macro_fly_steps_remaining > 0:
+            for _ in range(env.env.resource_frames_per_macro):
+                service_paused = bool(
+                    getattr(env.env, "pause_service_during_flight", False)
+                    and env.env.macro_service_pause_steps_remaining > 0
+                )
+                if service_paused:
                     micro_action = np.zeros(
                         2 * env.N * env.N,
                         dtype=np.float32,
                     )
                 else:
+                    env.prepare_resource_frame()
                     micro_action = np.asarray(
                         micro_policy(env, False),
                         dtype=np.float32,
                     )
-                _, mic_reward, done, _, mic_info = env.micro_step(micro_action)
-                raw_state = env.env.get_raw_state()
-                episode_micro_reward += float(mic_reward)
-                trace.record_micro_step(raw_state, mic_info)
+                frame = env.step_resource_frame(micro_action)
+                done = bool(frame["done"])
+                episode_micro_reward += float(frame["reward_sum"])
+                for raw_state, mic_info in zip(
+                    frame["raw_states"],
+                    frame["infos"],
+                ):
+                    trace.record_micro_step(raw_state, mic_info)
                 if done:
                     break
 
-            mappo_local_state, _ = env.get_macro_state()
             macro_reward = env.get_macro_reward()
+            mappo_local_state, _ = env.get_macro_state()
             episode_macro_reward += float(macro_reward)
             trace.record_macro_reward(macro_reward, env.get_last_macro_reward_info())
 

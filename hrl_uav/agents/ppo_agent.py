@@ -3,7 +3,6 @@
 # Actor:  输入单机局部观测，输出单机连续动作
 # Critic: 输入全局拼接状态，输出全局状态价值
 
-import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -94,6 +93,13 @@ class Actor:
     """
 
     def __init__(self, state_dim, action_dim):
+        if int(action_dim) % 2 != 0:
+            raise ValueError("PPO macro action_dim must contain dx/dy pairs")
+        self.action_dim = int(action_dim)
+        self.num_action_pairs = self.action_dim // 2
+        self.zero_inflated_actions = False
+        self.hover_gate_threshold = 0.1
+        self.hover_gate_temperature = 10.0
         self.old_pi = ActorNet(state_dim, action_dim).to(device)
         self.new_pi = ActorNet(state_dim, action_dim).to(device)
 
@@ -104,6 +110,58 @@ class Actor:
         )
 
         self.update_oldpi()
+
+    def configure_zero_inflated_actions(
+        self,
+        enabled,
+        threshold=0.1,
+        temperature=10.0,
+        initialize_hover=False,
+        initial_log_std=None,
+    ):
+        """Enable a point mass at exact zero for each dx/dy action pair."""
+        self.zero_inflated_actions = bool(enabled)
+        self.hover_gate_threshold = max(float(threshold), 1e-6)
+        self.hover_gate_temperature = max(float(temperature), 1e-6)
+        if initialize_hover:
+            for network in (self.old_pi, self.new_pi):
+                nn.init.zeros_(network.out.weight)
+                nn.init.zeros_(network.out.bias)
+                if initial_log_std is not None:
+                    network.log_std.data.fill_(float(initial_log_std))
+            self.update_oldpi()
+
+    def _hybrid_log_prob(self, mean, std, action):
+        dist = torch.distributions.Normal(mean, std)
+        if not self.zero_inflated_actions:
+            return dist.log_prob(action).sum(dim=-1, keepdim=True)
+
+        mean_pairs = mean.reshape(-1, self.num_action_pairs, 2)
+        action_pairs = action.reshape(-1, self.num_action_pairs, 2)
+        move_gate = (
+            torch.linalg.norm(action_pairs, dim=-1) > 1e-8
+        ).to(mean.dtype)
+        mean_norm = torch.linalg.norm(mean_pairs, dim=-1)
+        move_prob = torch.sigmoid(
+            self.hover_gate_temperature
+            * (mean_norm - self.hover_gate_threshold)
+        ).clamp(1e-6, 1.0 - 1e-6)
+        gate_log_prob = (
+            move_gate * torch.log(move_prob)
+            + (1.0 - move_gate) * torch.log1p(-move_prob)
+        )
+        movement_log_prob = dist.log_prob(action).reshape(
+            -1,
+            self.num_action_pairs,
+            2,
+        ).sum(dim=-1)
+        return (
+            gate_log_prob + move_gate * movement_log_prob
+        ).sum(dim=-1, keepdim=True)
+
+    def action_log_prob(self, network, states, actions):
+        mean, std = network(states)
+        return self._hybrid_log_prob(mean, std, actions), mean
 
     def choose_action(self, s):
         """
@@ -127,11 +185,23 @@ class Actor:
 
         mean, std = self.old_pi(inputstate)
         dist = torch.distributions.Normal(mean, std)
+        action = torch.clamp(dist.sample(), -1.0, 1.0)
+        if self.zero_inflated_actions:
+            mean_pairs = mean.reshape(-1, self.num_action_pairs, 2)
+            mean_norm = torch.linalg.norm(mean_pairs, dim=-1)
+            move_prob = torch.sigmoid(
+                self.hover_gate_temperature
+                * (mean_norm - self.hover_gate_threshold)
+            )
+            move_gate = torch.distributions.Bernoulli(
+                probs=move_prob
+            ).sample()
+            action = (
+                action.reshape(-1, self.num_action_pairs, 2)
+                * move_gate.unsqueeze(-1)
+            ).reshape_as(action)
 
-        action = dist.sample()
-        action = torch.clamp(action, -1.0, 1.0)
-
-        action_logprob = dist.log_prob(action).sum(dim=-1, keepdim=True)
+        action_logprob = self._hybrid_log_prob(mean, std, action)
 
         action_np = action.detach().cpu().numpy()
         logprob_np = action_logprob.detach().cpu().numpy()
@@ -159,6 +229,13 @@ class Actor:
 
         mean, _ = self.old_pi(inputstate)
         action = torch.clamp(mean, -1.0, 1.0)
+        if self.zero_inflated_actions:
+            action_pairs = action.reshape(-1, self.num_action_pairs, 2)
+            move_gate = (
+                torch.linalg.norm(action_pairs, dim=-1)
+                >= self.hover_gate_threshold
+            ).to(action.dtype)
+            action = (action_pairs * move_gate.unsqueeze(-1)).reshape_as(action)
         action_np = action.detach().cpu().numpy()
 
         if single_input:
@@ -195,12 +272,10 @@ class Actor:
             adv = adv - adv.mean()
 
         for _ in range(A_UPDATE_STEPS):
-            mean, std = self.new_pi(bs)
-            dist_new = torch.distributions.Normal(mean, std)
-
-            action_new_logprob = dist_new.log_prob(ba).sum(
-                dim=-1,
-                keepdim=True,
+            action_new_logprob, _ = self.action_log_prob(
+                self.new_pi,
+                bs,
+                ba,
             )
 
             ratio = torch.exp(action_new_logprob - bap.detach())
@@ -229,7 +304,6 @@ class Critic:
     """
 
     def __init__(self, state_dim, value_dim=1):
-        self.value_dim = value_dim
         self.critic_v = CriticNet(state_dim, value_dim).to(device)
 
         self.optimizer = torch.optim.Adam(

@@ -85,8 +85,18 @@ class Memory():
         self.recent_window = max(1, min(int(recent_window), self.capacity))
         self.recent_ratio = float(np.clip(recent_ratio, 0.0, 1.0))
 
-    def store_transition(self, s, a, r, s_):
-        tran = np.hstack((s, a, [r], s_))
+    def store_transition(self, s, a, r, s_, extras=None):
+        extra_values = (
+            np.asarray(extras, dtype=np.float32).reshape(-1)
+            if extras is not None
+            else np.empty(0, dtype=np.float32)
+        )
+        tran = np.hstack((s, a, [r], extra_values, s_))
+        if tran.size != self.mem.shape[1]:
+            raise ValueError(
+                f"Transition width {tran.size} does not match replay width "
+                f"{self.mem.shape[1]}."
+            )
         index = self.memory_counter % self.capacity
         self.mem[index, :] = tran
         self.memory_counter += 1
@@ -237,9 +247,6 @@ class Critic():
 
     def get_v(self, s, a):
         return self.critic_v(s, a)
-
-    def target_get_v(self, s, a):
-        return self.target_critic_v(s, a)
 
     def learn(self, current_q1, current_q2, target_q):
         loss = self.lossfunc(current_q1, target_q) + self.lossfunc(

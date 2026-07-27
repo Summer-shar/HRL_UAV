@@ -1,32 +1,53 @@
-# HRL_UAV
+# Joint HRL for Multi-UAV MEC
 
-UAV-MEC hierarchical reinforcement-learning simulation code.
+This directory is the clean experiment workspace for the two-timescale
+hierarchical controller:
 
-## Directory Layout
+- the macro TD3 policy selects the joint displacement of three UAVs;
+- the micro SAC policy selects forwarding ratios every resource frame;
+- SAC is first warm-started with a fixed macro hover policy;
+- SAC and TD3 then continue learning in the same joint-training run;
+- realized micro-frame costs are aggregated into each macro transition.
 
-```text
-HRL_UAV/
-  hrl_uav/              Core simulator, wrappers, plotting helpers
-    agents/             SAC, PPO, and micro-PPO agents
-  scripts/              Training, baseline comparison, and CSV export entrypoints
-  matlab/               MATLAB plotting scripts
-  results/              Training outputs, checkpoints, CSVs, figures
-  docs/                 Run notes
-```
+The active experiment parameters are defined only in
+`configs/main_experiment.json`.
 
-## Quick Start
+The current protocol uses 20 macro periods per episode. A
+`user_zone_radius_m` value of `0` disables the artificial circular zone
+boundary; users remain inside the 1000 m by 1000 m map through boundary
+reflection.
 
-The easiest way is to open [run.py](run.py), change the config block at the
-top, and click Run in VSCode.
+## Commands
 
-Set `MODE = "run_all_one_cpu"` to run SAC, PPO, NoCoop, Random, and SCA for
-one CPU frequency in a single click.
-
-For a command-line smoke test:
+Run the minimal smoke test:
 
 ```powershell
-cd C:\Users\PC\Desktop\HRL_UAV
-D:\Anaconda3\envs\pytorch-gpu\python.exe scripts\compare_random.py --episodes 1 --macro_steps 1 --micro_steps 2 --eval_episodes 1 --eval_interval 0 --results_subdir _smoke\random --cpu_ghz 8
+D:\Anaconda3\envs\pytorch-gpu\python.exe scripts\run_experiment.py `
+  --stage smoke --method joint_td3_sac
 ```
 
-More complete commands are in [docs/RUNNING.md](docs/RUNNING.md).
+Run the seed-1 pilot after smoke succeeds:
+
+```powershell
+D:\Anaconda3\envs\pytorch-gpu\python.exe scripts\run_experiment.py `
+  --stage pilot --method joint_td3_sac --seed 1
+```
+
+Plot raw training returns and moving averages:
+
+```powershell
+D:\Anaconda3\envs\pytorch-gpu\python.exe scripts\plot_convergence.py `
+  --stage smoke --seed 1
+```
+
+## Results
+
+Every run is stored under:
+
+```text
+results/joint_hrl_v2/<stage>/seed<seed>/<method>/
+```
+
+The micro pretraining and joint training phases have separate CSV files and
+checkpoints. Old experiment outputs are intentionally not mixed into this
+workspace.
