@@ -22,6 +22,7 @@ def make_env(
     objective_mode="weighted",
     power_budget_w=0.0,
     energy_lagrange_multiplier=0.0,
+    micro_reward_scale=10.0,
     uav_initial_positions=None,
     macro_action_mode="delta",
 ):
@@ -34,6 +35,7 @@ def make_env(
         load_scale=1.0,
         zone_loads=[12.5, 5.5, 3.5],
         micro_diag_bias=1.0,
+        micro_reward_scale=micro_reward_scale,
         macro_flow_state=True,
         macro_load_state=True,
         macro_capacity_state=capacity_state,
@@ -68,6 +70,18 @@ def run_macro_slot(env, macro_action, micro_action=None):
 
 
 class HierarchicalFeedbackTest(unittest.TestCase):
+    def test_micro_reward_scale_changes_only_reward_units(self):
+        env = make_env(micro_reward_scale=1.0)
+        env.reset(seed=98)
+        env.macro_step(np.zeros((env.N, 2), dtype=np.float32))
+        action = np.zeros(env.micro_action_space.shape[0], dtype=np.float32)
+        for _ in range(10):
+            env.micro_step(action)
+        _, reward, _, _, info = env.micro_step(action)
+
+        self.assertEqual(info["micro_reward_scale"], 1.0)
+        self.assertAlmostEqual(reward, -info["J_step"], places=6)
+
     def test_waypoint_action_reaches_target_without_cumulative_overshoot(self):
         env = make_env(
             pause_service=True,
@@ -100,6 +114,29 @@ class HierarchicalFeedbackTest(unittest.TestCase):
         env.reset(seed=123)
 
         np.testing.assert_allclose(env.macro_waypoint_origins, starts)
+
+    def test_centroid_waypoint_zero_action_tracks_current_centroid(self):
+        env = make_env(
+            pause_service=True,
+            macro_action_mode="centroid_waypoint",
+        )
+        env.reset(seed=124)
+        raw_state = env.env.get_raw_state()
+        start = np.asarray(raw_state["uav_coords"], dtype=np.float64)
+        centroids = np.asarray(
+            raw_state["weighted_centroids"],
+            dtype=np.float64,
+        )
+        displacement = centroids - start
+        distance = np.linalg.norm(displacement, axis=1, keepdims=True)
+        expected = start + displacement / np.maximum(
+            distance,
+            1e-12,
+        ) * np.minimum(distance, env.max_macro_displacement)
+
+        run_macro_slot(env, np.zeros((env.N, 2), dtype=np.float32))
+
+        np.testing.assert_allclose(env.env.uav_coords, expected, atol=1e-5)
 
     def test_strict_macro_reward_is_exact_micro_mean(self):
         env = make_env()
@@ -402,7 +439,7 @@ class HierarchicalFeedbackTest(unittest.TestCase):
             places=4,
         )
 
-    def test_constrained_reward_uses_current_dual_and_full_power(self):
+    def test_constrained_reward_uses_signed_long_term_power_residual(self):
         env = make_env(
             objective_mode="constrained_delay",
             power_budget_w=700.0,
@@ -423,7 +460,8 @@ class HierarchicalFeedbackTest(unittest.TestCase):
 
         expected_cost = (
             float(info["primal_cost_step"])
-            + 0.4 * float(info["energy_constraint_ratio"])
+            + 0.4
+            * (float(info["energy_constraint_ratio"]) - 1.0)
         )
         self.assertAlmostEqual(info["J_step"], expected_cost, places=7)
         self.assertAlmostEqual(
@@ -434,6 +472,18 @@ class HierarchicalFeedbackTest(unittest.TestCase):
         self.assertAlmostEqual(
             info["power_budget_step_j"],
             700.0 * env.env.micro_dt,
+            places=7,
+        )
+        self.assertAlmostEqual(
+            info["service_energy_constraint_ratio"],
+            info["service_energy_step_j"]
+            / info["power_budget_step_j"],
+            places=7,
+        )
+        self.assertAlmostEqual(
+            info["energy_constraint_ratio"],
+            info["full_energy_step_j"]
+            / info["power_budget_step_j"],
             places=7,
         )
 

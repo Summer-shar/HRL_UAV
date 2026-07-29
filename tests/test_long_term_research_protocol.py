@@ -17,10 +17,13 @@ for path in (PROJECT_ROOT, SCRIPT_ROOT):
 
 from hrl_uav.env import UAV_MEC_Env
 from hrl_uav.hrl_wrappers import HRL_Wrapper
+from hrl_uav.hrl_wrappers import normalized_power_residual
 from train_centralized_td3 import MacroReplayBuffer
 from train_centralized_td3 import TD3Agent
 from train_centralized_td3 import update_smoothed_per_uav_energy_duals
+from train_centralized_macro import checkpoint_rank
 from train_centralized_macro import load_checkpoint_energy_dual
+from train_centralized_macro import split_macro_lagrangian_reward
 from compare_sca import _sca_cache_key
 
 
@@ -51,6 +54,65 @@ def make_research_env(load_scale=1.15):
 
 
 class LongTermResearchProtocolTests(unittest.TestCase):
+    def test_feasible_checkpoint_rank_uses_true_system_objective(self):
+        args = SimpleNamespace(
+            objective_mode="constrained_delay",
+            checkpoint_power_rule="mean_target",
+            power_constraint_scope="system",
+            power_budget_w=840.0,
+            power_constraint_margin_w=0.0,
+            power_budget_tolerance=0.0,
+        )
+        lower_true_cost = {
+            "J": 3.1,
+            "delay_objective": 3.0,
+            "task_delay_weighted_ms": 5000.0,
+            "average_power_w": 820.0,
+        }
+        lower_censored_delay = {
+            "J": 3.8,
+            "delay_objective": 3.7,
+            "task_delay_weighted_ms": 3500.0,
+            "average_power_w": 820.0,
+        }
+
+        self.assertLess(
+            checkpoint_rank(lower_true_cost, args),
+            checkpoint_rank(lower_censored_delay, args),
+        )
+
+    def test_long_term_power_cost_uses_signed_normalized_residual(self):
+        self.assertAlmostEqual(normalized_power_residual(0.8), -0.2)
+        self.assertEqual(normalized_power_residual(1.0), 0.0)
+        self.assertAlmostEqual(normalized_power_residual(1.25), 0.25)
+        np.testing.assert_allclose(
+            normalized_power_residual([0.9, 1.1, 1.4]),
+            [-0.1, 0.1, 0.4],
+        )
+
+        env = SimpleNamespace(
+            power_constraint_scope="system",
+            macro_feudal_weight=1.0,
+            micro_reward_scale=1.0,
+            objective_mode="constrained_delay",
+            energy_lagrange_multiplier=2.0,
+        )
+        delay_reward, energy_cost = split_macro_lagrangian_reward(
+            macro_reward=-4.8,
+            reward_info={"energy_constraint_ratio_mean": 0.9},
+            env=env,
+        )
+        self.assertAlmostEqual(delay_reward, -5.0)
+        self.assertAlmostEqual(energy_cost, -0.1)
+
+        delay_reward, energy_cost = split_macro_lagrangian_reward(
+            macro_reward=-5.5,
+            reward_info={"energy_constraint_ratio_mean": 1.25},
+            env=env,
+        )
+        self.assertAlmostEqual(delay_reward, -5.0)
+        self.assertAlmostEqual(energy_cost, 0.25)
+
     def test_zero_zone_radius_removes_circle_but_keeps_map_boundary(self):
         env = UAV_MEC_Env(
             num_uavs=3,

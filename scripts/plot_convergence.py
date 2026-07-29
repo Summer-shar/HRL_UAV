@@ -26,7 +26,10 @@ def configure_chinese_font():
 
 def read_csv(path):
     with open(path, "r", encoding="utf-8-sig", newline="") as handle:
-        return list(csv.DictReader(handle))
+        rows = list(csv.DictReader(handle))
+    if not rows:
+        raise RuntimeError(f"Empty training log: {path}")
+    return rows
 
 
 def moving_average(values, window):
@@ -64,26 +67,42 @@ def plot_series(axis, episodes, values, window, color, label):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--stage", choices=["smoke", "diagnostic", "pilot", "formal"])
+    parser.add_argument(
+        "--stage",
+        choices=["smoke", "diagnostic", "pilot", "formal"],
+        required=True,
+    )
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--window", type=int, default=20)
     parser.add_argument("--results-version", default="joint_hrl_v1")
+    parser.add_argument(
+        "--micro-results-version",
+        default="",
+        help="Results version containing the reused SAC pretraining log",
+    )
     args = parser.parse_args()
 
-    root = os.path.join(
+    joint_root = os.path.join(
         PROJECT_ROOT,
         "results",
         args.results_version,
         args.stage,
         f"seed{args.seed}",
     )
+    micro_root = os.path.join(
+        PROJECT_ROOT,
+        "results",
+        args.micro_results_version or args.results_version,
+        args.stage,
+        f"seed{args.seed}",
+    )
     micro_path = os.path.join(
-        root,
+        micro_root,
         "micro_pretrain",
         "train_centralized.csv",
     )
     joint_path = os.path.join(
-        root,
+        joint_root,
         "joint_td3_sac",
         "train_td3.csv",
     )
@@ -96,15 +115,24 @@ def main():
     joint_rows = read_csv(joint_path)
     micro_episodes = numeric(micro_rows, "episode")
     joint_episodes = numeric(joint_rows, "episode")
-    micro_decisions = np.maximum(
+    service_decisions = np.maximum(
         numeric(micro_rows, "service_resource_decisions"),
+        1.0,
+    )
+    macro_periods = service_decisions / 18.0
+    micro_steps_per_macro = np.maximum(
+        numeric(micro_rows, "macro_micro_steps_max"),
+        1.0,
+    )
+    micro_steps = np.maximum(
+        macro_periods * micro_steps_per_macro,
         1.0,
     )
     macro_steps = max(
         float(joint_rows[0]["service_resource_decisions"]) / 18.0,
         1.0,
     )
-    micro_returns = numeric(micro_rows, "micro_reward") / micro_decisions
+    micro_returns = numeric(micro_rows, "micro_reward") / micro_steps
     macro_returns = numeric(joint_rows, "macro_actor_reward") / macro_steps
 
     configure_chinese_font()
@@ -119,7 +147,7 @@ def main():
     )
     axes[0].set_title("(a) SAC微观层预训练")
     axes[0].set_xlabel("预训练轮次")
-    axes[0].set_ylabel("每资源帧真实训练回报")
+    axes[0].set_ylabel("每0.1 s积分步真实训练回报")
 
     plot_series(
         axes[1],
@@ -139,32 +167,8 @@ def main():
             linestyle="--",
             linewidth=1.2,
             alpha=0.8,
-            label=f"TD3预热结束（第{int(warmup_episode)}轮）",
+            label=f"联合更新开始（第{int(warmup_episode)}轮）",
         )
-    eval_path = os.path.join(
-        root,
-        "joint_td3_sac",
-        "eval_central_td3.csv",
-    )
-    if os.path.isfile(eval_path):
-        eval_rows = read_csv(eval_path)
-        feasible = numeric(eval_rows, "energy_feasible_ucb95") > 0.5
-        if np.any(feasible):
-            eval_episodes = numeric(eval_rows, "episode")
-            eval_delays = numeric(eval_rows, "task_delay_weighted_ms")
-            feasible_indices = np.flatnonzero(feasible)
-            best_index = feasible_indices[
-                np.argmin(eval_delays[feasible_indices])
-            ]
-            best_episode = eval_episodes[best_index]
-            axes[1].axvline(
-                best_episode,
-                color="#2E8B57",
-                linestyle="-.",
-                linewidth=1.3,
-                alpha=0.9,
-                label=f"最佳可行检查点（第{int(best_episode)}轮）",
-            )
     axes[1].set_title("(b) TD3-SAC联合训练")
     axes[1].set_xlabel("联合训练轮次")
     axes[1].set_ylabel("每宏观周期真实训练回报")
@@ -173,9 +177,9 @@ def main():
         axis.grid(True, alpha=0.25)
         axis.legend(frameon=False)
 
-    figure.suptitle("双时间尺度分层强化学习真实训练与收敛诊断")
+    figure.suptitle("双时间尺度分层强化学习训练过程")
     figure.tight_layout()
-    output_dir = os.path.join(root, "figures")
+    output_dir = os.path.join(joint_root, "figures")
     os.makedirs(output_dir, exist_ok=True)
     output_path = os.path.join(output_dir, "training_convergence.png")
     figure.savefig(output_path, dpi=300, bbox_inches="tight")

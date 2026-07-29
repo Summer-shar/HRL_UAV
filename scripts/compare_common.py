@@ -217,6 +217,12 @@ def add_common_args(
         help="Total UAV-to-UAV bandwidth in MHz",
     )
     parser.add_argument(
+        "--min_uav_separation_m",
+        type=float,
+        default=5.0,
+        help="Minimum horizontal separation between any two UAVs",
+    )
+    parser.add_argument(
         "--cpu_ghz",
         type=float,
         default=16.0,
@@ -262,13 +268,31 @@ def add_common_args(
         "--micro_diag_bias",
         type=float,
         default=1.0,
-        help="Diagonal retention bias before micro-action softmax",
+        help="Diagonal retention bias before micro-action simplex projection",
     )
     parser.add_argument(
         "--micro_action_scale",
         type=float,
         default=1.0,
-        help="Scale applied to continuous micro actions before softmax",
+        help="Scale applied before routing-simplex projection",
+    )
+    parser.add_argument(
+        "--micro_action_encoding",
+        choices=["projected_full", "stick_breaking"],
+        default="projected_full",
+        help="Continuous encoding used for the learned routing action",
+    )
+    parser.add_argument(
+        "--micro_stick_breaking_scale",
+        type=float,
+        default=4.0,
+        help="Logit scale for the centered stick-breaking route encoding",
+    )
+    parser.add_argument(
+        "--micro_reward_scale",
+        type=float,
+        default=10.0,
+        help="Positive numerical scale applied to the SAC reward",
     )
     parser.add_argument(
         "--micro_state_mode",
@@ -439,7 +463,7 @@ def add_common_args(
     parser.add_argument(
         "--macro_action_mode",
         type=str,
-        choices=["polar", "delta", "waypoint"],
+        choices=["polar", "delta", "waypoint", "centroid_waypoint"],
         default="polar",
         help="Macro action interpretation in HRL_Wrapper",
     )
@@ -453,7 +477,10 @@ def add_common_args(
         "--macro_waypoint_radius_m",
         type=float,
         default=200.0,
-        help="Maximum target offset from each episode's initial UAV position",
+        help=(
+            "Maximum target offset from each episode's initial UAV position "
+            "or current duty centroid, depending on the action mode"
+        ),
     )
     parser.add_argument(
         "--macro_waypoint_tolerance_m",
@@ -512,6 +539,24 @@ def add_common_args(
         type=int,
         default=1,
         help=argparse.SUPPRESS,
+    )
+    parser.add_argument(
+        "--sac_policy_delay",
+        type=int,
+        default=1,
+        help=argparse.SUPPRESS,
+    )
+    parser.add_argument(
+        "--sac_actor_warmup_updates",
+        type=int,
+        default=0,
+        help=argparse.SUPPRESS,
+    )
+    parser.add_argument(
+        "--sac_grad_clip_norm",
+        type=float,
+        default=0.0,
+        help="SAC actor/critic gradient-norm cap; zero disables clipping",
     )
     parser.add_argument(
         "--results_subdir",
@@ -645,6 +690,13 @@ def make_env_from_args(
         u2u_bandwidth_mhz=float(getattr(args, "u2u_bandwidth_mhz", 3.0)),
         micro_diag_bias=float(getattr(args, "micro_diag_bias", 0.5)),
         micro_action_scale=float(getattr(args, "micro_action_scale", 1.0)),
+        micro_action_encoding=str(
+            getattr(args, "micro_action_encoding", "projected_full")
+        ),
+        micro_stick_breaking_scale=float(
+            getattr(args, "micro_stick_breaking_scale", 4.0)
+        ),
+        micro_reward_scale=float(getattr(args, "micro_reward_scale", 10.0)),
         micro_state_mode=str(getattr(args, "micro_state_mode", "pressure")),
         cpu_alloc_mode=str(getattr(args, "cpu_alloc_mode", "priority_kkt")),
         kkt_v=float(getattr(args, "kkt_v", 1.0)),
@@ -721,6 +773,9 @@ def make_env_from_args(
             getattr(args, "gm_heading_noise_std", 0.1)
         ),
         user_zone_radius=float(getattr(args, "user_zone_radius", 80.0)),
+        min_uav_separation_m=float(
+            getattr(args, "min_uav_separation_m", 5.0)
+        ),
     )
     return apply_env_config(env, args)
 
@@ -819,6 +874,26 @@ def save_scenario_metadata(
             getattr(args, "uplink_bandwidth_mhz", 20.0)
         ),
         "u2u_bandwidth_mhz": float(getattr(args, "u2u_bandwidth_mhz", 3.0)),
+        "min_uav_separation_m": float(
+            getattr(args, "min_uav_separation_m", 5.0)
+        ),
+        "communication_model_reference": (
+            "Xu et al., IEEE TCOM 2024, "
+            "DOI 10.1109/TCOMM.2024.3361536"
+        ),
+        "u2g_association_policy": "fixed_region_per_arrival_frame",
+        "u2g_bandwidth_policy": "orthogonal_equal_per_ground_terminal",
+        "u2u_bandwidth_policy": (
+            "work_conserving_equal_active_directed_links"
+        ),
+        "interference_model": "orthogonal_u2g_u2u_no_interference",
+        "downlink_result_return": "ignored_as_in_reference_model",
+        "u2u_active_link_allocation": (
+            "B_M / number_of_active_directed_links"
+        ),
+        "routing_action_mapping": str(
+            getattr(args, "micro_action_encoding", "projected_full")
+        ),
         "cpu_ghz": float(getattr(args, "cpu_ghz", 16.0)),
         "cpu_alloc_mode": getattr(args, "cpu_alloc_mode", "priority_kkt"),
         "kkt_v": float(getattr(args, "kkt_v", 1.0)),
@@ -828,11 +903,23 @@ def save_scenario_metadata(
         "cpu_energy_price_formula": "lambda_i / average_power_budget_i",
         "micro_diag_bias": float(getattr(args, "micro_diag_bias", 0.5)),
         "micro_action_scale": float(getattr(args, "micro_action_scale", 1.0)),
+        "micro_stick_breaking_scale": float(
+            getattr(args, "micro_stick_breaking_scale", 4.0)
+        ),
+        "micro_reward_scale": float(
+            getattr(args, "micro_reward_scale", 10.0)
+        ),
         "micro_state_mode": getattr(args, "micro_state_mode", "pressure"),
         "micro_solver": getattr(args, "micro_solver", "sac"),
         "sac_actor_lr": float(getattr(args, "sac_actor_lr", 3e-4)),
         "sac_critic_lr": float(getattr(args, "sac_critic_lr", 3e-4)),
         "sac_alpha_lr": float(getattr(args, "sac_alpha_lr", 3e-4)),
+        "sac_initial_alpha": float(
+            getattr(args, "sac_initial_alpha", 1.0)
+        ),
+        "sac_grad_clip_norm": float(
+            getattr(args, "sac_grad_clip_norm", 0.0)
+        ),
         "resume_micro_optimizer": int(
             getattr(args, "resume_micro_optimizer", 1)
         ),
@@ -910,6 +997,25 @@ def save_scenario_metadata(
         "macro_waypoint_tolerance_m": float(
             getattr(args, "macro_waypoint_tolerance_m", 0.5)
         ),
+        "td3_replay_capacity": int(
+            getattr(args, "td3_replay_capacity", 0)
+        ),
+        "td3_warmup_steps": int(getattr(args, "td3_warmup_steps", 0)),
+        "td3_warmup_action_radius": float(
+            getattr(args, "td3_warmup_action_radius", 0.0)
+        ),
+        "td3_exploration_initial": float(
+            getattr(args, "td3_exploration_initial", 0.0)
+        ),
+        "td3_exploration_final": float(
+            getattr(args, "td3_exploration_final", 0.0)
+        ),
+        "td3_exploration_decay_episodes": int(
+            getattr(args, "td3_exploration_decay_episodes", 0)
+        ),
+        "td3_exploration_persistence": str(
+            getattr(args, "td3_exploration_persistence", "auto")
+        ),
         "macro_slot_duration_s": 10.0,
         "macro_control_no_service_s": float(
             getattr(args, "deployment_dt", 1.0)
@@ -973,17 +1079,9 @@ def save_scenario_metadata(
 
 
 def compute_u2u_rate_mbps(wrapper: HRL_Wrapper, raw_state: Dict[str, np.ndarray]) -> np.ndarray:
-    diff = raw_state["uav_coords"][:, None, :] - raw_state["uav_coords"][None, :, :]
-    dist_sq = np.sum(diff ** 2, axis=-1)
-    np.fill_diagonal(dist_sq, np.inf)
-
-    channel_gain = wrapper.env.beta_0 / np.maximum(dist_sq, 1e-8)
-    np.fill_diagonal(channel_gain, 0.0)
-
-    rate_bps = wrapper.env.B_u2u_total * np.log2(
-        1.0 + (wrapper.env.p_u2u * channel_gain) / wrapper.env.noise_power
+    rate_bps = wrapper.env.compute_u2u_rate_bps(
+        uav_coords=raw_state["uav_coords"],
     )
-    np.fill_diagonal(rate_bps, 0.0)
     return (rate_bps / 1e6).astype(np.float32)
 
 
@@ -2791,7 +2889,7 @@ def evaluate_policy(
                 )
                 if service_paused:
                     micro_action = np.zeros(
-                        2 * eval_env.N * eval_env.N,
+                        eval_env.micro_action_space.shape[0],
                         dtype=np.float32,
                     )
                 else:
@@ -3540,7 +3638,7 @@ def run_fixed_policy_benchmark(
                 )
                 if service_paused:
                     micro_action = np.zeros(
-                        2 * env.N * env.N,
+                        env.micro_action_space.shape[0],
                         dtype=np.float32,
                     )
                 else:

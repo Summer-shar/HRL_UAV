@@ -16,5 +16,10 @@
   "resource_frame_s": 0.5,
   "integration_step_s": 0.1,
   "user_zone_radius_m": 0.0,
-  "users_static": true
+  "users_static": true,
+  "td3_replay_capacity": 12000,
+  "td3_exploration_persistence": "episode",
+  "td3_warmup_action_radius_m": 6.0,
+  "td3_exploration_initial_m": 4.0,
+  "td3_exploration_final_m": 0.5
 }

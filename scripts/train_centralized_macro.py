@@ -33,6 +33,7 @@ from hrl_uav.agents.sac_agent import Actor as SAC_Actor
 from hrl_uav.agents.sac_agent import Critic as SAC_Critic
 from hrl_uav.agents.sac_agent import Entroy as SAC_Entropy
 from hrl_uav.agents.sac_agent import Memory as SAC_Memory
+from hrl_uav.hrl_wrappers import normalized_power_residual
 import hrl_uav.agents.ppo_agent as ppo_agent_mod
 import hrl_uav.agents.sac_agent as sac_agent_mod
 
@@ -49,6 +50,20 @@ TRAIN_LOG_FIELDS = [
     "micro_reward",
     "J_train",
     "delay_objective_train",
+    "micro_cost_delay_mean",
+    "micro_lagrangian_energy_cost_mean",
+    "micro_drift_cost_mean",
+    "micro_overflow_cost_mean",
+    "micro_primal_cost_mean",
+    "micro_j_base_mean",
+    "micro_energy_ratio_mean",
+    "micro_q_total_mean",
+    "micro_q_total_final",
+    "micro_upload_delay_cost_mean",
+    "micro_route_entropy_mean",
+    "micro_route_boundary_fraction",
+    "micro_route_max_ratio",
+    "micro_reward_reconstruction_max_error",
     "service_energy_episode_j",
     "total_energy_episode_j",
     "average_power_w",
@@ -82,6 +97,17 @@ TRAIN_LOG_FIELDS = [
     "deployment_transient_energy_episode_j",
     "macro_energy_episode",
     "macro_feedback_mean",
+    "macro_primal_cost_mean",
+    "macro_energy_ratio_mean",
+    "macro_global_micro_signal_mean",
+    "macro_shaping_signal_mean",
+    "macro_positioning_improvement_mean",
+    "macro_movement_penalty_mean",
+    "macro_propulsion_penalty_mean",
+    "macro_action_norm_mean",
+    "projected_uplink_time_s_mean",
+    "projected_u2u_time_s_mean",
+    "projected_u2u_rate_mbps_mean",
     "macro_micro_steps_min",
     "macro_micro_steps_max",
     "macro_reward_reconstruction_max_error",
@@ -101,7 +127,11 @@ TRAIN_LOG_FIELDS = [
     "sac_trainable_micro_steps",
     "sac_actor_loss",
     "sac_critic_loss",
+    "sac_actor_grad_norm",
+    "sac_critic_grad_norm",
     "sac_alpha",
+    "sac_critic_updates_total",
+    "sac_actor_updates_total",
     "service_resource_decisions",
     "smdp_boundary_transitions",
     "smdp_boundary_duration_s",
@@ -118,6 +148,32 @@ TRAIN_LOG_FIELDS = [
     "episode_seconds",
 ]
 
+MICRO_REWARD_DIAGNOSTIC_SOURCES = {
+    "micro_cost_delay_mean": "cost_delay",
+    "micro_lagrangian_energy_cost_mean": "lagrangian_energy_cost",
+    "micro_drift_cost_mean": "drift_cost",
+    "micro_overflow_cost_mean": "overflow_cost",
+    "micro_primal_cost_mean": "primal_cost_step",
+    "micro_j_base_mean": "J_base_step",
+    "micro_energy_ratio_mean": "energy_constraint_ratio",
+    "micro_q_total_mean": "q_total_current",
+    "micro_upload_delay_cost_mean": "upload_delay_cost",
+    "micro_route_entropy_mean": "micro_route_entropy_mean",
+    "micro_route_boundary_fraction": "micro_route_boundary_fraction",
+    "micro_route_max_ratio": "micro_route_max_ratio",
+}
+
+MACRO_REWARD_DIAGNOSTIC_SOURCES = {
+    "macro_primal_cost_mean": "primal_cost_mean",
+    "macro_energy_ratio_mean": "energy_constraint_ratio_mean",
+    "macro_global_micro_signal_mean": "global_micro_signal",
+    "macro_shaping_signal_mean": "shaping_signal",
+    "macro_positioning_improvement_mean": "positioning_improvement",
+    "macro_movement_penalty_mean": "movement_penalty",
+    "macro_propulsion_penalty_mean": "propulsion_penalty",
+    "macro_action_norm_mean": "macro_action_norm_mean",
+}
+
 
 def initialize_training_log(path):
     os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -129,6 +185,73 @@ def append_training_log(path, row):
     with open(path, "a", newline="", encoding="utf-8") as fp:
         writer = csv.DictWriter(fp, fieldnames=TRAIN_LOG_FIELDS)
         writer.writerow({field: row.get(field, "") for field in TRAIN_LOG_FIELDS})
+
+
+def initialize_reward_diagnostics(source_map):
+    return {output_key: [] for output_key in source_map}
+
+
+def initialize_micro_reward_diagnostics():
+    storage = initialize_reward_diagnostics(
+        MICRO_REWARD_DIAGNOSTIC_SOURCES
+    )
+    storage["micro_reward_reconstruction_error"] = []
+    return storage
+
+
+def record_reward_diagnostics(storage, info, source_map):
+    for output_key, source_key in source_map.items():
+        storage[output_key].append(float(info.get(source_key, 0.0)))
+
+
+def summarize_reward_diagnostics(storage):
+    return {
+        output_key: (
+            float(np.mean(values))
+            if values
+            else 0.0
+        )
+        for output_key, values in storage.items()
+    }
+
+
+def record_micro_reward_diagnostics(storage, info):
+    record_reward_diagnostics(
+        storage,
+        info,
+        MICRO_REWARD_DIAGNOSTIC_SOURCES,
+    )
+    expected_reward = (
+        -float(info.get("J_step", 0.0))
+        * float(info.get("micro_reward_scale", 1.0))
+    )
+    storage["micro_reward_reconstruction_error"].append(
+        abs(float(info.get("micro_reward_scaled", 0.0)) - expected_reward)
+    )
+
+
+def summarize_micro_reward_diagnostics(storage):
+    summary = summarize_reward_diagnostics(
+        {
+            key: values
+            for key, values in storage.items()
+            if key != "micro_reward_reconstruction_error"
+        }
+    )
+    q_values = storage.get("micro_q_total_mean", [])
+    summary["micro_q_total_final"] = (
+        float(q_values[-1]) if q_values else 0.0
+    )
+    reconstruction_errors = storage.get(
+        "micro_reward_reconstruction_error",
+        [],
+    )
+    summary["micro_reward_reconstruction_max_error"] = (
+        float(np.max(reconstruction_errors))
+        if reconstruction_errors
+        else 0.0
+    )
+    return summary
 
 
 def parse_args():
@@ -166,6 +289,12 @@ def parse_args():
         type=float,
         default=3e-4,
         help="Learning rate of the SAC entropy temperature",
+    )
+    parser.add_argument(
+        "--sac_initial_alpha",
+        type=float,
+        default=1.0,
+        help="Initial SAC entropy temperature",
     )
     parser.add_argument(
         "--resume_micro_optimizer",
@@ -363,6 +492,12 @@ def parse_args():
         help="Checkpoint used to initialize the lower SAC policy",
     )
     parser.add_argument(
+        "--micro_replay",
+        type=str,
+        default="",
+        help="Replay state used to continue lower-layer SAC training",
+    )
+    parser.add_argument(
         "--freeze_micro",
         action="store_true",
         help="Keep the loaded lower SAC fixed while training macro PPO",
@@ -424,6 +559,8 @@ def parse_args():
         args.macro_comm_weight = 0.0
     if args.freeze_micro and not args.micro_ckpt:
         parser.error("--freeze_micro requires --micro_ckpt")
+    if args.micro_replay and args.micro_solver != "sac":
+        parser.error("--micro_replay is only valid with --micro_solver sac")
     if args.freeze_macro and (
         args.advisor_weight > 0.0 or args.advisor_final_weight > 0.0
     ):
@@ -461,8 +598,17 @@ def parse_args():
         parser.error("--ppo_gae_lambda must be in [0, 1]")
     if not np.isfinite(args.ppo_target_kl):
         parser.error("--ppo_target_kl must be finite")
-    if min(args.sac_actor_lr, args.sac_critic_lr, args.sac_alpha_lr) <= 0.0:
-        parser.error("SAC learning rates must be positive")
+    if min(
+        args.sac_actor_lr,
+        args.sac_critic_lr,
+        args.sac_alpha_lr,
+        args.sac_initial_alpha,
+    ) <= 0.0:
+        parser.error("SAC learning rates and initial alpha must be positive")
+    if args.micro_reward_scale <= 0.0:
+        parser.error("--micro_reward_scale must be positive")
+    if args.sac_grad_clip_norm < 0.0:
+        parser.error("--sac_grad_clip_norm must be non-negative")
     if args.train_start_jitter_max_m < 0.0:
         parser.error("--train_start_jitter_max_m must be non-negative")
     if not 0.0 <= args.train_start_anchor_probability <= 1.0:
@@ -591,10 +737,11 @@ def split_macro_lagrangian_reward(macro_reward, reward_info, env):
         return float(delay_reward), energy_cost.astype(np.float32)
 
     energy_ratio = float(reward_info.get("energy_constraint_ratio_mean", 0.0))
+    energy_residual = normalized_power_residual(energy_ratio)
     cost_scale = (
         float(env.macro_feudal_weight)
         * float(env.micro_reward_scale)
-        * energy_ratio
+        * energy_residual
     )
     if str(getattr(env, "objective_mode", "weighted")) == "constrained_delay":
         delay_reward = float(macro_reward) + (
@@ -828,6 +975,25 @@ def configure_sac_learning_rates(sac_actor, sac_critic, sac_entropy, args):
         param_group["lr"] = float(args.sac_alpha_lr)
 
 
+def save_sac_replay(path, sac_memory):
+    if sac_memory is None:
+        return ""
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    torch.save(sac_memory.state_dict(), path)
+    return path
+
+
+def load_sac_replay(path, sac_memory):
+    if sac_memory is None:
+        raise ValueError("Cannot restore replay without a trainable SAC memory.")
+    resolved = path if os.path.isabs(path) else os.path.join(PROJECT_ROOT, path)
+    if not os.path.isfile(resolved):
+        raise FileNotFoundError(f"Micro replay state not found: {resolved}")
+    state = torch_load_checkpoint(resolved)
+    restored = sac_memory.load_state_dict(state)
+    return resolved, restored
+
+
 def load_central_macro_checkpoint(
     path,
     macro_actor,
@@ -926,6 +1092,12 @@ def select_epsilon_checkpoint(ckpt_dir, records, epsilon_relative):
 def checkpoint_rank(metrics, args):
     if str(getattr(args, "objective_mode", "weighted")) != "constrained_delay":
         return (0, float(metrics.get("J", np.inf)))
+    objective_value = float(
+        metrics.get(
+            "J",
+            metrics.get("delay_objective", np.inf),
+        )
+    )
     checkpoint_power_rule = str(
         getattr(args, "checkpoint_power_rule", "mean_target")
     )
@@ -945,15 +1117,9 @@ def checkpoint_rank(metrics, args):
             )
         ) * float(args.power_budget_tolerance)
         excess_w = max(excess_w - tolerance_w, 0.0)
-        weighted_delay = float(
-            metrics.get(
-                "task_delay_weighted_ms",
-                metrics.get("delay_weighted_ms", np.inf),
-            )
-        )
         if excess_w <= 0.0:
-            return (0, weighted_delay)
-        return (1, excess_w, weighted_delay)
+            return (0, objective_value)
+        return (1, excess_w, objective_value)
     if checkpoint_power_rule == "ucb95":
         budget = float(args.power_budget_w)
         observed_power_w = float(
@@ -967,15 +1133,9 @@ def checkpoint_rank(metrics, args):
         observed_power_w - budget - tolerance_w,
         0.0,
     )
-    weighted_delay = float(
-        metrics.get(
-            "task_delay_weighted_ms",
-            metrics.get("delay_weighted_ms", np.inf),
-        )
-    )
     if excess_w <= 0.0:
-        return (0, weighted_delay)
-    return (1, excess_w, weighted_delay)
+        return (0, objective_value)
+    return (1, excess_w, objective_value)
 
 
 def project_unit_disk_np(action):
@@ -1360,10 +1520,13 @@ def update_sac(
     sac_action_dim,
     args,
     energy_lagrange_multiplier=0.0,
+    update_actor=True,
 ):
     device = sac_agent_mod.device
     actor_losses = []
     critic_losses = []
+    actor_grad_norms = []
+    critic_grad_norms = []
     for _ in range(args.sac_gradient_steps):
         batch = sac_memory.sample(args.sac_batch_size)
         b_s = torch.as_tensor(batch[:, :sac_state_dim], dtype=torch.float32, device=device)
@@ -1380,7 +1543,7 @@ def update_sac(
         )
         extras_col = reward_col + 1
         if str(getattr(args, "objective_mode", "weighted")) == "constrained_delay":
-            b_energy_ratio = torch.as_tensor(
+            b_controllable_energy_cost = torch.as_tensor(
                 batch[:, extras_col:extras_col + 1],
                 dtype=torch.float32,
                 device=device,
@@ -1389,9 +1552,9 @@ def update_sac(
                 getattr(args, "power_constraint_scope", "system")
             ) != "per_uav":
                 b_r = b_r - (
-                    10.0
+                    float(args.micro_reward_scale)
                     * float(energy_lagrange_multiplier)
-                    * b_energy_ratio
+                    * b_controllable_energy_cost
                 )
             extras_col += 1
         b_discount = torch.as_tensor(
@@ -1409,32 +1572,40 @@ def update_sac(
         )
 
         current_q1, current_q2 = sac_critic.get_v(b_s, b_a)
-        sac_critic.learn(current_q1, current_q2, target_q.detach())
+        critic_grad_norm = sac_critic.learn(
+            current_q1,
+            current_q2,
+            target_q.detach(),
+            max_grad_norm=float(args.sac_grad_clip_norm),
+        )
 
-        a_eval, log_prob = sac_actor.evaluate(b_s)
-        q1_eval, q2_eval = sac_critic.get_v(b_s, a_eval)
-        actor_loss = (
-            sac_entropy.alpha.detach().to(device) * log_prob
-            - torch.min(q1_eval, q2_eval)
-        ).mean()
-        sac_actor.learn(actor_loss)
+        if update_actor:
+            a_eval, log_prob = sac_actor.evaluate(b_s)
+            q1_eval, q2_eval = sac_critic.get_v(b_s, a_eval)
+            actor_loss = (
+                sac_entropy.alpha.detach().to(device) * log_prob
+                - torch.min(q1_eval, q2_eval)
+            ).mean()
+            actor_grad_norm = sac_actor.learn(
+                actor_loss,
+                max_grad_norm=float(args.sac_grad_clip_norm),
+            )
 
-        alpha_loss = -(
-            sac_entropy.log_alpha.exp().to(device)
-            * (log_prob + sac_entropy.target_entropy).detach()
-        ).mean()
-        sac_entropy.learn(alpha_loss)
-        sac_entropy.alpha = sac_entropy.log_alpha.exp().to(device)
+            alpha_loss = sac_entropy.temperature_loss(log_prob)
+            sac_entropy.learn(alpha_loss)
+            sac_entropy.alpha = sac_entropy.log_alpha.exp().to(device)
+            actor_losses.append(float(actor_loss.item()))
+            actor_grad_norms.append(float(actor_grad_norm))
         sac_critic.soft_update()
 
         critic_loss = (
             F.mse_loss(current_q1, target_q.detach())
             + F.mse_loss(current_q2, target_q.detach())
         )
-        actor_losses.append(float(actor_loss.item()))
         critic_losses.append(float(critic_loss.item()))
+        critic_grad_norms.append(float(critic_grad_norm))
 
-    return actor_losses, critic_losses
+    return actor_losses, critic_losses, actor_grad_norms, critic_grad_norms
 
 
 def compose_smdp_boundary_transition(
@@ -1473,18 +1644,18 @@ def compose_smdp_boundary_transition(
     ):
         reward += float(gamma) ** offset * holding_reward
     if use_conditional_lagrangian:
-        if "energy_constraint_ratio_per_uav_sum" not in service_frame:
+        if "energy_constraint_ratio_per_uav_mean" not in service_frame:
             raise KeyError(
                 "Per-UAV SMDP transition is missing "
-                "energy_constraint_ratio_per_uav_sum."
+                "energy_constraint_ratio_per_uav_mean."
             )
         energy_ratio_per_uav = np.asarray(
-            service_frame["energy_constraint_ratio_per_uav_sum"],
+            service_frame["energy_constraint_ratio_per_uav_mean"],
             dtype=np.float64,
         ).reshape(-1)
     else:
         energy_ratio_per_uav = np.asarray(
-            [service_frame.get("energy_constraint_ratio_sum", 0.0)],
+            [service_frame.get("energy_constraint_ratio_mean", 0.0)],
             dtype=np.float64,
         )
     return {
@@ -1493,7 +1664,13 @@ def compose_smdp_boundary_transition(
         "deployment_holding_reward_1": deployment_holding_rewards[0],
         "deployment_holding_reward_2": deployment_holding_rewards[1],
         "energy_constraint_ratio": float(
-            service_frame.get("energy_constraint_ratio_sum", 0.0)
+            service_frame.get("energy_constraint_ratio_mean", 0.0)
+        ),
+        "controllable_energy_cost": float(
+            service_frame.get(
+                "service_energy_constraint_ratio_sum",
+                0.0,
+            )
         ),
         "energy_constraint_ratio_per_uav": energy_ratio_per_uav.copy(),
         "bootstrap_discount": float(gamma) ** 3,
@@ -1511,11 +1688,11 @@ def store_sac_replay_transition(
     next_state,
     objective_mode,
     bootstrap_discount,
-    energy_constraint_ratio=0.0,
+    controllable_energy_cost=0.0,
 ):
     extras = []
     if str(objective_mode) == "constrained_delay":
-        extras.append(float(energy_constraint_ratio))
+        extras.append(float(controllable_energy_cost))
     extras.append(float(bootstrap_discount))
     memory.store_transition(
         state,
@@ -1606,7 +1783,14 @@ def main():
     sac_state_dim = env.sac_obs_dim if use_sac else None
     sac_actor = SAC_Actor(sac_state_dim, sac_action_dim) if use_sac else None
     sac_critic = SAC_Critic(sac_state_dim, sac_action_dim) if use_sac else None
-    sac_entropy = SAC_Entropy(sac_action_dim) if use_sac else None
+    sac_entropy = (
+        SAC_Entropy(
+            sac_action_dim,
+            initial_alpha=args.sac_initial_alpha,
+        )
+        if use_sac
+        else None
+    )
     configure_sac_learning_rates(sac_actor, sac_critic, sac_entropy, args)
     sac_memory = (
         SAC_Memory(
@@ -1653,6 +1837,15 @@ def main():
                 "[INFO] Inherited energy dual -> "
                 f"{np.asarray(inherited_dual)}"
             )
+    if use_sac and args.micro_replay:
+        replay_path, replay_count = load_sac_replay(
+            args.micro_replay,
+            sac_memory,
+        )
+        print(
+            f"[INFO] Loaded lower SAC replay ({replay_count} transitions) "
+            f"-> {replay_path}"
+        )
     if use_sac and args.freeze_micro:
         sac_actor.action_net.eval()
         sac_critic.critic_v.eval()
@@ -1726,6 +1919,8 @@ def main():
     ppo_advisor_actions = []
     ppo_advisor_weights = []
     sac_trainable_micro_steps = 0
+    sac_critic_update_count = 0
+    sac_actor_update_count = 0
 
     best_eval_rank = None
     eval_checkpoint_records = []
@@ -1805,6 +2000,13 @@ def main():
         ep_macro_feedback = []
         ep_macro_micro_steps = []
         ep_macro_reconstruction_error = []
+        ep_micro_diagnostics = initialize_micro_reward_diagnostics()
+        ep_macro_diagnostics = initialize_reward_diagnostics(
+            MACRO_REWARD_DIAGNOSTIC_SOURCES
+        )
+        ep_projected_uplink_time = []
+        ep_projected_u2u_time = []
+        ep_projected_u2u_rate = []
         ep_delay_rewards = []
         ep_energy_costs = []
         done = False
@@ -1820,6 +2022,8 @@ def main():
         ep_smdp_boundary_audit = None
         ep_sac_actor_losses = []
         ep_sac_critic_losses = []
+        ep_sac_actor_grad_norms = []
+        ep_sac_critic_grad_norms = []
 
         bc_weight = advisor_weight_for_episode(args, episode)
 
@@ -1858,6 +2062,20 @@ def main():
                 ep_propulsion_delta.append(
                     float(mac_info.get("macro_propulsion_delta_total", 0.0))
                 )
+                ep_projected_uplink_time.append(
+                    float(mac_info.get("projected_comm_uplink_time_s", 0.0))
+                )
+                ep_projected_u2u_time.append(
+                    float(mac_info.get("projected_comm_u2u_time_s", 0.0))
+                )
+                ep_projected_u2u_rate.append(
+                    float(
+                        mac_info.get(
+                            "projected_mean_u2u_rate_mbps",
+                            0.0,
+                        )
+                    )
+                )
 
             deployment_frames = []
             zero_micro_action = np.zeros(sac_action_dim, dtype=np.float32)
@@ -1866,6 +2084,10 @@ def main():
                 deployment_frames.append(frame)
                 ep_micro_reward += float(frame["reward_sum"])
                 for mic_info in frame["infos"]:
+                    record_micro_reward_diagnostics(
+                        ep_micro_diagnostics,
+                        mic_info,
+                    )
                     ep_j.append(float(mic_info.get("J_step", 0.0)))
                     ep_delay_objective.append(
                         float(mic_info.get("delay_objective_step", 0.0))
@@ -1901,7 +2123,7 @@ def main():
                     current_service_state,
                     args.objective_mode,
                     boundary["bootstrap_discount"],
-                    boundary["energy_constraint_ratio"],
+                    boundary["controllable_energy_cost"],
                 )
                 ep_smdp_boundary_transitions += 1
                 pending_sac_transition = None
@@ -1926,6 +2148,10 @@ def main():
                 frame = env.step_resource_frame(micro_action)
                 ep_micro_reward += float(frame["reward_sum"])
                 for mic_info in frame["infos"]:
+                    record_micro_reward_diagnostics(
+                        ep_micro_diagnostics,
+                        mic_info,
+                    )
                     ep_j.append(float(mic_info.get("J_step", 0.0)))
                     ep_delay_objective.append(
                         float(mic_info.get("delay_objective_step", 0.0))
@@ -1973,7 +2199,7 @@ def main():
                             next_service_state,
                             args.objective_mode,
                             SAC_GAMMA,
-                            frame["energy_constraint_ratio_sum"],
+                            frame["service_energy_constraint_ratio_sum"],
                         )
                         current_service_state = next_service_state
                 elif not is_last_service_frame:
@@ -1984,7 +2210,25 @@ def main():
                     and sac_memory.memory_counter > SAC_MEMORY_WARMUP
                     and sac_trainable_micro_steps % args.sac_update_freq == 0
                 ):
-                    sac_actor_losses, sac_critic_losses = update_sac(
+                    next_sac_critic_update_count = (
+                        sac_critic_update_count
+                        + max(int(args.sac_gradient_steps), 1)
+                    )
+                    sac_actor_ready = (
+                        next_sac_critic_update_count
+                        > int(args.sac_actor_warmup_updates)
+                    )
+                    sac_actor_due = (
+                        next_sac_critic_update_count
+                        % max(int(args.sac_policy_delay), 1)
+                        == 0
+                    )
+                    (
+                        sac_actor_losses,
+                        sac_critic_losses,
+                        sac_actor_grad_norms,
+                        sac_critic_grad_norms,
+                    ) = update_sac(
                         sac_actor,
                         sac_critic,
                         sac_entropy,
@@ -1995,14 +2239,26 @@ def main():
                         energy_lagrange_multiplier=(
                             env.energy_lagrange_multiplier
                         ),
+                        update_actor=(
+                            sac_actor_ready and sac_actor_due
+                        ),
                     )
+                    sac_critic_update_count = next_sac_critic_update_count
+                    sac_actor_update_count += len(sac_actor_losses)
                     ep_sac_actor_losses.extend(sac_actor_losses)
                     ep_sac_critic_losses.extend(sac_critic_losses)
+                    ep_sac_actor_grad_norms.extend(sac_actor_grad_norms)
+                    ep_sac_critic_grad_norms.extend(sac_critic_grad_norms)
                 if done:
                     break
 
             macro_reward = float(env.get_macro_reward())
             macro_reward_info = env.get_last_macro_reward_info()
+            record_reward_diagnostics(
+                ep_macro_diagnostics,
+                macro_reward_info,
+                MACRO_REWARD_DIAGNOSTIC_SOURCES,
+            )
             delay_reward, energy_cost = split_macro_lagrangian_reward(
                 macro_reward,
                 macro_reward_info,
@@ -2057,7 +2313,7 @@ def main():
                 terminal_frame["next_state"],
                 args.objective_mode,
                 0.0,
-                terminal_frame["energy_constraint_ratio_sum"],
+                terminal_frame["service_energy_constraint_ratio_sum"],
             )
             pending_sac_transition = None
 
@@ -2315,6 +2571,9 @@ def main():
                 )
                 if ep_delay_objective
                 else 0.0,
+                **summarize_micro_reward_diagnostics(
+                    ep_micro_diagnostics
+                ),
                 "service_energy_episode_j": service_energy_episode,
                 "total_energy_episode_j": total_energy_episode,
                 "average_power_w": average_power_w,
@@ -2394,6 +2653,24 @@ def main():
                 "macro_feedback_mean": float(np.mean(ep_macro_feedback))
                 if ep_macro_feedback
                 else 0.0,
+                **summarize_reward_diagnostics(
+                    ep_macro_diagnostics
+                ),
+                "projected_uplink_time_s_mean": float(
+                    np.mean(ep_projected_uplink_time)
+                )
+                if ep_projected_uplink_time
+                else 0.0,
+                "projected_u2u_time_s_mean": float(
+                    np.mean(ep_projected_u2u_time)
+                )
+                if ep_projected_u2u_time
+                else 0.0,
+                "projected_u2u_rate_mbps_mean": float(
+                    np.mean(ep_projected_u2u_rate)
+                )
+                if ep_projected_u2u_rate
+                else 0.0,
                 "macro_micro_steps_min": int(np.min(ep_macro_micro_steps))
                 if ep_macro_micro_steps
                 else 0,
@@ -2429,11 +2706,23 @@ def main():
                     if ep_sac_critic_losses
                     else ""
                 ),
+                "sac_actor_grad_norm": (
+                    float(np.mean(ep_sac_actor_grad_norms))
+                    if ep_sac_actor_grad_norms
+                    else ""
+                ),
+                "sac_critic_grad_norm": (
+                    float(np.mean(ep_sac_critic_grad_norms))
+                    if ep_sac_critic_grad_norms
+                    else ""
+                ),
                 "sac_alpha": (
                     float(sac_entropy.alpha.detach().cpu().item())
                     if sac_entropy is not None
                     else ""
                 ),
+                "sac_critic_updates_total": sac_critic_update_count,
+                "sac_actor_updates_total": sac_actor_update_count,
                 "service_resource_decisions": ep_service_resource_decisions,
                 "smdp_boundary_transitions": ep_smdp_boundary_transitions,
                 "smdp_boundary_duration_s": (
@@ -2616,6 +2905,12 @@ def main():
         ),
         os.path.join(ckpt_dir, "final.pt"),
     )
+    replay_path = save_sac_replay(
+        os.path.join(ckpt_dir, "micro_replay.pt"),
+        sac_memory,
+    )
+    if replay_path:
+        print(f"Saved lower SAC replay -> {replay_path}")
     if args.checkpoint_epsilon_relative > 0.0:
         selected = select_epsilon_checkpoint(
             ckpt_dir,

@@ -33,16 +33,42 @@ with open(CONFIG_PATH, "r", encoding="utf-8") as config_file:
     PROTOCOL = json.load(config_file)
 
 RESULTS_VERSION = str(PROTOCOL["results_version"])
+MICRO_PRETRAIN_SOURCE_VERSION = str(
+    PROTOCOL.get("micro_pretrain_source_results_version", RESULTS_VERSION)
+)
 FORMAL_SEEDS = [int(value) for value in PROTOCOL["formal_seeds"]]
 TRAINING_HORIZON = int(PROTOCOL["training_episodes"])
 MICRO_PRETRAIN_HORIZON = int(PROTOCOL["micro_pretrain_episodes"])
 MAIN_LOAD = float(PROTOCOL["load_scale"])
 ZONE_LOADS_MBPS = [float(value) for value in PROTOCOL["zone_loads_mbps"]]
 CPU_GHZ = float(PROTOCOL["cpu_ghz"])
-UAV_POWER_BUDGET_W = float(PROTOCOL["uav_power_budget_w"])
 NUM_UAVS = int(PROTOCOL["num_uavs"])
 NUM_USERS = int(PROTOCOL["num_users"])
+POWER_CONSTRAINT_SCOPE = str(
+    PROTOCOL.get(
+        "power_constraint_scope",
+        "per_uav" if "uav_power_budget_w" in PROTOCOL else "system",
+    )
+).lower()
+if POWER_CONSTRAINT_SCOPE not in {"system", "per_uav"}:
+    raise ValueError(
+        "power_constraint_scope must be either 'system' or 'per_uav'"
+    )
+UAV_POWER_BUDGET_W = float(PROTOCOL.get("uav_power_budget_w", 0.0))
+SYSTEM_POWER_BUDGET_W = float(
+    PROTOCOL.get(
+        "power_budget_w",
+        UAV_POWER_BUDGET_W * NUM_UAVS,
+    )
+)
 MAX_DEPLOYMENT_DISTANCE_M = float(PROTOCOL["max_deployment_distance_m"])
+MACRO_ACTION_MODE = str(PROTOCOL.get("macro_action_mode", "delta"))
+MACRO_WAYPOINT_RADIUS_M = float(
+    PROTOCOL.get("macro_waypoint_radius_m", 200.0)
+)
+MACRO_WAYPOINT_TOLERANCE_M = float(
+    PROTOCOL.get("macro_waypoint_tolerance_m", 0.5)
+)
 MACRO_STEPS = int(PROTOCOL["macro_steps"])
 MACRO_PERIOD_S = float(PROTOCOL["macro_period_s"])
 DEPLOYMENT_S = float(PROTOCOL["deployment_s"])
@@ -50,10 +76,90 @@ RESOURCE_FRAME_S = float(PROTOCOL["resource_frame_s"])
 INTEGRATION_STEP_S = float(PROTOCOL["integration_step_s"])
 USER_ZONE_RADIUS_M = float(PROTOCOL["user_zone_radius_m"])
 USERS_STATIC = bool(PROTOCOL.get("users_static", False))
+TD3_REPLAY_CAPACITY = int(PROTOCOL.get("td3_replay_capacity", 12000))
+TD3_WARMUP_STEPS = int(PROTOCOL.get("td3_warmup_steps", 300))
+TD3_UPDATES_PER_STEP = int(PROTOCOL.get("td3_updates_per_step", 1))
+TD3_POLICY_DELAY = int(PROTOCOL.get("td3_policy_delay", 2))
+TD3_ACTOR_WARMUP_UPDATES = int(
+    PROTOCOL.get("td3_actor_warmup_updates", 0)
+)
+TD3_POLICY_NOISE = float(PROTOCOL.get("td3_policy_noise", 0.2))
+TD3_NOISE_CLIP = float(PROTOCOL.get("td3_noise_clip", 0.5))
+TD3_HOVER_EXPLORATION_PROB = float(
+    PROTOCOL.get("td3_hover_exploration_probability", 0.0)
+)
+TD3_EXPLORATION_PERSISTENCE = str(
+    PROTOCOL.get("td3_exploration_persistence", "episode")
+)
+TD3_WARMUP_ACTION_RADIUS_M = float(
+    PROTOCOL.get("td3_warmup_action_radius_m", 6.0)
+)
+TD3_EXPLORATION_INITIAL_M = float(
+    PROTOCOL.get("td3_exploration_initial_m", 4.0)
+)
+TD3_EXPLORATION_FINAL_M = float(
+    PROTOCOL.get("td3_exploration_final_m", 0.5)
+)
+TD3_EXPLORATION_DECAY_EPISODES = int(
+    PROTOCOL.get("td3_exploration_decay_episodes", TRAINING_HORIZON)
+)
+TD3_REWARD_SCALE = float(PROTOCOL.get("td3_reward_scale", 0.01))
+MACRO_POWER_VIOLATION_PENALTY_WEIGHT = float(
+    PROTOCOL.get("macro_power_violation_penalty_weight", 0.0)
+)
+ENERGY_DUAL_LR = float(PROTOCOL.get("energy_dual_lr", 0.02))
+PPO_EXPLORATION_INITIAL_M = float(
+    PROTOCOL.get("ppo_exploration_initial_m", 2.0)
+)
+PPO_EXPLORATION_FINAL_M = float(
+    PROTOCOL.get("ppo_exploration_final_m", 0.1)
+)
+JOINT_SAC_ACTOR_LR = float(PROTOCOL.get("joint_sac_actor_lr", 3e-4))
+JOINT_SAC_CRITIC_LR = float(PROTOCOL.get("joint_sac_critic_lr", 3e-4))
+JOINT_SAC_ALPHA_LR = float(PROTOCOL.get("joint_sac_alpha_lr", 3e-4))
+JOINT_SAC_INITIAL_ALPHA = float(
+    PROTOCOL.get("joint_sac_initial_alpha", 1.0)
+)
+JOINT_SAC_POLICY_DELAY = int(
+    PROTOCOL.get("joint_sac_policy_delay", 1)
+)
+JOINT_SAC_ACTOR_WARMUP_UPDATES = int(
+    PROTOCOL.get("joint_sac_actor_warmup_updates", 0)
+)
+MICRO_PRETRAIN_SAC_ACTOR_LR = float(
+    PROTOCOL.get("micro_pretrain_sac_actor_lr", 3e-4)
+)
+MICRO_PRETRAIN_SAC_CRITIC_LR = float(
+    PROTOCOL.get("micro_pretrain_sac_critic_lr", 3e-4)
+)
+MICRO_PRETRAIN_SAC_ALPHA_LR = float(
+    PROTOCOL.get("micro_pretrain_sac_alpha_lr", 3e-4)
+)
+MICRO_PRETRAIN_SAC_INITIAL_ALPHA = float(
+    PROTOCOL.get("micro_pretrain_sac_initial_alpha", 1.0)
+)
+MICRO_REWARD_SCALE = float(PROTOCOL.get("micro_reward_scale", 10.0))
+SAC_GRAD_CLIP_NORM = float(PROTOCOL.get("sac_grad_clip_norm", 0.0))
+MICRO_ACTION_ENCODING = str(
+    PROTOCOL.get("micro_action_encoding", "projected_full")
+)
+MICRO_STICK_BREAKING_SCALE = float(
+    PROTOCOL.get("micro_stick_breaking_scale", 4.0)
+)
+RESUME_MICRO_REPLAY = bool(PROTOCOL.get("resume_micro_replay", False))
+ENERGY_DUAL_POWER_WINDOW = int(
+    PROTOCOL.get("energy_dual_power_window", 5)
+)
 
 
-def normalized_macro_distance(distance_m):
-    return float(distance_m) / MAX_DEPLOYMENT_DISTANCE_M
+def normalized_macro_distance(distance_m, action_mode=None):
+    mode = MACRO_ACTION_MODE if action_mode is None else str(action_mode)
+    scale_m = (
+        MACRO_WAYPOINT_RADIUS_M
+        if mode in ("waypoint", "centroid_waypoint")
+        else MAX_DEPLOYMENT_DISTANCE_M
+    )
+    return float(distance_m) / scale_m
 
 
 def ppo_log_std_for_distance(distance_m):
@@ -141,6 +247,20 @@ def stage_config(stage):
 def common_args(config, device):
     budgets = ",".join([f"{UAV_POWER_BUDGET_W:.1f}"] * NUM_UAVS)
     duals = ",".join(["0"] * NUM_UAVS)
+    if POWER_CONSTRAINT_SCOPE == "system":
+        constraint_args = [
+            "--power_constraint_scope", "system",
+            "--power_budget_w", str(SYSTEM_POWER_BUDGET_W),
+            "--energy_dual_initial", "0",
+        ]
+    else:
+        constraint_args = [
+            "--power_constraint_scope", "per_uav",
+            "--uav_power_budgets_w", budgets,
+            "--power_budget_w", str(UAV_POWER_BUDGET_W * NUM_UAVS),
+            "--energy_lagrange_multipliers", duals,
+            "--energy_dual_initial", "0",
+        ]
     return [
         "--episodes", str(config["episodes"]),
         "--macro_steps", str(config["macro_steps"]),
@@ -176,14 +296,14 @@ def common_args(config, device):
         "--cpu_power_cap_w", "0",
         "--micro_diag_bias", "0",
         "--micro_action_scale", "1",
+        "--micro_action_encoding", MICRO_ACTION_ENCODING,
+        "--micro_stick_breaking_scale", str(MICRO_STICK_BREAKING_SCALE),
+        "--micro_reward_scale", str(MICRO_REWARD_SCALE),
+        "--sac_grad_clip_norm", str(SAC_GRAD_CLIP_NORM),
         "--micro_state_mode", "pressure",
         "--objective_mode", "constrained_delay",
-        "--power_constraint_scope", "per_uav",
-        "--uav_power_budgets_w", budgets,
-        "--power_budget_w", str(UAV_POWER_BUDGET_W * NUM_UAVS),
-        "--energy_lagrange_multipliers", duals,
-        "--energy_dual_initial", "0",
-        "--energy_dual_lr", "0.02",
+    ] + constraint_args + [
+        "--energy_dual_lr", str(ENERGY_DUAL_LR),
         "--energy_dual_max", "20",
         "--energy_dual_state_norm", "10",
         "--checkpoint_power_rule", "ucb95",
@@ -191,8 +311,10 @@ def common_args(config, device):
         "--power_constraint_margin_w", "0",
         "--macro_reward_mode", "strict_global",
         "--strict_hierarchy_validation", "1",
-        "--macro_action_mode", "delta",
+        "--macro_action_mode", MACRO_ACTION_MODE,
         "--macro_action_deadzone", "0.05",
+        "--macro_waypoint_radius_m", str(MACRO_WAYPOINT_RADIUS_M),
+        "--macro_waypoint_tolerance_m", str(MACRO_WAYPOINT_TOLERANCE_M),
         "--macro_flow_state", "1",
         "--macro_load_state", "1",
         "--macro_capacity_state", "1",
@@ -205,12 +327,24 @@ def common_args(config, device):
 def micro_checkpoint_path(stage, seed):
     return os.path.join(
         "results",
-        RESULTS_VERSION,
+        MICRO_PRETRAIN_SOURCE_VERSION,
         stage,
         f"seed{int(seed)}",
         "micro_pretrain",
         "checkpoints",
         "best.pt",
+    )
+
+
+def micro_replay_path(stage, seed):
+    return os.path.join(
+        "results",
+        MICRO_PRETRAIN_SOURCE_VERSION,
+        stage,
+        f"seed{int(seed)}",
+        "micro_pretrain",
+        "checkpoints",
+        "micro_replay.pt",
     )
 
 
@@ -231,7 +365,11 @@ def build_micro_pretrain(stage, seed, config, device):
         "--macro_propulsion_tiebreak_weight", "0",
         "--advisor_weight", "0",
         "--advisor_final_weight", "0",
-        "--energy_dual_power_window", "5",
+        "--energy_dual_power_window", str(ENERGY_DUAL_POWER_WINDOW),
+        "--sac_actor_lr", str(MICRO_PRETRAIN_SAC_ACTOR_LR),
+        "--sac_critic_lr", str(MICRO_PRETRAIN_SAC_CRITIC_LR),
+        "--sac_alpha_lr", str(MICRO_PRETRAIN_SAC_ALPHA_LR),
+        "--sac_initial_alpha", str(MICRO_PRETRAIN_SAC_INITIAL_ALPHA),
         "--results_subdir", subdir,
     ]
     return {
@@ -246,17 +384,31 @@ def build_micro_pretrain(stage, seed, config, device):
 
 def method_specs():
     td3_common = [
-        "--td3_exploration_decay_episodes", str(TRAINING_HORIZON),
-        "--td3_warmup_action_radius", str(normalized_macro_distance(6.0)),
-        "--td3_exploration_initial", str(normalized_macro_distance(0.4)),
-        "--td3_exploration_final", str(normalized_macro_distance(0.1)),
-        "--td3_policy_noise", "0.02",
-        "--td3_noise_clip", "0.05",
+        "--td3_replay_capacity", str(TD3_REPLAY_CAPACITY),
+        "--td3_warmup_steps", str(TD3_WARMUP_STEPS),
+        "--td3_updates_per_step", str(TD3_UPDATES_PER_STEP),
+        "--td3_policy_delay", str(TD3_POLICY_DELAY),
+        "--td3_actor_warmup_updates", str(TD3_ACTOR_WARMUP_UPDATES),
+        "--td3_exploration_decay_episodes",
+        str(TD3_EXPLORATION_DECAY_EPISODES),
+        "--td3_exploration_persistence", TD3_EXPLORATION_PERSISTENCE,
+        "--td3_warmup_action_radius",
+        str(normalized_macro_distance(TD3_WARMUP_ACTION_RADIUS_M)),
+        "--td3_exploration_initial",
+        str(normalized_macro_distance(TD3_EXPLORATION_INITIAL_M)),
+        "--td3_exploration_final",
+        str(normalized_macro_distance(TD3_EXPLORATION_FINAL_M)),
+        "--td3_policy_noise", str(TD3_POLICY_NOISE),
+        "--td3_noise_clip", str(TD3_NOISE_CLIP),
         "--td3_actor_lr", "3e-5",
         "--td3_critic_lr", "3e-4",
         "--td3_gamma", "0.99",
-        "--td3_hover_exploration_prob", "0",
-        "--td3_dual_power_window", "5",
+        "--td3_reward_scale", str(TD3_REWARD_SCALE),
+        "--macro_power_violation_penalty_weight",
+        str(MACRO_POWER_VIOLATION_PENALTY_WEIGHT),
+        "--td3_hover_exploration_prob",
+        str(TD3_HOVER_EXPLORATION_PROB),
+        "--td3_dual_power_window", str(ENERGY_DUAL_POWER_WINDOW),
         "--macro_shaping_initial", "0",
         "--macro_shaping_final", "0",
         "--macro_move_penalty_weight", "0",
@@ -267,14 +419,16 @@ def method_specs():
         "--ppo_gamma", "0.99",
         "--ppo_gae_lambda", "0.95",
         "--ppo_zero_inflated_actions", "0",
-        "--ppo_initial_log_std", str(ppo_log_std_for_distance(2.0)),
-        "--ppo_final_log_std", str(ppo_log_std_for_distance(0.1)),
+        "--ppo_initial_log_std",
+        str(ppo_log_std_for_distance(PPO_EXPLORATION_INITIAL_M)),
+        "--ppo_final_log_std",
+        str(ppo_log_std_for_distance(PPO_EXPLORATION_FINAL_M)),
         "--ppo_log_std_decay_episodes", str(TRAINING_HORIZON),
         "--ppo_actor_lr", "3e-5",
         "--ppo_target_kl", "0.01",
         "--ppo_actor_final_lr", "1e-5",
         "--ppo_lr_decay_episodes", str(TRAINING_HORIZON),
-        "--energy_dual_power_window", "5",
+        "--energy_dual_power_window", str(ENERGY_DUAL_POWER_WINDOW),
         "--macro_shaping_initial", "0",
         "--macro_shaping_final", "0",
         "--macro_move_penalty_weight", "0",
@@ -286,10 +440,7 @@ def method_specs():
         {
             "method": "joint_td3_sac",
             "script": "train_centralized_td3.py",
-            "args": [
-                "--micro_solver", "sac",
-                "--td3_replay_capacity", "3000",
-            ] + td3_common,
+            "args": ["--micro_solver", "sac"] + td3_common,
             "uses_micro_checkpoint": True,
         },
         {
@@ -329,9 +480,19 @@ def build_experiments(stage, seeds, config, device):
             if spec["uses_micro_checkpoint"]:
                 method_args += [
                     "--micro_ckpt", micro_checkpoint_path(stage, seed),
+                    "--sac_actor_lr", str(JOINT_SAC_ACTOR_LR),
+                    "--sac_critic_lr", str(JOINT_SAC_CRITIC_LR),
+                    "--sac_alpha_lr", str(JOINT_SAC_ALPHA_LR),
+                    "--sac_initial_alpha", str(JOINT_SAC_INITIAL_ALPHA),
+                    "--sac_policy_delay", str(JOINT_SAC_POLICY_DELAY),
+                    "--sac_actor_warmup_updates",
+                    str(JOINT_SAC_ACTOR_WARMUP_UPDATES),
                 ]
-                if spec["method"] == "joint_ppo_sac":
-                    method_args += ["--resume_micro_optimizer", "1"]
+                if RESUME_MICRO_REPLAY:
+                    method_args += [
+                        "--micro_replay", micro_replay_path(stage, seed),
+                    ]
+                method_args += ["--resume_micro_optimizer", "0"]
             experiments.append(
                 {
                     "name": f"{spec['method']}_s{seed}",
@@ -464,7 +625,16 @@ def main():
     ):
         for seed in seeds:
             checkpoint = os.path.join(PROJECT_ROOT, micro_checkpoint_path(args.stage, seed))
-            if args.setup_only or not os.path.isfile(checkpoint):
+            replay = os.path.join(PROJECT_ROOT, micro_replay_path(args.stage, seed))
+            setup_ready = os.path.isfile(checkpoint) and (
+                not RESUME_MICRO_REPLAY or os.path.isfile(replay)
+            )
+            if args.setup_only or not setup_ready:
+                if MICRO_PRETRAIN_SOURCE_VERSION != RESULTS_VERSION:
+                    raise FileNotFoundError(
+                        "Configured external micro pretraining artifacts do "
+                        f"not both exist: checkpoint={checkpoint}, replay={replay}"
+                    )
                 setup_experiments.append(
                     build_micro_pretrain(args.stage, seed, config, args.device)
                 )
@@ -488,7 +658,8 @@ def main():
     print(f"  capacity_audit={audit_summary}")
     print(
         "  CPU=priced_maxweight, aggregate_cpu_cap=disabled, "
-        f"per_uav_average_battery_budget={UAV_POWER_BUDGET_W:.1f}W"
+        f"power_constraint={POWER_CONSTRAINT_SCOPE}, "
+        f"system_average_budget={SYSTEM_POWER_BUDGET_W:.1f}W"
     )
     print("  deployment=arrivals+mobility, service=paused for exactly 1s")
 

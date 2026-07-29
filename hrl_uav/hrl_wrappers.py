@@ -3,6 +3,26 @@ import numpy as np
 from gymnasium import spaces
 
 from .env import UAV_MEC_Env
+from .routing import centered_stick_breaking_to_simplex
+from .routing import project_rows_to_simplex
+
+
+def normalized_power_excess(energy_ratio):
+    """Return only normalized consumption above the power budget."""
+    values = np.asarray(energy_ratio, dtype=np.float64)
+    excess = np.maximum(values - 1.0, 0.0)
+    if values.ndim == 0:
+        return float(excess)
+    return excess
+
+
+def normalized_power_residual(energy_ratio):
+    """Return the signed residual used by a long-term power constraint."""
+    values = np.asarray(energy_ratio, dtype=np.float64)
+    residual = values - 1.0
+    if values.ndim == 0:
+        return float(residual)
+    return residual
 
 
 class HRL_Wrapper(gym.Env):
@@ -32,6 +52,9 @@ class HRL_Wrapper(gym.Env):
         u2u_bandwidth_mhz=3.0,
         micro_diag_bias=0.5,
         micro_action_scale=1.0,
+        micro_action_encoding="projected_full",
+        micro_stick_breaking_scale=4.0,
+        micro_reward_scale=10.0,
         micro_state_mode="pressure",
         cpu_alloc_mode="priority_kkt",
         kkt_v=1.0,
@@ -70,6 +93,7 @@ class HRL_Wrapper(gym.Env):
         gm_speed_noise_std=0.1,
         gm_heading_noise_std=0.1,
         user_zone_radius=80.0,
+        min_uav_separation_m=5.0,
     ):
         super(HRL_Wrapper, self).__init__()
 
@@ -106,12 +130,37 @@ class HRL_Wrapper(gym.Env):
             gm_speed_noise_std=gm_speed_noise_std,
             gm_heading_noise_std=gm_heading_noise_std,
             user_zone_radius=user_zone_radius,
+            min_uav_separation_m=min_uav_separation_m,
         )
 
         self.N = num_uavs
-        self.micro_reward_scale = 10.0
+        self.micro_reward_scale = float(micro_reward_scale)
+        if (
+            not np.isfinite(self.micro_reward_scale)
+            or self.micro_reward_scale <= 0.0
+        ):
+            raise ValueError("micro_reward_scale must be finite and positive.")
         self.micro_diag_bias = float(micro_diag_bias)
         self.micro_action_scale = float(micro_action_scale)
+        self.micro_action_encoding = str(micro_action_encoding).lower()
+        if self.micro_action_encoding not in (
+            "projected_full",
+            "stick_breaking",
+        ):
+            raise ValueError(
+                "micro_action_encoding must be 'projected_full' or "
+                "'stick_breaking'."
+            )
+        self.micro_stick_breaking_scale = float(
+            micro_stick_breaking_scale
+        )
+        if (
+            not np.isfinite(self.micro_stick_breaking_scale)
+            or self.micro_stick_breaking_scale <= 0.0
+        ):
+            raise ValueError(
+                "micro_stick_breaking_scale must be finite and positive."
+            )
         self.micro_holding_weight = 1.0
         self.micro_queue_weight = 0.0
         self.micro_energy_weight = 1.0
@@ -235,9 +284,15 @@ class HRL_Wrapper(gym.Env):
         self.macro_anchor_cost_weight = 0.0
         self.macro_zone_ingress_weight = float(macro_zone_ingress_weight)
         self.macro_action_mode = str(macro_action_mode).lower()
-        if self.macro_action_mode not in ("polar", "delta", "waypoint"):
+        if self.macro_action_mode not in (
+            "polar",
+            "delta",
+            "waypoint",
+            "centroid_waypoint",
+        ):
             raise ValueError(
-                "macro_action_mode must be 'polar', 'delta', or 'waypoint'."
+                "macro_action_mode must be 'polar', 'delta', 'waypoint', "
+                "or 'centroid_waypoint'."
             )
         self.macro_waypoint_radius_m = float(macro_waypoint_radius_m)
         self.macro_waypoint_tolerance_m = float(macro_waypoint_tolerance_m)
@@ -277,11 +332,15 @@ class HRL_Wrapper(gym.Env):
             dtype=np.float32,
         )
 
-        # Micro Action: 2 * N * N allocation fraction matrix
+        micro_action_dim = (
+            2 * self.N * (self.N - 1)
+            if self.micro_action_encoding == "stick_breaking"
+            else 2 * self.N * self.N
+        )
         self.micro_action_space = spaces.Box(
             low=-1.0,
             high=1.0,
-            shape=(2 * self.N * self.N,),
+            shape=(micro_action_dim,),
             dtype=np.float32,
         )
 
@@ -492,16 +551,31 @@ class HRL_Wrapper(gym.Env):
         self._reset_macro_summary_accumulator()
 
     def _expected_macro_upload_mbits(self):
-        expected_mbps = np.asarray(
-            getattr(
-                self.env,
-                "zone_expected_offered_load_mbps",
-                np.zeros(self.N, dtype=np.float32),
-            ),
-            dtype=np.float32,
+        user_expected_mbps = (
+            np.asarray(self.env.user_lambda_high, dtype=np.float64)
+            * np.asarray(
+                self.env.user_task_size_high_mbits,
+                dtype=np.float64,
+            )
+            + np.asarray(self.env.user_lambda_low, dtype=np.float64)
+            * np.asarray(
+                self.env.user_task_size_low_mbits,
+                dtype=np.float64,
+            )
         )
+        expected_mbps = np.zeros(self.N, dtype=np.float64)
+        if (
+            user_expected_mbps.shape == (self.env.M,)
+            and float(np.sum(user_expected_mbps)) > 1e-8
+        ):
+            associations = np.asarray(
+                self.env.user_allocations,
+                dtype=np.int64,
+            )
+            np.add.at(expected_mbps, associations, user_expected_mbps)
+
         if expected_mbps.shape[0] != self.N or np.sum(expected_mbps) <= 1e-8:
-            expected_mbps = np.zeros(self.N, dtype=np.float32)
+            expected_mbps = np.zeros(self.N, dtype=np.float64)
             for i in range(self.N):
                 if hasattr(self.env, "_get_zone_target_load_mbps"):
                     expected_mbps[i] = float(self.env._get_zone_target_load_mbps(i))
@@ -509,7 +583,7 @@ class HRL_Wrapper(gym.Env):
                     expected_mbps[i] = 1.0
 
         expected = expected_mbps * float(self.env.macro_dt)
-        expected = np.maximum(expected, 1e-6).astype(np.float32)
+        expected = np.maximum(expected, 0.0).astype(np.float32)
         self.macro_flow_norm_mbits = float(max(np.max(expected), 1.0))
         return expected
 
@@ -553,19 +627,15 @@ class HRL_Wrapper(gym.Env):
             raw_state.get("user_coords", self.env.user_coords),
             dtype=np.float64,
         )
-        assigned = np.asarray(self.env.user_allocations, dtype=np.int64)
-        assigned = np.clip(assigned, 0, self.N - 1)
-
-        diff = user_coords - positions[assigned]
-        dist_sq = np.sum(diff ** 2, axis=1) + float(self.env.H) ** 2
-        channel_gain = float(self.env.beta_0) / np.maximum(dist_sq, 1e-8)
-        user_bandwidth = float(self.env.B_gt_total) / max(self.env.M, 1)
+        assigned = np.asarray(
+            self.env.user_allocations,
+            dtype=np.int64,
+        )
         user_rate_mbps = (
-            user_bandwidth
-            * np.log2(
-                1.0
-                + (float(self.env.p_gt) * channel_gain)
-                / float(self.env.noise_power)
+            self.env.compute_u2g_rate_bps(
+                user_coords=user_coords,
+                uav_coords=positions,
+                associations=assigned,
             )
             / 1e6
         )
@@ -581,19 +651,8 @@ class HRL_Wrapper(gym.Env):
         np.fill_diagonal(active, False)
 
         rates = np.zeros((self.N, self.N), dtype=np.float64)
-        active_count = int(np.count_nonzero(active))
-        if active_count <= 0:
-            return rates.astype(np.float32)
-
-        diff = positions[:, None, :] - positions[None, :, :]
-        dist_sq = np.sum(diff ** 2, axis=-1)
-        np.fill_diagonal(dist_sq, np.inf)
-        channel_gain = float(self.env.beta_0) / np.maximum(dist_sq, 1e-8)
-        bandwidth_hz = float(self.env.B_u2u_total) / max(active_count, 1)
-        rates_bps = bandwidth_hz * np.log2(
-            1.0
-            + (float(self.env.p_u2u) * channel_gain)
-            / float(self.env.noise_power)
+        rates_bps = self.env.compute_u2u_rate_bps(
+            uav_coords=positions,
         )
         rates[active] = rates_bps[active] / 1e6
         return rates.astype(np.float32)
@@ -664,16 +723,9 @@ class HRL_Wrapper(gym.Env):
         ):
             diff = uav_coords[:, None, :] - uav_coords[None, :, :]
             dist_matrix = np.linalg.norm(diff, axis=-1)
-            dist_sq = np.sum(diff ** 2, axis=-1)
-            np.fill_diagonal(dist_sq, np.inf)
-
-            channel_gain = self.env.beta_0 / np.maximum(dist_sq, 1e-8)
-            np.fill_diagonal(channel_gain, 0.0)
-
-            nominal_rate_bps = self.env.B_u2u_total * np.log2(
-                1.0 + (self.env.p_u2u * channel_gain) / self.env.noise_power
+            nominal_rate_bps = self.env.compute_u2u_rate_bps(
+                uav_coords=uav_coords,
             )
-            np.fill_diagonal(nominal_rate_bps, 0.0)
 
             self._u2u_cache_coords = uav_coords.copy()
             self._u2u_cache_result = (
@@ -1204,7 +1256,6 @@ class HRL_Wrapper(gym.Env):
         self._macro_slot_index += 1
         raw_state_before = self.env.get_raw_state()
         flow_ref = self._estimate_macro_flow_reference(raw_state_before)
-        self.current_macro_flow_reference_mbits = flow_ref.copy()
         pre_macro_cost_info, pre_macro_cost_info_per_uav = self._compute_macro_costs(
             raw_state_before,
             flow_ref,
@@ -1247,7 +1298,7 @@ class HRL_Wrapper(gym.Env):
                 ],
                 axis=1,
             ).astype(np.float32)
-        else:
+        elif self.macro_action_mode == "waypoint":
             action_norm = np.linalg.norm(action, axis=1, keepdims=True)
             safe_norm = np.maximum(action_norm, 1.0)
             bounded_action = action / safe_norm
@@ -1287,6 +1338,47 @@ class HRL_Wrapper(gym.Env):
                 0.0,
                 move_distance / max(self.max_macro_displacement, 1e-8),
             )
+        else:
+            action_norm = np.linalg.norm(action, axis=1, keepdims=True)
+            safe_norm = np.maximum(action_norm, 1.0)
+            bounded_action = action / safe_norm
+            centroids = np.asarray(
+                raw_state_before["weighted_centroids"],
+                dtype=np.float32,
+            )
+            waypoint_targets = np.clip(
+                centroids + bounded_action * self.macro_waypoint_radius_m,
+                0.0,
+                1000.0,
+            ).astype(np.float32)
+            to_target = waypoint_targets - np.asarray(
+                raw_state_before["uav_coords"],
+                dtype=np.float32,
+            )
+            waypoint_remaining = np.linalg.norm(
+                to_target,
+                axis=1,
+                keepdims=True,
+            )
+            arrived = (
+                waypoint_remaining[:, 0]
+                <= self.macro_waypoint_tolerance_m
+            )
+            move_distance = np.minimum(
+                waypoint_remaining[:, 0],
+                self.max_macro_displacement,
+            )
+            move_direction = to_target / np.maximum(waypoint_remaining, 1e-8)
+            macro_actions = (
+                move_direction * move_distance[:, None]
+            ).astype(np.float32)
+            hover_mask = arrived
+            macro_actions[hover_mask] = 0.0
+            command_norm = np.where(
+                hover_mask,
+                0.0,
+                move_distance / max(self.max_macro_displacement, 1e-8),
+            )
 
         _, h_flying_penalty, mac_info = self.env.macro_step(macro_actions)
 
@@ -1305,6 +1397,7 @@ class HRL_Wrapper(gym.Env):
 
         projected_state = dict(raw_state_before)
         projected_state["uav_coords"] = projected_uav_coords.copy()
+        self.current_macro_flow_reference_mbits = flow_ref.copy()
         projected_cost_info, projected_cost_info_per_uav = self._compute_macro_costs(
             projected_state,
             flow_ref,
@@ -1565,7 +1658,7 @@ class HRL_Wrapper(gym.Env):
     def micro_step(self, action):
         """
         [REWARD SHAPING]
-        - 使用 softmax 将连续动作映射为路由比例
+        - 将连续动作投影到包含边界点的完整路由单纯形
         # 解析连续动作并映射为流量分配比例
         # 微观层输出: 2 * N * N (高优/低优路由矩阵)
         # 这里假设 action 被限制在 [-1, 1]
@@ -1578,28 +1671,57 @@ class HRL_Wrapper(gym.Env):
             split_ratios_high = np.eye(self.N, dtype=np.float32)
             split_ratios_low = np.eye(self.N, dtype=np.float32)
         else:
-            action_matrix = (
-                np.asarray(action, dtype=np.float32).reshape(2, self.N, self.N)
-                * self.micro_action_scale
-            )
-            action_matrix = np.clip(
-                action_matrix,
-                -self.micro_action_scale,
-                self.micro_action_scale,
-            )
-
-            # Diagonal retention is a representable prior shared by every
-            # learned/optimized cooperative policy.
-            diag_bias = np.eye(self.N) * self.micro_diag_bias
-            action_matrix += diag_bias
-
-            # Row-wise softmax guarantees a valid routing simplex.
-            e_x = np.exp(
-                action_matrix - np.max(action_matrix, axis=2, keepdims=True)
-            )
-            split_ratios = e_x / e_x.sum(axis=2, keepdims=True)
+            flat_action = np.asarray(action, dtype=np.float32).reshape(-1)
+            full_action_dim = 2 * self.N * self.N
+            latent_action_dim = 2 * self.N * (self.N - 1)
+            if (
+                self.micro_action_encoding == "stick_breaking"
+                and flat_action.size == latent_action_dim
+            ):
+                latent_action = np.clip(
+                    flat_action.reshape(2, self.N, self.N - 1),
+                    -1.0,
+                    1.0,
+                )
+                split_ratios = centered_stick_breaking_to_simplex(
+                    latent_action,
+                    logit_scale=self.micro_stick_breaking_scale,
+                )
+                if self.micro_diag_bias != 0.0:
+                    split_ratios += (
+                        np.eye(self.N, dtype=np.float64)[None, ...]
+                        * self.micro_diag_bias
+                    )
+                    split_ratios /= np.sum(
+                        split_ratios,
+                        axis=-1,
+                        keepdims=True,
+                    )
+            elif flat_action.size == full_action_dim:
+                action_matrix = (
+                    flat_action.reshape(2, self.N, self.N)
+                    * self.micro_action_scale
+                )
+                action_matrix = np.clip(
+                    action_matrix,
+                    -self.micro_action_scale,
+                    self.micro_action_scale,
+                )
+                diag_bias = np.eye(self.N) * self.micro_diag_bias
+                action_matrix += diag_bias
+                split_ratios = project_rows_to_simplex(action_matrix)
+            else:
+                raise ValueError(
+                    f"Micro action has {flat_action.size} elements; expected "
+                    f"{latent_action_dim} for stick_breaking or "
+                    f"{full_action_dim} for a full routing matrix."
+                )
             split_ratios_high = split_ratios[0]
             split_ratios_low = split_ratios[1]
+        split_ratios = np.stack(
+            [split_ratios_high, split_ratios_low],
+            axis=0,
+        )
 
         self._sync_cpu_energy_prices()
         raw_state, info = self.env.micro_step(
@@ -1657,6 +1779,7 @@ class HRL_Wrapper(gym.Env):
             self.N,
             dtype=np.float64,
         )
+        service_energy_constraint_ratio = 0.0
         energy_budget_step_per_uav = np.zeros(
             self.N,
             dtype=np.float64,
@@ -1670,6 +1793,10 @@ class HRL_Wrapper(gym.Env):
                 np.maximum(energy_budget_step_per_uav, 1e-8),
             )
             energy_budget_step = float(np.sum(energy_budget_step_per_uav))
+            service_energy_constraint_ratio = service_energy / max(
+                energy_budget_step,
+                1e-8,
+            )
             energy_constraint_ratio = float(
                 np.mean(energy_constraint_ratio_per_uav)
             )
@@ -1679,12 +1806,18 @@ class HRL_Wrapper(gym.Env):
             lagrangian_energy_cost = float(
                 np.dot(
                     self.energy_lagrange_multipliers,
-                    energy_constraint_ratio_per_uav,
+                    normalized_power_residual(
+                        energy_constraint_ratio_per_uav
+                    ),
                 )
             )
         elif self.power_budget_w > 0.0:
             energy_budget_step = (
                 self.power_budget_w * float(self.env.micro_dt)
+            )
+            service_energy_constraint_ratio = service_energy / max(
+                energy_budget_step,
+                1e-8,
             )
             energy_constraint_ratio = full_energy / max(
                 energy_budget_step,
@@ -1696,7 +1829,8 @@ class HRL_Wrapper(gym.Env):
                 energy_budget_step / max(self.N, 1)
             )
             lagrangian_energy_cost = float(
-                self.energy_lagrange_multiplier * energy_constraint_ratio
+                self.energy_lagrange_multiplier
+                * normalized_power_residual(energy_constraint_ratio)
             )
         else:
             energy_budget_step = 0.0
@@ -1780,6 +1914,9 @@ class HRL_Wrapper(gym.Env):
             energy_budget_step_per_uav.copy()
         )
         info["energy_constraint_ratio"] = energy_constraint_ratio
+        info["service_energy_constraint_ratio"] = float(
+            service_energy_constraint_ratio
+        )
         info["energy_constraint_ratio_per_uav"] = (
             energy_constraint_ratio_per_uav.copy()
         )
@@ -1800,6 +1937,20 @@ class HRL_Wrapper(gym.Env):
         info["micro_cost_raw"] = micro_cost_raw
         info["micro_reward_unscaled"] = -micro_cost_raw
         info["micro_action_scale"] = self.micro_action_scale
+        info["micro_action_encoding"] = self.micro_action_encoding
+        route_entropy = -np.sum(
+            split_ratios
+            * np.log(np.maximum(split_ratios, 1e-12)),
+            axis=-1,
+        )
+        info["micro_route_entropy_mean"] = float(np.mean(route_entropy))
+        info["micro_route_boundary_fraction"] = float(
+            np.mean(
+                (split_ratios <= 0.01)
+                | (split_ratios >= 0.99)
+            )
+        )
+        info["micro_route_max_ratio"] = float(np.max(split_ratios))
         info["micro_holding_weight"] = self.micro_holding_weight
         info["micro_queue_weight"] = self.micro_queue_weight
         info["micro_energy_weight"] = self.micro_energy_weight
@@ -1855,7 +2006,9 @@ class HRL_Wrapper(gym.Env):
             J_step_pu = (
                 self.J_w_delay * cost_delay_pu
                 + self.energy_lagrange_multipliers
-                * energy_constraint_ratio_per_uav
+                * normalized_power_residual(
+                    energy_constraint_ratio_per_uav
+                )
             ).astype(np.float32)
         else:
             J_step_pu = (
@@ -1964,6 +2117,31 @@ class HRL_Wrapper(gym.Env):
         holding_reward_sum = -self.micro_reward_scale * sum(
             float(info.get("delay_objective_step", 0.0)) for info in infos
         )
+        energy_constraint_ratio_sum = float(
+            sum(
+                float(info.get("energy_constraint_ratio", 0.0))
+                for info in infos
+            )
+        )
+        service_energy_constraint_ratio_sum = float(
+            sum(
+                float(info.get("service_energy_constraint_ratio", 0.0))
+                for info in infos
+            )
+        )
+        energy_constraint_ratio_per_uav_sum = np.sum(
+            [
+                np.asarray(
+                    info.get(
+                        "energy_constraint_ratio_per_uav",
+                        np.zeros(self.N),
+                    ),
+                    dtype=np.float64,
+                )
+                for info in infos
+            ],
+            axis=0,
+        )
         return {
             "phase": "deployment" if service_paused else "service",
             "duration_s": frame_steps * float(self.env.micro_dt),
@@ -1972,24 +2150,21 @@ class HRL_Wrapper(gym.Env):
             "reward_sum": float(np.sum(rewards)),
             "primal_reward_sum": float(primal_reward_sum),
             "holding_reward_sum": float(holding_reward_sum),
-            "energy_constraint_ratio_sum": float(
-                sum(
-                    float(info.get("energy_constraint_ratio", 0.0))
-                    for info in infos
-                )
+            "energy_constraint_ratio_sum": energy_constraint_ratio_sum,
+            "energy_constraint_ratio_mean": (
+                energy_constraint_ratio_sum / max(frame_steps, 1)
             ),
-            "energy_constraint_ratio_per_uav_sum": np.sum(
-                [
-                    np.asarray(
-                        info.get(
-                            "energy_constraint_ratio_per_uav",
-                            np.zeros(self.N),
-                        ),
-                        dtype=np.float64,
-                    )
-                    for info in infos
-                ],
-                axis=0,
+            "service_energy_constraint_ratio_sum": (
+                service_energy_constraint_ratio_sum
+            ),
+            "service_energy_constraint_ratio_mean": (
+                service_energy_constraint_ratio_sum / max(frame_steps, 1)
+            ),
+            "energy_constraint_ratio_per_uav_sum": (
+                energy_constraint_ratio_per_uav_sum
+            ),
+            "energy_constraint_ratio_per_uav_mean": (
+                energy_constraint_ratio_per_uav_sum / max(frame_steps, 1)
             ),
             "done": bool(done),
             "infos": infos,
@@ -2174,6 +2349,8 @@ class HRL_Wrapper(gym.Env):
             "movement_penalty_per_uav": (
                 self.current_macro_movement_penalty_per_uav.copy()
             ),
+            "propulsion_penalty": float(propulsion_penalty),
+            "propulsion_penalty_per_uav": propulsion_penalty_per_uav.copy(),
             "propulsion_delta_energy": float(
                 np.mean(self.current_macro_propulsion_delta_per_uav)
             ),

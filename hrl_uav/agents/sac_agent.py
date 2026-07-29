@@ -1,4 +1,6 @@
 import numpy as np
+import math
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -147,6 +149,38 @@ class Memory():
         new_mem = self.mem[sample_index, :]
         return new_mem
 
+    def state_dict(self):
+        pool_size = min(self.memory_counter, self.capacity)
+        start_global = max(0, self.memory_counter - pool_size)
+        indices = np.arange(
+            start_global,
+            self.memory_counter,
+            dtype=np.int64,
+        ) % self.capacity
+        return {
+            "transitions": self.mem[indices, :].copy(),
+            "transition_width": int(self.mem.shape[1]),
+            "recent_window": int(self.recent_window),
+            "recent_ratio": float(self.recent_ratio),
+        }
+
+    def load_state_dict(self, state):
+        if not isinstance(state, dict) or "transitions" not in state:
+            raise ValueError("Replay state must contain transitions.")
+        transitions = np.asarray(state["transitions"], dtype=np.float32)
+        if transitions.ndim != 2:
+            raise ValueError("Replay transitions must be a 2-D array.")
+        if transitions.shape[1] != self.mem.shape[1]:
+            raise ValueError(
+                "Replay transition width "
+                f"{transitions.shape[1]} does not match {self.mem.shape[1]}."
+            )
+        retained = transitions[-self.capacity :]
+        self.mem.fill(0.0)
+        self.mem[: retained.shape[0], :] = retained
+        self.memory_counter = int(retained.shape[0])
+        return self.memory_counter
+
 
 class Actor():
     def __init__(self, state_dim, action_dim):
@@ -199,23 +233,38 @@ class Actor():
         action = torch.clamp(action, self.min_action, self.max_action)
         return action, action_logprob
 
-    def learn(self, actor_loss):
+    def learn(self, actor_loss, max_grad_norm=0.0):
         loss = actor_loss
         self.optimizer.zero_grad()
         loss.backward()
+        grad_norm = torch.nn.utils.clip_grad_norm_(
+            self.action_net.parameters(),
+            float(max_grad_norm) if max_grad_norm > 0.0 else float("inf"),
+        )
         self.optimizer.step()
+        return float(grad_norm)
 
 
 class Entroy():
-    def __init__(self, action_dim=32):
+    def __init__(self, action_dim=32, initial_alpha=1.0):
+        initial_alpha = float(initial_alpha)
+        if not math.isfinite(initial_alpha) or initial_alpha <= 0.0:
+            raise ValueError("initial_alpha must be finite and positive.")
         self.target_entropy = -float(action_dim)
-        self.log_alpha = torch.zeros(
-            1,
+        self.log_alpha = torch.full(
+            (1,),
+            math.log(initial_alpha),
             requires_grad=True,
             device=device,
         )
         self.alpha = self.log_alpha.exp()
         self.optimizer = torch.optim.Adam([self.log_alpha], lr=q_lr)
+
+    def temperature_loss(self, log_prob):
+        return -(
+            self.log_alpha
+            * (log_prob + self.target_entropy).detach()
+        ).mean()
 
     def learn(self, entroy_loss):
         loss = entroy_loss
@@ -248,11 +297,16 @@ class Critic():
     def get_v(self, s, a):
         return self.critic_v(s, a)
 
-    def learn(self, current_q1, current_q2, target_q):
+    def learn(self, current_q1, current_q2, target_q, max_grad_norm=0.0):
         loss = self.lossfunc(current_q1, target_q) + self.lossfunc(
             current_q2,
             target_q,
         )
         self.optimizer.zero_grad()
         loss.backward()
+        grad_norm = torch.nn.utils.clip_grad_norm_(
+            self.critic_v.parameters(),
+            float(max_grad_norm) if max_grad_norm > 0.0 else float("inf"),
+        )
         self.optimizer.step()
+        return float(grad_norm)

@@ -75,6 +75,8 @@ class ParentTask:
     birth_time: float
     size_mbits: float
     cpu_cycles: float
+    remaining_upload_mbits: float = 0.0
+    upload_finish_time: float = None
     total_chunks: int = 0
     completed_chunks: int = 0
     finish_time: float = None
@@ -147,6 +149,8 @@ class UAV_MEC_Env:
         gm_speed_noise_std=0.1,
         gm_heading_noise_std=0.1,
         user_zone_radius=80.0,
+        min_uav_separation_m=5.0,
+        u2u_link_bandwidth_matrix_mhz=None,
     ):
 
         # ================== 1. 系统物理设定与参数 ==================
@@ -200,6 +204,8 @@ class UAV_MEC_Env:
         
         self.N = num_uavs      # 无人机数量 (默认 3)
         self.M = num_users     # 真实地面用户总数量 (默认 39)
+        if self.N <= 0 or self.M <= 0:
+            raise ValueError("num_uavs and num_users must be positive.")
         self.H = H             # 无人机飞行高度
         self.C = C             # CPU 周期数/bit
         self.kappa = kappa     # 能耗系数
@@ -213,6 +219,28 @@ class UAV_MEC_Env:
         # GT 上行 0.1 W、UAV 机间 1 W（论文功率非对称：机间链路更可靠）
         self.p_gt = float(p_gt_power)
         self.p_u2u = float(p_u2u_power)
+        self.min_uav_separation_m = float(min_uav_separation_m)
+        if self.min_uav_separation_m < 0.0:
+            raise ValueError("min_uav_separation_m must be non-negative.")
+        self.dynamic_u2u_bandwidth = u2u_link_bandwidth_matrix_mhz is None
+        self.u2u_link_bandwidth_matrix_hz = (
+            self._normalize_u2u_link_bandwidth_matrix(
+                u2u_link_bandwidth_matrix_mhz
+            )
+        )
+        self.last_u2u_link_bandwidth_matrix_hz = (
+            self.u2u_link_bandwidth_matrix_hz.copy()
+        )
+        self.communication_model_reference = (
+            "Xu et al., IEEE TCOM 2024, DOI 10.1109/TCOMM.2024.3361536"
+        )
+        self.u2g_association_policy = "fixed_region_uav"
+        self.u2g_bandwidth_policy = "orthogonal_equal_per_ground_terminal"
+        self.u2u_bandwidth_policy = (
+            "work_conserving_equal_active_directed_links"
+            if self.dynamic_u2u_bandwidth
+            else "fixed_custom_directed_links"
+        )
         self.traffic_profile = str(traffic_profile).lower()
         self.arrival_dt = max(float(arrival_dt), self.resource_frame_dt)
         # Legacy experiments pause both arrivals and service during deployment.
@@ -335,6 +363,19 @@ class UAV_MEC_Env:
             if np.any(initial_positions < 0.0) or np.any(initial_positions > 1000.0):
                 raise ValueError("uav_initial_positions must lie in [0, 1000] m.")
             self.uav_initial_positions = initial_positions.copy()
+        if self.N > 1 and self.min_uav_separation_m > 0.0:
+            initial_diff = (
+                self.uav_initial_positions[:, None, :]
+                - self.uav_initial_positions[None, :, :]
+            )
+            initial_distances = np.linalg.norm(initial_diff, axis=-1)
+            initial_distances[np.eye(self.N, dtype=bool)] = np.inf
+            if float(np.min(initial_distances)) < (
+                self.min_uav_separation_m - 1e-9
+            ):
+                raise ValueError(
+                    "uav_initial_positions violate min_uav_separation_m."
+                )
         if self.N > 3:
             # 超过 3 台时，额外的 UAV 初始位置已由 base_anchor_points 提供
             pass
@@ -406,6 +447,7 @@ class UAV_MEC_Env:
         
         # 3. UAV 部署在区域外围的三角形初始位置（以 (500,500) 为中心）
         self.uav_coords = self.uav_initial_positions.copy()
+        self.current_user_associations = self.user_allocations.copy()
 
         self.record_trajectory = record_trajectory
         if self.record_trajectory:
@@ -423,6 +465,138 @@ class UAV_MEC_Env:
     def _current_time(self):
         return float(self.global_micro_step) * float(self.micro_dt)
 
+    def _normalize_u2u_link_bandwidth_matrix(self, matrix_mhz):
+        if matrix_mhz is None:
+            matrix_hz = np.zeros((self.N, self.N), dtype=np.float64)
+            directed_links = self.N * max(self.N - 1, 0)
+            if directed_links > 0:
+                matrix_hz[~np.eye(self.N, dtype=bool)] = (
+                    self.B_u2u_total / directed_links
+                )
+            return matrix_hz
+
+        matrix_hz = np.asarray(matrix_mhz, dtype=np.float64) * 1e6
+        if matrix_hz.shape != (self.N, self.N):
+            raise ValueError(
+                "u2u_link_bandwidth_matrix_mhz must have shape "
+                f"({self.N}, {self.N})."
+            )
+        if np.any(~np.isfinite(matrix_hz)) or np.any(matrix_hz < 0.0):
+            raise ValueError(
+                "u2u_link_bandwidth_matrix_mhz must be finite and non-negative."
+            )
+        matrix_hz = matrix_hz.copy()
+        np.fill_diagonal(matrix_hz, 0.0)
+        if float(np.sum(matrix_hz)) > self.B_u2u_total + 1e-6:
+            raise ValueError(
+                "The fixed U2U link bandwidths exceed the total U2U bandwidth."
+            )
+        return matrix_hz
+
+    def get_nearest_uav_associations(self, user_coords=None, uav_coords=None):
+        users = np.asarray(
+            self.user_coords if user_coords is None else user_coords,
+            dtype=np.float64,
+        )
+        uavs = np.asarray(
+            self.uav_coords if uav_coords is None else uav_coords,
+            dtype=np.float64,
+        )
+        if users.ndim != 2 or users.shape[1] != 2:
+            raise ValueError("user_coords must have shape (K, 2).")
+        if uavs.shape != (self.N, 2):
+            raise ValueError(f"uav_coords must have shape ({self.N}, 2).")
+        horizontal_sq = np.sum(
+            (users[:, None, :] - uavs[None, :, :]) ** 2,
+            axis=2,
+        )
+        return np.argmin(horizontal_sq, axis=1).astype(np.int64)
+
+    def compute_u2g_rate_bps(
+        self,
+        user_coords=None,
+        uav_coords=None,
+        associations=None,
+    ):
+        users = np.asarray(
+            self.user_coords if user_coords is None else user_coords,
+            dtype=np.float64,
+        )
+        uavs = np.asarray(
+            self.uav_coords if uav_coords is None else uav_coords,
+            dtype=np.float64,
+        )
+        if associations is None:
+            if users.shape[0] != self.M:
+                raise ValueError(
+                    "associations are required when computing rates for a "
+                    "ground-terminal subset."
+                )
+            associations = self.user_allocations.copy()
+        associations = np.asarray(associations, dtype=np.int64)
+        if associations.shape != (users.shape[0],):
+            raise ValueError("associations must contain one UAV index per GT.")
+        if np.any(associations < 0) or np.any(associations >= self.N):
+            raise ValueError("associations contain an invalid UAV index.")
+
+        horizontal = users - uavs[associations]
+        distance_sq = np.sum(horizontal**2, axis=1) + float(self.H) ** 2
+        channel_gain = self.beta_0 / np.maximum(distance_sq, 1e-12)
+        bandwidth_per_gt = self.B_gt_total / max(self.M, 1)
+        return bandwidth_per_gt * np.log2(
+            1.0 + (self.p_gt * channel_gain) / self.noise_power
+        )
+
+    def allocate_u2u_link_bandwidth_hz(self, active_link_mask=None):
+        if not self.dynamic_u2u_bandwidth:
+            return self.u2u_link_bandwidth_matrix_hz.copy()
+
+        if active_link_mask is None:
+            active = ~np.eye(self.N, dtype=bool)
+        else:
+            active = np.asarray(active_link_mask, dtype=bool)
+            if active.shape != (self.N, self.N):
+                raise ValueError(
+                    f"active_link_mask must have shape ({self.N}, {self.N})."
+                )
+            active = active.copy()
+            np.fill_diagonal(active, False)
+
+        bandwidth_hz = np.zeros((self.N, self.N), dtype=np.float64)
+        active_count = int(np.count_nonzero(active))
+        if active_count > 0:
+            bandwidth_hz[active] = self.B_u2u_total / active_count
+        return bandwidth_hz
+
+    def compute_u2u_rate_bps(
+        self,
+        uav_coords=None,
+        active_link_mask=None,
+        return_bandwidth=False,
+    ):
+        if uav_coords is None:
+            spectral_efficiency = self._get_u2u_spectral_efficiency()
+        else:
+            coords = np.asarray(uav_coords, dtype=np.float64)
+            if coords.shape != (self.N, 2):
+                raise ValueError(f"uav_coords must have shape ({self.N}, 2).")
+            diff = coords[:, None, :] - coords[None, :, :]
+            dist_sq = np.sum(diff**2, axis=-1)
+            np.fill_diagonal(dist_sq, np.inf)
+            channel_gain = self.beta_0 / np.maximum(dist_sq, 1e-12)
+            np.fill_diagonal(channel_gain, 0.0)
+            spectral_efficiency = np.log2(
+                1.0 + (self.p_u2u * channel_gain) / self.noise_power
+            )
+            np.fill_diagonal(spectral_efficiency, 0.0)
+        bandwidth_hz = self.allocate_u2u_link_bandwidth_hz(
+            active_link_mask
+        )
+        rate_bps = bandwidth_hz * spectral_efficiency
+        if return_bandwidth:
+            return rate_bps, bandwidth_hz
+        return rate_bps
+
     def _new_loc_task_queues(self):
         return [deque() for _ in range(self.N)]
 
@@ -434,6 +608,8 @@ class UAV_MEC_Env:
         self.next_task_id = 0
         self.next_chunk_id = 0
         self.current_arrival_tasks_by_uav = [[] for _ in range(self.N)]
+        self.uplink_task_queues = [deque() for _ in range(self.M)]
+        self.completed_upload_tasks_by_uav = [[] for _ in range(self.N)]
         self.Q_loc_high_tasks = self._new_loc_task_queues()
         self.Q_loc_low_tasks = self._new_loc_task_queues()
         self.Q_tx_high_tasks = self._new_tx_task_queues()
@@ -693,11 +869,19 @@ class UAV_MEC_Env:
             ).astype(np.float64).copy(),
         }
 
-    def _create_parent_task(self, user_id, priority, size_mbits):
+    def _create_parent_task(
+        self,
+        user_id,
+        priority,
+        size_mbits,
+        source_uav=None,
+    ):
         task_id = self.next_task_id
         self.next_task_id += 1
 
-        source_uav = int(self.user_allocations[user_id])
+        if source_uav is None:
+            source_uav = int(self.user_allocations[int(user_id)])
+        source_uav = int(source_uav)
         task_type = self.device_type_names[
             int(self.user_device_type_ids[user_id])
         ]
@@ -710,6 +894,7 @@ class UAV_MEC_Env:
             birth_time=self._current_time(),
             size_mbits=float(size_mbits),
             cpu_cycles=float(size_mbits) * 1e6 * float(self.C),
+            remaining_upload_mbits=float(size_mbits),
         )
         self.parent_tasks[task_id] = parent
         self._register_arrived_parent_task(parent)
@@ -800,6 +985,113 @@ class UAV_MEC_Env:
         ):
             parent.finish_time = max(parent.chunk_finish_times)
             self._record_completed_parent_task(parent)
+
+    def _admit_current_arrival_tasks_to_uplink(self):
+        for task_ids in self.current_arrival_tasks_by_uav:
+            for task_id in task_ids:
+                parent = self.parent_tasks.get(task_id)
+                if parent is None:
+                    continue
+                self.uplink_task_queues[parent.user_id].append(task_id)
+
+    def _take_completed_upload_tasks(self):
+        completed = self.completed_upload_tasks_by_uav
+        self.completed_upload_tasks_by_uav = [[] for _ in range(self.N)]
+        return completed
+
+    def _serve_uplink_task_queues(self):
+        """Serve independent GT uplinks with the paper's B_K/K allocation."""
+        eps = 1e-12
+        step_start = self._current_time()
+        task_stage_durations = {}
+        for queue in self.uplink_task_queues:
+            for task_id in queue:
+                if task_id in self.parent_tasks:
+                    task_stage_durations[task_id] = float(self.micro_dt)
+
+        energy_per_source = np.zeros(self.N, dtype=np.float64)
+        service_per_user = np.zeros(self.M, dtype=np.float64)
+        active_time_per_user = np.zeros(self.M, dtype=np.float64)
+        completed_per_source = np.zeros(self.N, dtype=np.int64)
+
+        for user_id, queue in enumerate(self.uplink_task_queues):
+            elapsed = 0.0
+            while queue and elapsed < self.micro_dt - eps:
+                task_id = queue[0]
+                parent = self.parent_tasks.get(task_id)
+                if parent is None:
+                    queue.popleft()
+                    continue
+
+                source_uav = int(parent.source_uav)
+                rate_bps = float(
+                    self.compute_u2g_rate_bps(
+                        user_coords=self.user_coords[[user_id]],
+                        associations=np.asarray([source_uav], dtype=np.int64),
+                    )[0]
+                )
+                rate_mbits_per_s = rate_bps / 1e6
+                if rate_mbits_per_s <= eps:
+                    break
+
+                available_time = float(self.micro_dt) - elapsed
+                service_mbits = min(
+                    float(parent.remaining_upload_mbits),
+                    rate_mbits_per_s * available_time,
+                )
+                transmission_time = service_mbits / rate_mbits_per_s
+                parent.remaining_upload_mbits = max(
+                    float(parent.remaining_upload_mbits) - service_mbits,
+                    0.0,
+                )
+                service_per_user[user_id] += service_mbits
+                active_time_per_user[user_id] += transmission_time
+                energy_per_source[source_uav] += (
+                    self.p_gt * transmission_time
+                )
+                elapsed += transmission_time
+
+                if parent.remaining_upload_mbits > eps:
+                    break
+
+                queue.popleft()
+                parent.remaining_upload_mbits = 0.0
+                parent.upload_finish_time = step_start + elapsed
+                task_stage_durations[task_id] = elapsed
+                self.completed_upload_tasks_by_uav[source_uav].append(task_id)
+                completed_per_source[source_uav] += 1
+
+        upload_delay_high = 0.0
+        upload_delay_low = 0.0
+        upload_delay_per_uav = np.zeros(self.N, dtype=np.float64)
+        for task_id, stage_duration in task_stage_durations.items():
+            parent = self.parent_tasks.get(task_id)
+            if parent is None:
+                continue
+            if parent.priority == "high":
+                upload_delay_high += stage_duration
+                weighted_duration = 5.0 * stage_duration
+            else:
+                upload_delay_low += stage_duration
+                weighted_duration = stage_duration
+            upload_delay_per_uav[parent.source_uav] += weighted_duration
+
+        effective_rate_bps = np.divide(
+            service_per_user * 1e6,
+            active_time_per_user,
+            out=np.zeros(self.M, dtype=np.float64),
+            where=active_time_per_user > eps,
+        )
+        return {
+            "energy_per_uav": energy_per_source,
+            "service_mbits_per_user": service_per_user,
+            "active_time_s_per_user": active_time_per_user,
+            "effective_rate_bps_per_user": effective_rate_bps,
+            "completed_per_uav": completed_per_source,
+            "upload_delay_cost_high": float(upload_delay_high),
+            "upload_delay_cost_low": float(upload_delay_low),
+            "upload_delay_cost_per_uav": upload_delay_per_uav,
+        }
 
     def _discard_current_arrival_tasks(self):
         for task_ids in getattr(self, "current_arrival_tasks_by_uav", []):
@@ -1235,6 +1527,7 @@ class UAV_MEC_Env:
         # 3. UAV 部署在区域外围的三角形初始位置（以 (500,500) 为中心）
         self.uav_coords = self.uav_initial_positions.copy()
         self.uav_coords = np.clip(self.uav_coords, 0.0, 1000.0)
+        self.current_user_associations = self.user_allocations.copy()
         
         # 4. 初始化 GMMM 战术移动初速度
         self.instantaneous_centroids = self.weighted_centroids.copy()
@@ -1269,6 +1562,9 @@ class UAV_MEC_Env:
         self.mobility_update_count = 0
         self._u2u_spectral_cache_coords = None
         self._u2u_spectral_cache_result = None
+        self.last_u2u_link_bandwidth_matrix_hz = (
+            self.u2u_link_bandwidth_matrix_hz.copy()
+        )
         self.current_arrival_active_users = np.zeros(self.N)
         self.A_t_high = np.zeros(self.N)
         self.A_t_low = np.zeros(self.N)
@@ -1297,7 +1593,11 @@ class UAV_MEC_Env:
             'Q_tx_high': self.Q_tx_high.copy(),
             'Q_tx_low': self.Q_tx_low.copy(),
             'A_t_high': getattr(self, 'A_t_high', np.zeros(self.N)).copy(),
-            'A_t_low': getattr(self, 'A_t_low', np.zeros(self.N)).copy()
+            'A_t_low': getattr(self, 'A_t_low', np.zeros(self.N)).copy(),
+            'user_associations': self.current_user_associations.copy(),
+            'u2u_link_bandwidth_hz': (
+                self.last_u2u_link_bandwidth_matrix_hz.copy()
+            ),
         }
 
     @staticmethod
@@ -1440,6 +1740,7 @@ class UAV_MEC_Env:
                 self.user_lambda_low * self.arrival_dt
             ).astype(np.float32)
 
+        self.current_user_associations = self.user_allocations.copy()
         high_bits = counts_high * self.user_task_size_high_mbits
         low_bits = counts_low * self.user_task_size_low_mbits
         A_t_users = high_bits + low_bits
@@ -1452,12 +1753,14 @@ class UAV_MEC_Env:
                     user_idx,
                     "high",
                     self.user_task_size_high_mbits[user_idx],
+                    source_uav=self.current_user_associations[user_idx],
                 )
             for _ in range(low_count):
                 self._create_parent_task(
                     user_idx,
                     "low",
                     self.user_task_size_low_mbits[user_idx],
+                    source_uav=self.current_user_associations[user_idx],
                 )
         
         instantaneous_centroids = np.zeros((self.N, 2))
@@ -1482,10 +1785,12 @@ class UAV_MEC_Env:
         A_t_total_low = np.zeros(self.N)
         active_users_total = np.zeros(self.N)
         for i in range(self.N):
-            zone_mask = self.user_allocations == i
-            A_t_total_high[i] = np.sum(high_bits[zone_mask])
-            A_t_total_low[i] = np.sum(low_bits[zone_mask])
-            active_users_total[i] = np.sum((counts_high[zone_mask] + counts_low[zone_mask]) > 0)
+            source_mask = self.current_user_associations == i
+            A_t_total_high[i] = np.sum(high_bits[source_mask])
+            A_t_total_low[i] = np.sum(low_bits[source_mask])
+            active_users_total[i] = np.sum(
+                (counts_high[source_mask] + counts_low[source_mask]) > 0
+            )
             
         if append_to_ground_buffer:
             self.current_arrival_active_users += active_users_total
@@ -2001,55 +2306,9 @@ class UAV_MEC_Env:
         arrival_low_this_step = self.A_t_low.copy()
         arrival_active_users_this_step = self.current_arrival_active_users.copy()
 
-        arrived_high = np.zeros(self.N)
-        arrived_low = np.zeros(self.N)
-        arrived_task_ids_by_uav = [[] for _ in range(self.N)]
-
-        if self.pending_upload_jobs:
-            active_upload_jobs = []
-            for job in self.pending_upload_jobs:
-                if job['remaining_steps'] > 0:
-                    active_upload_jobs.append(job)
-                    continue
-                target = job['target_uav']
-                arrived_high[target] += job['high_bits']
-                arrived_low[target] += job['low_bits']
-                arrived_task_ids_by_uav[target].extend(
-                    job.get('task_ids', [])
-                )
-            self.pending_upload_jobs = active_upload_jobs
-
-        if np.sum(self.A_t_high) + np.sum(self.A_t_low) > 0:
-            assigned_uavs = self.user_allocations
-            user_offsets = self.user_coords - self.uav_coords[assigned_uavs]
-            user_dist_sq = np.sum(user_offsets**2, axis=1) + self.H**2
-            user_channel_gain = self.beta_0 / np.maximum(user_dist_sq, 1e-8)
-            user_bandwidth = self.B_gt_total / max(self.M, 1)
-            user_rate_bps = user_bandwidth * np.log2(1.0 + (self.p_gt * user_channel_gain) / self.noise_power)
-            user_uplink_step_mbits = (user_rate_bps * self.micro_dt) / 1e6
-
-            for i in range(self.N):
-                zone_mask = self.user_allocations == i
-                zone_capacity = np.sum(user_uplink_step_mbits[zone_mask])
-                total_bits = self.A_t_high[i] + self.A_t_low[i]
-                if total_bits <= 1e-12:
-                    continue
-                task_ids = list(self.current_arrival_tasks_by_uav[i])
-                active_user_ids = {
-                    int(self.parent_tasks[task_id].user_id)
-                    for task_id in task_ids
-                    if task_id in self.parent_tasks
-                }
-                upload_steps = max(1, int(np.ceil(total_bits / max(zone_capacity, 1e-8))))
-                self.pending_upload_jobs.append({
-                    'target_uav': i,
-                    'high_bits': float(self.A_t_high[i]),
-                    'low_bits': float(self.A_t_low[i]),
-                    'remaining_steps': upload_steps,
-                    'active_users': float(len(active_user_ids)),
-                    'task_ids': task_ids,
-                })
-                self.current_arrival_tasks_by_uav[i] = []
+        arrived_task_ids_by_uav = self._take_completed_upload_tasks()
+        self._admit_current_arrival_tasks_to_uplink()
+        uplink_metrics = self._serve_uplink_task_queues()
         self._clear_current_arrivals(discard_tasks=False)
 
         self._integrate_user_positions()
@@ -2101,17 +2360,18 @@ class UAV_MEC_Env:
             energy_comp_per_uav = self.kappa * (f_opt_array**3) * self.micro_dt
         total_E_comp = np.sum(energy_comp_per_uav)
 
-        spectral_efficiency = self._get_u2u_spectral_efficiency()
-
-        tx_demand_mask = (self.Q_tx_high + self.Q_tx_low) > 1e-9
+        tx_demand_mask = (
+            np.asarray(self.Q_tx_high, dtype=np.float64)
+            + np.asarray(self.Q_tx_low, dtype=np.float64)
+        ) > 1e-12
         np.fill_diagonal(tx_demand_mask, False)
-        num_active_links = np.count_nonzero(tx_demand_mask)
-
-        link_bandwidth = np.zeros((self.N, self.N))
-        if num_active_links > 0:
-            link_bandwidth[tx_demand_mask] = self.B_u2u_total / num_active_links
-
-        rate_bps = link_bandwidth * spectral_efficiency
+        rate_bps, u2u_link_bandwidth_hz = self.compute_u2u_rate_bps(
+            active_link_mask=tx_demand_mask,
+            return_bandwidth=True,
+        )
+        self.last_u2u_link_bandwidth_matrix_hz = (
+            u2u_link_bandwidth_hz.copy()
+        )
         mu_trans_mbits = (rate_bps * self.micro_dt) / 1e6
 
         actual_trans_high = self._serve_tx_task_queues(
@@ -2125,30 +2385,32 @@ class UAV_MEC_Env:
             "low",
         )
 
-        upload_delay_cost_per_uav = np.zeros(self.N, dtype=np.float32)
-        energy_uplink_per_uav = np.zeros(self.N, dtype=np.float32)
-        upload_delay_cost_high = 0.0
-        upload_delay_cost_low = 0.0
-        for job in self.pending_upload_jobs:
-            target = int(job['target_uav'])
-            high_delay = job['high_bits'] * job['remaining_steps'] * self.micro_dt
-            low_delay = job['low_bits'] * job['remaining_steps'] * self.micro_dt
-            upload_delay_cost_high += high_delay
-            upload_delay_cost_low += low_delay
-            if 0 <= target < self.N:
-                energy_uplink_per_uav[target] += (
-                    job['active_users'] * self.p_gt * self.micro_dt
-                )
-                upload_delay_cost_per_uav[target] += (
-                    5.0 * high_delay + low_delay
-                )
-            job['remaining_steps'] -= 1
+        upload_delay_cost_per_uav = np.asarray(
+            uplink_metrics["upload_delay_cost_per_uav"],
+            dtype=np.float32,
+        )
+        energy_uplink_per_uav = np.asarray(
+            uplink_metrics["energy_per_uav"],
+            dtype=np.float32,
+        )
+        upload_delay_cost_high = float(
+            uplink_metrics["upload_delay_cost_high"]
+        )
+        upload_delay_cost_low = float(
+            uplink_metrics["upload_delay_cost_low"]
+        )
         total_E_uplink = float(np.sum(energy_uplink_per_uav))
         upload_delay_cost = 5.0 * upload_delay_cost_high + upload_delay_cost_low
 
-        active_u2u_links = ((actual_trans_high > 0) | (actual_trans_low > 0)).astype(float)
+        actual_trans_total = actual_trans_high + actual_trans_low
+        u2u_active_time_s = np.divide(
+            actual_trans_total * 1e6,
+            rate_bps,
+            out=np.zeros_like(actual_trans_total, dtype=np.float64),
+            where=rate_bps > 1e-12,
+        )
         energy_trans_per_uav = np.sum(
-            active_u2u_links * self.p_u2u * self.micro_dt,
+            u2u_active_time_s * self.p_u2u,
             axis=1,
         ).astype(np.float32)
         total_E_trans = float(np.sum(energy_trans_per_uav))
@@ -2226,6 +2488,28 @@ class UAV_MEC_Env:
             'upload_delay_cost_high': upload_delay_cost_high,
             'upload_delay_cost_low': upload_delay_cost_low,
             'upload_delay_cost_per_uav': upload_delay_cost_per_uav.copy(),
+            'uplink_service_mbits_per_user': np.asarray(
+                uplink_metrics["service_mbits_per_user"],
+                dtype=np.float32,
+            ),
+            'uplink_active_time_s_per_user': np.asarray(
+                uplink_metrics["active_time_s_per_user"],
+                dtype=np.float32,
+            ),
+            'uplink_rate_bps_per_user': np.asarray(
+                uplink_metrics["effective_rate_bps_per_user"],
+                dtype=np.float32,
+            ),
+            'uplink_completed_tasks_per_uav': np.asarray(
+                uplink_metrics["completed_per_uav"],
+                dtype=np.int64,
+            ),
+            'user_associations': self.current_user_associations.copy(),
+            'u2u_rate_bps': rate_bps.astype(np.float64).copy(),
+            'u2u_link_bandwidth_hz': (
+                u2u_link_bandwidth_hz.copy()
+            ),
+            'u2u_active_time_s': u2u_active_time_s.copy(),
             'cpu_utilization_mean': np.mean(f_opt_array / np.maximum(self.F_max_array, 1e-8)),
             'cpu_utilization_per_uav': (f_opt_array / np.maximum(self.F_max_array, 1e-8)).copy(),
             'cpu_high_utilization_per_uav': (
@@ -2303,6 +2587,80 @@ class UAV_MEC_Env:
 
         return self.get_raw_state(), info
 
+    def _minimum_separation_along_joint_motion(self, start, delta):
+        if self.N < 2:
+            return np.inf
+        minimum = np.inf
+        for i in range(self.N):
+            for j in range(i + 1, self.N):
+                relative_start = start[i] - start[j]
+                relative_delta = delta[i] - delta[j]
+                denominator = float(np.dot(relative_delta, relative_delta))
+                if denominator <= 1e-14:
+                    fraction = 0.0
+                else:
+                    fraction = float(
+                        np.clip(
+                            -np.dot(relative_start, relative_delta)
+                            / denominator,
+                            0.0,
+                            1.0,
+                        )
+                    )
+                distance = np.linalg.norm(
+                    relative_start + fraction * relative_delta
+                )
+                minimum = min(minimum, float(distance))
+        return minimum
+
+    def _project_joint_motion_to_safe_separation(self, start, delta):
+        required = float(self.min_uav_separation_m)
+        if self.N < 2 or required <= 0.0:
+            return delta.copy(), 1.0
+        if (
+            self._minimum_separation_along_joint_motion(start, delta)
+            >= required - 1e-9
+        ):
+            return delta.copy(), 1.0
+
+        safe_scale = 1.0
+        required_sq = required**2
+        for i in range(self.N):
+            for j in range(i + 1, self.N):
+                relative_start = start[i] - start[j]
+                relative_delta = delta[i] - delta[j]
+                a = float(np.dot(relative_delta, relative_delta))
+                b = 2.0 * float(np.dot(relative_start, relative_delta))
+                c = float(np.dot(relative_start, relative_start)) - required_sq
+                if a <= 1e-14:
+                    continue
+                discriminant = b * b - 4.0 * a * c
+                if discriminant < 0.0:
+                    continue
+                root_term = np.sqrt(max(discriminant, 0.0))
+                roots = (
+                    (-b - root_term) / (2.0 * a),
+                    (-b + root_term) / (2.0 * a),
+                )
+                entering_roots = [
+                    root
+                    for root in roots
+                    if -1e-12 <= root <= 1.0 + 1e-12
+                ]
+                if entering_roots:
+                    safe_scale = min(
+                        safe_scale,
+                        max(min(entering_roots), 0.0),
+                    )
+
+        safe_delta = delta * safe_scale
+        if (
+            self._minimum_separation_along_joint_motion(start, safe_delta)
+            < required - 1e-7
+        ):
+            return np.zeros_like(delta), 0.0
+        return safe_delta, float(safe_scale)
+
     def macro_step(self, macro_actions):
         """
         Fly-Hover protocol for one 10s macro slot.
@@ -2310,16 +2668,31 @@ class UAV_MEC_Env:
         meters. UAVs fly for 1s and then hover for 9s.
         """
         macro_actions = np.asarray(macro_actions, dtype=np.float64)
+        if macro_actions.shape != (self.N, 2):
+            raise ValueError(
+                f"macro_actions must have shape ({self.N}, 2)."
+            )
         delta_xy = np.clip(macro_actions, -20.0, 20.0)
         t_fly = self.deployment_dt
         t_hover = self.macro_dt - self.deployment_dt
 
         current_coords = self.uav_coords.copy()
-        projected_coords = np.clip(current_coords + delta_xy, 0.0, 1000.0)
+        requested_coords = np.clip(
+            current_coords + delta_xy,
+            0.0,
+            1000.0,
+        )
+        requested_delta_xy = requested_coords - current_coords
+        actual_delta_xy, separation_scale = (
+            self._project_joint_motion_to_safe_separation(
+                current_coords,
+                requested_delta_xy,
+            )
+        )
+        projected_coords = current_coords + actual_delta_xy
 
-        # [REMOVED FENCE LOGIC] 废除物理硬限墙，依靠强化学习的软惩罚来约束区域飞行
-        # 这允许 UAV 更加自由、连贯地向目标中心移动，避免在边界处发生位置卡壳。
-        actual_delta_xy = projected_coords - current_coords
+        # The joint displacement is scaled only when the paper's pairwise
+        # safety-distance constraint would be violated along the flight leg.
         fly_distances = np.linalg.norm(actual_delta_xy, axis=1)
         fly_theta = np.where(
             fly_distances > 1e-8,
@@ -2372,7 +2745,16 @@ class UAV_MEC_Env:
             'macro_penalty': h_flying_penalty,
             'u2g_distances': centroid_distances.copy(),
             'anchor_distances': anchor_distance_values.copy(),
+            'requested_uav_coords': requested_coords.copy(),
             'projected_uav_coords': projected_coords.copy(),
+            'separation_projection_scale': float(separation_scale),
+            'minimum_flight_separation_m': float(
+                self._minimum_separation_along_joint_motion(
+                    current_coords,
+                    actual_delta_xy,
+                )
+            ),
+            'min_uav_separation_m': float(self.min_uav_separation_m),
             'pause_service_during_flight': self.pause_service_during_flight,
             'macro_transition_steps': transition_steps,
             'macro_service_pause_steps': (

@@ -14,6 +14,7 @@ bootstrap()
 from compare_common import add_common_args
 from compare_common import compute_u2u_rate_mbps
 from compare_common import run_fixed_policy_benchmark
+from hrl_uav.routing import project_rows_to_simplex
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -44,10 +45,11 @@ def _build_zone_priority_task_bits(env) -> np.ndarray:
     )
     high = np.zeros(base_env.N, dtype=np.float64)
     low = np.zeros(base_env.N, dtype=np.float64)
-    for zone_idx in range(base_env.N):
-        mask = base_env.user_allocations == zone_idx
-        high[zone_idx] = float(np.sum(high_per_user[mask]))
-        low[zone_idx] = float(np.sum(low_per_user[mask]))
+    associations = base_env.get_nearest_uav_associations()
+    for source_uav in range(base_env.N):
+        mask = associations == source_uav
+        high[source_uav] = float(np.sum(high_per_user[mask]))
+        low[source_uav] = float(np.sum(low_per_user[mask]))
     return np.concatenate([high, low], axis=0) * 1e6
 
 
@@ -94,7 +96,7 @@ def _sca_cache_key(env) -> Tuple[int, ...]:
     )
 
 
-def _routing_softmax(action, num_uavs, diagonal_bias, action_scale):
+def _routing_simplex(action, num_uavs, diagonal_bias, action_scale):
     action = np.asarray(action, dtype=np.float64).reshape(
         2 * num_uavs, num_uavs
     )
@@ -104,12 +106,7 @@ def _routing_softmax(action, num_uavs, diagonal_bias, action_scale):
         np.eye(num_uavs, dtype=np.float64),
         (2, 1),
     ) * float(diagonal_bias)
-    logits -= np.max(logits, axis=1, keepdims=True)
-    exp_logits = np.exp(logits)
-    return exp_logits / np.maximum(
-        np.sum(exp_logits, axis=1, keepdims=True),
-        1e-12,
-    )
+    return project_rows_to_simplex(logits)
 
 
 def _sca_energy_coefficients(omega_energy, energy_norm, num_uavs):
@@ -165,7 +162,7 @@ def _routing_surrogate_value_and_gradient(
         2 * num_uavs,
         num_uavs,
     )
-    rho = _routing_softmax(
+    rho = _routing_simplex(
         action,
         num_uavs,
         diagonal_bias,
@@ -301,13 +298,16 @@ def _routing_surrogate_value_and_gradient(
             + grad_energy_low,
         ]
     )
-    grad_action = np.empty_like(action)
+    grad_action = np.zeros_like(action)
     for row_idx in range(2 * num_uavs):
         probability = rho[row_idx]
         row_gradient = grad_rho[row_idx]
-        grad_action[row_idx] = float(action_scale) * probability * (
-            row_gradient - float(np.dot(row_gradient, probability))
-        )
+        support = probability > 1e-10
+        if np.any(support):
+            support_mean = float(np.mean(row_gradient[support]))
+            grad_action[row_idx, support] = float(action_scale) * (
+                row_gradient[support] - support_mean
+            )
     grad_action += (
         2.0 * float(proximal_weight) * (action - anchor_action)
     )
@@ -347,14 +347,7 @@ def optimize_routing_logits_SCA(
     solver="CLARABEL",
     verbose=False,
 ):
-    """Fast projected SCA over the same bounded logits used by SAC.
-
-    At each outer iteration, equal-bandwidth U2U coupling is fixed at the
-    current active-link estimate.  A quadratic upper model in the logits is
-    minimized by projected gradient with backtracking.  This is the same
-    route-only subproblem as the CVXPY reference above without rebuilding a
-    cone program at every 0.1-second slot.
-    """
+    """Fast projected SCA over the same bounded actions used by SAC."""
     del solver, verbose
     expected_load_mbits = np.asarray(expected_load_mbits, dtype=np.float64)
     if expected_load_mbits.ndim != 2 or expected_load_mbits.shape[0] != 2:
@@ -403,7 +396,7 @@ def optimize_routing_logits_SCA(
 
     for _ in range(max(int(max_iter), 1)):
         outer_start = action.copy()
-        rho = _routing_softmax(
+        rho = _routing_simplex(
             action,
             num_uavs,
             diagonal_bias,
@@ -428,7 +421,7 @@ def optimize_routing_logits_SCA(
             1.0,
         )
         active_link_history.append(active_link_count)
-        shared_rate = nominal_rate / active_link_count
+        shared_rate = nominal_rate.copy()
         np.fill_diagonal(shared_rate, np.inf)
         anchor_action = action.copy()
 

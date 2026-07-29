@@ -18,6 +18,7 @@ for path in (ROOT, SCRIPTS):
 from train_centralized_td3 import MacroReplayBuffer
 from train_centralized_td3 import TD3Agent
 from train_centralized_td3 import build_checkpoint_payload
+from train_centralized_td3 import macro_power_violation_penalty
 from train_centralized_td3 import update_smoothed_energy_dual
 
 
@@ -115,6 +116,13 @@ class TD3ConstrainedCriticTests(unittest.TestCase):
         self.assertAlmostEqual(observed[4], 830.0)
         self.assertAlmostEqual(observed[5], 834.0)
         self.assertEqual(list(history), [820.0, 830.0, 810.0, 850.0, 860.0])
+
+    def test_soft_power_penalty_is_zero_inside_budget(self):
+        self.assertEqual(macro_power_violation_penalty(0.98, 10.0), 0.0)
+        self.assertAlmostEqual(
+            macro_power_violation_penalty(1.02, 10.0),
+            0.2,
+        )
 
     def test_actor_ema_initializes_equal_and_updates_by_fixed_decay(self):
         args = make_args(ema_decay=0.5)

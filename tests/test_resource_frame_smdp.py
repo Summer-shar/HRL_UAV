@@ -72,6 +72,21 @@ class ResourceFrameProtocolTest(unittest.TestCase):
                 )
 
         self.assertTrue(all(frame["phase"] == "service" for frame in service))
+        for frame in service:
+            self.assertAlmostEqual(
+                frame["energy_constraint_ratio_mean"],
+                frame["energy_constraint_ratio_sum"] / frame["substeps"],
+            )
+            self.assertAlmostEqual(
+                frame["service_energy_constraint_ratio_mean"],
+                frame["service_energy_constraint_ratio_sum"]
+                / frame["substeps"],
+            )
+            np.testing.assert_allclose(
+                frame["energy_constraint_ratio_per_uav_mean"],
+                frame["energy_constraint_ratio_per_uav_sum"]
+                / frame["substeps"],
+            )
         self.assertEqual(env.env.global_micro_step, 100)
         self.assertEqual(env.env.resource_frame_prepare_count, 18)
         self.assertEqual(env.env.mobility_update_count, 18)
@@ -88,6 +103,8 @@ class ResourceFrameProtocolTest(unittest.TestCase):
             "reward_sum": -7.0,
             "primal_reward_sum": -5.0,
             "energy_constraint_ratio_sum": 2.5,
+            "energy_constraint_ratio_mean": 0.5,
+            "service_energy_constraint_ratio_sum": 1.25,
         }
         deployment = [
             {"duration_s": 0.5, "holding_reward_sum": -2.0},
@@ -108,7 +125,8 @@ class ResourceFrameProtocolTest(unittest.TestCase):
         self.assertAlmostEqual(transition["bootstrap_discount"], gamma**3)
         self.assertEqual(transition["discount_exponent"], 3)
         self.assertAlmostEqual(transition["duration_s"], 1.5)
-        self.assertAlmostEqual(transition["energy_constraint_ratio"], 2.5)
+        self.assertAlmostEqual(transition["energy_constraint_ratio"], 0.5)
+        self.assertAlmostEqual(transition["controllable_energy_cost"], 1.25)
         self.assertAlmostEqual(transition["service_reward"], -5.0)
         self.assertAlmostEqual(
             transition["deployment_holding_reward_1"],
@@ -132,7 +150,7 @@ class ResourceFrameProtocolTest(unittest.TestCase):
             next_state=next_state,
             objective_mode="constrained_delay",
             bootstrap_discount=0.99**3,
-            energy_constraint_ratio=1.25,
+            controllable_energy_cost=1.25,
         )
 
         row = memory.mem[0]
