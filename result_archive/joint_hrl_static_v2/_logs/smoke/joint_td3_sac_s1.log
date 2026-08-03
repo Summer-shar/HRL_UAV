@@ -1,0 +1,25 @@
+# CMD: D:\Anaconda3\envs\pytorch-gpu\python.exe -u C:\Users\PC\Desktop\HRL_UAV\scripts\train_centralized_td3.py --episodes 2 --macro_steps 2 --micro_steps 100 --num_agents 3 --num_users 39 --eval_interval 1 --eval_episodes 2 --trajectory_plot_interval 0 --zone_loads 12.5,5.5,3.5 --load_scale 1.15 --traffic_profile normal --traffic_scale 0.5 --arrival_dt 0.5 --resource_frame_dt 0.5 --deployment_dt 1.0 --pause_service_during_flight 1 --arrivals_during_deployment 1 --deployment_transient_energy_mode kinetic_lower_bound --uav_mass_kg 2.038735983690112 --users_static 1 --gm_mean_speed_mps 0.5 --gm_mean_heading_rad 0.7853981633974483 --gm_speed_memory 0.5 --gm_heading_memory 0.5 --gm_speed_noise_std 0.1 --gm_heading_noise_std 0.1 --user_zone_radius 0.0 --uplink_bandwidth_mhz 20 --u2u_bandwidth_mhz 3 --cpu_ghz 10.0 --cpu_alloc_mode priced_maxweight --cpu_power_cap_w 0 --micro_diag_bias 0 --micro_action_scale 1 --micro_state_mode pressure --objective_mode constrained_delay --power_constraint_scope per_uav --uav_power_budgets_w 280.0,280.0,280.0 --power_budget_w 840.0 --energy_lagrange_multipliers 0,0,0 --energy_dual_initial 0 --energy_dual_lr 0.02 --energy_dual_max 20 --energy_dual_state_norm 10 --checkpoint_power_rule ucb95 --power_budget_tolerance 0 --power_constraint_margin_w 0 --macro_reward_mode strict_global --strict_hierarchy_validation 1 --macro_action_mode delta --macro_action_deadzone 0.05 --macro_flow_state 1 --macro_load_state 1 --macro_capacity_state 1 --macro_comm_weight 0 --seed 1 --device cuda --micro_solver sac --td3_replay_capacity 12000 --td3_exploration_decay_episodes 600 --td3_exploration_persistence episode --td3_warmup_action_radius 0.3 --td3_exploration_initial 0.2 --td3_exploration_final 0.025 --td3_policy_noise 0.02 --td3_noise_clip 0.05 --td3_actor_lr 3e-5 --td3_critic_lr 3e-4 --td3_gamma 0.99 --td3_hover_exploration_prob 0 --td3_dual_power_window 5 --macro_shaping_initial 0 --macro_shaping_final 0 --macro_move_penalty_weight 0 --macro_propulsion_tiebreak_weight 0 --micro_ckpt results\joint_hrl_static_v2\smoke\seed1\micro_pretrain\checkpoints\best.pt --results_subdir joint_hrl_static_v2/smoke/seed1/joint_td3_sac
+
+[INFO] Training on CUDA
+[INFO] Macro solver: centralized TD3, joint 6D delta action
+[INFO] Micro solver: SAC
+[INFO] TD3 exploration scope: episode
+[INFO] PPO trainer remains available as the macro-layer comparator
+[INFO] macro_comm_weight=0.0
+[INFO] Macro reward mode: strict_global
+[INFO] Objective: constrained_delay power_budget=840.00W
+[INFO] training scenario mode: independent
+[INFO] Loaded lower SAC -> C:\Users\PC\Desktop\HRL_UAV\results\joint_hrl_static_v2\smoke\seed1\micro_pretrain\checkpoints\best.pt
+[INFO] Inherited energy dual -> [0. 0. 0.]
+Episode 1 | Macro R -18.30 | Micro R -1830.50 | J 0.9152 | U2G 16.2 | Move 2.2 | Start 0.0m | CPU 10.00GHz | Psys 833.4W | Pcon [282.8,281.3,268.8]W | PemaMax 282.8W | Dual [2.0100e-04,9.1489e-05,0.0000e+00] | Noise 0.200 | Buffer 2
+  Eval@1 | Score: -54.41 | J: 0.5444 | Dh(ms): 111.2 | Dl(ms): 647.7 | Dw(ms): 528.1 | Ttask(ms): 1199.9 | TwE2E(ms): 738.0 | Done: 578/590 | Dmax(ms): 735.8 | Eservice/step(J): 21.84 | Psys(W): 802.66 | Pbatt(W): [278. ,265.6,258.6] | Pbatt-UCB95(W): [300.8,281.3,278.3] | Pviol-max(W): 20.76 | Eep: 16053.19 | Coop: 0.64 | CPU sat: 0.61 | Press imbal: 0.42 | U2G: 12.51 | Decision: 2.286 ms
+  Eval task delay(ms) H/L/S/C/V: 592.5/1530.8/1272.5/844.9/1617.2 | CPU service(Mb) H/L/S/C/V: 106.28/364.92/238.69/93.10/139.40
+Episode 2 | Macro R -17.42 | Micro R -1742.23 | J 0.8711 | U2G 15.9 | Move 4.4 | Start 0.0m | CPU 10.00GHz | Psys 811.5W | Pcon [268.3,274.9,267.8]W | PemaMax 278.1W | Dual [0.,0.,0.] | Noise 0.200 | Buffer 4
+  Eval@2 | Score: -54.41 | J: 0.5441 | Dh(ms): 111.2 | Dl(ms): 647.7 | Dw(ms): 528.1 | Ttask(ms): 1199.9 | TwE2E(ms): 738.0 | Done: 578/590 | Dmax(ms): 735.8 | Eservice/step(J): 21.84 | Psys(W): 802.66 | Pbatt(W): [278. ,265.6,258.6] | Pbatt-UCB95(W): [300.8,281.3,278.3] | Pviol-max(W): 20.76 | Eep: 16053.19 | Coop: 0.64 | CPU sat: 0.61 | Press imbal: 0.42 | U2G: 12.51 | Decision: 2.067 ms
+  Eval task delay(ms) H/L/S/C/V: 592.5/1530.8/1272.5/844.9/1617.2 | CPU service(Mb) H/L/S/C/V: 106.28/364.92/238.69/93.10/139.40
+  Saved trajectory data -> C:\Users\PC\Desktop\HRL_UAV\results\joint_hrl_static_v2/smoke/seed1/joint_td3_sac\trajectory_snapshots\trajectory_best.npz (2.8 KB)
+  Saved trajectory figure -> C:\Users\PC\Desktop\HRL_UAV\results\joint_hrl_static_v2/smoke/seed1/joint_td3_sac\trajectory_snapshots\trajectory_best.png (201.3 KB)
+Saved evaluation CSV -> C:\Users\PC\Desktop\HRL_UAV\results\joint_hrl_static_v2/smoke/seed1/joint_td3_sac\eval_central_td3.csv
+Saved per-episode training CSV -> C:\Users\PC\Desktop\HRL_UAV\results\joint_hrl_static_v2/smoke/seed1/joint_td3_sac\train_td3.csv
+Best fixed-evaluation rank -> (1, 20.76036629419781, 738.0314973338427)
+Training complete.

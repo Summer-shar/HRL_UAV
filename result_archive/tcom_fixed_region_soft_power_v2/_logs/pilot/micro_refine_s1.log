@@ -1,0 +1,38 @@
+[INFO] Training on CUDA
+[INFO] Macro policy: centralized dx/dy actor
+[INFO] Micro solver: SAC
+[INFO] Macro reward mode: strict_global
+[INFO] Objective: constrained_delay power_budget=840.00W
+[INFO] macro_comm_weight=0.0
+[INFO] shaping=0.0->0.0 over 0 episodes
+[INFO] move_penalty=0.0 propulsion_tiebreak=0.0
+[INFO] training scenario mode: independent
+[INFO] Loaded lower SAC -> C:\Users\PC\Desktop\HRL_UAV\results\tcom_fixed_region_soft_power_v2\pilot\seed1\micro_pretrain\checkpoints\best.pt
+[INFO] Inherited energy dual -> 0.0
+[INFO] Loaded lower SAC replay (108000 transitions) -> C:\Users\PC\Desktop\HRL_UAV\results\tcom_fixed_region_soft_power_v2\pilot\seed1\micro_pretrain\checkpoints\micro_replay.pt
+[INFO] Macro PPO frozen; deterministic actions are used and only the micro layer is trained
+Episode 0 | Macro R -1038.45 | Micro R -103845.11 | J 3.4615 | Comm 4.392 | U2G 72.5 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 786.4W | Pcon 786.4W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 1 | Macro R -1005.34 | Micro R -100533.78 | J 3.3511 | Comm 4.319 | U2G 62.5 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 785.5W | Pcon 785.5W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 2 | Macro R -986.52 | Micro R -98652.35 | J 3.2884 | Comm 4.332 | U2G 67.4 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 786.4W | Pcon 786.4W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 3 | Macro R -1017.70 | Micro R -101769.81 | J 3.3923 | Comm 4.394 | U2G 72.7 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 790.1W | Pcon 790.1W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 4 | Macro R -1020.90 | Micro R -102090.04 | J 3.4030 | Comm 4.447 | U2G 73.4 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 786.6W | Pcon 786.6W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 5 | Macro R -1000.86 | Micro R -100085.69 | J 3.3362 | Comm 4.552 | U2G 73.6 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 785.7W | Pcon 785.7W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 6 | Macro R -1003.90 | Micro R -100390.38 | J 3.3463 | Comm 4.627 | U2G 67.2 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 785.9W | Pcon 785.9W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 7 | Macro R -1037.90 | Micro R -103789.92 | J 3.4597 | Comm 4.676 | U2G 73.5 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 783.6W | Pcon 783.6W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 8 | Macro R -950.65 | Micro R -95065.02 | J 3.1688 | Comm 4.737 | U2G 64.1 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 784.5W | Pcon 784.5W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 9 | Macro R -1003.07 | Micro R -100306.79 | J 3.3436 | Comm 4.801 | U2G 76.3 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 784.4W | Pcon 784.4W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 10 | Macro R -1050.96 | Micro R -105095.91 | J 3.5032 | Comm 4.918 | U2G 71.8 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 786.9W | Pcon 786.9W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 11 | Macro R -1064.76 | Micro R -106476.13 | J 3.5492 | Comm 5.005 | U2G 66.2 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 784.2W | Pcon 784.2W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 12 | Macro R -1085.36 | Micro R -108536.11 | J 3.6179 | Comm 5.129 | U2G 73.8 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 777.2W | Pcon 777.2W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 13 | Macro R -1154.79 | Micro R -115478.52 | J 3.8493 | Comm 5.170 | U2G 64.0 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 773.9W | Pcon 773.9W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 14 | Macro R -1200.71 | Micro R -120070.96 | J 4.0024 | Comm 5.270 | U2G 64.4 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 767.5W | Pcon 767.5W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 15 | Macro R -1226.19 | Micro R -122619.38 | J 4.0873 | Comm 5.379 | U2G 69.0 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 766.9W | Pcon 766.9W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 16 | Macro R -1260.06 | Micro R -126006.07 | J 4.2002 | Comm 5.407 | U2G 71.4 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 762.9W | Pcon 762.9W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 17 | Macro R -1294.46 | Micro R -129445.95 | J 4.3149 | Comm 5.425 | U2G 76.3 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 762.6W | Pcon 762.6W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 18 | Macro R -1298.30 | Micro R -129830.38 | J 4.3277 | Comm 5.503 | U2G 73.2 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 760.8W | Pcon 760.8W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 19 | Macro R -1340.29 | Micro R -134029.48 | J 4.4676 | Comm 5.591 | U2G 66.2 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 766.1W | Pcon 766.1W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+  Eval@20 | Score: -320.25 | J: 4.2056 | Dh(ms): 82.9 | Dl(ms): 30705.0 | Dw(ms): 24196.8 | Ttask(ms): 22087.3 | TwE2E(ms): 4951.7 | Done: 6855/8988 | Dmax(ms): 39011.6 | Eservice/step(J): 18.34 | Pavg(W): 767.68 | Pucb95(W): 768.59 | Pvio(W): 0.00 | Eep: 230303.16 | Coop: 0.52 | CPU sat: 0.52 | Press imbal: 0.57 | U2G: 68.28 | Decision: 2.274 ms
+  Eval task delay(ms) H/L/S/C/V: 636.5/39031.4/26933.0/6753.8/41406.8 | CPU service(Mb) H/L/S/C/V: 1579.80/4557.14/3070.52/1280.62/1785.79
+Episode 20 | Macro R -1327.27 | Micro R -132726.51 | J 4.4242 | Comm 5.533 | U2G 76.5 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 763.5W | Pcon 763.5W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 21 | Macro R -1268.51 | Micro R -126850.79 | J 4.2284 | Comm 5.422 | U2G 69.9 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 768.5W | Pcon 768.5W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 22 | Macro R -1330.91 | Micro R -133090.97 | J 4.4364 | Comm 5.484 | U2G 72.3 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 763.4W | Pcon 763.4W | Dual 0.0000 | BCw 0.000 | Shape 0.000

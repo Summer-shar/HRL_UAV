@@ -1,0 +1,10 @@
+{
+  "stage": "pilot",
+  "seed": 1,
+  "micro_pretrain_episodes": 200,
+  "joint_episodes": 100,
+  "joint_sac_trainable_micro_steps": 270000,
+  "joint_sac_replay_size": 54000,
+  "joint_macro_replay_size": 3000,
+  "status": "passed"
+}

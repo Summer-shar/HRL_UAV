@@ -1,0 +1,62 @@
+{
+  "protocol": {
+    "results_version": "tcom_fixed_region_soft_power_v4_stick",
+    "formal_seeds": [
+      1,
+      42,
+      123
+    ],
+    "training_episodes": 600,
+    "micro_pretrain_episodes": 300,
+    "num_uavs": 3,
+    "num_users": 39,
+    "zone_loads_mbps": [
+      12.5,
+      5.5,
+      3.5
+    ],
+    "load_scale": 1.15,
+    "cpu_ghz": 10.0,
+    "power_constraint_scope": "system",
+    "power_budget_w": 840.0,
+    "max_deployment_distance_m": 20.0,
+    "macro_steps": 30,
+    "macro_period_s": 10.0,
+    "deployment_s": 1.0,
+    "resource_frame_s": 0.5,
+    "integration_step_s": 0.1,
+    "user_zone_radius_m": 0.0,
+    "users_static": false,
+    "td3_replay_capacity": 12000,
+    "td3_exploration_persistence": "macro_step",
+    "td3_warmup_action_radius_m": 6.0,
+    "td3_exploration_initial_m": 4.0,
+    "td3_exploration_final_m": 0.5,
+    "resume_micro_replay": true,
+    "micro_action_encoding": "stick_breaking",
+    "micro_stick_breaking_scale": 4.0,
+    "micro_reward_scale": 1.0,
+    "sac_grad_clip_norm": 1.0,
+    "micro_pretrain_sac_actor_lr": 3e-05,
+    "micro_pretrain_sac_critic_lr": 0.0003,
+    "micro_pretrain_sac_alpha_lr": 3e-05,
+    "joint_sac_actor_lr": 3e-05,
+    "joint_sac_critic_lr": 0.0001,
+    "joint_sac_alpha_lr": 3e-05
+  },
+  "stage": "smoke",
+  "stage_config": {
+    "episodes": 2,
+    "seeds": [
+      1
+    ],
+    "macro_steps": 2,
+    "eval_interval": 1,
+    "eval_episodes": 2,
+    "trajectory_interval": 0,
+    "micro_pretrain_episodes": 2
+  },
+  "requested_seeds": [
+    1
+  ]
+}

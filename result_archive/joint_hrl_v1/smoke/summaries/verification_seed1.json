@@ -1,0 +1,10 @@
+{
+  "stage": "smoke",
+  "seed": 1,
+  "micro_pretrain_episodes": 2,
+  "joint_episodes": 2,
+  "joint_sac_trainable_micro_steps": 360,
+  "joint_sac_replay_size": 72,
+  "joint_macro_replay_size": 4,
+  "status": "passed"
+}

@@ -1,0 +1,3853 @@
+{
+  "checkpoint": "C:\\Users\\PC\\Desktop\\HRL_UAV\\results\\joint_hrl_static_v2\\pilot\\seed1\\joint_td3_sac\\checkpoints\\final.pt",
+  "device": "cuda",
+  "search_protocol": {
+    "population": 12,
+    "iterations": 5,
+    "elite_fraction": 0.25,
+    "search_episodes": 2,
+    "validation_episodes": 20,
+    "eval_base_seed": 1000,
+    "search_seed": 20260727,
+    "initial_std_m": 80.0,
+    "minimum_std_m": 5.0,
+    "max_offset_m": 200.0
+  },
+  "anchors_m": [
+    [
+      350.0,
+      350.0
+    ],
+    [
+      350.0,
+      650.0
+    ],
+    [
+      650.0,
+      500.0
+    ]
+  ],
+  "best_targets_m": [
+    [
+      361.50105442915475,
+      356.25350253538573
+    ],
+    [
+      346.08617583224236,
+      627.2987120802244
+    ],
+    [
+      624.096273459255,
+      474.87619171019526
+    ]
+  ],
+  "validation": {
+    "learned_policy": {
+      "score": -56.869872499999985,
+      "J": 0.6025413604374843,
+      "delay_objective": 0.568698725,
+      "legacy_score": -29.393471725025783,
+      "q_high": 0.7638201492548882,
+      "q_low": 13.515795959918421,
+      "energy": 23.55582274786586,
+      "service_energy_per_micro_step_j": 23.55582274786586,
+      "average_power_w": 835.6341835937499,
+      "average_power_std_w": 5.69961906852214,
+      "average_power_sem_w": 1.2744735683069537,
+      "power_sample_count": 20.0,
+      "average_power_ucb95_w": 837.8379176581261,
+      "average_power_ci95_low_w": 832.9666797585759,
+      "average_power_ci95_high_w": 838.3016874289239,
+      "power_budget_w": 840.0,
+      "power_violation_w": 0.0,
+      "power_violation_ratio": 0.0,
+      "energy_feasible": 0.0,
+      "power_ucb95_violation_w": 0.0,
+      "energy_feasible_ucb95": 0.0,
+      "average_battery_power_per_uav_w": [
+        278.1376037597656,
+        286.0600891113281,
+        270.9896545410156
+      ],
+      "battery_power_ucb95_per_uav_w": [
+        278.55731201171875,
+        286.9754638671875,
+        271.89776611328125
+      ],
+      "uav_power_budgets_w": [
+        280.0,
+        280.0,
+        280.0
+      ],
+      "battery_power_violation_per_uav_w": [
+        0.0,
+        6.060093879699707,
+        0.0
+      ],
+      "battery_power_ucb95_violation_per_uav_w": [
+        0.0,
+        6.975475788116455,
+        0.0
+      ],
+      "max_battery_power_violation_w": 6.060093688964855,
+      "max_battery_power_ucb95_violation_w": 6.975475745817278,
+      "power_constraint_scope": "per_uav",
+      "energy_propulsion_episode": 120015.203125,
+      "energy_uplink_episode": 89.36815643310547,
+      "energy_u2u_episode": 578.5867919921875,
+      "energy_compute_episode": 46443.69140625,
+      "energy_component_residual": -0.012760925281327218,
+      "micro_decision_count": 7200.0,
+      "micro_decision_seconds": 10.107171900001276,
+      "micro_decision_mean_ms": 1.4037738750001774,
+      "micro_decision_p95_ms": 2.304110000002879,
+      "u2g": 70.61683135165195,
+      "cpu_util": 0.8235011630285257,
+      "cpu_saturation": 0.6838249999999999,
+      "cpu_high_util": 0.17533550923686766,
+      "cpu_low_util": 0.6481656537916581,
+      "f_high_ghz": 1.7533550923686767,
+      "f_low_ghz": 6.481656537916581,
+      "f_total_ghz": 8.235011630285259,
+      "delay_high": 132.3534978976906,
+      "delay_low": 629.7978502662626,
+      "delay_mean_ms": 514.4128171479969,
+      "delay_weighted_ms": 524.3388119265758,
+      "delay_max_ms": 538.7584082378397,
+      "task_delay_avg_ms": 1136.903316287258,
+      "task_delay_weighted_ms": 774.000945168409,
+      "task_delay_high_ms": 654.3051340669066,
+      "task_delay_low_ms": 1382.1953548858223,
+      "task_delay_sensor_ms": 1201.0679505210487,
+      "task_delay_controller_ms": 818.9697387221344,
+      "task_delay_vision_ms": 1448.4195466189165,
+      "task_completed_count": 5970.4,
+      "task_arrived_count": 5980.6,
+      "task_completion_rate": 0.9982949639367409,
+      "task_qos_violation_rate": 0.0005444209567394418,
+      "compute_service_high_mbits": 1052.013055421206,
+      "compute_service_low_mbits": 3888.993922749949,
+      "compute_service_sensor_mbits": 2499.8134411882447,
+      "compute_service_controller_mbits": 881.7365209867963,
+      "compute_service_vision_mbits": 1559.4570159961136,
+      "q_total_per_uav": [
+        8.464923858642578,
+        3.658594846725464,
+        2.156099557876587
+      ],
+      "arrival_total_per_uav": [
+        1.5756564140319824,
+        0.6999399065971375,
+        0.44478392601013184
+      ],
+      "cpu_util_per_uav": [
+        0.8423382043838501,
+        0.8176620602607727,
+        0.8105031847953796
+      ],
+      "delay_total_per_uav_ms": [
+        536.6145629882812,
+        522.55224609375,
+        484.0716857910156
+      ],
+      "upload_delay_cost_per_uav": [
+        1.4733883142471313,
+        0.372478187084198,
+        0.0923999473452568
+      ],
+      "upload_delay_penalty_per_uav": [
+        -0.0029467770364135504,
+        -0.0007449564873240888,
+        -0.00018480005383025855
+      ],
+      "task_delay_source_uav_ms": [
+        1189.2308349609375,
+        1106.302978515625,
+        993.2955932617188
+      ],
+      "task_completed_source_count": [
+        3394.0,
+        1704.949951171875,
+        871.4500122070312
+      ],
+      "task_arrived_source_count": [
+        3399.89990234375,
+        1708.550048828125,
+        872.1500244140625
+      ],
+      "task_delay_source_high_ms": [
+        694.8067016601562,
+        615.9769287109375,
+        538.6378173828125
+      ],
+      "task_delay_source_low_ms": [
+        1457.4715576171875,
+        1372.9827880859375,
+        1145.047607421875
+      ],
+      "task_completed_source_high_count": [
+        1194.25,
+        600.9500122070312,
+        217.10000610351562
+      ],
+      "task_completed_source_low_count": [
+        2199.75,
+        1104.0,
+        654.3499755859375
+      ],
+      "task_arrived_source_high_count": [
+        1194.75,
+        601.5499877929688,
+        217.10000610351562
+      ],
+      "task_arrived_source_low_count": [
+        2205.14990234375,
+        1107.0,
+        655.0499877929688
+      ],
+      "energy_total_episode_per_uav": [
+        55683.0078125,
+        57236.5703125,
+        54207.25
+      ],
+      "energy_comp_episode_per_uav": [
+        16437.509765625,
+        14853.373046875,
+        15152.802734375
+      ],
+      "energy_uplink_episode_per_uav": [
+        55.48909378051758,
+        24.55655288696289,
+        9.32252311706543
+      ],
+      "energy_trans_episode_per_uav": [
+        273.39886474609375,
+        180.97874450683594,
+        124.20914459228516
+      ],
+      "energy_macro_episode_per_uav": [
+        38916.61328125,
+        42177.6640625,
+        38920.9140625
+      ],
+      "energy_total_episode": 167126.83671875,
+      "compute_service_per_uav_mbits": [
+        1684.6763916015625,
+        1635.323974609375,
+        1621.006591796875
+      ],
+      "coop_flow_mbits": [
+        [
+          1149.9423828125,
+          819.0935668945312,
+          896.60888671875
+        ],
+        [
+          380.21331787109375,
+          560.5980834960938,
+          333.423583984375
+        ],
+        [
+          157.0436553955078,
+          258.172607421875,
+          392.8812561035156
+        ]
+      ],
+      "tx_service_matrix_mbits": [
+        [
+          0.0,
+          818.4703369140625,
+          895.8551025390625
+        ],
+        [
+          380.07513427734375,
+          0.0,
+          333.33111572265625
+        ],
+        [
+          157.04367065429688,
+          258.172607421875,
+          0.0
+        ]
+      ],
+      "split_ratios_high": [
+        [
+          0.4197138845920563,
+          0.22678515315055847,
+          0.25350093841552734
+        ],
+        [
+          0.1986154317855835,
+          0.38591763377189636,
+          0.3154672086238861
+        ],
+        [
+          0.2495206594467163,
+          0.4546160101890564,
+          0.19586339592933655
+        ]
+      ],
+      "split_ratios_low": [
+        [
+          0.3337722420692444,
+          0.27180764079093933,
+          0.2944202423095703
+        ],
+        [
+          0.2868625223636627,
+          0.3983178734779358,
+          0.2148195505142212
+        ],
+        [
+          0.15170994400978088,
+          0.27296724915504456,
+          0.4753229022026062
+        ]
+      ],
+      "pressure_per_uav": [
+        11.479669570922852,
+        6.95128870010376,
+        6.7578887939453125
+      ],
+      "pressure_imbalance": 0.32402136890424255,
+      "coop_ratio": 0.574851147558882
+    },
+    "anchor_placement": {
+      "score": -55.322417499999986,
+      "J": 0.5858470581732724,
+      "delay_objective": 0.5532241749999998,
+      "legacy_score": -23.871688571244118,
+      "q_high": 0.7504576029220511,
+      "q_low": 13.658825388082894,
+      "energy": 23.42930050781675,
+      "service_energy_per_micro_step_j": 23.42930050781675,
+      "average_power_w": 818.583296875,
+      "average_power_std_w": 5.8534246485639985,
+      "average_power_sem_w": 1.3088655415361916,
+      "power_sample_count": 20.0,
+      "average_power_ucb95_w": 820.8464992287398,
+      "average_power_ci95_low_w": 815.8438098125787,
+      "average_power_ci95_high_w": 821.3227839374213,
+      "power_budget_w": 840.0,
+      "power_violation_w": 0.0,
+      "power_violation_ratio": 0.0,
+      "energy_feasible": 1.0,
+      "power_ucb95_violation_w": 0.0,
+      "energy_feasible_ucb95": 1.0,
+      "average_battery_power_per_uav_w": [
+        278.39984130859375,
+        269.70550537109375,
+        270.06829833984375
+      ],
+      "battery_power_ucb95_per_uav_w": [
+        278.8096008300781,
+        270.6277770996094,
+        271.0459289550781
+      ],
+      "uav_power_budgets_w": [
+        280.0,
+        280.0,
+        280.0
+      ],
+      "battery_power_violation_per_uav_w": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "battery_power_ucb95_violation_per_uav_w": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "max_battery_power_violation_w": 0.0,
+      "max_battery_power_ucb95_violation_w": 0.0,
+      "power_constraint_scope": "per_uav",
+      "energy_propulsion_episode": 116858.046875,
+      "energy_uplink_episode": 81.93714141845703,
+      "energy_u2u_episode": 613.8572998046875,
+      "energy_compute_episode": 46162.80078125,
+      "energy_component_residual": 0.017277526843827218,
+      "micro_decision_count": 7200.0,
+      "micro_decision_seconds": 10.29796100000118,
+      "micro_decision_mean_ms": 1.4302723611112749,
+      "micro_decision_p95_ms": 2.3148649999654927,
+      "u2g": 15.368221285498711,
+      "cpu_util": 0.8236284223361029,
+      "cpu_saturation": 0.6709416666666665,
+      "cpu_high_util": 0.17534928896899477,
+      "cpu_low_util": 0.6482791333671081,
+      "f_high_ghz": 1.7534928896899475,
+      "f_low_ghz": 6.482791333671081,
+      "f_total_ghz": 8.236284223361029,
+      "delay_high": 130.03844589201788,
+      "delay_low": 636.4648853727657,
+      "delay_mean_ms": 495.3808743022934,
+      "delay_weighted_ms": 529.1091406963935,
+      "delay_max_ms": 578.1423945080974,
+      "task_delay_avg_ms": 1143.3992675196191,
+      "task_delay_weighted_ms": 755.6349681550234,
+      "task_delay_high_ms": 627.75066617314,
+      "task_delay_low_ms": 1405.5273802629683,
+      "task_delay_sensor_ms": 1208.583623551424,
+      "task_delay_controller_ms": 804.3976615474511,
+      "task_delay_vision_ms": 1484.4453082193445,
+      "task_completed_count": 5970.65,
+      "task_arrived_count": 5980.6,
+      "task_completion_rate": 0.9983360703591823,
+      "task_qos_violation_rate": 0.0006094259369953056,
+      "compute_service_high_mbits": 1052.0957338139685,
+      "compute_service_low_mbits": 3889.6748002026484,
+      "compute_service_sensor_mbits": 2500.284190833237,
+      "compute_service_controller_mbits": 881.8371632436467,
+      "compute_service_vision_mbits": 1559.6491799397327,
+      "q_total_per_uav": [
+        9.11954402923584,
+        3.422449827194214,
+        1.8672879934310913
+      ],
+      "arrival_total_per_uav": [
+        1.5756564140319824,
+        0.6999399065971375,
+        0.44478392601013184
+      ],
+      "cpu_util_per_uav": [
+        0.8431246876716614,
+        0.8192890882492065,
+        0.8084715604782104
+      ],
+      "delay_total_per_uav_ms": [
+        578.1423950195312,
+        488.79730224609375,
+        419.20281982421875
+      ],
+      "upload_delay_cost_per_uav": [
+        1.3843344449996948,
+        0.23362824320793152,
+        0.09087319672107697
+      ],
+      "upload_delay_penalty_per_uav": [
+        -0.0027686692774295807,
+        -0.0004672565555665642,
+        -0.0001817465526983142
+      ],
+      "task_delay_source_uav_ms": [
+        1215.6121826171875,
+        1064.8984375,
+        1015.8131103515625
+      ],
+      "task_completed_source_count": [
+        3393.89990234375,
+        1705.4000244140625,
+        871.3499755859375
+      ],
+      "task_arrived_source_count": [
+        3399.89990234375,
+        1708.550048828125,
+        872.1500244140625
+      ],
+      "task_delay_source_high_ms": [
+        686.3268432617188,
+        547.0894165039062,
+        530.3588256835938
+      ],
+      "task_delay_source_low_ms": [
+        1502.882080078125,
+        1346.6075439453125,
+        1177.8035888671875
+      ],
+      "task_completed_source_high_count": [
+        1194.4000244140625,
+        601.25,
+        217.10000610351562
+      ],
+      "task_completed_source_low_count": [
+        2199.5,
+        1104.1500244140625,
+        654.25
+      ],
+      "task_arrived_source_high_count": [
+        1194.75,
+        601.5499877929688,
+        217.10000610351562
+      ],
+      "task_arrived_source_low_count": [
+        2205.14990234375,
+        1107.0,
+        655.0499877929688
+      ],
+      "energy_total_episode_per_uav": [
+        55733.65625,
+        53960.11328125,
+        54022.89453125
+      ],
+      "energy_comp_episode_per_uav": [
+        16436.328125,
+        14797.119140625,
+        14929.3564453125
+      ],
+      "energy_uplink_episode_per_uav": [
+        53.68907928466797,
+        19.015033721923828,
+        9.23302173614502
+      ],
+      "energy_trans_episode_per_uav": [
+        290.9497375488281,
+        191.29351806640625,
+        131.61410522460938
+      ],
+      "energy_macro_episode_per_uav": [
+        38952.6875,
+        38952.6875,
+        38952.6875
+      ],
+      "energy_total_episode": 163716.659375,
+      "compute_service_per_uav_mbits": [
+        1686.2493896484375,
+        1638.578125,
+        1616.943115234375
+      ],
+      "coop_flow_mbits": [
+        [
+          1155.5716552734375,
+          818.8406982421875,
+          891.2326049804688
+        ],
+        [
+          372.99603271484375,
+          568.5853271484375,
+          332.653564453125
+        ],
+        [
+          159.87869262695312,
+          253.36691284179688,
+          394.85186767578125
+        ]
+      ],
+      "tx_service_matrix_mbits": [
+        [
+          0.0,
+          818.2505493164062,
+          890.4674072265625
+        ],
+        [
+          372.9372863769531,
+          0.0,
+          332.64666748046875
+        ],
+        [
+          159.87875366210938,
+          253.3673553466797,
+          0.0
+        ]
+      ],
+      "split_ratios_high": [
+        [
+          0.41963306069374084,
+          0.22605760395526886,
+          0.25430935621261597
+        ],
+        [
+          0.19833391904830933,
+          0.3865491449832916,
+          0.31511667370796204
+        ],
+        [
+          0.25348854064941406,
+          0.4455238878726959,
+          0.20098738372325897
+        ]
+      ],
+      "split_ratios_low": [
+        [
+          0.3361625373363495,
+          0.2722812294960022,
+          0.2915562391281128
+        ],
+        [
+          0.27820008993148804,
+          0.40740257501602173,
+          0.2143971025943756
+        ],
+        [
+          0.1545921266078949,
+          0.2679925560951233,
+          0.47741517424583435
+        ]
+      ],
+      "pressure_per_uav": [
+        12.292280197143555,
+        7.059128761291504,
+        6.838644504547119
+      ],
+      "pressure_imbalance": 0.33399440991250234,
+      "coop_ratio": 0.571707716020325
+    },
+    "cem_placement": {
+      "score": -54.71551749999999,
+      "J": 0.5799611992589508,
+      "delay_objective": 0.5471551749999998,
+      "legacy_score": -24.718345506999558,
+      "q_high": 0.7534709536072496,
+      "q_low": 13.318264865275145,
+      "energy": 23.505514285455938,
+      "service_energy_per_micro_step_j": 23.505514285455938,
+      "average_power_w": 825.4071015625001,
+      "average_power_std_w": 5.644479072838648,
+      "average_power_sem_w": 1.2621438904442202,
+      "power_sample_count": 20.0,
+      "average_power_ucb95_w": 827.5895159763285,
+      "average_power_ci95_low_w": 822.7654040396759,
+      "average_power_ci95_high_w": 828.0487990853243,
+      "power_budget_w": 840.0,
+      "power_violation_w": 0.0,
+      "power_violation_ratio": 0.0,
+      "energy_feasible": 1.0,
+      "power_ucb95_violation_w": 0.0,
+      "energy_feasible_ucb95": 1.0,
+      "average_battery_power_per_uav_w": [
+        279.0890808105469,
+        271.73291015625,
+        274.1728820800781
+      ],
+      "battery_power_ucb95_per_uav_w": [
+        279.4972229003906,
+        272.6575927734375,
+        275.0733947753906
+      ],
+      "uav_power_budgets_w": [
+        280.0,
+        280.0,
+        280.0
+      ],
+      "battery_power_violation_per_uav_w": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "battery_power_ucb95_violation_per_uav_w": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "max_battery_power_violation_w": 0.0,
+      "max_battery_power_ucb95_violation_w": 0.0,
+      "power_constraint_scope": "per_uav",
+      "energy_propulsion_episode": 118070.4140625,
+      "energy_uplink_episode": 82.44513702392578,
+      "energy_u2u_episode": 587.7115478515625,
+      "energy_compute_episode": 46340.87109375,
+      "energy_component_residual": -0.021528625482460484,
+      "micro_decision_count": 7200.0,
+      "micro_decision_seconds": 10.48212979999903,
+      "micro_decision_mean_ms": 1.4558513611109762,
+      "micro_decision_p95_ms": 2.352250000018329,
+      "u2g": 26.900953913791163,
+      "cpu_util": 0.8236328497541539,
+      "cpu_saturation": 0.6804333333333332,
+      "cpu_high_util": 0.17534316783987913,
+      "cpu_low_util": 0.6482896819142747,
+      "f_high_ghz": 1.753431678398791,
+      "f_low_ghz": 6.482896819142748,
+      "f_total_ghz": 8.236328497541539,
+      "delay_high": 130.55437018097066,
+      "delay_low": 620.5871026210049,
+      "delay_mean_ms": 504.12346373087377,
+      "delay_weighted_ms": 516.7056088699798,
+      "delay_max_ms": 534.8330912787925,
+      "task_delay_avg_ms": 1112.0790944330122,
+      "task_delay_weighted_ms": 748.4389247146912,
+      "task_delay_high_ms": 628.5118676504906,
+      "task_delay_low_ms": 1357.9012308404103,
+      "task_delay_sensor_ms": 1175.381348698719,
+      "task_delay_controller_ms": 793.4728645604775,
+      "task_delay_vision_ms": 1427.0034309215002,
+      "task_completed_count": 5970.8,
+      "task_arrived_count": 5980.6,
+      "task_completion_rate": 0.9983612734893562,
+      "task_qos_violation_rate": 0.00036820920952028815,
+      "compute_service_high_mbits": 1052.0590070392748,
+      "compute_service_low_mbits": 3889.7380914856485,
+      "compute_service_sensor_mbits": 2500.2511658438093,
+      "compute_service_controller_mbits": 881.8108277852916,
+      "compute_service_vision_mbits": 1559.7351048958221,
+      "q_total_per_uav": [
+        8.4361572265625,
+        3.5224437713623047,
+        2.113132953643799
+      ],
+      "arrival_total_per_uav": [
+        1.5756564140319824,
+        0.6999399065971375,
+        0.44478392601013184
+      ],
+      "cpu_util_per_uav": [
+        0.8432686924934387,
+        0.8185690641403198,
+        0.8090607523918152
+      ],
+      "delay_total_per_uav_ms": [
+        534.8330688476562,
+        503.05950927734375,
+        474.477783203125
+      ],
+      "upload_delay_cost_per_uav": [
+        1.3984482288360596,
+        0.235294908285141,
+        0.09341719001531601
+      ],
+      "upload_delay_penalty_per_uav": [
+        -0.002796896966174245,
+        -0.000470589759061113,
+        -0.00018683457165025175
+      ],
+      "task_delay_source_uav_ms": [
+        1165.6761474609375,
+        1058.8267822265625,
+        1007.6859130859375
+      ],
+      "task_completed_source_count": [
+        3394.0,
+        1705.5,
+        871.2999877929688
+      ],
+      "task_arrived_source_count": [
+        3399.89990234375,
+        1708.550048828125,
+        872.1500244140625
+      ],
+      "task_delay_source_high_ms": [
+        686.3380126953125,
+        548.244384765625,
+        534.0446166992188
+      ],
+      "task_delay_source_low_ms": [
+        1425.822265625,
+        1336.59375,
+        1165.795654296875
+      ],
+      "task_completed_source_high_count": [
+        1194.4000244140625,
+        601.25,
+        217.10000610351562
+      ],
+      "task_completed_source_low_count": [
+        2199.60009765625,
+        1104.25,
+        654.2000122070312
+      ],
+      "task_arrived_source_high_count": [
+        1194.75,
+        601.5499877929688,
+        217.10000610351562
+      ],
+      "task_arrived_source_low_count": [
+        2205.14990234375,
+        1107.0,
+        655.0499877929688
+      ],
+      "energy_total_episode_per_uav": [
+        55871.78125,
+        54365.6875,
+        54843.95703125
+      ],
+      "energy_comp_episode_per_uav": [
+        16450.23828125,
+        14793.2216796875,
+        15097.4091796875
+      ],
+      "energy_uplink_episode_per_uav": [
+        53.96208572387695,
+        19.103532791137695,
+        9.379521369934082
+      ],
+      "energy_trans_episode_per_uav": [
+        277.7638854980469,
+        184.20858764648438,
+        125.73912048339844
+      ],
+      "energy_macro_episode_per_uav": [
+        39089.8125,
+        39369.14453125,
+        39611.43359375
+      ],
+      "energy_total_episode": 165081.4203125,
+      "compute_service_per_uav_mbits": [
+        1686.5374755859375,
+        1637.1383056640625,
+        1618.1214599609375
+      ],
+      "coop_flow_mbits": [
+        [
+          1148.703857421875,
+          821.0701904296875,
+          895.8709716796875
+        ],
+        [
+          382.9274597167969,
+          559.4405517578125,
+          331.86688232421875
+        ],
+        [
+          157.17214965820312,
+          258.8158874511719,
+          392.1095275878906
+        ]
+      ],
+      "tx_service_matrix_mbits": [
+        [
+          0.0,
+          820.5723876953125,
+          895.177734375
+        ],
+        [
+          382.88189697265625,
+          0.0,
+          331.86273193359375
+        ],
+        [
+          157.17214965820312,
+          258.8155212402344,
+          0.0
+        ]
+      ],
+      "split_ratios_high": [
+        [
+          0.4189814031124115,
+          0.2265995740890503,
+          0.25441890954971313
+        ],
+        [
+          0.20233674347400665,
+          0.38444197177886963,
+          0.31322139501571655
+        ],
+        [
+          0.24784055352210999,
+          0.45488065481185913,
+          0.1972784548997879
+        ]
+      ],
+      "split_ratios_low": [
+        [
+          0.33380818367004395,
+          0.2729230523109436,
+          0.2932688593864441
+        ],
+        [
+          0.2860283851623535,
+          0.3996866047382355,
+          0.21428494155406952
+        ],
+        [
+          0.15204910933971405,
+          0.2738712728023529,
+          0.4740796685218811
+        ]
+      ],
+      "pressure_per_uav": [
+        11.523296356201172,
+        6.950499534606934,
+        6.504415988922119
+      ],
+      "pressure_imbalance": 0.32970945271826485,
+      "coop_ratio": 0.5754912298332387
+    }
+  },
+  "search_history": [
+    {
+      "iteration": 1,
+      "best_targets_m": [
+        [
+          359.40326511584453,
+          352.20222143130604
+        ],
+        [
+          319.64598503457717,
+          563.6810970023416
+        ],
+        [
+          630.0710424659703,
+          479.57777235486225
+        ]
+      ],
+      "best_metrics": {
+        "score": -52.636324999999985,
+        "J": 0.5595808650291705,
+        "delay_objective": 0.52636325,
+        "legacy_score": -24.342652884119055,
+        "q_high": 0.716698950344562,
+        "q_low": 11.99186424913433,
+        "energy": 23.305046893207432,
+        "service_energy_per_micro_step_j": 23.305046893207432,
+        "average_power_w": 828.6963671875,
+        "average_power_std_w": 1.249866478464503,
+        "average_power_sem_w": 0.8837890625,
+        "power_sample_count": 2.0,
+        "average_power_ucb95_w": 834.2763917196238,
+        "average_power_ci95_low_w": 817.4667624155555,
+        "average_power_ci95_high_w": 839.9259719594444,
+        "power_budget_w": 840.0,
+        "power_violation_w": 0.0,
+        "power_violation_ratio": 0.0,
+        "energy_feasible": 1.0,
+        "power_ucb95_violation_w": 0.0,
+        "energy_feasible_ucb95": 0.0,
+        "average_battery_power_per_uav_w": [
+          278.26348876953125,
+          277.6846618652344,
+          272.3348388671875
+        ],
+        "battery_power_ucb95_per_uav_w": [
+          280.5274963378906,
+          278.7284240722656,
+          274.6585693359375
+        ],
+        "uav_power_budgets_w": [
+          280.0,
+          280.0,
+          280.0
+        ],
+        "battery_power_violation_per_uav_w": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "battery_power_ucb95_violation_per_uav_w": [
+          0.5274835228919983,
+          0.0,
+          0.0
+        ],
+        "max_battery_power_violation_w": 0.0,
+        "max_battery_power_ucb95_violation_w": 0.5274835296298761,
+        "power_constraint_scope": "per_uav",
+        "energy_propulsion_episode": 119129.203125,
+        "energy_uplink_episode": 82.68011474609375,
+        "energy_u2u_episode": 562.0963134765625,
+        "energy_compute_episode": 45965.3046875,
+        "energy_component_residual": -0.01080322265625,
+        "micro_decision_count": 720.0,
+        "micro_decision_seconds": 1.3910817000000009,
+        "micro_decision_mean_ms": 1.9320579166666678,
+        "micro_decision_p95_ms": 3.0837549999933596,
+        "u2g": 40.185467868787356,
+        "cpu_util": 0.8186004031003826,
+        "cpu_saturation": 0.6696666666666666,
+        "cpu_high_util": 0.17718750298290203,
+        "cpu_low_util": 0.6414129001174806,
+        "f_high_ghz": 1.7718750298290202,
+        "f_low_ghz": 6.414129001174807,
+        "f_total_ghz": 8.18600403100383,
+        "delay_high": 122.83370581919064,
+        "delay_low": 567.4117825882388,
+        "delay_mean_ms": 467.0609526549207,
+        "delay_weighted_ms": 471.2359573009262,
+        "delay_max_ms": 482.29969507553733,
+        "task_delay_avg_ms": 1048.4564215077694,
+        "task_delay_weighted_ms": 724.8487246721293,
+        "task_delay_high_ms": 619.0656565656557,
+        "task_delay_low_ms": 1269.6405513362627,
+        "task_delay_sensor_ms": 1108.0651745768157,
+        "task_delay_controller_ms": 768.6357905439759,
+        "task_delay_vision_ms": 1312.8393733284101,
+        "task_completed_count": 5928.5,
+        "task_arrived_count": 5933.0,
+        "task_completion_rate": 0.9992434323415842,
+        "task_qos_violation_rate": 8.399126490844952e-05,
+        "compute_service_high_mbits": 1063.1250178974124,
+        "compute_service_low_mbits": 3848.4774007048845,
+        "compute_service_sensor_mbits": 2484.1992679406685,
+        "compute_service_controller_mbits": 876.3000148462131,
+        "compute_service_vision_mbits": 1551.1031358154146,
+        "q_total_per_uav": [
+          7.352987766265869,
+          3.3390355110168457,
+          2.016533613204956
+        ],
+        "arrival_total_per_uav": [
+          1.5451874732971191,
+          0.7032495737075806,
+          0.4484251141548157
+        ],
+        "cpu_util_per_uav": [
+          0.8403462171554565,
+          0.8129563331604004,
+          0.8024988770484924
+        ],
+        "delay_total_per_uav_ms": [
+          476.0296630859375,
+          474.8594970703125,
+          450.29364013671875
+        ],
+        "upload_delay_cost_per_uav": [
+          1.2554553747177124,
+          0.29407256841659546,
+          0.09430743753910065
+        ],
+        "upload_delay_penalty_per_uav": [
+          -0.0025109106209129095,
+          -0.0005881452816538513,
+          -0.00018861504213418812
+        ],
+        "task_delay_source_uav_ms": [
+          1086.076904296875,
+          1028.186767578125,
+          942.3137817382812
+        ],
+        "task_completed_source_count": [
+          3344.0,
+          1730.0,
+          854.5
+        ],
+        "task_arrived_source_count": [
+          3345.0,
+          1731.0,
+          857.0
+        ],
+        "task_delay_source_high_ms": [
+          666.20703125,
+          561.565185546875,
+          522.3046264648438
+        ],
+        "task_delay_source_low_ms": [
+          1317.7452392578125,
+          1289.802001953125,
+          1074.9781494140625
+        ],
+        "task_completed_source_high_count": [
+          1189.0,
+          621.0,
+          205.0
+        ],
+        "task_completed_source_low_count": [
+          2155.0,
+          1109.0,
+          649.5
+        ],
+        "task_arrived_source_high_count": [
+          1189.0,
+          621.0,
+          205.0
+        ],
+        "task_arrived_source_low_count": [
+          2156.0,
+          1110.0,
+          652.0
+        ],
+        "energy_total_episode_per_uav": [
+          55704.30078125,
+          55558.6953125,
+          54476.2890625
+        ],
+        "energy_comp_episode_per_uav": [
+          16381.2138671875,
+          14641.435546875,
+          14942.65625
+        ],
+        "energy_uplink_episode_per_uav": [
+          51.60005187988281,
+          21.760051727294922,
+          9.32002067565918
+        ],
+        "energy_trans_episode_per_uav": [
+          265.848388671875,
+          176.44866943359375,
+          119.79920959472656
+        ],
+        "energy_macro_episode_per_uav": [
+          39005.63671875,
+          40719.046875,
+          39404.51171875
+        ],
+        "energy_total_episode": 165739.2734375,
+        "compute_service_per_uav_mbits": [
+          1680.6923828125,
+          1625.91259765625,
+          1604.997802734375
+        ],
+        "coop_flow_mbits": [
+          [
+            1140.2838134765625,
+            800.042724609375,
+            872.6734619140625
+          ],
+          [
+            383.2389831542969,
+            569.6705322265625,
+            337.04046630859375
+          ],
+          [
+            157.39627075195312,
+            256.9515380859375,
+            396.127197265625
+          ]
+        ],
+        "tx_service_matrix_mbits": [
+          [
+            0.0,
+            800.0382080078125,
+            872.6699829101562
+          ],
+          [
+            383.2373046875,
+            0.0,
+            337.04058837890625
+          ],
+          [
+            157.39639282226562,
+            256.9505310058594,
+            0.0
+          ]
+        ],
+        "split_ratios_high": [
+          [
+            0.41860637068748474,
+            0.22670060396194458,
+            0.2546938359737396
+          ],
+          [
+            0.20077751576900482,
+            0.38529521226882935,
+            0.313926637172699
+          ],
+          [
+            0.24903273582458496,
+            0.4527967572212219,
+            0.19817055761814117
+          ]
+        ],
+        "split_ratios_low": [
+          [
+            0.33576393127441406,
+            0.2724195122718811,
+            0.29181617498397827
+          ],
+          [
+            0.28436988592147827,
+            0.4010295271873474,
+            0.21460101008415222
+          ],
+          [
+            0.151455819606781,
+            0.27374011278152466,
+            0.47480446100234985
+          ]
+        ],
+        "pressure_per_uav": [
+          10.12481689453125,
+          6.274322986602783,
+          6.159351348876953
+        ],
+        "pressure_imbalance": 0.32402767037495617,
+        "coop_ratio": 0.5713626384700834
+      },
+      "global_best_targets_m": [
+        [
+          359.40326511584453,
+          352.20222143130604
+        ],
+        [
+          319.64598503457717,
+          563.6810970023416
+        ],
+        [
+          630.0710424659703,
+          479.57777235486225
+        ]
+      ],
+      "global_best_metrics": {
+        "score": -52.636324999999985,
+        "J": 0.5595808650291705,
+        "delay_objective": 0.52636325,
+        "legacy_score": -24.342652884119055,
+        "q_high": 0.716698950344562,
+        "q_low": 11.99186424913433,
+        "energy": 23.305046893207432,
+        "service_energy_per_micro_step_j": 23.305046893207432,
+        "average_power_w": 828.6963671875,
+        "average_power_std_w": 1.249866478464503,
+        "average_power_sem_w": 0.8837890625,
+        "power_sample_count": 2.0,
+        "average_power_ucb95_w": 834.2763917196238,
+        "average_power_ci95_low_w": 817.4667624155555,
+        "average_power_ci95_high_w": 839.9259719594444,
+        "power_budget_w": 840.0,
+        "power_violation_w": 0.0,
+        "power_violation_ratio": 0.0,
+        "energy_feasible": 1.0,
+        "power_ucb95_violation_w": 0.0,
+        "energy_feasible_ucb95": 0.0,
+        "average_battery_power_per_uav_w": [
+          278.26348876953125,
+          277.6846618652344,
+          272.3348388671875
+        ],
+        "battery_power_ucb95_per_uav_w": [
+          280.5274963378906,
+          278.7284240722656,
+          274.6585693359375
+        ],
+        "uav_power_budgets_w": [
+          280.0,
+          280.0,
+          280.0
+        ],
+        "battery_power_violation_per_uav_w": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "battery_power_ucb95_violation_per_uav_w": [
+          0.5274835228919983,
+          0.0,
+          0.0
+        ],
+        "max_battery_power_violation_w": 0.0,
+        "max_battery_power_ucb95_violation_w": 0.5274835296298761,
+        "power_constraint_scope": "per_uav",
+        "energy_propulsion_episode": 119129.203125,
+        "energy_uplink_episode": 82.68011474609375,
+        "energy_u2u_episode": 562.0963134765625,
+        "energy_compute_episode": 45965.3046875,
+        "energy_component_residual": -0.01080322265625,
+        "micro_decision_count": 720.0,
+        "micro_decision_seconds": 1.3910817000000009,
+        "micro_decision_mean_ms": 1.9320579166666678,
+        "micro_decision_p95_ms": 3.0837549999933596,
+        "u2g": 40.185467868787356,
+        "cpu_util": 0.8186004031003826,
+        "cpu_saturation": 0.6696666666666666,
+        "cpu_high_util": 0.17718750298290203,
+        "cpu_low_util": 0.6414129001174806,
+        "f_high_ghz": 1.7718750298290202,
+        "f_low_ghz": 6.414129001174807,
+        "f_total_ghz": 8.18600403100383,
+        "delay_high": 122.83370581919064,
+        "delay_low": 567.4117825882388,
+        "delay_mean_ms": 467.0609526549207,
+        "delay_weighted_ms": 471.2359573009262,
+        "delay_max_ms": 482.29969507553733,
+        "task_delay_avg_ms": 1048.4564215077694,
+        "task_delay_weighted_ms": 724.8487246721293,
+        "task_delay_high_ms": 619.0656565656557,
+        "task_delay_low_ms": 1269.6405513362627,
+        "task_delay_sensor_ms": 1108.0651745768157,
+        "task_delay_controller_ms": 768.6357905439759,
+        "task_delay_vision_ms": 1312.8393733284101,
+        "task_completed_count": 5928.5,
+        "task_arrived_count": 5933.0,
+        "task_completion_rate": 0.9992434323415842,
+        "task_qos_violation_rate": 8.399126490844952e-05,
+        "compute_service_high_mbits": 1063.1250178974124,
+        "compute_service_low_mbits": 3848.4774007048845,
+        "compute_service_sensor_mbits": 2484.1992679406685,
+        "compute_service_controller_mbits": 876.3000148462131,
+        "compute_service_vision_mbits": 1551.1031358154146,
+        "q_total_per_uav": [
+          7.352987766265869,
+          3.3390355110168457,
+          2.016533613204956
+        ],
+        "arrival_total_per_uav": [
+          1.5451874732971191,
+          0.7032495737075806,
+          0.4484251141548157
+        ],
+        "cpu_util_per_uav": [
+          0.8403462171554565,
+          0.8129563331604004,
+          0.8024988770484924
+        ],
+        "delay_total_per_uav_ms": [
+          476.0296630859375,
+          474.8594970703125,
+          450.29364013671875
+        ],
+        "upload_delay_cost_per_uav": [
+          1.2554553747177124,
+          0.29407256841659546,
+          0.09430743753910065
+        ],
+        "upload_delay_penalty_per_uav": [
+          -0.0025109106209129095,
+          -0.0005881452816538513,
+          -0.00018861504213418812
+        ],
+        "task_delay_source_uav_ms": [
+          1086.076904296875,
+          1028.186767578125,
+          942.3137817382812
+        ],
+        "task_completed_source_count": [
+          3344.0,
+          1730.0,
+          854.5
+        ],
+        "task_arrived_source_count": [
+          3345.0,
+          1731.0,
+          857.0
+        ],
+        "task_delay_source_high_ms": [
+          666.20703125,
+          561.565185546875,
+          522.3046264648438
+        ],
+        "task_delay_source_low_ms": [
+          1317.7452392578125,
+          1289.802001953125,
+          1074.9781494140625
+        ],
+        "task_completed_source_high_count": [
+          1189.0,
+          621.0,
+          205.0
+        ],
+        "task_completed_source_low_count": [
+          2155.0,
+          1109.0,
+          649.5
+        ],
+        "task_arrived_source_high_count": [
+          1189.0,
+          621.0,
+          205.0
+        ],
+        "task_arrived_source_low_count": [
+          2156.0,
+          1110.0,
+          652.0
+        ],
+        "energy_total_episode_per_uav": [
+          55704.30078125,
+          55558.6953125,
+          54476.2890625
+        ],
+        "energy_comp_episode_per_uav": [
+          16381.2138671875,
+          14641.435546875,
+          14942.65625
+        ],
+        "energy_uplink_episode_per_uav": [
+          51.60005187988281,
+          21.760051727294922,
+          9.32002067565918
+        ],
+        "energy_trans_episode_per_uav": [
+          265.848388671875,
+          176.44866943359375,
+          119.79920959472656
+        ],
+        "energy_macro_episode_per_uav": [
+          39005.63671875,
+          40719.046875,
+          39404.51171875
+        ],
+        "energy_total_episode": 165739.2734375,
+        "compute_service_per_uav_mbits": [
+          1680.6923828125,
+          1625.91259765625,
+          1604.997802734375
+        ],
+        "coop_flow_mbits": [
+          [
+            1140.2838134765625,
+            800.042724609375,
+            872.6734619140625
+          ],
+          [
+            383.2389831542969,
+            569.6705322265625,
+            337.04046630859375
+          ],
+          [
+            157.39627075195312,
+            256.9515380859375,
+            396.127197265625
+          ]
+        ],
+        "tx_service_matrix_mbits": [
+          [
+            0.0,
+            800.0382080078125,
+            872.6699829101562
+          ],
+          [
+            383.2373046875,
+            0.0,
+            337.04058837890625
+          ],
+          [
+            157.39639282226562,
+            256.9505310058594,
+            0.0
+          ]
+        ],
+        "split_ratios_high": [
+          [
+            0.41860637068748474,
+            0.22670060396194458,
+            0.2546938359737396
+          ],
+          [
+            0.20077751576900482,
+            0.38529521226882935,
+            0.313926637172699
+          ],
+          [
+            0.24903273582458496,
+            0.4527967572212219,
+            0.19817055761814117
+          ]
+        ],
+        "split_ratios_low": [
+          [
+            0.33576393127441406,
+            0.2724195122718811,
+            0.29181617498397827
+          ],
+          [
+            0.28436988592147827,
+            0.4010295271873474,
+            0.21460101008415222
+          ],
+          [
+            0.151455819606781,
+            0.27374011278152466,
+            0.47480446100234985
+          ]
+        ],
+        "pressure_per_uav": [
+          10.12481689453125,
+          6.274322986602783,
+          6.159351348876953
+        ],
+        "pressure_imbalance": 0.32402767037495617,
+        "coop_ratio": 0.5713626384700834
+      },
+      "mean_offset_m": [
+        [
+          2.569560674659215,
+          6.0568649810252095
+        ],
+        [
+          -2.009934842089308,
+          -52.93670791902385
+        ],
+        [
+          6.846211329355128,
+          -37.203328331105446
+        ]
+      ],
+      "std_offset_m": [
+        [
+          5.0,
+          7.065925078590903
+        ],
+        [
+          22.367490723526057,
+          37.85518443576346
+        ],
+        [
+          25.127524637959116,
+          39.072631322721826
+        ]
+      ]
+    },
+    {
+      "iteration": 2,
+      "best_targets_m": [
+        [
+          349.2683351691239,
+          351.39739484507726
+        ],
+        [
+          329.4479501490431,
+          634.319907905385
+        ],
+        [
+          627.9232929281828,
+          482.2156400970752
+        ]
+      ],
+      "best_metrics": {
+        "score": -52.38992499999999,
+        "J": 0.556577479686259,
+        "delay_objective": 0.5238992499999999,
+        "legacy_score": -22.56478609564536,
+        "q_high": 0.710487360416526,
+        "q_low": 12.12696769288975,
+        "energy": 23.235835608505027,
+        "service_energy_per_micro_step_j": 23.235835608505027,
+        "average_power_w": 821.0050390624999,
+        "average_power_std_w": 0.9925459013733262,
+        "average_power_sem_w": 0.7018359374999931,
+        "power_sample_count": 2.0,
+        "average_power_ucb95_w": 825.4362567760322,
+        "average_power_ci95_low_w": 812.0873679492393,
+        "average_power_ci95_high_w": 829.9227101757606,
+        "power_budget_w": 840.0,
+        "power_violation_w": 0.0,
+        "power_violation_ratio": 0.0,
+        "energy_feasible": 1.0,
+        "power_ucb95_violation_w": 0.0,
+        "energy_feasible_ucb95": 0.0,
+        "average_battery_power_per_uav_w": [
+          277.98919677734375,
+          270.681884765625,
+          271.93133544921875
+        ],
+        "battery_power_ucb95_per_uav_w": [
+          280.2152404785156,
+          271.3729248046875,
+          273.5238342285156
+        ],
+        "uav_power_budgets_w": [
+          280.0,
+          280.0,
+          280.0
+        ],
+        "battery_power_violation_per_uav_w": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "battery_power_ucb95_violation_per_uav_w": [
+          0.21523350477218628,
+          0.0,
+          0.0
+        ],
+        "max_battery_power_violation_w": 0.0,
+        "max_battery_power_ucb95_violation_w": 0.21523349763475608,
+        "power_constraint_scope": "per_uav",
+        "energy_propulsion_episode": 117729.34375,
+        "energy_uplink_episode": 80.52511596679688,
+        "energy_u2u_episode": 595.2467041015625,
+        "energy_compute_episode": 45795.890625,
+        "energy_component_residual": 0.001617431640625,
+        "micro_decision_count": 720.0,
+        "micro_decision_seconds": 1.1005874999999605,
+        "micro_decision_mean_ms": 1.5285937499999451,
+        "micro_decision_p95_ms": 2.5241349999994602,
+        "u2g": 21.711530181651,
+        "cpu_util": 0.8186022325861828,
+        "cpu_saturation": 0.66275,
+        "cpu_high_util": 0.17718750324156135,
+        "cpu_low_util": 0.6414147293446213,
+        "f_high_ghz": 1.7718750324156134,
+        "f_low_ghz": 6.414147293446213,
+        "f_total_ghz": 8.186022325861828,
+        "delay_high": 121.77208023560999,
+        "delay_low": 573.8064647889732,
+        "delay_mean_ms": 456.7919332788383,
+        "delay_weighted_ms": 476.0157654331633,
+        "delay_max_ms": 504.23218254120764,
+        "task_delay_avg_ms": 1063.2663114819734,
+        "task_delay_weighted_ms": 721.9268822099365,
+        "task_delay_high_ms": 610.3319783197805,
+        "task_delay_low_ms": 1296.5277125006232,
+        "task_delay_sensor_ms": 1124.7129517313426,
+        "task_delay_controller_ms": 767.0448398576505,
+        "task_delay_vision_ms": 1347.6191121913175,
+        "task_completed_count": 5929.0,
+        "task_arrived_count": 5933.0,
+        "task_completion_rate": 0.9993273249590338,
+        "task_qos_violation_rate": 0.000252642663309401,
+        "compute_service_high_mbits": 1063.1250194493682,
+        "compute_service_low_mbits": 3848.4883760677285,
+        "compute_service_sensor_mbits": 2484.1993592098506,
+        "compute_service_controller_mbits": 876.3000154398381,
+        "compute_service_vision_mbits": 1551.1140208674071,
+        "q_total_per_uav": [
+          7.788793087005615,
+          3.220980644226074,
+          1.8276797533035278
+        ],
+        "arrival_total_per_uav": [
+          1.5451874732971191,
+          0.7032495737075806,
+          0.4484251141548157
+        ],
+        "cpu_util_per_uav": [
+          0.8403962850570679,
+          0.8131430149078369,
+          0.8022670745849609
+        ],
+        "delay_total_per_uav_ms": [
+          504.232177734375,
+          458.06048583984375,
+          408.0831298828125
+        ],
+        "upload_delay_cost_per_uav": [
+          1.2437227964401245,
+          0.2525288462638855,
+          0.09430743753910065
+        ],
+        "upload_delay_penalty_per_uav": [
+          -0.0024874454829841852,
+          -0.0005050575127825141,
+          -0.00018861504213418812
+        ],
+        "task_delay_source_uav_ms": [
+          1110.3798828125,
+          1024.4566650390625,
+          957.1925048828125
+        ],
+        "task_completed_source_count": [
+          3344.0,
+          1730.0,
+          855.0
+        ],
+        "task_arrived_source_count": [
+          3345.0,
+          1731.0,
+          857.0
+        ],
+        "task_delay_source_high_ms": [
+          663.5411376953125,
+          539.9248046875,
+          516.2232666015625
+        ],
+        "task_delay_source_low_ms": [
+          1356.9473876953125,
+          1296.0439453125,
+          1096.330078125
+        ],
+        "task_completed_source_high_count": [
+          1189.0,
+          621.0,
+          205.0
+        ],
+        "task_completed_source_low_count": [
+          2155.0,
+          1109.0,
+          650.0
+        ],
+        "task_arrived_source_high_count": [
+          1189.0,
+          621.0,
+          205.0
+        ],
+        "task_arrived_source_low_count": [
+          2156.0,
+          1110.0,
+          652.0
+        ],
+        "energy_total_episode_per_uav": [
+          55649.234375,
+          54156.18359375,
+          54395.58984375
+        ],
+        "energy_comp_episode_per_uav": [
+          16365.4609375,
+          14572.380859375,
+          14858.05078125
+        ],
+        "energy_uplink_episode_per_uav": [
+          51.395050048828125,
+          19.810043334960938,
+          9.32002067565918
+        ],
+        "energy_trans_episode_per_uav": [
+          280.3990478515625,
+          188.3485565185547,
+          126.49911499023438
+        ],
+        "energy_macro_episode_per_uav": [
+          38951.98046875,
+          39375.64453125,
+          39401.71875
+        ],
+        "energy_total_episode": 164201.0078125,
+        "compute_service_per_uav_mbits": [
+          1680.7926025390625,
+          1626.2861328125,
+          1604.5341796875
+        ],
+        "coop_flow_mbits": [
+          [
+            1143.0908203125,
+            798.672119140625,
+            871.2371826171875
+          ],
+          [
+            378.2600402832031,
+            575.4693603515625,
+            336.2206115722656
+          ],
+          [
+            159.64773559570312,
+            252.91238403320312,
+            397.91485595703125
+          ]
+        ],
+        "tx_service_matrix_mbits": [
+          [
+            0.0,
+            798.6689453125,
+            871.234619140625
+          ],
+          [
+            378.260498046875,
+            0.0,
+            336.2208557128906
+          ],
+          [
+            159.6478271484375,
+            252.91189575195312,
+            0.0
+          ]
+        ],
+        "split_ratios_high": [
+          [
+            0.41680842638015747,
+            0.22682404518127441,
+            0.256367564201355
+          ],
+          [
+            0.20065224170684814,
+            0.38634711503982544,
+            0.3130009174346924
+          ],
+          [
+            0.25156375765800476,
+            0.446454256772995,
+            0.20198187232017517
+          ]
+        ],
+        "split_ratios_low": [
+          [
+            0.33759379386901855,
+            0.2718546986579895,
+            0.2905518114566803
+          ],
+          [
+            0.28029686212539673,
+            0.40532442927360535,
+            0.21437916159629822
+          ],
+          [
+            0.1542297601699829,
+            0.26890894770622253,
+            0.47686144709587097
+          ]
+        ],
+        "pressure_per_uav": [
+          10.663002014160156,
+          6.475803852081299,
+          6.2200822830200195
+        ],
+        "pressure_imbalance": 0.33204698647159725,
+        "coop_ratio": 0.5692479250410744
+      },
+      "global_best_targets_m": [
+        [
+          349.2683351691239,
+          351.39739484507726
+        ],
+        [
+          329.4479501490431,
+          634.319907905385
+        ],
+        [
+          627.9232929281828,
+          482.2156400970752
+        ]
+      ],
+      "global_best_metrics": {
+        "score": -52.38992499999999,
+        "J": 0.556577479686259,
+        "delay_objective": 0.5238992499999999,
+        "legacy_score": -22.56478609564536,
+        "q_high": 0.710487360416526,
+        "q_low": 12.12696769288975,
+        "energy": 23.235835608505027,
+        "service_energy_per_micro_step_j": 23.235835608505027,
+        "average_power_w": 821.0050390624999,
+        "average_power_std_w": 0.9925459013733262,
+        "average_power_sem_w": 0.7018359374999931,
+        "power_sample_count": 2.0,
+        "average_power_ucb95_w": 825.4362567760322,
+        "average_power_ci95_low_w": 812.0873679492393,
+        "average_power_ci95_high_w": 829.9227101757606,
+        "power_budget_w": 840.0,
+        "power_violation_w": 0.0,
+        "power_violation_ratio": 0.0,
+        "energy_feasible": 1.0,
+        "power_ucb95_violation_w": 0.0,
+        "energy_feasible_ucb95": 0.0,
+        "average_battery_power_per_uav_w": [
+          277.98919677734375,
+          270.681884765625,
+          271.93133544921875
+        ],
+        "battery_power_ucb95_per_uav_w": [
+          280.2152404785156,
+          271.3729248046875,
+          273.5238342285156
+        ],
+        "uav_power_budgets_w": [
+          280.0,
+          280.0,
+          280.0
+        ],
+        "battery_power_violation_per_uav_w": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "battery_power_ucb95_violation_per_uav_w": [
+          0.21523350477218628,
+          0.0,
+          0.0
+        ],
+        "max_battery_power_violation_w": 0.0,
+        "max_battery_power_ucb95_violation_w": 0.21523349763475608,
+        "power_constraint_scope": "per_uav",
+        "energy_propulsion_episode": 117729.34375,
+        "energy_uplink_episode": 80.52511596679688,
+        "energy_u2u_episode": 595.2467041015625,
+        "energy_compute_episode": 45795.890625,
+        "energy_component_residual": 0.001617431640625,
+        "micro_decision_count": 720.0,
+        "micro_decision_seconds": 1.1005874999999605,
+        "micro_decision_mean_ms": 1.5285937499999451,
+        "micro_decision_p95_ms": 2.5241349999994602,
+        "u2g": 21.711530181651,
+        "cpu_util": 0.8186022325861828,
+        "cpu_saturation": 0.66275,
+        "cpu_high_util": 0.17718750324156135,
+        "cpu_low_util": 0.6414147293446213,
+        "f_high_ghz": 1.7718750324156134,
+        "f_low_ghz": 6.414147293446213,
+        "f_total_ghz": 8.186022325861828,
+        "delay_high": 121.77208023560999,
+        "delay_low": 573.8064647889732,
+        "delay_mean_ms": 456.7919332788383,
+        "delay_weighted_ms": 476.0157654331633,
+        "delay_max_ms": 504.23218254120764,
+        "task_delay_avg_ms": 1063.2663114819734,
+        "task_delay_weighted_ms": 721.9268822099365,
+        "task_delay_high_ms": 610.3319783197805,
+        "task_delay_low_ms": 1296.5277125006232,
+        "task_delay_sensor_ms": 1124.7129517313426,
+        "task_delay_controller_ms": 767.0448398576505,
+        "task_delay_vision_ms": 1347.6191121913175,
+        "task_completed_count": 5929.0,
+        "task_arrived_count": 5933.0,
+        "task_completion_rate": 0.9993273249590338,
+        "task_qos_violation_rate": 0.000252642663309401,
+        "compute_service_high_mbits": 1063.1250194493682,
+        "compute_service_low_mbits": 3848.4883760677285,
+        "compute_service_sensor_mbits": 2484.1993592098506,
+        "compute_service_controller_mbits": 876.3000154398381,
+        "compute_service_vision_mbits": 1551.1140208674071,
+        "q_total_per_uav": [
+          7.788793087005615,
+          3.220980644226074,
+          1.8276797533035278
+        ],
+        "arrival_total_per_uav": [
+          1.5451874732971191,
+          0.7032495737075806,
+          0.4484251141548157
+        ],
+        "cpu_util_per_uav": [
+          0.8403962850570679,
+          0.8131430149078369,
+          0.8022670745849609
+        ],
+        "delay_total_per_uav_ms": [
+          504.232177734375,
+          458.06048583984375,
+          408.0831298828125
+        ],
+        "upload_delay_cost_per_uav": [
+          1.2437227964401245,
+          0.2525288462638855,
+          0.09430743753910065
+        ],
+        "upload_delay_penalty_per_uav": [
+          -0.0024874454829841852,
+          -0.0005050575127825141,
+          -0.00018861504213418812
+        ],
+        "task_delay_source_uav_ms": [
+          1110.3798828125,
+          1024.4566650390625,
+          957.1925048828125
+        ],
+        "task_completed_source_count": [
+          3344.0,
+          1730.0,
+          855.0
+        ],
+        "task_arrived_source_count": [
+          3345.0,
+          1731.0,
+          857.0
+        ],
+        "task_delay_source_high_ms": [
+          663.5411376953125,
+          539.9248046875,
+          516.2232666015625
+        ],
+        "task_delay_source_low_ms": [
+          1356.9473876953125,
+          1296.0439453125,
+          1096.330078125
+        ],
+        "task_completed_source_high_count": [
+          1189.0,
+          621.0,
+          205.0
+        ],
+        "task_completed_source_low_count": [
+          2155.0,
+          1109.0,
+          650.0
+        ],
+        "task_arrived_source_high_count": [
+          1189.0,
+          621.0,
+          205.0
+        ],
+        "task_arrived_source_low_count": [
+          2156.0,
+          1110.0,
+          652.0
+        ],
+        "energy_total_episode_per_uav": [
+          55649.234375,
+          54156.18359375,
+          54395.58984375
+        ],
+        "energy_comp_episode_per_uav": [
+          16365.4609375,
+          14572.380859375,
+          14858.05078125
+        ],
+        "energy_uplink_episode_per_uav": [
+          51.395050048828125,
+          19.810043334960938,
+          9.32002067565918
+        ],
+        "energy_trans_episode_per_uav": [
+          280.3990478515625,
+          188.3485565185547,
+          126.49911499023438
+        ],
+        "energy_macro_episode_per_uav": [
+          38951.98046875,
+          39375.64453125,
+          39401.71875
+        ],
+        "energy_total_episode": 164201.0078125,
+        "compute_service_per_uav_mbits": [
+          1680.7926025390625,
+          1626.2861328125,
+          1604.5341796875
+        ],
+        "coop_flow_mbits": [
+          [
+            1143.0908203125,
+            798.672119140625,
+            871.2371826171875
+          ],
+          [
+            378.2600402832031,
+            575.4693603515625,
+            336.2206115722656
+          ],
+          [
+            159.64773559570312,
+            252.91238403320312,
+            397.91485595703125
+          ]
+        ],
+        "tx_service_matrix_mbits": [
+          [
+            0.0,
+            798.6689453125,
+            871.234619140625
+          ],
+          [
+            378.260498046875,
+            0.0,
+            336.2208557128906
+          ],
+          [
+            159.6478271484375,
+            252.91189575195312,
+            0.0
+          ]
+        ],
+        "split_ratios_high": [
+          [
+            0.41680842638015747,
+            0.22682404518127441,
+            0.256367564201355
+          ],
+          [
+            0.20065224170684814,
+            0.38634711503982544,
+            0.3130009174346924
+          ],
+          [
+            0.25156375765800476,
+            0.446454256772995,
+            0.20198187232017517
+          ]
+        ],
+        "split_ratios_low": [
+          [
+            0.33759379386901855,
+            0.2718546986579895,
+            0.2905518114566803
+          ],
+          [
+            0.28029686212539673,
+            0.40532442927360535,
+            0.21437916159629822
+          ],
+          [
+            0.1542297601699829,
+            0.26890894770622253,
+            0.47686144709587097
+          ]
+        ],
+        "pressure_per_uav": [
+          10.663002014160156,
+          6.475803852081299,
+          6.2200822830200195
+        ],
+        "pressure_imbalance": 0.33204698647159725,
+        "coop_ratio": 0.5692479250410744
+      },
+      "mean_offset_m": [
+        [
+          3.1519942679005717,
+          2.6196999910574923
+        ],
+        [
+          3.167728575202792,
+          -42.07960310827707
+        ],
+        [
+          -18.150047306263975,
+          -25.69282195033291
+        ]
+      ],
+      "std_offset_m": [
+        [
+          5.0,
+          5.0
+        ],
+        [
+          21.790657265171806,
+          18.765014408098416
+        ],
+        [
+          19.01016920176023,
+          8.32686920910501
+        ]
+      ]
+    },
+    {
+      "iteration": 3,
+      "best_targets_m": [
+        [
+          358.94019528280836,
+          354.08776441322317
+        ],
+        [
+          357.32743140776626,
+          616.0093163661943
+        ],
+        [
+          615.8244157526369,
+          473.4756623630107
+        ]
+      ],
+      "best_metrics": {
+        "score": -52.16172499999999,
+        "J": 0.5543899127138697,
+        "delay_objective": 0.5216172499999999,
+        "legacy_score": -23.114229373750614,
+        "q_high": 0.711601547443508,
+        "q_low": 11.943214605366848,
+        "energy": 23.293515318723287,
+        "service_energy_per_micro_step_j": 23.293515318723287,
+        "average_power_w": 824.729609375,
+        "average_power_std_w": 1.0539205602716306,
+        "average_power_sem_w": 0.7452343749999955,
+        "power_sample_count": 2.0,
+        "average_power_ucb95_w": 829.4348340390379,
+        "average_power_ci95_low_w": 815.2605088296231,
+        "average_power_ci95_high_w": 834.1987099203769,
+        "power_budget_w": 840.0,
+        "power_violation_w": 0.0,
+        "power_violation_ratio": 0.0,
+        "energy_feasible": 1.0,
+        "power_ucb95_violation_w": 0.0,
+        "energy_feasible_ucb95": 0.0,
+        "average_battery_power_per_uav_w": [
+          278.35797119140625,
+          271.71942138671875,
+          274.246337890625
+        ],
+        "battery_power_ucb95_per_uav_w": [
+          280.4542541503906,
+          272.0504455566406,
+          276.5911865234375
+        ],
+        "uav_power_budgets_w": [
+          280.0,
+          280.0,
+          280.0
+        ],
+        "battery_power_violation_per_uav_w": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "battery_power_ucb95_violation_per_uav_w": [
+          0.4542529284954071,
+          0.0,
+          0.0
+        ],
+        "max_battery_power_violation_w": 0.0,
+        "max_battery_power_ucb95_violation_w": 0.45425291764149733,
+        "power_constraint_scope": "per_uav",
+        "energy_propulsion_episode": 118358.890625,
+        "energy_uplink_episode": 81.17511749267578,
+        "energy_u2u_episode": 570.9962768554688,
+        "energy_compute_episode": 45934.859375,
+        "energy_component_residual": 0.00048065185546875,
+        "micro_decision_count": 720.0,
+        "micro_decision_seconds": 1.080296000000061,
+        "micro_decision_mean_ms": 1.5004111111111957,
+        "micro_decision_p95_ms": 2.4825449999966054,
+        "u2g": 28.903235280125223,
+        "cpu_util": 0.8186481436116708,
+        "cpu_saturation": 0.6695833333333333,
+        "cpu_high_util": 0.17718750282302498,
+        "cpu_low_util": 0.6414606407886458,
+        "f_high_ghz": 1.7718750282302498,
+        "f_low_ghz": 6.414606407886459,
+        "f_total_ghz": 8.186481436116708,
+        "delay_high": 121.96137090762488,
+        "delay_low": 565.1090836135315,
+        "delay_mean_ms": 462.63557446873466,
+        "delay_weighted_ms": 469.2428162116369,
+        "delay_max_ms": 478.568071993448,
+        "task_delay_avg_ms": 1047.1050979824515,
+        "task_delay_weighted_ms": 719.207503580691,
+        "task_delay_high_ms": 612.0086228134987,
+        "task_delay_low_ms": 1271.1845896834907,
+        "task_delay_sensor_ms": 1108.2757672941548,
+        "task_delay_controller_ms": 762.5909845788848,
+        "task_delay_vision_ms": 1314.2405663535146,
+        "task_completed_count": 5929.0,
+        "task_arrived_count": 5933.0,
+        "task_completion_rate": 0.9993273249590338,
+        "task_qos_violation_rate": 8.397715821296607e-05,
+        "compute_service_high_mbits": 1063.1250169381499,
+        "compute_service_low_mbits": 3848.7638447318755,
+        "compute_service_sensor_mbits": 2484.1959015079183,
+        "compute_service_controller_mbits": 876.3000136977062,
+        "compute_service_vision_mbits": 1551.3929464644002,
+        "q_total_per_uav": [
+          7.391537666320801,
+          3.277038812637329,
+          1.9862325191497803
+        ],
+        "arrival_total_per_uav": [
+          1.5451874732971191,
+          0.7032495737075806,
+          0.4484251141548157
+        ],
+        "cpu_util_per_uav": [
+          0.8407379388809204,
+          0.8132113218307495,
+          0.8019955158233643
+        ],
+        "delay_total_per_uav_ms": [
+          478.4954528808594,
+          466.05255126953125,
+          443.3587341308594
+        ],
+        "upload_delay_cost_per_uav": [
+          1.2554553747177124,
+          0.255906343460083,
+          0.09780744463205338
+        ],
+        "upload_delay_penalty_per_uav": [
+          -0.0025109106209129095,
+          -0.000511812511831522,
+          -0.0001956150372279808
+        ],
+        "task_delay_source_uav_ms": [
+          1084.8526611328125,
+          1021.19287109375,
+          951.970458984375
+        ],
+        "task_completed_source_count": [
+          3343.5,
+          1730.0,
+          855.5
+        ],
+        "task_arrived_source_count": [
+          3345.0,
+          1731.0,
+          857.0
+        ],
+        "task_delay_source_high_ms": [
+          662.732421875,
+          543.2846069335938,
+          527.6549072265625
+        ],
+        "task_delay_source_low_ms": [
+          1317.8436279296875,
+          1289.001220703125,
+          1085.765380859375
+        ],
+        "task_completed_source_high_count": [
+          1189.0,
+          621.0,
+          205.0
+        ],
+        "task_completed_source_low_count": [
+          2154.5,
+          1109.0,
+          650.5
+        ],
+        "task_arrived_source_high_count": [
+          1189.0,
+          621.0,
+          205.0
+        ],
+        "task_arrived_source_low_count": [
+          2156.0,
+          1110.0,
+          652.0
+        ],
+        "energy_total_episode_per_uav": [
+          55723.19921875,
+          54363.9765625,
+          54858.75
+        ],
+        "energy_comp_episode_per_uav": [
+          16392.07421875,
+          14601.1240234375,
+          14941.66015625
+        ],
+        "energy_uplink_episode_per_uav": [
+          51.60005187988281,
+          20.095043182373047,
+          9.480022430419922
+        ],
+        "energy_trans_episode_per_uav": [
+          270.5484619140625,
+          180.1486358642578,
+          120.29920959472656
+        ],
+        "energy_macro_episode_per_uav": [
+          39008.9765625,
+          39562.609375,
+          39787.30859375
+        ],
+        "energy_total_episode": 164945.921875,
+        "compute_service_per_uav_mbits": [
+          1681.4759521484375,
+          1626.422607421875,
+          1603.9910888671875
+        ],
+        "coop_flow_mbits": [
+          [
+            1140.3341064453125,
+            800.3953247070312,
+            872.2705078125
+          ],
+          [
+            383.65789794921875,
+            570.0301513671875,
+            336.26190185546875
+          ],
+          [
+            157.6841583251953,
+            256.68060302734375,
+            396.1102294921875
+          ]
+        ],
+        "tx_service_matrix_mbits": [
+          [
+            0.0,
+            800.3917236328125,
+            872.2669677734375
+          ],
+          [
+            383.656982421875,
+            0.0,
+            336.26287841796875
+          ],
+          [
+            157.6842041015625,
+            256.6813659667969,
+            0.0
+          ]
+        ],
+        "split_ratios_high": [
+          [
+            0.417274534702301,
+            0.22691446542739868,
+            0.25581109523773193
+          ],
+          [
+            0.202989399433136,
+            0.3846988081932068,
+            0.31231242418289185
+          ],
+          [
+            0.24789555370807648,
+            0.45294809341430664,
+            0.1991560161113739
+          ]
+        ],
+        "split_ratios_low": [
+          [
+            0.33618199825286865,
+            0.2723561227321625,
+            0.2914615869522095
+          ],
+          [
+            0.2847699522972107,
+            0.4010537266731262,
+            0.2141752541065216
+          ],
+          [
+            0.15206822752952576,
+            0.2733285427093506,
+            0.47460341453552246
+          ]
+        ],
+        "pressure_per_uav": [
+          10.189699172973633,
+          6.340646743774414,
+          5.99741268157959
+        ],
+        "pressure_imbalance": 0.327752826759563,
+        "coop_ratio": 0.5712828212564621
+      },
+      "global_best_targets_m": [
+        [
+          358.94019528280836,
+          354.08776441322317
+        ],
+        [
+          357.32743140776626,
+          616.0093163661943
+        ],
+        [
+          615.8244157526369,
+          473.4756623630107
+        ]
+      ],
+      "global_best_metrics": {
+        "score": -52.16172499999999,
+        "J": 0.5543899127138697,
+        "delay_objective": 0.5216172499999999,
+        "legacy_score": -23.114229373750614,
+        "q_high": 0.711601547443508,
+        "q_low": 11.943214605366848,
+        "energy": 23.293515318723287,
+        "service_energy_per_micro_step_j": 23.293515318723287,
+        "average_power_w": 824.729609375,
+        "average_power_std_w": 1.0539205602716306,
+        "average_power_sem_w": 0.7452343749999955,
+        "power_sample_count": 2.0,
+        "average_power_ucb95_w": 829.4348340390379,
+        "average_power_ci95_low_w": 815.2605088296231,
+        "average_power_ci95_high_w": 834.1987099203769,
+        "power_budget_w": 840.0,
+        "power_violation_w": 0.0,
+        "power_violation_ratio": 0.0,
+        "energy_feasible": 1.0,
+        "power_ucb95_violation_w": 0.0,
+        "energy_feasible_ucb95": 0.0,
+        "average_battery_power_per_uav_w": [
+          278.35797119140625,
+          271.71942138671875,
+          274.246337890625
+        ],
+        "battery_power_ucb95_per_uav_w": [
+          280.4542541503906,
+          272.0504455566406,
+          276.5911865234375
+        ],
+        "uav_power_budgets_w": [
+          280.0,
+          280.0,
+          280.0
+        ],
+        "battery_power_violation_per_uav_w": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "battery_power_ucb95_violation_per_uav_w": [
+          0.4542529284954071,
+          0.0,
+          0.0
+        ],
+        "max_battery_power_violation_w": 0.0,
+        "max_battery_power_ucb95_violation_w": 0.45425291764149733,
+        "power_constraint_scope": "per_uav",
+        "energy_propulsion_episode": 118358.890625,
+        "energy_uplink_episode": 81.17511749267578,
+        "energy_u2u_episode": 570.9962768554688,
+        "energy_compute_episode": 45934.859375,
+        "energy_component_residual": 0.00048065185546875,
+        "micro_decision_count": 720.0,
+        "micro_decision_seconds": 1.080296000000061,
+        "micro_decision_mean_ms": 1.5004111111111957,
+        "micro_decision_p95_ms": 2.4825449999966054,
+        "u2g": 28.903235280125223,
+        "cpu_util": 0.8186481436116708,
+        "cpu_saturation": 0.6695833333333333,
+        "cpu_high_util": 0.17718750282302498,
+        "cpu_low_util": 0.6414606407886458,
+        "f_high_ghz": 1.7718750282302498,
+        "f_low_ghz": 6.414606407886459,
+        "f_total_ghz": 8.186481436116708,
+        "delay_high": 121.96137090762488,
+        "delay_low": 565.1090836135315,
+        "delay_mean_ms": 462.63557446873466,
+        "delay_weighted_ms": 469.2428162116369,
+        "delay_max_ms": 478.568071993448,
+        "task_delay_avg_ms": 1047.1050979824515,
+        "task_delay_weighted_ms": 719.207503580691,
+        "task_delay_high_ms": 612.0086228134987,
+        "task_delay_low_ms": 1271.1845896834907,
+        "task_delay_sensor_ms": 1108.2757672941548,
+        "task_delay_controller_ms": 762.5909845788848,
+        "task_delay_vision_ms": 1314.2405663535146,
+        "task_completed_count": 5929.0,
+        "task_arrived_count": 5933.0,
+        "task_completion_rate": 0.9993273249590338,
+        "task_qos_violation_rate": 8.397715821296607e-05,
+        "compute_service_high_mbits": 1063.1250169381499,
+        "compute_service_low_mbits": 3848.7638447318755,
+        "compute_service_sensor_mbits": 2484.1959015079183,
+        "compute_service_controller_mbits": 876.3000136977062,
+        "compute_service_vision_mbits": 1551.3929464644002,
+        "q_total_per_uav": [
+          7.391537666320801,
+          3.277038812637329,
+          1.9862325191497803
+        ],
+        "arrival_total_per_uav": [
+          1.5451874732971191,
+          0.7032495737075806,
+          0.4484251141548157
+        ],
+        "cpu_util_per_uav": [
+          0.8407379388809204,
+          0.8132113218307495,
+          0.8019955158233643
+        ],
+        "delay_total_per_uav_ms": [
+          478.4954528808594,
+          466.05255126953125,
+          443.3587341308594
+        ],
+        "upload_delay_cost_per_uav": [
+          1.2554553747177124,
+          0.255906343460083,
+          0.09780744463205338
+        ],
+        "upload_delay_penalty_per_uav": [
+          -0.0025109106209129095,
+          -0.000511812511831522,
+          -0.0001956150372279808
+        ],
+        "task_delay_source_uav_ms": [
+          1084.8526611328125,
+          1021.19287109375,
+          951.970458984375
+        ],
+        "task_completed_source_count": [
+          3343.5,
+          1730.0,
+          855.5
+        ],
+        "task_arrived_source_count": [
+          3345.0,
+          1731.0,
+          857.0
+        ],
+        "task_delay_source_high_ms": [
+          662.732421875,
+          543.2846069335938,
+          527.6549072265625
+        ],
+        "task_delay_source_low_ms": [
+          1317.8436279296875,
+          1289.001220703125,
+          1085.765380859375
+        ],
+        "task_completed_source_high_count": [
+          1189.0,
+          621.0,
+          205.0
+        ],
+        "task_completed_source_low_count": [
+          2154.5,
+          1109.0,
+          650.5
+        ],
+        "task_arrived_source_high_count": [
+          1189.0,
+          621.0,
+          205.0
+        ],
+        "task_arrived_source_low_count": [
+          2156.0,
+          1110.0,
+          652.0
+        ],
+        "energy_total_episode_per_uav": [
+          55723.19921875,
+          54363.9765625,
+          54858.75
+        ],
+        "energy_comp_episode_per_uav": [
+          16392.07421875,
+          14601.1240234375,
+          14941.66015625
+        ],
+        "energy_uplink_episode_per_uav": [
+          51.60005187988281,
+          20.095043182373047,
+          9.480022430419922
+        ],
+        "energy_trans_episode_per_uav": [
+          270.5484619140625,
+          180.1486358642578,
+          120.29920959472656
+        ],
+        "energy_macro_episode_per_uav": [
+          39008.9765625,
+          39562.609375,
+          39787.30859375
+        ],
+        "energy_total_episode": 164945.921875,
+        "compute_service_per_uav_mbits": [
+          1681.4759521484375,
+          1626.422607421875,
+          1603.9910888671875
+        ],
+        "coop_flow_mbits": [
+          [
+            1140.3341064453125,
+            800.3953247070312,
+            872.2705078125
+          ],
+          [
+            383.65789794921875,
+            570.0301513671875,
+            336.26190185546875
+          ],
+          [
+            157.6841583251953,
+            256.68060302734375,
+            396.1102294921875
+          ]
+        ],
+        "tx_service_matrix_mbits": [
+          [
+            0.0,
+            800.3917236328125,
+            872.2669677734375
+          ],
+          [
+            383.656982421875,
+            0.0,
+            336.26287841796875
+          ],
+          [
+            157.6842041015625,
+            256.6813659667969,
+            0.0
+          ]
+        ],
+        "split_ratios_high": [
+          [
+            0.417274534702301,
+            0.22691446542739868,
+            0.25581109523773193
+          ],
+          [
+            0.202989399433136,
+            0.3846988081932068,
+            0.31231242418289185
+          ],
+          [
+            0.24789555370807648,
+            0.45294809341430664,
+            0.1991560161113739
+          ]
+        ],
+        "split_ratios_low": [
+          [
+            0.33618199825286865,
+            0.2723561227321625,
+            0.2914615869522095
+          ],
+          [
+            0.2847699522972107,
+            0.4010537266731262,
+            0.2141752541065216
+          ],
+          [
+            0.15206822752952576,
+            0.2733285427093506,
+            0.47460341453552246
+          ]
+        ],
+        "pressure_per_uav": [
+          10.189699172973633,
+          6.340646743774414,
+          5.99741268157959
+        ],
+        "pressure_imbalance": 0.327752826759563,
+        "coop_ratio": 0.5712828212564621
+      },
+      "mean_offset_m": [
+        [
+          5.965212964185564,
+          3.7829124585459986
+        ],
+        [
+          3.7964250923721465,
+          -30.653964632806606
+        ],
+        [
+          -28.503000420147185,
+          -32.57032912912342
+        ]
+      ],
+      "std_offset_m": [
+        [
+          5.0,
+          5.0
+        ],
+        [
+          5.0,
+          10.94845661157858
+        ],
+        [
+          7.331841562996136,
+          9.144596510411013
+        ]
+      ]
+    },
+    {
+      "iteration": 4,
+      "best_targets_m": [
+        [
+          350.8975519360676,
+          359.4952775062675
+        ],
+        [
+          343.0048698479001,
+          614.1466069709512
+        ],
+        [
+          617.720616262616,
+          466.05724273922436
+        ]
+      ],
+      "best_metrics": {
+        "score": -52.123924999999986,
+        "J": 0.5540387467490793,
+        "delay_objective": 0.5212392499999998,
+        "legacy_score": -23.24804553040859,
+        "q_high": 0.7111081807695374,
+        "q_low": 11.967926434067845,
+        "energy": 23.287764785824812,
+        "service_energy_per_micro_step_j": 23.287764785824812,
+        "average_power_w": 825.048046875,
+        "average_power_std_w": 1.0482858031090276,
+        "average_power_sem_w": 0.7412499999999794,
+        "power_sample_count": 2.0,
+        "average_power_ucb95_w": 829.728115185346,
+        "average_power_ci95_low_w": 815.62957261412,
+        "average_power_ci95_high_w": 834.4665211358799,
+        "power_budget_w": 840.0,
+        "power_violation_w": 0.0,
+        "power_violation_ratio": 0.0,
+        "energy_feasible": 1.0,
+        "power_ucb95_violation_w": 0.0,
+        "energy_feasible_ucb95": 0.0,
+        "average_battery_power_per_uav_w": [
+          278.340087890625,
+          272.0863037109375,
+          274.21575927734375
+        ],
+        "battery_power_ucb95_per_uav_w": [
+          280.51263427734375,
+          272.173583984375,
+          276.7064208984375
+        ],
+        "uav_power_budgets_w": [
+          280.0,
+          280.0,
+          280.0
+        ],
+        "battery_power_violation_per_uav_w": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "battery_power_ucb95_violation_per_uav_w": [
+          0.5126405358314514,
+          0.0,
+          0.0
+        ],
+        "max_battery_power_violation_w": 0.0,
+        "max_battery_power_ucb95_violation_w": 0.5126405397076041,
+        "power_constraint_scope": "per_uav",
+        "energy_propulsion_episode": 118434.09375,
+        "energy_uplink_episode": 81.18011474609375,
+        "energy_u2u_episode": 574.3463134765625,
+        "energy_compute_episode": 45919.9921875,
+        "energy_component_residual": -0.00299072265625,
+        "micro_decision_count": 720.0,
+        "micro_decision_seconds": 1.1238949000000957,
+        "micro_decision_mean_ms": 1.5609651388890218,
+        "micro_decision_p95_ms": 2.6095650000058868,
+        "u2g": 30.046490493541313,
+        "cpu_util": 0.8186141211592324,
+        "cpu_saturation": 0.6685833333333333,
+        "cpu_high_util": 0.17718750296551733,
+        "cpu_low_util": 0.6414266181937149,
+        "f_high_ghz": 1.7718750296551735,
+        "f_low_ghz": 6.414266181937151,
+        "f_total_ghz": 8.186141211592323,
+        "delay_high": 121.87388673831717,
+        "delay_low": 566.2714723558494,
+        "delay_mean_ms": 462.168174881137,
+        "delay_weighted_ms": 470.1394935959166,
+        "delay_max_ms": 481.1287176971004,
+        "task_delay_avg_ms": 1048.098156325866,
+        "task_delay_weighted_ms": 718.7408755432575,
+        "task_delay_high_ms": 611.0527223454033,
+        "task_delay_low_ms": 1273.1432175473296,
+        "task_delay_sensor_ms": 1109.327204305769,
+        "task_delay_controller_ms": 763.7005592272491,
+        "task_delay_vision_ms": 1314.9775339782145,
+        "task_completed_count": 5929.0,
+        "task_arrived_count": 5933.0,
+        "task_completion_rate": 0.9993273249590338,
+        "task_qos_violation_rate": 8.397715821296607e-05,
+        "compute_service_high_mbits": 1063.1250177931042,
+        "compute_service_low_mbits": 3848.5597091622903,
+        "compute_service_sensor_mbits": 2484.209025268016,
+        "compute_service_controller_mbits": 876.3000143829734,
+        "compute_service_vision_mbits": 1551.175687304405,
+        "q_total_per_uav": [
+          7.4324517250061035,
+          3.281564950942993,
+          1.9650076627731323
+        ],
+        "arrival_total_per_uav": [
+          1.5451874732971191,
+          0.7032495737075806,
+          0.4484251141548157
+        ],
+        "cpu_util_per_uav": [
+          0.8406673669815063,
+          0.8132752180099487,
+          0.8018995523452759
+        ],
+        "delay_total_per_uav_ms": [
+          481.12872314453125,
+          466.69708251953125,
+          438.6787414550781
+        ],
+        "upload_delay_cost_per_uav": [
+          1.2519752979278564,
+          0.255906343460083,
+          0.09780744463205338
+        ],
+        "upload_delay_penalty_per_uav": [
+          -0.0025039506144821644,
+          -0.000511812511831522,
+          -0.0001956150372279808
+        ],
+        "task_delay_source_uav_ms": [
+          1086.179931640625,
+          1021.2575073242188,
+          953.5269775390625
+        ],
+        "task_completed_source_count": [
+          3344.0,
+          1730.0,
+          855.0
+        ],
+        "task_arrived_source_count": [
+          3345.0,
+          1731.0,
+          857.0
+        ],
+        "task_delay_source_high_ms": [
+          660.91943359375,
+          545.0640869140625,
+          523.189453125
+        ],
+        "task_delay_source_low_ms": [
+          1320.8302001953125,
+          1288.013671875,
+          1089.2967529296875
+        ],
+        "task_completed_source_high_count": [
+          1189.0,
+          621.0,
+          205.0
+        ],
+        "task_completed_source_low_count": [
+          2155.0,
+          1109.0,
+          650.0
+        ],
+        "task_arrived_source_high_count": [
+          1189.0,
+          621.0,
+          205.0
+        ],
+        "task_arrived_source_low_count": [
+          2156.0,
+          1110.0,
+          652.0
+        ],
+        "energy_total_episode_per_uav": [
+          55719.62109375,
+          54437.359375,
+          54852.62890625
+        ],
+        "energy_comp_episode_per_uav": [
+          16393.74609375,
+          14606.8037109375,
+          14919.44140625
+        ],
+        "energy_uplink_episode_per_uav": [
+          51.60504913330078,
+          20.095043182373047,
+          9.480022430419922
+        ],
+        "energy_trans_episode_per_uav": [
+          270.8985595703125,
+          181.34861755371094,
+          122.09918212890625
+        ],
+        "energy_macro_episode_per_uav": [
+          39003.37109375,
+          39629.109375,
+          39801.609375
+        ],
+        "energy_total_episode": 165009.609375,
+        "compute_service_per_uav_mbits": [
+          1681.334716796875,
+          1626.550537109375,
+          1603.799072265625
+        ],
+        "coop_flow_mbits": [
+          [
+            1140.87548828125,
+            800.091552734375,
+            872.032958984375
+          ],
+          [
+            382.7126770019531,
+            571.1143798828125,
+            336.1229553222656
+          ],
+          [
+            157.9474334716797,
+            256.0760192871094,
+            396.4515380859375
+          ]
+        ],
+        "tx_service_matrix_mbits": [
+          [
+            0.0,
+            800.08984375,
+            872.038330078125
+          ],
+          [
+            382.7113342285156,
+            0.0,
+            336.12200927734375
+          ],
+          [
+            157.94735717773438,
+            256.07550048828125,
+            0.0
+          ]
+        ],
+        "split_ratios_high": [
+          [
+            0.41717633605003357,
+            0.22691558301448822,
+            0.25590917468070984
+          ],
+          [
+            0.20197905600070953,
+            0.3852750062942505,
+            0.31274694204330444
+          ],
+          [
+            0.24857985973358154,
+            0.4518388509750366,
+            0.19958224892616272
+          ]
+        ],
+        "split_ratios_low": [
+          [
+            0.336635559797287,
+            0.2720149755477905,
+            0.29134976863861084
+          ],
+          [
+            0.28417402505874634,
+            0.401621550321579,
+            0.21420437097549438
+          ],
+          [
+            0.15239262580871582,
+            0.2724919319152832,
+            0.47511565685272217
+          ]
+        ],
+        "pressure_per_uav": [
+          10.214011192321777,
+          6.344616889953613,
+          6.071206092834473
+        ],
+        "pressure_imbalance": 0.32624720415474073,
+        "coop_ratio": 0.5708825710868592
+      },
+      "global_best_targets_m": [
+        [
+          350.8975519360676,
+          359.4952775062675
+        ],
+        [
+          343.0048698479001,
+          614.1466069709512
+        ],
+        [
+          617.720616262616,
+          466.05724273922436
+        ]
+      ],
+      "global_best_metrics": {
+        "score": -52.123924999999986,
+        "J": 0.5540387467490793,
+        "delay_objective": 0.5212392499999998,
+        "legacy_score": -23.24804553040859,
+        "q_high": 0.7111081807695374,
+        "q_low": 11.967926434067845,
+        "energy": 23.287764785824812,
+        "service_energy_per_micro_step_j": 23.287764785824812,
+        "average_power_w": 825.048046875,
+        "average_power_std_w": 1.0482858031090276,
+        "average_power_sem_w": 0.7412499999999794,
+        "power_sample_count": 2.0,
+        "average_power_ucb95_w": 829.728115185346,
+        "average_power_ci95_low_w": 815.62957261412,
+        "average_power_ci95_high_w": 834.4665211358799,
+        "power_budget_w": 840.0,
+        "power_violation_w": 0.0,
+        "power_violation_ratio": 0.0,
+        "energy_feasible": 1.0,
+        "power_ucb95_violation_w": 0.0,
+        "energy_feasible_ucb95": 0.0,
+        "average_battery_power_per_uav_w": [
+          278.340087890625,
+          272.0863037109375,
+          274.21575927734375
+        ],
+        "battery_power_ucb95_per_uav_w": [
+          280.51263427734375,
+          272.173583984375,
+          276.7064208984375
+        ],
+        "uav_power_budgets_w": [
+          280.0,
+          280.0,
+          280.0
+        ],
+        "battery_power_violation_per_uav_w": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "battery_power_ucb95_violation_per_uav_w": [
+          0.5126405358314514,
+          0.0,
+          0.0
+        ],
+        "max_battery_power_violation_w": 0.0,
+        "max_battery_power_ucb95_violation_w": 0.5126405397076041,
+        "power_constraint_scope": "per_uav",
+        "energy_propulsion_episode": 118434.09375,
+        "energy_uplink_episode": 81.18011474609375,
+        "energy_u2u_episode": 574.3463134765625,
+        "energy_compute_episode": 45919.9921875,
+        "energy_component_residual": -0.00299072265625,
+        "micro_decision_count": 720.0,
+        "micro_decision_seconds": 1.1238949000000957,
+        "micro_decision_mean_ms": 1.5609651388890218,
+        "micro_decision_p95_ms": 2.6095650000058868,
+        "u2g": 30.046490493541313,
+        "cpu_util": 0.8186141211592324,
+        "cpu_saturation": 0.6685833333333333,
+        "cpu_high_util": 0.17718750296551733,
+        "cpu_low_util": 0.6414266181937149,
+        "f_high_ghz": 1.7718750296551735,
+        "f_low_ghz": 6.414266181937151,
+        "f_total_ghz": 8.186141211592323,
+        "delay_high": 121.87388673831717,
+        "delay_low": 566.2714723558494,
+        "delay_mean_ms": 462.168174881137,
+        "delay_weighted_ms": 470.1394935959166,
+        "delay_max_ms": 481.1287176971004,
+        "task_delay_avg_ms": 1048.098156325866,
+        "task_delay_weighted_ms": 718.7408755432575,
+        "task_delay_high_ms": 611.0527223454033,
+        "task_delay_low_ms": 1273.1432175473296,
+        "task_delay_sensor_ms": 1109.327204305769,
+        "task_delay_controller_ms": 763.7005592272491,
+        "task_delay_vision_ms": 1314.9775339782145,
+        "task_completed_count": 5929.0,
+        "task_arrived_count": 5933.0,
+        "task_completion_rate": 0.9993273249590338,
+        "task_qos_violation_rate": 8.397715821296607e-05,
+        "compute_service_high_mbits": 1063.1250177931042,
+        "compute_service_low_mbits": 3848.5597091622903,
+        "compute_service_sensor_mbits": 2484.209025268016,
+        "compute_service_controller_mbits": 876.3000143829734,
+        "compute_service_vision_mbits": 1551.175687304405,
+        "q_total_per_uav": [
+          7.4324517250061035,
+          3.281564950942993,
+          1.9650076627731323
+        ],
+        "arrival_total_per_uav": [
+          1.5451874732971191,
+          0.7032495737075806,
+          0.4484251141548157
+        ],
+        "cpu_util_per_uav": [
+          0.8406673669815063,
+          0.8132752180099487,
+          0.8018995523452759
+        ],
+        "delay_total_per_uav_ms": [
+          481.12872314453125,
+          466.69708251953125,
+          438.6787414550781
+        ],
+        "upload_delay_cost_per_uav": [
+          1.2519752979278564,
+          0.255906343460083,
+          0.09780744463205338
+        ],
+        "upload_delay_penalty_per_uav": [
+          -0.0025039506144821644,
+          -0.000511812511831522,
+          -0.0001956150372279808
+        ],
+        "task_delay_source_uav_ms": [
+          1086.179931640625,
+          1021.2575073242188,
+          953.5269775390625
+        ],
+        "task_completed_source_count": [
+          3344.0,
+          1730.0,
+          855.0
+        ],
+        "task_arrived_source_count": [
+          3345.0,
+          1731.0,
+          857.0
+        ],
+        "task_delay_source_high_ms": [
+          660.91943359375,
+          545.0640869140625,
+          523.189453125
+        ],
+        "task_delay_source_low_ms": [
+          1320.8302001953125,
+          1288.013671875,
+          1089.2967529296875
+        ],
+        "task_completed_source_high_count": [
+          1189.0,
+          621.0,
+          205.0
+        ],
+        "task_completed_source_low_count": [
+          2155.0,
+          1109.0,
+          650.0
+        ],
+        "task_arrived_source_high_count": [
+          1189.0,
+          621.0,
+          205.0
+        ],
+        "task_arrived_source_low_count": [
+          2156.0,
+          1110.0,
+          652.0
+        ],
+        "energy_total_episode_per_uav": [
+          55719.62109375,
+          54437.359375,
+          54852.62890625
+        ],
+        "energy_comp_episode_per_uav": [
+          16393.74609375,
+          14606.8037109375,
+          14919.44140625
+        ],
+        "energy_uplink_episode_per_uav": [
+          51.60504913330078,
+          20.095043182373047,
+          9.480022430419922
+        ],
+        "energy_trans_episode_per_uav": [
+          270.8985595703125,
+          181.34861755371094,
+          122.09918212890625
+        ],
+        "energy_macro_episode_per_uav": [
+          39003.37109375,
+          39629.109375,
+          39801.609375
+        ],
+        "energy_total_episode": 165009.609375,
+        "compute_service_per_uav_mbits": [
+          1681.334716796875,
+          1626.550537109375,
+          1603.799072265625
+        ],
+        "coop_flow_mbits": [
+          [
+            1140.87548828125,
+            800.091552734375,
+            872.032958984375
+          ],
+          [
+            382.7126770019531,
+            571.1143798828125,
+            336.1229553222656
+          ],
+          [
+            157.9474334716797,
+            256.0760192871094,
+            396.4515380859375
+          ]
+        ],
+        "tx_service_matrix_mbits": [
+          [
+            0.0,
+            800.08984375,
+            872.038330078125
+          ],
+          [
+            382.7113342285156,
+            0.0,
+            336.12200927734375
+          ],
+          [
+            157.94735717773438,
+            256.07550048828125,
+            0.0
+          ]
+        ],
+        "split_ratios_high": [
+          [
+            0.41717633605003357,
+            0.22691558301448822,
+            0.25590917468070984
+          ],
+          [
+            0.20197905600070953,
+            0.3852750062942505,
+            0.31274694204330444
+          ],
+          [
+            0.24857985973358154,
+            0.4518388509750366,
+            0.19958224892616272
+          ]
+        ],
+        "split_ratios_low": [
+          [
+            0.336635559797287,
+            0.2720149755477905,
+            0.29134976863861084
+          ],
+          [
+            0.28417402505874634,
+            0.401621550321579,
+            0.21420437097549438
+          ],
+          [
+            0.15239262580871582,
+            0.2724919319152832,
+            0.47511565685272217
+          ]
+        ],
+        "pressure_per_uav": [
+          10.214011192321777,
+          6.344616889953613,
+          6.071206092834473
+        ],
+        "pressure_imbalance": 0.32624720415474073,
+        "coop_ratio": 0.5708825710868592
+      },
+      "mean_offset_m": [
+        [
+          5.591765260055695,
+          5.576440474794538
+        ],
+        [
+          5.245172521090542,
+          -20.492779802107332
+        ],
+        [
+          -27.021200300566687,
+          -28.441118652959194
+        ]
+      ],
+      "std_offset_m": [
+        [
+          5.2401843259043925,
+          5.0
+        ],
+        [
+          9.293084859783788,
+          12.412876507658675
+        ],
+        [
+          5.0,
+          5.0
+        ]
+      ]
+    },
+    {
+      "iteration": 5,
+      "best_targets_m": [
+        [
+          361.50105442915475,
+          356.25350253538573
+        ],
+        [
+          346.08617583224236,
+          627.2987120802244
+        ],
+        [
+          624.096273459255,
+          474.87619171019526
+        ]
+      ],
+      "best_metrics": {
+        "score": -51.974299999999985,
+        "J": 0.5524572313230989,
+        "delay_objective": 0.5197429999999998,
+        "legacy_score": -22.697420843431175,
+        "q_high": 0.7080346981451304,
+        "q_low": 11.974153554012775,
+        "energy": 23.27025290461743,
+        "service_energy_per_micro_step_j": 23.27025290461743,
+        "average_power_w": 823.0545312500001,
+        "average_power_std_w": 0.9724927950005883,
+        "average_power_sem_w": 0.687656249999975,
+        "power_sample_count": 2.0,
+        "average_power_ucb95_w": 827.3962219400997,
+        "average_power_ci95_low_w": 814.3170301492132,
+        "average_power_ci95_high_w": 831.7920323507869,
+        "power_budget_w": 840.0,
+        "power_violation_w": 0.0,
+        "power_violation_ratio": 0.0,
+        "energy_feasible": 1.0,
+        "power_ucb95_violation_w": 0.0,
+        "energy_feasible_ucb95": 0.0,
+        "average_battery_power_per_uav_w": [
+          278.7413330078125,
+          270.71807861328125,
+          273.1895751953125
+        ],
+        "battery_power_ucb95_per_uav_w": [
+          281.1850280761719,
+          271.4906311035156,
+          274.38409423828125
+        ],
+        "uav_power_budgets_w": [
+          280.0,
+          280.0,
+          280.0
+        ],
+        "battery_power_violation_per_uav_w": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "battery_power_ucb95_violation_per_uav_w": [
+          1.185017466545105,
+          0.0,
+          0.0
+        ],
+        "max_battery_power_violation_w": 0.0,
+        "max_battery_power_ucb95_violation_w": 1.1850175044696698,
+        "power_constraint_scope": "per_uav",
+        "energy_propulsion_episode": 118070.3984375,
+        "energy_uplink_episode": 81.10511779785156,
+        "energy_u2u_episode": 579.54638671875,
+        "energy_compute_episode": 45879.86328125,
+        "energy_component_residual": -0.0069732666015625,
+        "micro_decision_count": 720.0,
+        "micro_decision_seconds": 1.1546784999996476,
+        "micro_decision_mean_ms": 1.6037201388883995,
+        "micro_decision_p95_ms": 2.842060000020296,
+        "u2g": 24.79407662736222,
+        "cpu_util": 0.8186138684575315,
+        "cpu_saturation": 0.6669166666666667,
+        "cpu_high_util": 0.1771875029739613,
+        "cpu_low_util": 0.6414263654835701,
+        "f_high_ghz": 1.771875029739613,
+        "f_low_ghz": 6.4142636548357,
+        "f_total_ghz": 8.186138684575315,
+        "delay_high": 121.36170542130324,
+        "delay_low": 566.5657440738743,
+        "delay_mean_ms": 460.2866789547835,
+        "delay_weighted_ms": 470.2566331941096,
+        "delay_max_ms": 484.6145403941373,
+        "task_delay_avg_ms": 1049.313543626699,
+        "task_delay_weighted_ms": 717.0068487712477,
+        "task_delay_high_ms": 608.3661000246343,
+        "task_delay_low_ms": 1276.4050515115018,
+        "task_delay_sensor_ms": 1109.9120294673967,
+        "task_delay_controller_ms": 762.1649211997965,
+        "task_delay_vision_ms": 1322.1729624438963,
+        "task_completed_count": 5929.0,
+        "task_arrived_count": 5933.0,
+        "task_completion_rate": 0.9993273249590338,
+        "task_qos_violation_rate": 8.397715821296607e-05,
+        "compute_service_high_mbits": 1063.125017843768,
+        "compute_service_low_mbits": 3848.5581929014206,
+        "compute_service_sensor_mbits": 2484.2071114918176,
+        "compute_service_controller_mbits": 876.300014122203,
+        "compute_service_vision_mbits": 1551.1760851311678,
+        "q_total_per_uav": [
+          7.485969543457031,
+          3.2570576667785645,
+          1.9391669034957886
+        ],
+        "arrival_total_per_uav": [
+          1.5451874732971191,
+          0.7032495737075806,
+          0.4484251141548157
+        ],
+        "cpu_util_per_uav": [
+          0.8406846523284912,
+          0.8131718039512634,
+          0.8019856214523315
+        ],
+        "delay_total_per_uav_ms": [
+          484.61456298828125,
+          463.2318115234375,
+          433.013671875
+        ],
+        "upload_delay_cost_per_uav": [
+          1.2638177871704102,
+          0.2521350681781769,
+          0.09641744196414948
+        ],
+        "upload_delay_penalty_per_uav": [
+          -0.002527635544538498,
+          -0.0005042699631303549,
+          -0.00019283505389466882
+        ],
+        "task_delay_source_uav_ms": [
+          1091.922607421875,
+          1015.5661010742188,
+          951.0457153320312
+        ],
+        "task_completed_source_count": [
+          3344.0,
+          1730.0,
+          855.0
+        ],
+        "task_arrived_source_count": [
+          3345.0,
+          1731.0,
+          857.0
+        ],
+        "task_delay_source_high_ms": [
+          662.066650390625,
+          535.5872802734375,
+          518.9954833984375
+        ],
+        "task_delay_source_low_ms": [
+          1329.140380859375,
+          1284.562744140625,
+          1087.35400390625
+        ],
+        "task_completed_source_high_count": [
+          1189.0,
+          621.0,
+          205.0
+        ],
+        "task_completed_source_low_count": [
+          2155.0,
+          1109.0,
+          650.0
+        ],
+        "task_arrived_source_high_count": [
+          1189.0,
+          621.0,
+          205.0
+        ],
+        "task_arrived_source_low_count": [
+          2156.0,
+          1110.0,
+          652.0
+        ],
+        "energy_total_episode_per_uav": [
+          55800.0625,
+          54163.5078125,
+          54647.3359375
+        ],
+        "energy_comp_episode_per_uav": [
+          16385.16015625,
+          14591.169921875,
+          14903.533203125
+        ],
+        "energy_uplink_episode_per_uav": [
+          51.7900505065918,
+          19.89004135131836,
+          9.42502212524414
+        ],
+        "energy_trans_episode_per_uav": [
+          273.2986145019531,
+          183.2986297607422,
+          122.94917297363281
+        ],
+        "energy_macro_episode_per_uav": [
+          39089.8125,
+          39369.15234375,
+          39611.4296875
+        ],
+        "energy_total_episode": 164610.90625,
+        "compute_service_per_uav_mbits": [
+          1681.369140625,
+          1626.3436279296875,
+          1603.97119140625
+        ],
+        "coop_flow_mbits": [
+          [
+            1141.10888671875,
+            799.8369140625,
+            872.05419921875
+          ],
+          [
+            382.05303955078125,
+            571.850830078125,
+            336.04608154296875
+          ],
+          [
+            158.4047393798828,
+            255.38919067382812,
+            396.6810607910156
+          ]
+        ],
+        "tx_service_matrix_mbits": [
+          [
+            0.0,
+            799.84130859375,
+            872.04931640625
+          ],
+          [
+            382.05487060546875,
+            0.0,
+            336.0466003417969
+          ],
+          [
+            158.40476989746094,
+            255.38882446289062,
+            0.0
+          ]
+        ],
+        "split_ratios_high": [
+          [
+            0.41648000478744507,
+            0.22705793380737305,
+            0.256460964679718
+          ],
+          [
+            0.20198267698287964,
+            0.38553857803344727,
+            0.3124787211418152
+          ],
+          [
+            0.24884788691997528,
+            0.4506639540195465,
+            0.2004871815443039
+          ]
+        ],
+        "split_ratios_low": [
+          [
+            0.33710935711860657,
+            0.2717527747154236,
+            0.2911384105682373
+          ],
+          [
+            0.28368672728538513,
+            0.40217629075050354,
+            0.2141367793083191
+          ],
+          [
+            0.15302324295043945,
+            0.27156102657318115,
+            0.47541528940200806
+          ]
+        ],
+        "pressure_per_uav": [
+          10.266996383666992,
+          6.390568733215332,
+          6.0625834465026855
+        ],
+        "pressure_imbalance": 0.3289860868030434,
+        "coop_ratio": 0.5706384942834972
+      },
+      "global_best_targets_m": [
+        [
+          361.50105442915475,
+          356.25350253538573
+        ],
+        [
+          346.08617583224236,
+          627.2987120802244
+        ],
+        [
+          624.096273459255,
+          474.87619171019526
+        ]
+      ],
+      "global_best_metrics": {
+        "score": -51.974299999999985,
+        "J": 0.5524572313230989,
+        "delay_objective": 0.5197429999999998,
+        "legacy_score": -22.697420843431175,
+        "q_high": 0.7080346981451304,
+        "q_low": 11.974153554012775,
+        "energy": 23.27025290461743,
+        "service_energy_per_micro_step_j": 23.27025290461743,
+        "average_power_w": 823.0545312500001,
+        "average_power_std_w": 0.9724927950005883,
+        "average_power_sem_w": 0.687656249999975,
+        "power_sample_count": 2.0,
+        "average_power_ucb95_w": 827.3962219400997,
+        "average_power_ci95_low_w": 814.3170301492132,
+        "average_power_ci95_high_w": 831.7920323507869,
+        "power_budget_w": 840.0,
+        "power_violation_w": 0.0,
+        "power_violation_ratio": 0.0,
+        "energy_feasible": 1.0,
+        "power_ucb95_violation_w": 0.0,
+        "energy_feasible_ucb95": 0.0,
+        "average_battery_power_per_uav_w": [
+          278.7413330078125,
+          270.71807861328125,
+          273.1895751953125
+        ],
+        "battery_power_ucb95_per_uav_w": [
+          281.1850280761719,
+          271.4906311035156,
+          274.38409423828125
+        ],
+        "uav_power_budgets_w": [
+          280.0,
+          280.0,
+          280.0
+        ],
+        "battery_power_violation_per_uav_w": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "battery_power_ucb95_violation_per_uav_w": [
+          1.185017466545105,
+          0.0,
+          0.0
+        ],
+        "max_battery_power_violation_w": 0.0,
+        "max_battery_power_ucb95_violation_w": 1.1850175044696698,
+        "power_constraint_scope": "per_uav",
+        "energy_propulsion_episode": 118070.3984375,
+        "energy_uplink_episode": 81.10511779785156,
+        "energy_u2u_episode": 579.54638671875,
+        "energy_compute_episode": 45879.86328125,
+        "energy_component_residual": -0.0069732666015625,
+        "micro_decision_count": 720.0,
+        "micro_decision_seconds": 1.1546784999996476,
+        "micro_decision_mean_ms": 1.6037201388883995,
+        "micro_decision_p95_ms": 2.842060000020296,
+        "u2g": 24.79407662736222,
+        "cpu_util": 0.8186138684575315,
+        "cpu_saturation": 0.6669166666666667,
+        "cpu_high_util": 0.1771875029739613,
+        "cpu_low_util": 0.6414263654835701,
+        "f_high_ghz": 1.771875029739613,
+        "f_low_ghz": 6.4142636548357,
+        "f_total_ghz": 8.186138684575315,
+        "delay_high": 121.36170542130324,
+        "delay_low": 566.5657440738743,
+        "delay_mean_ms": 460.2866789547835,
+        "delay_weighted_ms": 470.2566331941096,
+        "delay_max_ms": 484.6145403941373,
+        "task_delay_avg_ms": 1049.313543626699,
+        "task_delay_weighted_ms": 717.0068487712477,
+        "task_delay_high_ms": 608.3661000246343,
+        "task_delay_low_ms": 1276.4050515115018,
+        "task_delay_sensor_ms": 1109.9120294673967,
+        "task_delay_controller_ms": 762.1649211997965,
+        "task_delay_vision_ms": 1322.1729624438963,
+        "task_completed_count": 5929.0,
+        "task_arrived_count": 5933.0,
+        "task_completion_rate": 0.9993273249590338,
+        "task_qos_violation_rate": 8.397715821296607e-05,
+        "compute_service_high_mbits": 1063.125017843768,
+        "compute_service_low_mbits": 3848.5581929014206,
+        "compute_service_sensor_mbits": 2484.2071114918176,
+        "compute_service_controller_mbits": 876.300014122203,
+        "compute_service_vision_mbits": 1551.1760851311678,
+        "q_total_per_uav": [
+          7.485969543457031,
+          3.2570576667785645,
+          1.9391669034957886
+        ],
+        "arrival_total_per_uav": [
+          1.5451874732971191,
+          0.7032495737075806,
+          0.4484251141548157
+        ],
+        "cpu_util_per_uav": [
+          0.8406846523284912,
+          0.8131718039512634,
+          0.8019856214523315
+        ],
+        "delay_total_per_uav_ms": [
+          484.61456298828125,
+          463.2318115234375,
+          433.013671875
+        ],
+        "upload_delay_cost_per_uav": [
+          1.2638177871704102,
+          0.2521350681781769,
+          0.09641744196414948
+        ],
+        "upload_delay_penalty_per_uav": [
+          -0.002527635544538498,
+          -0.0005042699631303549,
+          -0.00019283505389466882
+        ],
+        "task_delay_source_uav_ms": [
+          1091.922607421875,
+          1015.5661010742188,
+          951.0457153320312
+        ],
+        "task_completed_source_count": [
+          3344.0,
+          1730.0,
+          855.0
+        ],
+        "task_arrived_source_count": [
+          3345.0,
+          1731.0,
+          857.0
+        ],
+        "task_delay_source_high_ms": [
+          662.066650390625,
+          535.5872802734375,
+          518.9954833984375
+        ],
+        "task_delay_source_low_ms": [
+          1329.140380859375,
+          1284.562744140625,
+          1087.35400390625
+        ],
+        "task_completed_source_high_count": [
+          1189.0,
+          621.0,
+          205.0
+        ],
+        "task_completed_source_low_count": [
+          2155.0,
+          1109.0,
+          650.0
+        ],
+        "task_arrived_source_high_count": [
+          1189.0,
+          621.0,
+          205.0
+        ],
+        "task_arrived_source_low_count": [
+          2156.0,
+          1110.0,
+          652.0
+        ],
+        "energy_total_episode_per_uav": [
+          55800.0625,
+          54163.5078125,
+          54647.3359375
+        ],
+        "energy_comp_episode_per_uav": [
+          16385.16015625,
+          14591.169921875,
+          14903.533203125
+        ],
+        "energy_uplink_episode_per_uav": [
+          51.7900505065918,
+          19.89004135131836,
+          9.42502212524414
+        ],
+        "energy_trans_episode_per_uav": [
+          273.2986145019531,
+          183.2986297607422,
+          122.94917297363281
+        ],
+        "energy_macro_episode_per_uav": [
+          39089.8125,
+          39369.15234375,
+          39611.4296875
+        ],
+        "energy_total_episode": 164610.90625,
+        "compute_service_per_uav_mbits": [
+          1681.369140625,
+          1626.3436279296875,
+          1603.97119140625
+        ],
+        "coop_flow_mbits": [
+          [
+            1141.10888671875,
+            799.8369140625,
+            872.05419921875
+          ],
+          [
+            382.05303955078125,
+            571.850830078125,
+            336.04608154296875
+          ],
+          [
+            158.4047393798828,
+            255.38919067382812,
+            396.6810607910156
+          ]
+        ],
+        "tx_service_matrix_mbits": [
+          [
+            0.0,
+            799.84130859375,
+            872.04931640625
+          ],
+          [
+            382.05487060546875,
+            0.0,
+            336.0466003417969
+          ],
+          [
+            158.40476989746094,
+            255.38882446289062,
+            0.0
+          ]
+        ],
+        "split_ratios_high": [
+          [
+            0.41648000478744507,
+            0.22705793380737305,
+            0.256460964679718
+          ],
+          [
+            0.20198267698287964,
+            0.38553857803344727,
+            0.3124787211418152
+          ],
+          [
+            0.24884788691997528,
+            0.4506639540195465,
+            0.2004871815443039
+          ]
+        ],
+        "split_ratios_low": [
+          [
+            0.33710935711860657,
+            0.2717527747154236,
+            0.2911384105682373
+          ],
+          [
+            0.28368672728538513,
+            0.40217629075050354,
+            0.2141367793083191
+          ],
+          [
+            0.15302324295043945,
+            0.27156102657318115,
+            0.47541528940200806
+          ]
+        ],
+        "pressure_per_uav": [
+          10.266996383666992,
+          6.390568733215332,
+          6.0625834465026855
+        ],
+        "pressure_imbalance": 0.3289860868030434,
+        "coop_ratio": 0.5706384942834972
+      },
+      "mean_offset_m": [
+        [
+          9.449241330400602,
+          5.843821591840651
+        ],
+        [
+          2.7569463300591983,
+          -22.551890884664317
+        ],
+        [
+          -30.551978156697903,
+          -26.647155327434557
+        ]
+      ],
+      "std_offset_m": [
+        [
+          5.0,
+          5.0
+        ],
+        [
+          5.0,
+          5.0
+        ],
+        [
+          5.801412427440342,
+          5.0
+        ]
+      ]
+    }
+  ]
+}

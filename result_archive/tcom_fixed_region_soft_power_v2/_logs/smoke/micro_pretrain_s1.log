@@ -1,0 +1,20 @@
+# CMD: D:\Anaconda3\envs\pytorch-gpu\python.exe -u C:\Users\PC\Desktop\HRL_UAV\scripts\train_centralized_macro.py --episodes 2 --macro_steps 2 --micro_steps 100 --num_agents 3 --num_users 39 --eval_interval 2 --eval_episodes 2 --trajectory_plot_interval 0 --zone_loads 12.5,5.5,3.5 --load_scale 1.15 --traffic_profile normal --traffic_scale 0.5 --arrival_dt 0.5 --resource_frame_dt 0.5 --deployment_dt 1.0 --pause_service_during_flight 1 --arrivals_during_deployment 1 --deployment_transient_energy_mode kinetic_lower_bound --uav_mass_kg 2.038735983690112 --users_static 0 --gm_mean_speed_mps 0.5 --gm_mean_heading_rad 0.7853981633974483 --gm_speed_memory 0.5 --gm_heading_memory 0.5 --gm_speed_noise_std 0.1 --gm_heading_noise_std 0.1 --user_zone_radius 0.0 --uplink_bandwidth_mhz 20 --u2u_bandwidth_mhz 3 --cpu_ghz 10.0 --cpu_alloc_mode priced_maxweight --cpu_power_cap_w 0 --micro_diag_bias 0 --micro_action_scale 1 --micro_state_mode pressure --objective_mode constrained_delay --power_constraint_scope system --power_budget_w 840.0 --energy_dual_initial 0 --energy_dual_lr 0.02 --energy_dual_max 20 --energy_dual_state_norm 10 --checkpoint_power_rule ucb95 --power_budget_tolerance 0 --power_constraint_margin_w 0 --macro_reward_mode strict_global --strict_hierarchy_validation 1 --macro_action_mode delta --macro_action_deadzone 0.05 --macro_waypoint_radius_m 200.0 --macro_waypoint_tolerance_m 0.5 --macro_flow_state 1 --macro_load_state 1 --macro_capacity_state 1 --macro_comm_weight 0 --seed 1 --device cuda --micro_solver sac --freeze_macro --ppo_zero_inflated_actions 0 --ppo_initial_log_std -2.3025850929940455 --macro_shaping_initial 0 --macro_shaping_final 0 --macro_move_penalty_weight 0 --macro_propulsion_tiebreak_weight 0 --advisor_weight 0 --advisor_final_weight 0 --energy_dual_power_window 5 --results_subdir tcom_fixed_region_soft_power_v2/smoke/seed1/micro_pretrain
+
+[INFO] Training on CUDA
+[INFO] Macro policy: centralized dx/dy actor
+[INFO] Micro solver: SAC
+[INFO] Macro reward mode: strict_global
+[INFO] Objective: constrained_delay power_budget=840.00W
+[INFO] macro_comm_weight=0.0
+[INFO] shaping=0.0->0.0 over 0 episodes
+[INFO] move_penalty=0.0 propulsion_tiebreak=0.0
+[INFO] training scenario mode: independent
+[INFO] Macro PPO frozen; deterministic actions are used and only the micro layer is trained
+Episode 0 | Macro R -20.67 | Micro R -2067.31 | J 1.0337 | Comm 1.334 | U2G 16.7 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 724.4W | Pcon 724.4W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 1 | Macro R -21.37 | Micro R -2136.61 | J 1.0683 | Comm 1.354 | U2G 20.1 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 732.0W | Pcon 732.0W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+  Eval@2 | Score: -136.89 | J: 1.3689 | Dh(ms): 171.9 | Dl(ms): 4189.5 | Dw(ms): 3351.3 | Ttask(ms): 1757.3 | TwE2E(ms): 952.5 | Done: 422/650 | Dmax(ms): 5286.9 | Eservice/step(J): 12.91 | Pavg(W): 713.40 | Pucb95(W): 746.52 | Pvio(W): 0.00 | Eep: 14268.06 | Coop: 0.76 | CPU sat: 0.33 | Press imbal: 0.30 | U2G: 12.33 | Decision: 1.562 ms
+  Eval task delay(ms) H/L/S/C/V: 770.8/2731.2/1978.4/997.2/3026.2 | CPU service(Mb) H/L/S/C/V: 111.26/222.97/178.11/82.78/73.34
+Saved lower SAC replay -> C:\Users\PC\Desktop\HRL_UAV\results\tcom_fixed_region_soft_power_v2/smoke/seed1/micro_pretrain\checkpoints\micro_replay.pt
+Saved evaluation CSV -> C:\Users\PC\Desktop\HRL_UAV\results\tcom_fixed_region_soft_power_v2/smoke/seed1/micro_pretrain\eval_central_macro.csv
+Saved per-episode training CSV -> C:\Users\PC\Desktop\HRL_UAV\results\tcom_fixed_region_soft_power_v2/smoke/seed1/micro_pretrain\train_centralized.csv
+Training complete.

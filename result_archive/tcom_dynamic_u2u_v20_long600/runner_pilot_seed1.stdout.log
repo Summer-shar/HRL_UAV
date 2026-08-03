@@ -1,0 +1,8 @@
+Candidate long-term research protocol
+  stage=pilot, episodes=600, seeds=[1]
+  methods=['joint_td3_sac']
+  capacity_audit={'load_scale': 1.15, 'arrival_mbits_per_macro': [143.74999999999997, 63.24999999999999, 40.24999999999999], 'compute_capacity_mbits_per_macro': [90.0, 90.0, 90.0], 'locally_overloaded': [True, False, False], 'globally_feasible': True, 'global_margin_mbits': 22.75000000000003}
+  CPU=priced_maxweight, aggregate_cpu_cap=disabled, power_constraint=system, system_average_budget=840.0W
+  deployment=arrivals+mobility, service=paused for exactly 1s
+
+[START] micro_pretrain_s1 at 2026-07-29 11:39:14

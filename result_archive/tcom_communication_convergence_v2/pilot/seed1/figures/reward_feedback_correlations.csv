@@ -1,0 +1,9 @@
+﻿parameter,source_field,pearson_r
+加权排队压力,micro_cost_delay_mean,-0.3832679877645106
+总队列,micro_q_total_mean,-0.9246738572661012
+平均U2G距离,u2g_m,0.258331053830472
+实际上行时延代价,micro_upload_delay_cost_mean,0.026246288556062067
+预测U2U时间,projected_u2u_time_s_mean,-0.1916220102154334
+通信代价,comm_cost,0.14418276609792913
+平均移动距离,move_m,0.24257988270467595
+约束能耗比,macro_energy_ratio_mean,0.5172048942726719

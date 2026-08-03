@@ -1,0 +1,42 @@
+{
+  "protocol": {
+    "results_version": "joint_hrl_v1",
+    "formal_seeds": [
+      1,
+      42,
+      123
+    ],
+    "training_episodes": 600,
+    "micro_pretrain_episodes": 200,
+    "num_uavs": 3,
+    "num_users": 39,
+    "zone_loads_mbps": [
+      12.5,
+      5.5,
+      3.5
+    ],
+    "load_scale": 1.15,
+    "cpu_ghz": 10.0,
+    "uav_power_budget_w": 280.0,
+    "max_deployment_distance_m": 20.0,
+    "macro_period_s": 10.0,
+    "deployment_s": 1.0,
+    "resource_frame_s": 0.5,
+    "integration_step_s": 0.1
+  },
+  "stage": "pilot",
+  "stage_config": {
+    "episodes": 100,
+    "seeds": [
+      1
+    ],
+    "macro_steps": 30,
+    "eval_interval": 20,
+    "eval_episodes": 20,
+    "trajectory_interval": 100,
+    "micro_pretrain_episodes": 200
+  },
+  "requested_seeds": [
+    1
+  ]
+}

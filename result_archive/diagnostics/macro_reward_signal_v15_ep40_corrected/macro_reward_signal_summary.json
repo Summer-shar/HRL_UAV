@@ -1,0 +1,298 @@
+{
+  "checkpoint": "C:\\Users\\PC\\Desktop\\HRL_UAV\\results\\tcom_fixed_region_soft_power_v15_two_timescale\\pilot\\seed1\\joint_td3_sac\\checkpoints\\eval_candidates\\eval_ep_0040.pt",
+  "episodes": 8,
+  "eval_base_seed": 1000,
+  "association_policy": "fixed_region_uav",
+  "summaries": {
+    "anchor": {
+      "delay_objective": {
+        "mean": 0.9243085833333329,
+        "std": 0.13054798355160016,
+        "paired_difference_vs_anchor": 0.0,
+        "paired_ci95_low": 0.0,
+        "paired_ci95_high": 0.0,
+        "paired_difference_std": 0.0,
+        "paired_signal_to_noise": 0.0
+      },
+      "task_delay_weighted_ms": {
+        "mean": 1196.001694662081,
+        "std": 152.4132182776465,
+        "paired_difference_vs_anchor": 0.0,
+        "paired_ci95_low": 0.0,
+        "paired_ci95_high": 0.0,
+        "paired_difference_std": 0.0,
+        "paired_signal_to_noise": 0.0
+      },
+      "average_power_w": {
+        "mean": 819.511484375,
+        "std": 3.4414328996387105,
+        "paired_difference_vs_anchor": 0.0,
+        "paired_ci95_low": 0.0,
+        "paired_ci95_high": 0.0,
+        "paired_difference_std": 0.0,
+        "paired_signal_to_noise": 0.0
+      },
+      "u2g": {
+        "mean": 67.28351484754032,
+        "std": 4.557870475064378,
+        "paired_difference_vs_anchor": 0.0,
+        "paired_ci95_low": 0.0,
+        "paired_ci95_high": 0.0,
+        "paired_difference_std": 0.0,
+        "paired_signal_to_noise": 0.0
+      },
+      "coop_ratio": {
+        "mean": 0.3904226541052973,
+        "std": 0.014095017745479143,
+        "paired_difference_vs_anchor": 0.0,
+        "paired_ci95_low": 0.0,
+        "paired_ci95_high": 0.0,
+        "paired_difference_std": 0.0,
+        "paired_signal_to_noise": 0.0
+      },
+      "battery_power_mean_per_uav_w": [
+        285.679141998291,
+        275.04381561279297,
+        258.0535469055176
+      ],
+      "battery_power_ucb95_per_uav_w": [
+        285.9333735661843,
+        276.14230741369556,
+        259.3552749913434
+      ],
+      "battery_power_feasible_ucb95": false
+    },
+    "centroid": {
+      "delay_objective": {
+        "mean": 0.9114685416666661,
+        "std": 0.12519916426732278,
+        "paired_difference_vs_anchor": -0.012840041666666746,
+        "paired_ci95_low": -0.05484703321553277,
+        "paired_ci95_high": 0.029166949882199276,
+        "paired_difference_std": 0.050246340087971714,
+        "paired_signal_to_noise": 0.2555418293986446
+      },
+      "task_delay_weighted_ms": {
+        "mean": 1177.4458347185073,
+        "std": 140.16879075572683,
+        "paired_difference_vs_anchor": -18.555859943573495,
+        "paired_ci95_low": -63.72255493210597,
+        "paired_ci95_high": 26.610835044958982,
+        "paired_difference_std": 54.0257950727908,
+        "paired_signal_to_noise": 0.3434629683574772
+      },
+      "average_power_w": {
+        "mean": 829.2079817708334,
+        "std": 3.839062858219903,
+        "paired_difference_vs_anchor": 9.696497395833319,
+        "paired_ci95_low": 8.681849595080775,
+        "paired_ci95_high": 10.711145196585862,
+        "paired_difference_std": 1.2136631685898753,
+        "paired_signal_to_noise": 7.989446863662704
+      },
+      "u2g": {
+        "mean": 0.03148693597456263,
+        "std": 0.05953772017569365,
+        "paired_difference_vs_anchor": -67.25202791156576,
+        "paired_ci95_low": -71.09419358619893,
+        "paired_ci95_high": -63.4098622369326,
+        "paired_difference_std": 4.595776941973383,
+        "paired_signal_to_noise": 14.633440386836613
+      },
+      "coop_ratio": {
+        "mean": 0.39389729806658746,
+        "std": 0.014567352918989576,
+        "paired_difference_vs_anchor": 0.0034746439612901997,
+        "paired_ci95_low": 0.0008556490826672151,
+        "paired_ci95_high": 0.006093638839913184,
+        "paired_difference_std": 0.003132690595251616,
+        "paired_signal_to_noise": 1.1091564441623762
+      },
+      "battery_power_mean_per_uav_w": [
+        287.4276542663574,
+        278.3706359863281,
+        262.7740020751953
+      ],
+      "battery_power_ucb95_per_uav_w": [
+        288.15194056537956,
+        279.9165072618899,
+        264.2579983350479
+      ],
+      "battery_power_feasible_ucb95": false
+    },
+    "toward_20_40": {
+      "delay_objective": {
+        "mean": 0.832794958333333,
+        "std": 0.0887513448061649,
+        "paired_difference_vs_anchor": -0.09151362499999995,
+        "paired_ci95_low": -0.14655083341470257,
+        "paired_ci95_high": -0.03647641658529732,
+        "paired_difference_std": 0.06583233384568286,
+        "paired_signal_to_noise": 1.3901014843939214
+      },
+      "task_delay_weighted_ms": {
+        "mean": 1086.7659521856021,
+        "std": 99.11959559019681,
+        "paired_difference_vs_anchor": -109.2357424764786,
+        "paired_ci95_low": -174.31395082857426,
+        "paired_ci95_high": -44.157534124382934,
+        "paired_difference_std": 77.84279874866574,
+        "paired_signal_to_noise": 1.403286421254875
+      },
+      "average_power_w": {
+        "mean": 832.1481184895833,
+        "std": 4.2769411532226025,
+        "paired_difference_vs_anchor": 12.636634114583345,
+        "paired_ci95_low": 11.039336979116293,
+        "paired_ci95_high": 14.233931250050396,
+        "paired_difference_std": 1.9105946922396801,
+        "paired_signal_to_noise": 6.613979493353531
+      },
+      "u2g": {
+        "mean": 19.656196332756114,
+        "std": 0.14860189947894054,
+        "paired_difference_vs_anchor": -47.62731851478421,
+        "paired_ci95_low": -51.412971479722245,
+        "paired_ci95_high": -43.84166554984617,
+        "paired_difference_std": 4.528179698611388,
+        "paired_signal_to_noise": 10.517983314440812
+      },
+      "coop_ratio": {
+        "mean": 0.38450613547183976,
+        "std": 0.013906209423206738,
+        "paired_difference_vs_anchor": -0.0059165186334574765,
+        "paired_ci95_low": -0.009219379916147363,
+        "paired_ci95_high": -0.0026136573507675896,
+        "paired_difference_std": 0.003950692138483089,
+        "paired_signal_to_noise": 1.497590403419586
+      },
+      "battery_power_mean_per_uav_w": [
+        287.2812690734863,
+        277.8960266113281,
+        266.32665252685547
+      ],
+      "battery_power_ucb95_per_uav_w": [
+        288.0121860217658,
+        279.4734982980926,
+        268.0742830572374
+      ],
+      "battery_power_feasible_ucb95": false
+    },
+    "toward_40_80": {
+      "delay_objective": {
+        "mean": 0.7954820416666664,
+        "std": 0.07387034710154526,
+        "paired_difference_vs_anchor": -0.12882654166666652,
+        "paired_ci95_low": -0.18498740701273303,
+        "paired_ci95_high": -0.0726656763206,
+        "paired_difference_std": 0.06717638744804184,
+        "paired_signal_to_noise": 1.9177354805854738
+      },
+      "task_delay_weighted_ms": {
+        "mean": 1043.8015054882267,
+        "std": 83.58685197551267,
+        "paired_difference_vs_anchor": -152.20018917385408,
+        "paired_ci95_low": -219.12337082048668,
+        "paired_ci95_high": -85.2770075272215,
+        "paired_difference_std": 80.04964937501177,
+        "paired_signal_to_noise": 1.9013223713302705
+      },
+      "average_power_w": {
+        "mean": 835.8869205729167,
+        "std": 4.6755866088880245,
+        "paired_difference_vs_anchor": 16.37543619791667,
+        "paired_ci95_low": 14.72316703062351,
+        "paired_ci95_high": 18.02770536520983,
+        "paired_difference_std": 1.9763490656098441,
+        "paired_signal_to_noise": 8.285700376954253
+      },
+      "u2g": {
+        "mean": 38.38602538470755,
+        "std": 0.28439967935862304,
+        "paired_difference_vs_anchor": -28.897489462832777,
+        "paired_ci95_low": -32.60795010337344,
+        "paired_ci95_high": -25.18702882229211,
+        "paired_difference_std": 4.438238977689241,
+        "paired_signal_to_noise": 6.511026019125763
+      },
+      "coop_ratio": {
+        "mean": 0.3748420150102994,
+        "std": 0.012629883967824964,
+        "paired_difference_vs_anchor": -0.01558063909499785,
+        "paired_ci95_low": -0.01932892556105498,
+        "paired_ci95_high": -0.01183235262894072,
+        "paired_difference_std": 0.00448348404816275,
+        "paired_signal_to_noise": 3.475118663884287
+      },
+      "battery_power_mean_per_uav_w": [
+        287.1809425354004,
+        278.46336364746094,
+        269.58061599731445
+      ],
+      "battery_power_ucb95_per_uav_w": [
+        287.9062259453304,
+        280.12847610206916,
+        271.3890565369592
+      ],
+      "battery_power_feasible_ucb95": false
+    },
+    "toward_60_120": {
+      "delay_objective": {
+        "mean": 0.7830990416666666,
+        "std": 0.05995611534199639,
+        "paired_difference_vs_anchor": -0.1412095416666665,
+        "paired_ci95_low": -0.2074512636990551,
+        "paired_ci95_high": -0.07496781963427791,
+        "paired_difference_std": 0.0792345266949291,
+        "paired_signal_to_noise": 1.7821718328722433
+      },
+      "task_delay_weighted_ms": {
+        "mean": 1029.115981861836,
+        "std": 65.85733649220793,
+        "paired_difference_vs_anchor": -166.88571280024502,
+        "paired_ci95_low": -245.57649308455638,
+        "paired_ci95_high": -88.19493251593366,
+        "paired_difference_std": 94.12537204321895,
+        "paired_signal_to_noise": 1.7730151730355677
+      },
+      "average_power_w": {
+        "mean": 839.342734375,
+        "std": 4.217318135812071,
+        "paired_difference_vs_anchor": 19.831249999999997,
+        "paired_ci95_low": 18.342702868726096,
+        "paired_ci95_high": 21.319797131273898,
+        "paired_difference_std": 1.7805142105441274,
+        "paired_signal_to_noise": 11.137934133049992
+      },
+      "u2g": {
+        "mean": 56.16004604566115,
+        "std": 0.4435121571177924,
+        "paired_difference_vs_anchor": -11.12346880187918,
+        "paired_ci95_low": -14.718012464260447,
+        "paired_ci95_high": -7.528925139497915,
+        "paired_difference_std": 4.299585775167185,
+        "paired_signal_to_noise": 2.587102428825636
+      },
+      "coop_ratio": {
+        "mean": 0.36479682808226843,
+        "std": 0.011678359087015559,
+        "paired_difference_vs_anchor": -0.02562582602302882,
+        "paired_ci95_low": -0.028970438408013638,
+        "paired_ci95_high": -0.022281213638044,
+        "paired_difference_std": 0.004000632398606654,
+        "paired_signal_to_noise": 6.405443807322516
+      },
+      "battery_power_mean_per_uav_w": [
+        287.07484436035156,
+        278.9987678527832,
+        272.5844268798828
+      ],
+      "battery_power_ucb95_per_uav_w": [
+        287.8079201486266,
+        280.46190209034444,
+        274.3703662242771
+      ],
+      "battery_power_feasible_ucb95": false
+    }
+  }
+}

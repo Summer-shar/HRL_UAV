@@ -1,0 +1,31 @@
+{
+  "results_version": "tcom_communication_convergence_v1",
+  "stage": "diagnostic",
+  "seed": 1,
+  "micro_pretrain_episodes": 20,
+  "joint_training_episodes": 20,
+  "window": 5,
+  "micro_j_first_window": 3.6140438566478514,
+  "micro_j_last_window": 3.3935600638445407,
+  "joint_j_first_window": 4.275727383785863,
+  "joint_j_last_window": 3.49854840698317,
+  "joint_reward_first_window": -0.4275517500846916,
+  "joint_reward_last_window": -0.34982526601910735,
+  "joint_reward_tail_slope_per_episode": -0.03317599844264035,
+  "joint_j_tail_slope_per_episode": 0.331579086606748,
+  "micro_reward_reconstruction_max_error": 0.0,
+  "joint_micro_reward_reconstruction_max_error": 0.0,
+  "macro_reward_reconstruction_max_error": 0.0,
+  "mean_episode_seconds_micro": 4.770874924999999,
+  "mean_episode_seconds_joint": 4.920501315000001,
+  "correlations": {
+    "加权排队压力": -0.779890223089953,
+    "总队列": -0.9931620094455931,
+    "平均U2G距离": 0.09236188931905316,
+    "预测上行时间": 0.1005407591105408,
+    "预测U2U时间": -0.8813093828996793,
+    "通信代价": 0.1005407587608861,
+    "平均移动距离": 0.25296968311731727,
+    "约束能耗比": 0.9132279032933495
+  }
+}

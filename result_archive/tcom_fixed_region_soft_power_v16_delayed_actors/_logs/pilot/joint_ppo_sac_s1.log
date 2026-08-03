@@ -1,0 +1,213 @@
+# CMD: D:\Anaconda3\envs\pytorch-gpu\python.exe -u C:\Users\PC\Desktop\HRL_UAV\scripts\train_centralized_macro.py --episodes 160 --macro_steps 30 --micro_steps 100 --num_agents 3 --num_users 39 --eval_interval 20 --eval_episodes 20 --trajectory_plot_interval 100 --zone_loads 12.5,5.5,3.5 --load_scale 1.15 --traffic_profile normal --traffic_scale 0.5 --arrival_dt 0.5 --resource_frame_dt 0.5 --deployment_dt 1.0 --pause_service_during_flight 1 --arrivals_during_deployment 1 --deployment_transient_energy_mode kinetic_lower_bound --uav_mass_kg 2.038735983690112 --users_static 0 --gm_mean_speed_mps 0.5 --gm_mean_heading_rad 0.7853981633974483 --gm_speed_memory 0.5 --gm_heading_memory 0.5 --gm_speed_noise_std 0.1 --gm_heading_noise_std 0.1 --user_zone_radius 0.0 --uplink_bandwidth_mhz 20 --u2u_bandwidth_mhz 3 --cpu_ghz 10.0 --cpu_alloc_mode priced_maxweight --cpu_power_cap_w 0 --micro_diag_bias 0 --micro_action_scale 1 --micro_action_encoding stick_breaking --micro_stick_breaking_scale 4.0 --micro_reward_scale 1.0 --sac_grad_clip_norm 1.0 --micro_state_mode pressure --objective_mode constrained_delay --power_constraint_scope system --power_budget_w 840.0 --energy_dual_initial 0 --energy_dual_lr 0.1 --energy_dual_max 20 --energy_dual_state_norm 10 --checkpoint_power_rule ucb95 --power_budget_tolerance 0 --power_constraint_margin_w 0 --macro_reward_mode strict_global --strict_hierarchy_validation 1 --macro_action_mode centroid_waypoint --macro_action_deadzone 0.05 --macro_waypoint_radius_m 200.0 --macro_waypoint_tolerance_m 0.5 --macro_flow_state 1 --macro_load_state 1 --macro_capacity_state 1 --macro_comm_weight 0 --seed 1 --device cuda --micro_solver sac --ppo_update_episode_window 10 --ppo_gamma 0.99 --ppo_gae_lambda 0.95 --ppo_zero_inflated_actions 0 --ppo_initial_log_std -1.2039728043259361 --ppo_final_log_std -3.6888794541139363 --ppo_log_std_decay_episodes 600 --ppo_actor_lr 3e-5 --ppo_target_kl 0.01 --ppo_actor_final_lr 1e-5 --ppo_lr_decay_episodes 600 --energy_dual_power_window 20 --macro_shaping_initial 0 --macro_shaping_final 0 --macro_move_penalty_weight 0 --macro_propulsion_tiebreak_weight 0 --advisor_weight 0 --advisor_final_weight 0 --micro_ckpt results\tcom_fixed_region_soft_power_v5_alpha01\pilot\seed1\micro_pretrain\checkpoints\best.pt --sac_actor_lr 3e-06 --sac_critic_lr 0.0001 --sac_alpha_lr 3e-05 --sac_initial_alpha 0.1 --sac_policy_delay 10 --sac_actor_warmup_updates 100 --resume_micro_optimizer 0 --results_subdir tcom_fixed_region_soft_power_v16_delayed_actors/pilot/seed1/joint_ppo_sac
+
+[INFO] Training on CUDA
+[INFO] Macro policy: centralized dx/dy actor
+[INFO] Micro solver: SAC
+[INFO] Macro reward mode: strict_global
+[INFO] Objective: constrained_delay power_budget=840.00W
+[INFO] macro_comm_weight=0.0
+[INFO] shaping=0.0->0.0 over 0 episodes
+[INFO] move_penalty=0.0 propulsion_tiebreak=0.0
+[INFO] training scenario mode: independent
+[INFO] Loaded lower SAC -> C:\Users\PC\Desktop\HRL_UAV\results\tcom_fixed_region_soft_power_v5_alpha01\pilot\seed1\micro_pretrain\checkpoints\best.pt
+[INFO] Inherited energy dual -> 0.0
+Episode 0 | Macro R -33.22 | Micro R -3322.44 | J 1.1075 | Comm 3.253 | U2G 33.0 | Move 19.6 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 941.2W | Pcon 941.2W | Dual 0.0120 | BCw 0.000 | Shape 0.000
+Episode 1 | Macro R -25.38 | Micro R -2537.97 | J 0.8460 | Comm 3.085 | U2G 28.7 | Move 19.5 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 937.2W | Pcon 937.2W | Dual 0.0239 | BCw 0.000 | Shape 0.000
+Episode 2 | Macro R -32.88 | Micro R -3287.81 | J 1.0959 | Comm 3.205 | U2G 33.3 | Move 19.8 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 941.0W | Pcon 941.0W | Dual 0.0357 | BCw 0.000 | Shape 0.000
+Episode 3 | Macro R -26.49 | Micro R -2649.12 | J 0.8830 | Comm 3.129 | U2G 25.4 | Move 19.8 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 942.6W | Pcon 942.6W | Dual 0.0477 | BCw 0.000 | Shape 0.000
+Episode 4 | Macro R -31.90 | Micro R -3189.55 | J 1.0632 | Comm 3.138 | U2G 26.3 | Move 19.6 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 931.9W | Pcon 931.9W | Dual 0.0595 | BCw 0.000 | Shape 0.000
+Episode 5 | Macro R -27.74 | Micro R -2773.56 | J 0.9245 | Comm 3.043 | U2G 30.8 | Move 19.7 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 930.0W | Pcon 930.0W | Dual 0.0711 | BCw 0.000 | Shape 0.000
+Episode 6 | Macro R -30.28 | Micro R -3028.47 | J 1.0095 | Comm 3.033 | U2G 27.4 | Move 19.4 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 927.4W | Pcon 927.4W | Dual 0.0825 | BCw 0.000 | Shape 0.000
+Episode 7 | Macro R -31.10 | Micro R -3110.27 | J 1.0368 | Comm 3.197 | U2G 29.7 | Move 19.7 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 926.3W | Pcon 926.3W | Dual 0.0937 | BCw 0.000 | Shape 0.000
+Episode 8 | Macro R -27.80 | Micro R -2779.97 | J 0.9267 | Comm 2.864 | U2G 38.8 | Move 19.7 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 923.6W | Pcon 923.6W | Dual 0.1049 | BCw 0.000 | Shape 0.000
+  PPO update | actor=-0.0124 ppo=-0.0124 bc=0.0000 kl=0.00826 clip=0.097 epochs=10 Dcritic=40.2487 Ecritic=0.1719
+Episode 9 | Macro R -37.09 | Micro R -3708.53 | J 1.2362 | Comm 3.180 | U2G 35.2 | Move 19.5 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 922.8W | Pcon 922.8W | Dual 0.1159 | BCw 0.000 | Shape 0.000
+Episode 10 | Macro R -59.15 | Micro R -5914.52 | J 1.9715 | Comm 3.536 | U2G 27.2 | Move 19.6 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 928.4W | Pcon 928.4W | Dual 0.1268 | BCw 0.000 | Shape 0.000
+Episode 11 | Macro R -37.70 | Micro R -3769.78 | J 1.2566 | Comm 3.125 | U2G 24.8 | Move 19.9 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 932.6W | Pcon 932.6W | Dual 0.1378 | BCw 0.000 | Shape 0.000
+Episode 12 | Macro R -32.87 | Micro R -3286.60 | J 1.0955 | Comm 2.953 | U2G 30.8 | Move 19.4 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 924.5W | Pcon 924.5W | Dual 0.1487 | BCw 0.000 | Shape 0.000
+Episode 13 | Macro R -33.91 | Micro R -3391.00 | J 1.1303 | Comm 3.041 | U2G 25.1 | Move 19.9 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 927.1W | Pcon 927.1W | Dual 0.1595 | BCw 0.000 | Shape 0.000
+Episode 14 | Macro R -41.32 | Micro R -4131.77 | J 1.3773 | Comm 3.302 | U2G 31.2 | Move 19.8 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 920.6W | Pcon 920.6W | Dual 0.1703 | BCw 0.000 | Shape 0.000
+Episode 15 | Macro R -34.98 | Micro R -3497.99 | J 1.1660 | Comm 2.976 | U2G 34.1 | Move 19.8 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 924.9W | Pcon 924.9W | Dual 0.1810 | BCw 0.000 | Shape 0.000
+Episode 16 | Macro R -36.58 | Micro R -3658.21 | J 1.2194 | Comm 3.123 | U2G 26.6 | Move 19.7 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 917.7W | Pcon 917.7W | Dual 0.1917 | BCw 0.000 | Shape 0.000
+Episode 17 | Macro R -60.50 | Micro R -6049.97 | J 2.0167 | Comm 3.366 | U2G 24.0 | Move 19.7 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 921.0W | Pcon 921.0W | Dual 0.2023 | BCw 0.000 | Shape 0.000
+Episode 18 | Macro R -42.54 | Micro R -4253.61 | J 1.4179 | Comm 3.240 | U2G 28.1 | Move 20.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 921.8W | Pcon 921.8W | Dual 0.2128 | BCw 0.000 | Shape 0.000
+  PPO update | actor=-0.0069 ppo=-0.0069 bc=0.0000 kl=0.00732 clip=0.087 epochs=10 Dcritic=74.0373 Ecritic=0.3028
+Episode 19 | Macro R -49.38 | Micro R -4937.72 | J 1.6459 | Comm 3.193 | U2G 32.6 | Move 19.9 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 936.4W | Pcon 936.4W | Dual 0.2234 | BCw 0.000 | Shape 0.000
+  Eval@20 | Score: -148.69 | J: 1.4793 | Dh(ms): 162.0 | Dl(ms): 1927.6 | Dw(ms): 1553.0 | Ttask(ms): 3562.9 | TwE2E(ms): 1854.7 | Done: 8896/8988 | Dmax(ms): 1809.1 | Eservice/step(J): 21.72 | Pavg(W): 811.31 | Pucb95(W): 813.54 | Pvio(W): 0.00 | Eep: 243394.31 | Coop: 0.41 | CPU sat: 0.40 | Press imbal: 0.27 | U2G: 6.10 | Decision: 1.693 ms
+  Eval task delay(ms) H/L/S/C/V: 1295.9/4729.6/3789.9/2058.0/5272.7 | CPU service(Mb) H/L/S/C/V: 1579.70/5810.66/3729.42/1325.87/2335.08
+Episode 20 | Macro R -40.45 | Micro R -4045.36 | J 1.3485 | Comm 3.199 | U2G 25.8 | Move 19.4 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 920.6W | Pcon 920.6W | Dual 0.2339 | BCw 0.000 | Shape 0.000
+Episode 21 | Macro R -40.63 | Micro R -4062.89 | J 1.3543 | Comm 3.152 | U2G 32.1 | Move 19.7 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 924.3W | Pcon 924.3W | Dual 0.2443 | BCw 0.000 | Shape 0.000
+Episode 22 | Macro R -40.98 | Micro R -4097.67 | J 1.3659 | Comm 3.057 | U2G 32.7 | Move 19.7 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 923.1W | Pcon 923.1W | Dual 0.2545 | BCw 0.000 | Shape 0.000
+Episode 23 | Macro R -37.10 | Micro R -3709.71 | J 1.2366 | Comm 3.014 | U2G 22.9 | Move 19.6 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 924.2W | Pcon 924.2W | Dual 0.2647 | BCw 0.000 | Shape 0.000
+Episode 24 | Macro R -47.87 | Micro R -4787.15 | J 1.5957 | Comm 3.297 | U2G 24.6 | Move 19.7 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 921.8W | Pcon 921.8W | Dual 0.2748 | BCw 0.000 | Shape 0.000
+Episode 25 | Macro R -50.72 | Micro R -5072.11 | J 1.6907 | Comm 3.192 | U2G 25.3 | Move 19.7 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 929.9W | Pcon 929.9W | Dual 0.2849 | BCw 0.000 | Shape 0.000
+Episode 26 | Macro R -44.66 | Micro R -4465.64 | J 1.4885 | Comm 3.228 | U2G 31.3 | Move 19.6 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 918.2W | Pcon 918.2W | Dual 0.2950 | BCw 0.000 | Shape 0.000
+Episode 27 | Macro R -47.10 | Micro R -4709.88 | J 1.5700 | Comm 3.386 | U2G 26.1 | Move 19.9 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 907.2W | Pcon 907.2W | Dual 0.3049 | BCw 0.000 | Shape 0.000
+Episode 28 | Macro R -67.49 | Micro R -6749.25 | J 2.2498 | Comm 3.397 | U2G 25.9 | Move 19.7 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 926.5W | Pcon 926.5W | Dual 0.3149 | BCw 0.000 | Shape 0.000
+  PPO update | actor=-0.0045 ppo=-0.0045 bc=0.0000 kl=0.00291 clip=0.023 epochs=10 Dcritic=41.5978 Ecritic=0.2645
+Episode 29 | Macro R -48.41 | Micro R -4840.79 | J 1.6136 | Comm 3.279 | U2G 38.3 | Move 19.3 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 914.5W | Pcon 914.5W | Dual 0.3248 | BCw 0.000 | Shape 0.000
+Episode 30 | Macro R -62.82 | Micro R -6282.03 | J 2.0940 | Comm 3.449 | U2G 28.4 | Move 19.2 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 917.3W | Pcon 917.3W | Dual 0.3347 | BCw 0.000 | Shape 0.000
+Episode 31 | Macro R -55.70 | Micro R -5570.15 | J 1.8567 | Comm 3.333 | U2G 26.4 | Move 19.3 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 914.3W | Pcon 914.3W | Dual 0.3444 | BCw 0.000 | Shape 0.000
+Episode 32 | Macro R -77.35 | Micro R -7734.93 | J 2.5783 | Comm 3.843 | U2G 25.4 | Move 20.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 910.6W | Pcon 910.6W | Dual 0.3541 | BCw 0.000 | Shape 0.000
+Episode 33 | Macro R -71.14 | Micro R -7114.27 | J 2.3714 | Comm 3.615 | U2G 31.4 | Move 19.6 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 919.3W | Pcon 919.3W | Dual 0.3637 | BCw 0.000 | Shape 0.000
+Episode 34 | Macro R -63.68 | Micro R -6367.70 | J 2.1226 | Comm 3.509 | U2G 34.1 | Move 19.9 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 913.1W | Pcon 913.1W | Dual 0.3732 | BCw 0.000 | Shape 0.000
+Episode 35 | Macro R -78.59 | Micro R -7859.20 | J 2.6197 | Comm 3.703 | U2G 29.6 | Move 19.7 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 906.1W | Pcon 906.1W | Dual 0.3827 | BCw 0.000 | Shape 0.000
+Episode 36 | Macro R -60.45 | Micro R -6044.57 | J 2.0149 | Comm 3.437 | U2G 27.8 | Move 19.6 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 908.5W | Pcon 908.5W | Dual 0.3921 | BCw 0.000 | Shape 0.000
+Episode 37 | Macro R -57.27 | Micro R -5727.37 | J 1.9091 | Comm 3.352 | U2G 33.2 | Move 19.2 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 917.3W | Pcon 917.3W | Dual 0.4014 | BCw 0.000 | Shape 0.000
+Episode 38 | Macro R -86.84 | Micro R -8683.65 | J 2.8946 | Comm 3.894 | U2G 31.5 | Move 19.5 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 912.3W | Pcon 912.3W | Dual 0.4108 | BCw 0.000 | Shape 0.000
+  PPO update | actor=-0.0029 ppo=-0.0029 bc=0.0000 kl=0.00714 clip=0.077 epochs=10 Dcritic=115.2268 Ecritic=0.0604
+Episode 39 | Macro R -87.41 | Micro R -8740.86 | J 2.9136 | Comm 3.867 | U2G 31.5 | Move 19.3 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 905.1W | Pcon 905.1W | Dual 0.4199 | BCw 0.000 | Shape 0.000
+  Eval@40 | Score: -260.77 | J: 2.5865 | Dh(ms): 325.1 | Dl(ms): 5437.4 | Dw(ms): 4352.6 | Ttask(ms): 8331.7 | TwE2E(ms): 3241.2 | Done: 8578/8988 | Dmax(ms): 5962.8 | Eservice/step(J): 20.34 | Pavg(W): 797.63 | Pucb95(W): 799.82 | Pvio(W): 0.00 | Eep: 239290.42 | Coop: 0.44 | CPU sat: 0.22 | Press imbal: 0.27 | U2G: 8.66 | Decision: 1.722 ms
+  Eval task delay(ms) H/L/S/C/V: 1636.2/11977.1/9036.1/3914.8/13568.0 | CPU service(Mb) H/L/S/C/V: 1578.83/5671.78/3658.11/1320.37/2272.13
+Episode 40 | Macro R -78.09 | Micro R -7808.98 | J 2.6030 | Comm 3.760 | U2G 33.1 | Move 19.6 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 902.1W | Pcon 902.1W | Dual 0.4289 | BCw 0.000 | Shape 0.000
+Episode 41 | Macro R -79.67 | Micro R -7967.31 | J 2.6558 | Comm 3.587 | U2G 33.6 | Move 19.4 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 900.6W | Pcon 900.6W | Dual 0.4378 | BCw 0.000 | Shape 0.000
+Episode 42 | Macro R -87.77 | Micro R -8776.68 | J 2.9256 | Comm 3.985 | U2G 28.4 | Move 18.5 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 888.4W | Pcon 888.4W | Dual 0.4465 | BCw 0.000 | Shape 0.000
+Episode 43 | Macro R -89.00 | Micro R -8899.54 | J 2.9665 | Comm 3.933 | U2G 23.5 | Move 19.5 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 905.1W | Pcon 905.1W | Dual 0.4550 | BCw 0.000 | Shape 0.000
+Episode 44 | Macro R -87.07 | Micro R -8707.31 | J 2.9024 | Comm 3.890 | U2G 28.9 | Move 19.5 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 908.7W | Pcon 908.7W | Dual 0.4635 | BCw 0.000 | Shape 0.000
+Episode 45 | Macro R -77.05 | Micro R -7704.75 | J 2.5682 | Comm 3.618 | U2G 25.3 | Move 19.5 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 901.5W | Pcon 901.5W | Dual 0.4718 | BCw 0.000 | Shape 0.000
+Episode 46 | Macro R -88.38 | Micro R -8837.59 | J 2.9459 | Comm 3.892 | U2G 29.7 | Move 19.8 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 905.6W | Pcon 905.6W | Dual 0.4801 | BCw 0.000 | Shape 0.000
+Episode 47 | Macro R -93.20 | Micro R -9320.15 | J 3.1067 | Comm 4.036 | U2G 35.4 | Move 19.4 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 903.5W | Pcon 903.5W | Dual 0.4883 | BCw 0.000 | Shape 0.000
+Episode 48 | Macro R -93.11 | Micro R -9310.92 | J 3.1036 | Comm 4.048 | U2G 24.5 | Move 19.5 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 899.6W | Pcon 899.6W | Dual 0.4963 | BCw 0.000 | Shape 0.000
+  PPO update | actor=-0.0098 ppo=-0.0098 bc=0.0000 kl=0.00657 clip=0.073 epochs=10 Dcritic=179.2142 Ecritic=0.0301
+Episode 49 | Macro R -91.22 | Micro R -9122.28 | J 3.0408 | Comm 3.968 | U2G 32.3 | Move 19.8 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 900.8W | Pcon 900.8W | Dual 0.5043 | BCw 0.000 | Shape 0.000
+Episode 50 | Macro R -88.27 | Micro R -8826.63 | J 2.9422 | Comm 3.789 | U2G 26.3 | Move 20.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 912.3W | Pcon 912.3W | Dual 0.5123 | BCw 0.000 | Shape 0.000
+Episode 51 | Macro R -93.70 | Micro R -9369.94 | J 3.1233 | Comm 3.861 | U2G 25.4 | Move 19.9 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 905.9W | Pcon 905.9W | Dual 0.5201 | BCw 0.000 | Shape 0.000
+Episode 52 | Macro R -88.06 | Micro R -8805.92 | J 2.9353 | Comm 3.676 | U2G 30.2 | Move 18.9 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 900.9W | Pcon 900.9W | Dual 0.5280 | BCw 0.000 | Shape 0.000
+Episode 53 | Macro R -83.08 | Micro R -8308.37 | J 2.7695 | Comm 3.715 | U2G 29.6 | Move 19.5 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 899.1W | Pcon 899.1W | Dual 0.5357 | BCw 0.000 | Shape 0.000
+Episode 54 | Macro R -97.18 | Micro R -9718.39 | J 3.2395 | Comm 4.262 | U2G 28.4 | Move 19.5 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 890.0W | Pcon 890.0W | Dual 0.5433 | BCw 0.000 | Shape 0.000
+Episode 55 | Macro R -91.67 | Micro R -9167.26 | J 3.0558 | Comm 3.866 | U2G 31.7 | Move 19.3 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 903.5W | Pcon 903.5W | Dual 0.5508 | BCw 0.000 | Shape 0.000
+Episode 56 | Macro R -85.18 | Micro R -8518.41 | J 2.8395 | Comm 3.657 | U2G 27.8 | Move 19.8 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 898.1W | Pcon 898.1W | Dual 0.5584 | BCw 0.000 | Shape 0.000
+Episode 57 | Macro R -90.11 | Micro R -9010.90 | J 3.0036 | Comm 3.797 | U2G 29.1 | Move 19.6 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 896.2W | Pcon 896.2W | Dual 0.5657 | BCw 0.000 | Shape 0.000
+Episode 58 | Macro R -96.09 | Micro R -9609.39 | J 3.2031 | Comm 3.980 | U2G 28.1 | Move 19.6 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 900.2W | Pcon 900.2W | Dual 0.5730 | BCw 0.000 | Shape 0.000
+  PPO update | actor=-0.0101 ppo=-0.0101 bc=0.0000 kl=0.00904 clip=0.120 epochs=10 Dcritic=211.9743 Ecritic=0.0400
+Episode 59 | Macro R -92.85 | Micro R -9284.88 | J 3.0950 | Comm 3.953 | U2G 28.9 | Move 19.4 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 894.8W | Pcon 894.8W | Dual 0.5803 | BCw 0.000 | Shape 0.000
+  Eval@60 | Score: -311.25 | J: 3.0793 | Dh(ms): 507.8 | Dl(ms): 7152.1 | Dw(ms): 5741.6 | Ttask(ms): 11596.3 | TwE2E(ms): 4426.9 | Done: 8354/8988 | Dmax(ms): 7793.9 | Eservice/step(J): 19.77 | Pavg(W): 792.07 | Pucb95(W): 794.35 | Pvio(W): 0.00 | Eep: 237621.20 | Coop: 0.45 | CPU sat: 0.14 | Press imbal: 0.35 | U2G: 10.51 | Decision: 1.752 ms
+  Eval task delay(ms) H/L/S/C/V: 2219.4/16893.4/12581.1/5378.0/19297.8 | CPU service(Mb) H/L/S/C/V: 1578.00/5603.99/3621.28/1317.37/2243.35
+Episode 60 | Macro R -96.58 | Micro R -9657.99 | J 3.2193 | Comm 3.909 | U2G 28.2 | Move 19.1 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 906.9W | Pcon 906.9W | Dual 0.5875 | BCw 0.000 | Shape 0.000
+Episode 61 | Macro R -93.43 | Micro R -9343.36 | J 3.1145 | Comm 3.975 | U2G 27.7 | Move 19.5 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 894.6W | Pcon 894.6W | Dual 0.5948 | BCw 0.000 | Shape 0.000
+Episode 62 | Macro R -94.79 | Micro R -9478.70 | J 3.1596 | Comm 3.936 | U2G 25.9 | Move 19.5 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 892.7W | Pcon 892.7W | Dual 0.6020 | BCw 0.000 | Shape 0.000
+Episode 63 | Macro R -90.93 | Micro R -9093.07 | J 3.0310 | Comm 3.904 | U2G 31.0 | Move 19.8 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 897.4W | Pcon 897.4W | Dual 0.6093 | BCw 0.000 | Shape 0.000
+Episode 64 | Macro R -91.00 | Micro R -9100.45 | J 3.0335 | Comm 3.699 | U2G 29.7 | Move 19.6 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 907.6W | Pcon 907.6W | Dual 0.6165 | BCw 0.000 | Shape 0.000
+Episode 65 | Macro R -97.33 | Micro R -9732.89 | J 3.2443 | Comm 3.963 | U2G 34.0 | Move 19.5 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 892.2W | Pcon 892.2W | Dual 0.6236 | BCw 0.000 | Shape 0.000
+Episode 66 | Macro R -92.04 | Micro R -9204.17 | J 3.0681 | Comm 3.587 | U2G 33.6 | Move 19.3 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 912.0W | Pcon 912.0W | Dual 0.6308 | BCw 0.000 | Shape 0.000
+Episode 67 | Macro R -89.67 | Micro R -8966.51 | J 2.9888 | Comm 3.702 | U2G 28.6 | Move 19.5 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 894.8W | Pcon 894.8W | Dual 0.6380 | BCw 0.000 | Shape 0.000
+Episode 68 | Macro R -98.35 | Micro R -9835.45 | J 3.2785 | Comm 3.821 | U2G 26.2 | Move 18.9 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 910.8W | Pcon 910.8W | Dual 0.6452 | BCw 0.000 | Shape 0.000
+  PPO update | actor=-0.0045 ppo=-0.0045 bc=0.0000 kl=0.00725 clip=0.080 epochs=10 Dcritic=216.8120 Ecritic=0.0299
+Episode 69 | Macro R -95.39 | Micro R -9538.77 | J 3.1796 | Comm 3.794 | U2G 27.0 | Move 19.7 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 898.8W | Pcon 898.8W | Dual 0.6524 | BCw 0.000 | Shape 0.000
+Episode 70 | Macro R -96.76 | Micro R -9676.48 | J 3.2255 | Comm 3.922 | U2G 28.7 | Move 19.9 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 906.2W | Pcon 906.2W | Dual 0.6595 | BCw 0.000 | Shape 0.000
+Episode 71 | Macro R -87.37 | Micro R -8736.98 | J 2.9123 | Comm 3.641 | U2G 28.3 | Move 19.8 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 909.2W | Pcon 909.2W | Dual 0.6667 | BCw 0.000 | Shape 0.000
+Episode 72 | Macro R -96.84 | Micro R -9684.49 | J 3.2282 | Comm 3.807 | U2G 32.8 | Move 19.6 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 905.7W | Pcon 905.7W | Dual 0.6739 | BCw 0.000 | Shape 0.000
+Episode 73 | Macro R -99.96 | Micro R -9996.20 | J 3.3321 | Comm 3.785 | U2G 25.2 | Move 19.7 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 909.4W | Pcon 909.4W | Dual 0.6812 | BCw 0.000 | Shape 0.000
+Episode 74 | Macro R -91.11 | Micro R -9110.90 | J 3.0370 | Comm 3.664 | U2G 25.6 | Move 19.2 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 900.9W | Pcon 900.9W | Dual 0.6885 | BCw 0.000 | Shape 0.000
+Episode 75 | Macro R -89.59 | Micro R -8959.49 | J 2.9865 | Comm 3.508 | U2G 28.1 | Move 19.8 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 918.5W | Pcon 918.5W | Dual 0.6959 | BCw 0.000 | Shape 0.000
+Episode 76 | Macro R -97.51 | Micro R -9751.01 | J 3.2503 | Comm 3.938 | U2G 26.5 | Move 19.1 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 894.7W | Pcon 894.7W | Dual 0.7033 | BCw 0.000 | Shape 0.000
+Episode 77 | Macro R -98.82 | Micro R -9881.51 | J 3.2938 | Comm 4.067 | U2G 22.9 | Move 19.2 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 894.0W | Pcon 894.0W | Dual 0.7107 | BCw 0.000 | Shape 0.000
+Episode 78 | Macro R -98.77 | Micro R -9876.93 | J 3.2923 | Comm 4.048 | U2G 28.5 | Move 19.5 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 893.1W | Pcon 893.1W | Dual 0.7181 | BCw 0.000 | Shape 0.000
+  PPO update | actor=-0.0176 ppo=-0.0176 bc=0.0000 kl=0.00749 clip=0.080 epochs=10 Dcritic=266.7966 Ecritic=0.0615
+Episode 79 | Macro R -94.83 | Micro R -9482.97 | J 3.1610 | Comm 3.924 | U2G 23.1 | Move 19.4 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 891.2W | Pcon 891.2W | Dual 0.7254 | BCw 0.000 | Shape 0.000
+  Eval@80 | Score: -306.19 | J: 3.0237 | Dh(ms): 707.3 | Dl(ms): 6167.3 | Dw(ms): 5008.2 | Ttask(ms): 8413.1 | TwE2E(ms): 4184.5 | Done: 8632/8988 | Dmax(ms): 6208.2 | Eservice/step(J): 20.15 | Pavg(W): 795.78 | Pucb95(W): 798.14 | Pvio(W): 0.00 | Eep: 238734.11 | Coop: 0.46 | CPU sat: 0.13 | Press imbal: 0.18 | U2G: 10.75 | Decision: 1.716 ms
+  Eval task delay(ms) H/L/S/C/V: 2838.3/11403.4/9027.7/4723.1/12636.7 | CPU service(Mb) H/L/S/C/V: 1576.93/5662.30/3651.60/1318.71/2268.92
+Episode 80 | Macro R -89.44 | Micro R -8944.16 | J 2.9814 | Comm 3.643 | U2G 30.8 | Move 19.6 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 898.7W | Pcon 898.7W | Dual 0.7327 | BCw 0.000 | Shape 0.000
+Episode 81 | Macro R -93.89 | Micro R -9389.16 | J 3.1297 | Comm 3.603 | U2G 25.2 | Move 19.7 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 901.1W | Pcon 901.1W | Dual 0.7400 | BCw 0.000 | Shape 0.000
+Episode 82 | Macro R -94.04 | Micro R -9404.02 | J 3.1347 | Comm 3.760 | U2G 31.4 | Move 19.4 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 897.8W | Pcon 897.8W | Dual 0.7473 | BCw 0.000 | Shape 0.000
+Episode 83 | Macro R -93.27 | Micro R -9326.95 | J 3.1090 | Comm 3.735 | U2G 26.5 | Move 19.2 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 900.1W | Pcon 900.1W | Dual 0.7547 | BCw 0.000 | Shape 0.000
+Episode 84 | Macro R -96.73 | Micro R -9672.62 | J 3.2242 | Comm 3.723 | U2G 26.9 | Move 19.3 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 899.0W | Pcon 899.0W | Dual 0.7620 | BCw 0.000 | Shape 0.000
+Episode 85 | Macro R -88.36 | Micro R -8835.69 | J 2.9452 | Comm 3.535 | U2G 29.6 | Move 19.6 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 895.6W | Pcon 895.6W | Dual 0.7693 | BCw 0.000 | Shape 0.000
+Episode 86 | Macro R -98.28 | Micro R -9827.79 | J 3.2759 | Comm 3.882 | U2G 28.7 | Move 19.5 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 899.2W | Pcon 899.2W | Dual 0.7766 | BCw 0.000 | Shape 0.000
+Episode 87 | Macro R -99.18 | Micro R -9917.79 | J 3.3059 | Comm 3.748 | U2G 22.8 | Move 19.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 906.0W | Pcon 906.0W | Dual 0.7839 | BCw 0.000 | Shape 0.000
+Episode 88 | Macro R -97.07 | Micro R -9706.51 | J 3.2355 | Comm 3.796 | U2G 27.7 | Move 19.7 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 904.0W | Pcon 904.0W | Dual 0.7912 | BCw 0.000 | Shape 0.000
+  PPO update | actor=-0.0146 ppo=-0.0146 bc=0.0000 kl=0.00944 clip=0.127 epochs=10 Dcritic=200.9491 Ecritic=0.0429
+Episode 89 | Macro R -98.58 | Micro R -9858.44 | J 3.2861 | Comm 3.710 | U2G 29.3 | Move 19.8 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 906.7W | Pcon 906.7W | Dual 0.7985 | BCw 0.000 | Shape 0.000
+Episode 90 | Macro R -85.34 | Micro R -8533.70 | J 2.8446 | Comm 3.430 | U2G 24.1 | Move 19.8 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 899.0W | Pcon 899.0W | Dual 0.8058 | BCw 0.000 | Shape 0.000
+Episode 91 | Macro R -89.39 | Micro R -8939.05 | J 2.9797 | Comm 3.530 | U2G 26.6 | Move 19.6 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 901.9W | Pcon 901.9W | Dual 0.8131 | BCw 0.000 | Shape 0.000
+Episode 92 | Macro R -91.97 | Micro R -9196.88 | J 3.0656 | Comm 3.365 | U2G 27.3 | Move 19.5 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 909.7W | Pcon 909.7W | Dual 0.8203 | BCw 0.000 | Shape 0.000
+Episode 93 | Macro R -94.91 | Micro R -9491.22 | J 3.1637 | Comm 3.618 | U2G 26.7 | Move 19.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 892.1W | Pcon 892.1W | Dual 0.8275 | BCw 0.000 | Shape 0.000
+Episode 94 | Macro R -101.79 | Micro R -10178.70 | J 3.3929 | Comm 3.721 | U2G 28.9 | Move 19.6 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 908.8W | Pcon 908.8W | Dual 0.8347 | BCw 0.000 | Shape 0.000
+Episode 95 | Macro R -82.74 | Micro R -8274.28 | J 2.7581 | Comm 3.289 | U2G 24.8 | Move 19.4 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 902.4W | Pcon 902.4W | Dual 0.8418 | BCw 0.000 | Shape 0.000
+Episode 96 | Macro R -96.16 | Micro R -9616.46 | J 3.2055 | Comm 3.674 | U2G 25.9 | Move 19.6 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 904.6W | Pcon 904.6W | Dual 0.8490 | BCw 0.000 | Shape 0.000
+Episode 97 | Macro R -96.15 | Micro R -9614.74 | J 3.2049 | Comm 3.577 | U2G 29.2 | Move 19.3 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 912.7W | Pcon 912.7W | Dual 0.8563 | BCw 0.000 | Shape 0.000
+Episode 98 | Macro R -101.13 | Micro R -10112.63 | J 3.3709 | Comm 3.659 | U2G 26.4 | Move 19.5 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 908.2W | Pcon 908.2W | Dual 0.8636 | BCw 0.000 | Shape 0.000
+  PPO update | actor=-0.0076 ppo=-0.0076 bc=0.0000 kl=0.01099 clip=0.157 epochs=10 Dcritic=173.1361 Ecritic=0.1264
+Episode 99 | Macro R -98.06 | Micro R -9806.50 | J 3.2688 | Comm 3.581 | U2G 22.4 | Move 18.9 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 903.0W | Pcon 903.0W | Dual 0.8711 | BCw 0.000 | Shape 0.000
+  Saved trajectory data -> C:\Users\PC\Desktop\HRL_UAV\results\tcom_fixed_region_soft_power_v16_delayed_actors/pilot/seed1/joint_ppo_sac\trajectory_snapshots\trajectory_ep_0100.npz (814.9 KB)
+  Saved trajectory figure -> C:\Users\PC\Desktop\HRL_UAV\results\tcom_fixed_region_soft_power_v16_delayed_actors/pilot/seed1/joint_ppo_sac\trajectory_snapshots\trajectory_ep_0100.png (325.8 KB)
+  Eval@100 | Score: -324.99 | J: 3.2045 | Dh(ms): 911.2 | Dl(ms): 6414.7 | Dw(ms): 5246.5 | Ttask(ms): 10505.0 | TwE2E(ms): 4979.0 | Done: 8521/8988 | Dmax(ms): 6372.3 | Eservice/step(J): 20.17 | Pavg(W): 796.21 | Pucb95(W): 798.70 | Pvio(W): 0.00 | Eep: 238862.32 | Coop: 0.46 | CPU sat: 0.15 | Press imbal: 0.28 | U2G: 13.41 | Decision: 1.753 ms
+  Eval task delay(ms) H/L/S/C/V: 3245.7/14490.6/11331.3/5690.2/16097.1 | CPU service(Mb) H/L/S/C/V: 1575.73/5664.13/3651.20/1318.16/2270.50
+Episode 100 | Macro R -103.54 | Micro R -10353.82 | J 3.4513 | Comm 3.890 | U2G 23.9 | Move 19.4 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 902.7W | Pcon 902.7W | Dual 0.8785 | BCw 0.000 | Shape 0.000
+Episode 101 | Macro R -100.00 | Micro R -9999.96 | J 3.3333 | Comm 3.603 | U2G 25.5 | Move 19.3 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 899.4W | Pcon 899.4W | Dual 0.8860 | BCw 0.000 | Shape 0.000
+Episode 102 | Macro R -101.14 | Micro R -10114.08 | J 3.3714 | Comm 3.488 | U2G 27.5 | Move 18.6 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 911.8W | Pcon 911.8W | Dual 0.8935 | BCw 0.000 | Shape 0.000
+Episode 103 | Macro R -102.44 | Micro R -10244.15 | J 3.4147 | Comm 3.946 | U2G 21.7 | Move 19.1 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 893.4W | Pcon 893.4W | Dual 0.9010 | BCw 0.000 | Shape 0.000
+Episode 104 | Macro R -102.51 | Micro R -10251.26 | J 3.4171 | Comm 3.763 | U2G 31.8 | Move 19.5 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 894.5W | Pcon 894.5W | Dual 0.9085 | BCw 0.000 | Shape 0.000
+Episode 105 | Macro R -99.40 | Micro R -9939.73 | J 3.3132 | Comm 3.587 | U2G 26.9 | Move 19.3 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 897.9W | Pcon 897.9W | Dual 0.9160 | BCw 0.000 | Shape 0.000
+Episode 106 | Macro R -102.32 | Micro R -10231.83 | J 3.4106 | Comm 3.727 | U2G 29.9 | Move 19.4 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 908.4W | Pcon 908.4W | Dual 0.9236 | BCw 0.000 | Shape 0.000
+Episode 107 | Macro R -98.78 | Micro R -9878.11 | J 3.2927 | Comm 3.757 | U2G 27.0 | Move 18.9 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 899.0W | Pcon 899.0W | Dual 0.9311 | BCw 0.000 | Shape 0.000
+Episode 108 | Macro R -98.11 | Micro R -9810.73 | J 3.2702 | Comm 3.636 | U2G 25.1 | Move 19.7 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 900.0W | Pcon 900.0W | Dual 0.9385 | BCw 0.000 | Shape 0.000
+  PPO update | actor=-0.0048 ppo=-0.0048 bc=0.0000 kl=0.01047 clip=0.167 epochs=10 Dcritic=137.2056 Ecritic=0.0371
+Episode 109 | Macro R -102.29 | Micro R -10228.96 | J 3.4097 | Comm 3.610 | U2G 24.8 | Move 19.3 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 900.8W | Pcon 900.8W | Dual 0.9460 | BCw 0.000 | Shape 0.000
+Episode 110 | Macro R -103.56 | Micro R -10356.46 | J 3.4522 | Comm 3.730 | U2G 27.9 | Move 18.9 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 904.0W | Pcon 904.0W | Dual 0.9534 | BCw 0.000 | Shape 0.000
+Episode 111 | Macro R -103.16 | Micro R -10315.59 | J 3.4385 | Comm 3.770 | U2G 23.8 | Move 19.6 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 905.6W | Pcon 905.6W | Dual 0.9609 | BCw 0.000 | Shape 0.000
+Episode 112 | Macro R -102.96 | Micro R -10296.48 | J 3.4322 | Comm 3.945 | U2G 26.5 | Move 19.2 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 894.6W | Pcon 894.6W | Dual 0.9683 | BCw 0.000 | Shape 0.000
+Episode 113 | Macro R -99.51 | Micro R -9951.40 | J 3.3171 | Comm 3.396 | U2G 30.7 | Move 19.3 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 901.3W | Pcon 901.3W | Dual 0.9758 | BCw 0.000 | Shape 0.000
+Episode 114 | Macro R -103.80 | Micro R -10380.34 | J 3.4601 | Comm 3.771 | U2G 32.3 | Move 19.2 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 897.7W | Pcon 897.7W | Dual 0.9832 | BCw 0.000 | Shape 0.000
+Episode 115 | Macro R -102.64 | Micro R -10263.66 | J 3.4212 | Comm 4.056 | U2G 25.1 | Move 19.6 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 893.9W | Pcon 893.9W | Dual 0.9905 | BCw 0.000 | Shape 0.000
+Episode 116 | Macro R -104.04 | Micro R -10404.03 | J 3.4680 | Comm 4.074 | U2G 22.7 | Move 19.8 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 888.5W | Pcon 888.5W | Dual 0.9978 | BCw 0.000 | Shape 0.000
+Episode 117 | Macro R -103.72 | Micro R -10371.72 | J 3.4572 | Comm 4.169 | U2G 26.7 | Move 19.5 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 892.9W | Pcon 892.9W | Dual 1.0049 | BCw 0.000 | Shape 0.000
+Episode 118 | Macro R -103.21 | Micro R -10320.96 | J 3.4403 | Comm 3.809 | U2G 29.3 | Move 19.5 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 898.7W | Pcon 898.7W | Dual 1.0120 | BCw 0.000 | Shape 0.000
+  PPO update | actor=-0.0124 ppo=-0.0124 bc=0.0000 kl=0.01183 clip=0.177 epochs=8 Dcritic=108.4897 Ecritic=0.0348
+Episode 119 | Macro R -103.14 | Micro R -10313.98 | J 3.4380 | Comm 3.609 | U2G 27.9 | Move 19.9 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 909.1W | Pcon 909.1W | Dual 1.0191 | BCw 0.000 | Shape 0.000
+  Eval@120 | Score: -336.95 | J: 3.3113 | Dh(ms): 1088.9 | Dl(ms): 8086.2 | Dw(ms): 6600.8 | Ttask(ms): 12099.3 | TwE2E(ms): 5778.4 | Done: 8416/8988 | Dmax(ms): 7876.9 | Eservice/step(J): 19.71 | Pavg(W): 792.05 | Pucb95(W): 794.57 | Pvio(W): 0.00 | Eep: 237613.87 | Coop: 0.47 | CPU sat: 0.13 | Press imbal: 0.26 | U2G: 19.35 | Decision: 1.727 ms
+  Eval task delay(ms) H/L/S/C/V: 3810.1/16700.6/13033.9/6584.2/18621.3 | CPU service(Mb) H/L/S/C/V: 1574.47/5601.50/3618.76/1314.94/2242.27
+Episode 120 | Macro R -103.23 | Micro R -10322.80 | J 3.4409 | Comm 3.882 | U2G 31.5 | Move 18.8 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 898.6W | Pcon 898.6W | Dual 1.0262 | BCw 0.000 | Shape 0.000
+Episode 121 | Macro R -103.54 | Micro R -10354.38 | J 3.4515 | Comm 3.870 | U2G 29.0 | Move 19.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 895.1W | Pcon 895.1W | Dual 1.0332 | BCw 0.000 | Shape 0.000
+Episode 122 | Macro R -103.69 | Micro R -10368.85 | J 3.4563 | Comm 3.867 | U2G 33.1 | Move 19.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 887.8W | Pcon 887.8W | Dual 1.0401 | BCw 0.000 | Shape 0.000
+Episode 123 | Macro R -103.59 | Micro R -10358.54 | J 3.4528 | Comm 3.884 | U2G 25.6 | Move 19.2 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 891.0W | Pcon 891.0W | Dual 1.0470 | BCw 0.000 | Shape 0.000
+Episode 124 | Macro R -105.06 | Micro R -10506.29 | J 3.5021 | Comm 3.842 | U2G 24.6 | Move 19.1 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 898.7W | Pcon 898.7W | Dual 1.0540 | BCw 0.000 | Shape 0.000
+Episode 125 | Macro R -102.59 | Micro R -10258.68 | J 3.4196 | Comm 3.794 | U2G 24.1 | Move 19.2 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 891.6W | Pcon 891.6W | Dual 1.0609 | BCw 0.000 | Shape 0.000
+Episode 126 | Macro R -103.90 | Micro R -10389.95 | J 3.4633 | Comm 3.815 | U2G 22.9 | Move 19.7 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 895.3W | Pcon 895.3W | Dual 1.0677 | BCw 0.000 | Shape 0.000
+Episode 127 | Macro R -103.58 | Micro R -10358.47 | J 3.4528 | Comm 4.004 | U2G 27.7 | Move 19.2 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 884.9W | Pcon 884.9W | Dual 1.0744 | BCw 0.000 | Shape 0.000
+Episode 128 | Macro R -101.63 | Micro R -10162.83 | J 3.3876 | Comm 3.332 | U2G 29.1 | Move 18.7 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 901.1W | Pcon 901.1W | Dual 1.0811 | BCw 0.000 | Shape 0.000
+  PPO update | actor=-0.0133 ppo=-0.0133 bc=0.0000 kl=0.01050 clip=0.163 epochs=7 Dcritic=108.9519 Ecritic=0.0280
+Episode 129 | Macro R -104.07 | Micro R -10407.36 | J 3.4691 | Comm 3.793 | U2G 40.9 | Move 19.3 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 899.2W | Pcon 899.2W | Dual 1.0879 | BCw 0.000 | Shape 0.000
+Episode 130 | Macro R -102.73 | Micro R -10272.67 | J 3.4242 | Comm 3.817 | U2G 28.4 | Move 19.5 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 899.4W | Pcon 899.4W | Dual 1.0946 | BCw 0.000 | Shape 0.000
+Episode 131 | Macro R -103.35 | Micro R -10334.80 | J 3.4449 | Comm 3.777 | U2G 26.8 | Move 19.4 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 892.8W | Pcon 892.8W | Dual 1.1012 | BCw 0.000 | Shape 0.000
+Episode 132 | Macro R -103.74 | Micro R -10374.25 | J 3.4581 | Comm 3.713 | U2G 28.4 | Move 18.8 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 894.8W | Pcon 894.8W | Dual 1.1078 | BCw 0.000 | Shape 0.000
+Episode 133 | Macro R -103.47 | Micro R -10346.69 | J 3.4489 | Comm 3.817 | U2G 26.4 | Move 19.3 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 889.0W | Pcon 889.0W | Dual 1.1143 | BCw 0.000 | Shape 0.000
+Episode 134 | Macro R -103.82 | Micro R -10382.34 | J 3.4608 | Comm 3.724 | U2G 32.8 | Move 18.9 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 902.0W | Pcon 902.0W | Dual 1.1209 | BCw 0.000 | Shape 0.000
+Episode 135 | Macro R -103.98 | Micro R -10397.63 | J 3.4659 | Comm 3.922 | U2G 32.0 | Move 19.4 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 893.4W | Pcon 893.4W | Dual 1.1275 | BCw 0.000 | Shape 0.000
+Episode 136 | Macro R -100.77 | Micro R -10076.88 | J 3.3590 | Comm 3.374 | U2G 27.8 | Move 18.6 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 897.1W | Pcon 897.1W | Dual 1.1341 | BCw 0.000 | Shape 0.000
+Episode 137 | Macro R -105.66 | Micro R -10566.25 | J 3.5221 | Comm 3.612 | U2G 32.2 | Move 19.9 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 910.2W | Pcon 910.2W | Dual 1.1408 | BCw 0.000 | Shape 0.000
+Episode 138 | Macro R -104.50 | Micro R -10450.28 | J 3.4834 | Comm 3.740 | U2G 32.6 | Move 19.1 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 891.0W | Pcon 891.0W | Dual 1.1475 | BCw 0.000 | Shape 0.000
+  PPO update | actor=-0.0053 ppo=-0.0053 bc=0.0000 kl=0.01147 clip=0.180 epochs=9 Dcritic=74.6926 Ecritic=0.0491
+Episode 139 | Macro R -105.11 | Micro R -10510.75 | J 3.5036 | Comm 3.428 | U2G 35.4 | Move 18.7 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 906.3W | Pcon 906.3W | Dual 1.1542 | BCw 0.000 | Shape 0.000
+  Eval@140 | Score: -340.69 | J: 3.3396 | Dh(ms): 1241.0 | Dl(ms): 8601.0 | Dw(ms): 7038.3 | Ttask(ms): 12471.6 | TwE2E(ms): 6246.2 | Done: 8398/8988 | Dmax(ms): 8327.2 | Eservice/step(J): 19.55 | Pavg(W): 790.98 | Pucb95(W): 793.35 | Pvio(W): 0.00 | Eep: 237293.83 | Coop: 0.45 | CPU sat: 0.08 | Press imbal: 0.21 | U2G: 23.11 | Decision: 1.763 ms
+  Eval task delay(ms) H/L/S/C/V: 4307.1/17001.1/13377.9/7065.4/18887.4 | CPU service(Mb) H/L/S/C/V: 1573.62/5588.43/3610.52/1314.07/2237.46
+Episode 140 | Macro R -104.32 | Micro R -10431.82 | J 3.4773 | Comm 3.450 | U2G 27.0 | Move 19.3 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 903.1W | Pcon 903.1W | Dual 1.1609 | BCw 0.000 | Shape 0.000
+Episode 141 | Macro R -103.24 | Micro R -10323.68 | J 3.4412 | Comm 3.208 | U2G 26.5 | Move 18.9 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 898.6W | Pcon 898.6W | Dual 1.1676 | BCw 0.000 | Shape 0.000
+Episode 142 | Macro R -105.04 | Micro R -10504.31 | J 3.5014 | Comm 3.725 | U2G 30.6 | Move 18.9 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 893.0W | Pcon 893.0W | Dual 1.1743 | BCw 0.000 | Shape 0.000
+Episode 143 | Macro R -104.07 | Micro R -10406.87 | J 3.4690 | Comm 3.495 | U2G 21.5 | Move 19.3 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 898.2W | Pcon 898.2W | Dual 1.1811 | BCw 0.000 | Shape 0.000
+Episode 144 | Macro R -105.12 | Micro R -10512.43 | J 3.5041 | Comm 3.719 | U2G 24.8 | Move 19.7 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 895.7W | Pcon 895.7W | Dual 1.1879 | BCw 0.000 | Shape 0.000
+Episode 145 | Macro R -103.84 | Micro R -10383.93 | J 3.4613 | Comm 3.611 | U2G 33.1 | Move 18.9 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 887.9W | Pcon 887.9W | Dual 1.1946 | BCw 0.000 | Shape 0.000
+Episode 146 | Macro R -104.36 | Micro R -10435.90 | J 3.4786 | Comm 3.559 | U2G 27.8 | Move 18.9 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 893.6W | Pcon 893.6W | Dual 1.2014 | BCw 0.000 | Shape 0.000
+Episode 147 | Macro R -105.18 | Micro R -10517.55 | J 3.5058 | Comm 3.727 | U2G 26.5 | Move 18.8 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 893.0W | Pcon 893.0W | Dual 1.2081 | BCw 0.000 | Shape 0.000
+Episode 148 | Macro R -103.95 | Micro R -10395.17 | J 3.4651 | Comm 3.637 | U2G 30.6 | Move 18.9 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 891.7W | Pcon 891.7W | Dual 1.2149 | BCw 0.000 | Shape 0.000
+  PPO update | actor=-0.0093 ppo=-0.0093 bc=0.0000 kl=0.01108 clip=0.170 epochs=9 Dcritic=45.4745 Ecritic=0.0507
+Episode 149 | Macro R -104.49 | Micro R -10448.58 | J 3.4829 | Comm 3.602 | U2G 29.1 | Move 19.1 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 897.1W | Pcon 897.1W | Dual 1.2216 | BCw 0.000 | Shape 0.000
+Episode 150 | Macro R -102.82 | Micro R -10282.14 | J 3.4274 | Comm 3.445 | U2G 29.8 | Move 19.3 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 887.3W | Pcon 887.3W | Dual 1.2282 | BCw 0.000 | Shape 0.000
+Episode 151 | Macro R -105.16 | Micro R -10515.78 | J 3.5053 | Comm 3.723 | U2G 31.6 | Move 19.1 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 892.8W | Pcon 892.8W | Dual 1.2349 | BCw 0.000 | Shape 0.000
+Episode 152 | Macro R -104.09 | Micro R -10409.09 | J 3.4697 | Comm 3.647 | U2G 27.4 | Move 18.7 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 874.7W | Pcon 874.7W | Dual 1.2414 | BCw 0.000 | Shape 0.000
+Episode 153 | Macro R -103.73 | Micro R -10373.11 | J 3.4577 | Comm 3.169 | U2G 30.2 | Move 18.1 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 884.9W | Pcon 884.9W | Dual 1.2479 | BCw 0.000 | Shape 0.000
+Episode 154 | Macro R -104.86 | Micro R -10486.14 | J 3.4954 | Comm 3.435 | U2G 38.8 | Move 19.2 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 898.5W | Pcon 898.5W | Dual 1.2544 | BCw 0.000 | Shape 0.000
+Episode 155 | Macro R -103.57 | Micro R -10357.21 | J 3.4524 | Comm 3.447 | U2G 28.3 | Move 18.8 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 877.6W | Pcon 877.6W | Dual 1.2607 | BCw 0.000 | Shape 0.000
+Episode 156 | Macro R -104.48 | Micro R -10447.53 | J 3.4825 | Comm 3.644 | U2G 26.8 | Move 19.7 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 891.7W | Pcon 891.7W | Dual 1.2671 | BCw 0.000 | Shape 0.000
+Episode 157 | Macro R -105.64 | Micro R -10563.60 | J 3.5212 | Comm 3.649 | U2G 27.0 | Move 19.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 898.4W | Pcon 898.4W | Dual 1.2734 | BCw 0.000 | Shape 0.000
+Episode 158 | Macro R -104.85 | Micro R -10485.19 | J 3.4951 | Comm 3.914 | U2G 29.4 | Move 19.1 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 891.8W | Pcon 891.8W | Dual 1.2797 | BCw 0.000 | Shape 0.000
+  PPO update | actor=-0.0151 ppo=-0.0151 bc=0.0000 kl=0.01169 clip=0.170 epochs=7 Dcritic=25.3490 Ecritic=0.0227
+Episode 159 | Macro R -102.80 | Micro R -10279.99 | J 3.4267 | Comm 3.604 | U2G 32.0 | Move 19.2 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 881.5W | Pcon 881.5W | Dual 1.2858 | BCw 0.000 | Shape 0.000
+  Eval@160 | Score: -343.19 | J: 3.3495 | Dh(ms): 1375.7 | Dl(ms): 10235.9 | Dw(ms): 8354.5 | Ttask(ms): 15641.0 | TwE2E(ms): 7288.9 | Done: 8189/8988 | Dmax(ms): 9988.1 | Eservice/step(J): 19.03 | Pavg(W): 786.21 | Pucb95(W): 788.47 | Pvio(W): 0.00 | Eep: 235861.73 | Coop: 0.43 | CPU sat: 0.04 | Press imbal: 0.31 | U2G: 26.10 | Decision: 1.769 ms
+  Eval task delay(ms) H/L/S/C/V: 4747.3/21910.5/16872.7/8389.6/24574.7 | CPU service(Mb) H/L/S/C/V: 1572.94/5520.96/3575.26/1311.24/2207.39
+Saved lower SAC replay -> C:\Users\PC\Desktop\HRL_UAV\results\tcom_fixed_region_soft_power_v16_delayed_actors/pilot/seed1/joint_ppo_sac\checkpoints\micro_replay.pt
+  Saved trajectory data -> C:\Users\PC\Desktop\HRL_UAV\results\tcom_fixed_region_soft_power_v16_delayed_actors/pilot/seed1/joint_ppo_sac\trajectory_snapshots\trajectory_final.npz (808.4 KB)
+  Saved trajectory figure -> C:\Users\PC\Desktop\HRL_UAV\results\tcom_fixed_region_soft_power_v16_delayed_actors/pilot/seed1/joint_ppo_sac\trajectory_snapshots\trajectory_final.png (328.5 KB)
+Saved evaluation CSV -> C:\Users\PC\Desktop\HRL_UAV\results\tcom_fixed_region_soft_power_v16_delayed_actors/pilot/seed1/joint_ppo_sac\eval_central_macro.csv
+Saved per-episode training CSV -> C:\Users\PC\Desktop\HRL_UAV\results\tcom_fixed_region_soft_power_v16_delayed_actors/pilot/seed1/joint_ppo_sac\train_centralized.csv
+Training complete.

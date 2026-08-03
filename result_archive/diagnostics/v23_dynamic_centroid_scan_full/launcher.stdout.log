@@ -1,0 +1,9 @@
+[uav1 01/33] offset=[0. 0.] delay=710.22ms violation=0.000W
+[uav1 02/33] offset=[20.  0.] delay=712.11ms violation=0.000W
+[uav1 03/33] offset=[14.1 14.1] delay=710.28ms violation=0.000W
+[uav1 04/33] offset=[1.2e-15 2.0e+01] delay=712.51ms violation=0.000W
+[uav1 05/33] offset=[-14.1  14.1] delay=708.43ms violation=0.000W
+[uav1 06/33] offset=[-2.0e+01  2.4e-15] delay=712.56ms violation=0.000W
+[uav1 07/33] offset=[-14.1 -14.1] delay=713.41ms violation=0.000W
+[uav1 08/33] offset=[-3.7e-15 -2.0e+01] delay=715.42ms violation=0.000W
+[uav1 09/33] offset=[ 14.1 -14.1] delay=712.27ms violation=0.000W

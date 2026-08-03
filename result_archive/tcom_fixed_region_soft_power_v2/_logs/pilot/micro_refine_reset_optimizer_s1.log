@@ -1,0 +1,43 @@
+[INFO] Training on CUDA
+[INFO] Macro policy: centralized dx/dy actor
+[INFO] Micro solver: SAC
+[INFO] Macro reward mode: strict_global
+[INFO] Objective: constrained_delay power_budget=840.00W
+[INFO] macro_comm_weight=0.0
+[INFO] shaping=0.0->0.0 over 0 episodes
+[INFO] move_penalty=0.0 propulsion_tiebreak=0.0
+[INFO] training scenario mode: independent
+[INFO] Loaded lower SAC -> C:\Users\PC\Desktop\HRL_UAV\results\tcom_fixed_region_soft_power_v2\pilot\seed1\micro_pretrain\checkpoints\best.pt
+[INFO] Inherited energy dual -> 0.0
+[INFO] Loaded lower SAC replay (108000 transitions) -> C:\Users\PC\Desktop\HRL_UAV\results\tcom_fixed_region_soft_power_v2\pilot\seed1\micro_pretrain\checkpoints\micro_replay.pt
+[INFO] Macro PPO frozen; deterministic actions are used and only the micro layer is trained
+Episode 0 | Macro R -1038.49 | Micro R -103849.38 | J 3.4616 | Comm 4.395 | U2G 72.5 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 786.2W | Pcon 786.2W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 1 | Macro R -1007.10 | Micro R -100709.78 | J 3.3570 | Comm 4.340 | U2G 62.5 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 785.4W | Pcon 785.4W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 2 | Macro R -1000.04 | Micro R -100004.29 | J 3.3335 | Comm 4.369 | U2G 67.4 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 785.2W | Pcon 785.2W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 3 | Macro R -1023.84 | Micro R -102383.53 | J 3.4128 | Comm 4.431 | U2G 72.7 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 789.4W | Pcon 789.4W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 4 | Macro R -1029.27 | Micro R -102927.36 | J 3.4309 | Comm 4.507 | U2G 73.4 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 785.6W | Pcon 785.6W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 5 | Macro R -1005.35 | Micro R -100535.17 | J 3.3512 | Comm 4.609 | U2G 73.6 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 785.3W | Pcon 785.3W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 6 | Macro R -1004.87 | Micro R -100486.55 | J 3.3496 | Comm 4.668 | U2G 67.2 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 786.0W | Pcon 786.0W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 7 | Macro R -1040.89 | Micro R -104089.44 | J 3.4696 | Comm 4.708 | U2G 73.5 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 783.2W | Pcon 783.2W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 8 | Macro R -950.85 | Micro R -95085.12 | J 3.1695 | Comm 4.765 | U2G 64.1 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 783.9W | Pcon 783.9W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 9 | Macro R -1006.85 | Micro R -100684.59 | J 3.3562 | Comm 4.833 | U2G 76.3 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 783.2W | Pcon 783.2W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 10 | Macro R -1053.43 | Micro R -105343.26 | J 3.5114 | Comm 4.947 | U2G 71.8 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 785.8W | Pcon 785.8W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 11 | Macro R -1073.04 | Micro R -107303.61 | J 3.5768 | Comm 5.053 | U2G 66.2 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 782.8W | Pcon 782.8W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 12 | Macro R -1091.20 | Micro R -109120.25 | J 3.6373 | Comm 5.192 | U2G 73.8 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 775.7W | Pcon 775.7W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 13 | Macro R -1159.35 | Micro R -115935.48 | J 3.8645 | Comm 5.233 | U2G 64.0 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 772.3W | Pcon 772.3W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 14 | Macro R -1211.17 | Micro R -121116.97 | J 4.0372 | Comm 5.342 | U2G 64.4 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 765.6W | Pcon 765.6W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 15 | Macro R -1238.01 | Micro R -123800.80 | J 4.1267 | Comm 5.464 | U2G 69.0 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 764.5W | Pcon 764.5W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 16 | Macro R -1281.98 | Micro R -128198.11 | J 4.2733 | Comm 5.493 | U2G 71.4 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 759.5W | Pcon 759.5W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 17 | Macro R -1332.73 | Micro R -133273.49 | J 4.4424 | Comm 5.539 | U2G 76.3 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 758.5W | Pcon 758.5W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 18 | Macro R -1336.52 | Micro R -133651.94 | J 4.4551 | Comm 5.622 | U2G 73.2 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 756.7W | Pcon 756.7W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+Episode 19 | Macro R -1387.04 | Micro R -138704.15 | J 4.6235 | Comm 5.722 | U2G 66.2 | Move 0.0 | Start 0.0m | Load 1.15 | CPU 10.00GHz | Psys 761.3W | Pcon 761.3W | Dual 0.0000 | BCw 0.000 | Shape 0.000
+  Saved trajectory data -> C:\Users\PC\Desktop\HRL_UAV\results\tcom_fixed_region_soft_power_v2/pilot/seed1/micro_refine_reset_optimizer\trajectory_snapshots\trajectory_ep_0020.npz (805.4 KB)
+  Saved trajectory figure -> C:\Users\PC\Desktop\HRL_UAV\results\tcom_fixed_region_soft_power_v2/pilot/seed1/micro_refine_reset_optimizer\trajectory_snapshots\trajectory_ep_0020.png (325.3 KB)
+  Eval@20 | Score: -320.64 | J: 4.3606 | Dh(ms): 80.1 | Dl(ms): 32713.4 | Dw(ms): 25777.6 | Ttask(ms): 22172.1 | TwE2E(ms): 4924.9 | Done: 6794/8988 | Dmax(ms): 41577.4 | Eservice/step(J): 17.66 | Pavg(W): 760.85 | Pucb95(W): 761.79 | Pvio(W): 0.00 | Eep: 228255.49 | Coop: 0.55 | CPU sat: 0.48 | Press imbal: 0.57 | U2G: 68.28 | Decision: 2.306 ms
+  Eval task delay(ms) H/L/S/C/V: 620.0/39470.7/27142.1/6747.9/41698.6 | CPU service(Mb) H/L/S/C/V: 1579.79/4467.09/3022.31/1277.46/1747.10
+Saved lower SAC replay -> C:\Users\PC\Desktop\HRL_UAV\results\tcom_fixed_region_soft_power_v2/pilot/seed1/micro_refine_reset_optimizer\checkpoints\micro_replay.pt
+  Saved trajectory data -> C:\Users\PC\Desktop\HRL_UAV\results\tcom_fixed_region_soft_power_v2/pilot/seed1/micro_refine_reset_optimizer\trajectory_snapshots\trajectory_final.npz (802.1 KB)
+  Saved trajectory figure -> C:\Users\PC\Desktop\HRL_UAV\results\tcom_fixed_region_soft_power_v2/pilot/seed1/micro_refine_reset_optimizer\trajectory_snapshots\trajectory_final.png (326.1 KB)
+Saved evaluation CSV -> C:\Users\PC\Desktop\HRL_UAV\results\tcom_fixed_region_soft_power_v2/pilot/seed1/micro_refine_reset_optimizer\eval_central_macro.csv
+Saved per-episode training CSV -> C:\Users\PC\Desktop\HRL_UAV\results\tcom_fixed_region_soft_power_v2/pilot/seed1/micro_refine_reset_optimizer\train_centralized.csv
+Training complete.

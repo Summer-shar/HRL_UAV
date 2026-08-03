@@ -1,0 +1,469 @@
+{
+  "checkpoint": "C:\\Users\\PC\\Desktop\\HRL_UAV\\results\\tcom_dynamic_u2u_sparse_v23_target_noise\\pilot\\seed1\\joint_td3_sac\\checkpoints\\best.pt",
+  "search_protocol": {
+    "population": 4,
+    "iterations": 1,
+    "elite_fraction": 0.25,
+    "search_episodes": 1,
+    "search_base_seed": 64000,
+    "search_seed": 20260730,
+    "initial_std_m": 35.0,
+    "minimum_std_m": 5.0,
+    "max_residual_m": 100.0,
+    "directed_distances_m": [
+      20.0
+    ]
+  },
+  "cem_history": [
+    {
+      "iteration": 1,
+      "best_targets_m": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ],
+      "best_metrics": {
+        "J": 0.49289099999999986,
+        "delay_objective": 0.49289099999999986,
+        "task_delay_weighted_ms": 694.8600107141897,
+        "task_delay_high_ms": 561.486486486493,
+        "task_delay_low_ms": 1367.7518322822514,
+        "average_power_w": 817.9420833333334,
+        "average_power_ucb95_w": Infinity,
+        "power_budget_w": 840.0,
+        "power_ucb95_violation_w": Infinity,
+        "energy_feasible_ucb95": 0.0,
+        "u2g": 13.843229146804454,
+        "coop_ratio": 0.4647714491914626,
+        "power_constraint_scope": "system",
+        "coop_flow_mbits": [
+          [
+            2207.50830078125,
+            21.054763793945312,
+            2048.436767578125
+          ],
+          [
+            410.8653259277344,
+            1420.8345947265625,
+            0.0
+          ],
+          [
+            47.42259216308594,
+            863.4020385742188,
+            276.9253234863281
+          ]
+        ],
+        "tx_service_matrix_mbits": [
+          [
+            0.0,
+            21.054758071899414,
+            2047.9508056640625
+          ],
+          [
+            410.6278381347656,
+            0.0,
+            0.0
+          ],
+          [
+            47.422603607177734,
+            863.0399169921875,
+            0.0
+          ]
+        ],
+        "task_delay_source_uav_ms": [
+          1194.4708251953125,
+          912.6307373046875,
+          1073.7451171875
+        ]
+      },
+      "global_best_targets_m": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ],
+      "global_best_metrics": {
+        "J": 0.49289099999999986,
+        "delay_objective": 0.49289099999999986,
+        "task_delay_weighted_ms": 694.8600107141897,
+        "task_delay_high_ms": 561.486486486493,
+        "task_delay_low_ms": 1367.7518322822514,
+        "average_power_w": 817.9420833333334,
+        "average_power_ucb95_w": Infinity,
+        "power_budget_w": 840.0,
+        "power_ucb95_violation_w": Infinity,
+        "energy_feasible_ucb95": 0.0,
+        "u2g": 13.843229146804454,
+        "coop_ratio": 0.4647714491914626,
+        "power_constraint_scope": "system",
+        "coop_flow_mbits": [
+          [
+            2207.50830078125,
+            21.054763793945312,
+            2048.436767578125
+          ],
+          [
+            410.8653259277344,
+            1420.8345947265625,
+            0.0
+          ],
+          [
+            47.42259216308594,
+            863.4020385742188,
+            276.9253234863281
+          ]
+        ],
+        "tx_service_matrix_mbits": [
+          [
+            0.0,
+            21.054758071899414,
+            2047.9508056640625
+          ],
+          [
+            410.6278381347656,
+            0.0,
+            0.0
+          ],
+          [
+            47.422603607177734,
+            863.0399169921875,
+            0.0
+          ]
+        ],
+        "task_delay_source_uav_ms": [
+          1194.4708251953125,
+          912.6307373046875,
+          1073.7451171875
+        ]
+      },
+      "mean_offset_m": [
+        [
+          4.353457315056714,
+          15.303611427350926
+        ],
+        [
+          27.05686873225985,
+          -23.26531786951391
+        ],
+        [
+          -6.066349047504666,
+          0.5010599745043249
+        ]
+      ],
+      "std_offset_m": [
+        [
+          5.0,
+          15.303611427350926
+        ],
+        [
+          27.05686873225985,
+          23.26531786951391
+        ],
+        [
+          6.066349047504666,
+          5.0
+        ]
+      ]
+    }
+  ],
+  "candidate_records": [
+    {
+      "candidate_id": "cem_best",
+      "policy_type": "constant_residual",
+      "offsets_m": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ],
+      "metrics": {
+        "J": 0.49289099999999986,
+        "delay_objective": 0.49289099999999986,
+        "task_delay_weighted_ms": 694.8600107141897,
+        "task_delay_high_ms": 561.486486486493,
+        "task_delay_low_ms": 1367.7518322822514,
+        "average_power_w": 817.9420833333334,
+        "average_power_ucb95_w": Infinity,
+        "power_budget_w": 840.0,
+        "power_ucb95_violation_w": Infinity,
+        "energy_feasible_ucb95": 0.0,
+        "u2g": 13.843229146804454,
+        "coop_ratio": 0.4647714491914626,
+        "power_constraint_scope": "system",
+        "coop_flow_mbits": [
+          [
+            2207.50830078125,
+            21.054763793945312,
+            2048.436767578125
+          ],
+          [
+            410.8653259277344,
+            1420.8345947265625,
+            0.0
+          ],
+          [
+            47.42259216308594,
+            863.4020385742188,
+            276.9253234863281
+          ]
+        ],
+        "tx_service_matrix_mbits": [
+          [
+            0.0,
+            21.054758071899414,
+            2047.9508056640625
+          ],
+          [
+            410.6278381347656,
+            0.0,
+            0.0
+          ],
+          [
+            47.422603607177734,
+            863.0399169921875,
+            0.0
+          ]
+        ],
+        "task_delay_source_uav_ms": [
+          1194.4708251953125,
+          912.6307373046875,
+          1073.7451171875
+        ]
+      }
+    },
+    {
+      "candidate_id": "uplink_reference",
+      "policy_type": "constant_residual",
+      "offsets_m": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ],
+      "metrics": {
+        "J": 0.49289099999999986,
+        "delay_objective": 0.49289099999999986,
+        "task_delay_weighted_ms": 694.8600107141897,
+        "task_delay_high_ms": 561.486486486493,
+        "task_delay_low_ms": 1367.7518322822514,
+        "average_power_w": 817.9420833333334,
+        "average_power_ucb95_w": Infinity,
+        "power_budget_w": 840.0,
+        "power_ucb95_violation_w": Infinity,
+        "energy_feasible_ucb95": 0.0,
+        "u2g": 13.843229146804454,
+        "coop_ratio": 0.4647714491914626,
+        "power_constraint_scope": "system",
+        "coop_flow_mbits": [
+          [
+            2207.50830078125,
+            21.054763793945312,
+            2048.436767578125
+          ],
+          [
+            410.8653259277344,
+            1420.8345947265625,
+            0.0
+          ],
+          [
+            47.42259216308594,
+            863.4020385742188,
+            276.9253234863281
+          ]
+        ],
+        "tx_service_matrix_mbits": [
+          [
+            0.0,
+            21.054758071899414,
+            2047.9508056640625
+          ],
+          [
+            410.6278381347656,
+            0.0,
+            0.0
+          ],
+          [
+            47.422603607177734,
+            863.0399169921875,
+            0.0
+          ]
+        ],
+        "task_delay_source_uav_ms": [
+          1194.4708251953125,
+          912.6307373046875,
+          1073.7451171875
+        ]
+      }
+    },
+    {
+      "candidate_id": "uav3_toward_uav1_020m",
+      "policy_type": "directed_dynamic_residual",
+      "directed_moves": [
+        [
+          2,
+          0,
+          20.0
+        ]
+      ],
+      "metrics": {
+        "J": 0.5003319999999999,
+        "delay_objective": 0.5003319999999999,
+        "task_delay_weighted_ms": 703.840297749964,
+        "task_delay_high_ms": 572.6689189189269,
+        "task_delay_low_ms": 1365.734742584382,
+        "average_power_w": 819.3878645833333,
+        "average_power_ucb95_w": Infinity,
+        "power_budget_w": 840.0,
+        "power_ucb95_violation_w": Infinity,
+        "energy_feasible_ucb95": 0.0,
+        "u2g": 19.50418168799807,
+        "coop_ratio": 0.46339284713957485,
+        "power_constraint_scope": "system",
+        "coop_flow_mbits": [
+          [
+            2207.386962890625,
+            20.484567642211914,
+            2049.12841796875
+          ],
+          [
+            415.188232421875,
+            1416.51171875,
+            0.0
+          ],
+          [
+            43.64216995239258,
+            852.6793212890625,
+            291.4284973144531
+          ]
+        ],
+        "tx_service_matrix_mbits": [
+          [
+            0.0,
+            20.48457145690918,
+            2048.583740234375
+          ],
+          [
+            414.8312683105469,
+            0.0,
+            0.0
+          ],
+          [
+            43.642173767089844,
+            852.6796264648438,
+            0.0
+          ]
+        ],
+        "task_delay_source_uav_ms": [
+          1193.5592041015625,
+          919.7103881835938,
+          1079.9072265625
+        ]
+      }
+    }
+  ],
+  "selected_candidate": {
+    "candidate_id": "cem_best",
+    "policy_type": "constant_residual",
+    "offsets_m": [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "metrics": {
+      "J": 0.49289099999999986,
+      "delay_objective": 0.49289099999999986,
+      "task_delay_weighted_ms": 694.8600107141897,
+      "task_delay_high_ms": 561.486486486493,
+      "task_delay_low_ms": 1367.7518322822514,
+      "average_power_w": 817.9420833333334,
+      "average_power_ucb95_w": Infinity,
+      "power_budget_w": 840.0,
+      "power_ucb95_violation_w": Infinity,
+      "energy_feasible_ucb95": 0.0,
+      "u2g": 13.843229146804454,
+      "coop_ratio": 0.4647714491914626,
+      "power_constraint_scope": "system",
+      "coop_flow_mbits": [
+        [
+          2207.50830078125,
+          21.054763793945312,
+          2048.436767578125
+        ],
+        [
+          410.8653259277344,
+          1420.8345947265625,
+          0.0
+        ],
+        [
+          47.42259216308594,
+          863.4020385742188,
+          276.9253234863281
+        ]
+      ],
+      "tx_service_matrix_mbits": [
+        [
+          0.0,
+          21.054758071899414,
+          2047.9508056640625
+        ],
+        [
+          410.6278381347656,
+          0.0,
+          0.0
+        ],
+        [
+          47.422603607177734,
+          863.0399169921875,
+          0.0
+        ]
+      ],
+      "task_delay_source_uav_ms": [
+        1194.4708251953125,
+        912.6307373046875,
+        1073.7451171875
+      ]
+    }
+  }
+}
