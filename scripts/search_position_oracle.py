@@ -5,6 +5,7 @@ from pathlib import Path
 
 import numpy as np
 import torch
+from scipy.optimize import minimize
 from scipy.stats import t as student_t
 
 try:
@@ -127,6 +128,334 @@ def target_centroid_waypoint_action(
         (targets - centroid_array) / max(float(waypoint_radius_m), 1e-8)
     )
     return project_unit_disk_np(normalized_action.astype(np.float32))
+
+
+def uplink_reference_objective_and_gradient(
+    position,
+    user_coords,
+    weighted_load_mbps,
+    altitude_m,
+    bandwidth_per_user_hz,
+    p_gt_power,
+    beta_0,
+    noise_power,
+):
+    position = np.asarray(position, dtype=np.float64).reshape(2)
+    users = np.asarray(user_coords, dtype=np.float64).reshape(-1, 2)
+    loads_mbps = np.asarray(
+        weighted_load_mbps,
+        dtype=np.float64,
+    ).reshape(-1)
+    if users.shape[0] != loads_mbps.size:
+        raise ValueError("Each user must have one weighted uplink load.")
+    if bandwidth_per_user_hz <= 0.0 or noise_power <= 0.0:
+        raise ValueError("Bandwidth and noise power must be positive.")
+
+    horizontal = position[None, :] - users
+    distance_sq = (
+        np.sum(horizontal**2, axis=1) + float(altitude_m) ** 2
+    )
+    snr_scale = float(p_gt_power) * float(beta_0) / float(noise_power)
+    rates_bps = float(bandwidth_per_user_hz) * np.log2(
+        1.0 + snr_scale / np.maximum(distance_sq, 1e-12)
+    )
+    rates_bps = np.maximum(rates_bps, 1e-12)
+    loads_bps = np.maximum(loads_mbps, 0.0) * 1e6
+    objective = float(np.sum(loads_bps / rates_bps))
+
+    rate_gradient = (
+        -2.0
+        * float(bandwidth_per_user_hz)
+        * snr_scale
+        * horizontal
+        / (
+            np.log(2.0)
+            * distance_sq[:, None]
+            * (distance_sq + snr_scale)[:, None]
+        )
+    )
+    gradient = np.sum(
+        (-loads_bps / rates_bps**2)[:, None] * rate_gradient,
+        axis=0,
+    )
+    return objective, gradient
+
+
+def solve_uplink_reference_position(
+    user_coords,
+    weighted_load_mbps,
+    initial_position,
+    altitude_m,
+    bandwidth_per_user_hz,
+    p_gt_power,
+    beta_0,
+    noise_power,
+    map_min_m=0.0,
+    map_max_m=1000.0,
+    max_iterations=50,
+):
+    users = np.asarray(user_coords, dtype=np.float64).reshape(-1, 2)
+    loads = np.asarray(weighted_load_mbps, dtype=np.float64).reshape(-1)
+    initial = np.clip(
+        np.asarray(initial_position, dtype=np.float64).reshape(2),
+        float(map_min_m),
+        float(map_max_m),
+    )
+    if users.shape[0] != loads.size:
+        raise ValueError("Each user must have one weighted uplink load.")
+    if users.shape[0] == 0 or float(np.sum(np.maximum(loads, 0.0))) <= 0.0:
+        return initial, {
+            "success": True,
+            "status": 0,
+            "iterations": 0,
+            "initial_objective": 0.0,
+            "final_objective": 0.0,
+            "message": "No positive offered load.",
+        }
+
+    def objective_with_gradient(position):
+        return uplink_reference_objective_and_gradient(
+            position,
+            users,
+            loads,
+            altitude_m=altitude_m,
+            bandwidth_per_user_hz=bandwidth_per_user_hz,
+            p_gt_power=p_gt_power,
+            beta_0=beta_0,
+            noise_power=noise_power,
+        )
+
+    initial_objective, _ = objective_with_gradient(initial)
+    result = minimize(
+        objective_with_gradient,
+        initial,
+        method="L-BFGS-B",
+        jac=True,
+        bounds=[
+            (float(map_min_m), float(map_max_m)),
+            (float(map_min_m), float(map_max_m)),
+        ],
+        options={
+            "maxiter": max(int(max_iterations), 1),
+            "ftol": 1e-12,
+            "gtol": 1e-8,
+        },
+    )
+    candidate = np.clip(
+        np.asarray(result.x, dtype=np.float64),
+        float(map_min_m),
+        float(map_max_m),
+    )
+    final_objective, _ = objective_with_gradient(candidate)
+    if not np.all(np.isfinite(candidate)) or (
+        final_objective > initial_objective + 1e-10
+    ):
+        candidate = initial
+        final_objective = initial_objective
+
+    return candidate, {
+        "success": bool(result.success),
+        "status": int(result.status),
+        "iterations": int(result.nit),
+        "initial_objective": float(initial_objective),
+        "final_objective": float(final_objective),
+        "message": str(result.message),
+    }
+
+
+def expected_priority_weighted_uplink_loads(
+    env,
+    priority_high_weight=None,
+    priority_low_weight=None,
+):
+    base_env = getattr(env, "env", env)
+    high_weight = (
+        float(base_env.w_D_high)
+        if priority_high_weight is None
+        else float(priority_high_weight)
+    )
+    low_weight = (
+        float(base_env.w_D_low)
+        if priority_low_weight is None
+        else float(priority_low_weight)
+    )
+    return (
+        high_weight
+        * np.asarray(base_env.user_lambda_high, dtype=np.float64)
+        * np.asarray(base_env.user_task_size_high_mbits, dtype=np.float64)
+        + low_weight
+        * np.asarray(base_env.user_lambda_low, dtype=np.float64)
+        * np.asarray(base_env.user_task_size_low_mbits, dtype=np.float64)
+    )
+
+
+def solve_uplink_reference_positions(
+    env,
+    initial_positions=None,
+    priority_high_weight=None,
+    priority_low_weight=None,
+    map_min_m=0.0,
+    map_max_m=1000.0,
+    max_iterations=50,
+):
+    base_env = getattr(env, "env", env)
+    if initial_positions is None:
+        initial_positions = base_env.weighted_centroids
+    initial_positions = np.asarray(
+        initial_positions,
+        dtype=np.float64,
+    ).reshape(base_env.N, 2)
+    user_loads = expected_priority_weighted_uplink_loads(
+        base_env,
+        priority_high_weight=priority_high_weight,
+        priority_low_weight=priority_low_weight,
+    )
+    bandwidth_per_user_hz = float(base_env.B_gt_total) / max(
+        int(base_env.M),
+        1,
+    )
+    targets = np.zeros((base_env.N, 2), dtype=np.float64)
+    diagnostics = []
+    for uav_index in range(base_env.N):
+        mask = np.asarray(base_env.user_allocations) == uav_index
+        target, diagnostic = solve_uplink_reference_position(
+            np.asarray(base_env.user_coords, dtype=np.float64)[mask],
+            user_loads[mask],
+            initial_positions[uav_index],
+            altitude_m=base_env.H,
+            bandwidth_per_user_hz=bandwidth_per_user_hz,
+            p_gt_power=base_env.p_gt,
+            beta_0=base_env.beta_0,
+            noise_power=base_env.noise_power,
+            map_min_m=map_min_m,
+            map_max_m=map_max_m,
+            max_iterations=max_iterations,
+        )
+        targets[uav_index] = target
+        diagnostics.append(
+            {
+                "uav_index": int(uav_index),
+                **diagnostic,
+            }
+        )
+    return targets, diagnostics
+
+
+def uplink_reference_macro_ema_beta(env):
+    base_env = getattr(env, "env", env)
+    eligible_steps = int(base_env.micro_steps_per_macro)
+    if not bool(getattr(base_env, "arrivals_during_deployment", False)):
+        eligible_steps -= int(base_env.deployment_steps)
+    arrival_updates = max(
+        eligible_steps // max(int(base_env.arrival_interval_steps), 1),
+        1,
+    )
+    return float(base_env.centroid_ema_beta) ** arrival_updates
+
+
+def make_uplink_reference_policy(
+    offsets=None,
+    directed_moves=None,
+    priority_high_weight=None,
+    priority_low_weight=None,
+    ema_beta=None,
+    map_min_m=0.0,
+    map_max_m=1000.0,
+    trace=None,
+):
+    fixed_offsets = None
+    if offsets is not None:
+        fixed_offsets = np.asarray(offsets, dtype=np.float64).copy()
+    directed_moves = tuple(directed_moves or ())
+    state = {
+        "smoothed_targets": None,
+        "last_global_micro_step": None,
+    }
+
+    def _policy(env, _local_obs_batch, _eval_mode):
+        base_env = getattr(env, "env", env)
+        current_step = int(getattr(base_env, "global_micro_step", 0))
+        previous_step = state["last_global_micro_step"]
+        if previous_step is not None and current_step <= previous_step:
+            state["smoothed_targets"] = None
+
+        raw_targets, diagnostics = solve_uplink_reference_positions(
+            base_env,
+            initial_positions=state["smoothed_targets"],
+            priority_high_weight=priority_high_weight,
+            priority_low_weight=priority_low_weight,
+            map_min_m=map_min_m,
+            map_max_m=map_max_m,
+        )
+        beta = (
+            uplink_reference_macro_ema_beta(base_env)
+            if ema_beta is None
+            else float(ema_beta)
+        )
+        if not 0.0 <= beta < 1.0:
+            raise ValueError("ema_beta must lie in [0, 1).")
+        if state["smoothed_targets"] is None:
+            smoothed_targets = raw_targets
+        else:
+            smoothed_targets = (
+                beta * state["smoothed_targets"]
+                + (1.0 - beta) * raw_targets
+            )
+        state["smoothed_targets"] = smoothed_targets.copy()
+        state["last_global_micro_step"] = current_step
+
+        targets = smoothed_targets.copy()
+        if fixed_offsets is not None:
+            targets += fixed_offsets.reshape(targets.shape)
+        for source_index, target_index, distance_m in directed_moves:
+            direction = (
+                smoothed_targets[int(target_index)]
+                - smoothed_targets[int(source_index)]
+            )
+            norm = float(np.linalg.norm(direction))
+            if norm > 1e-12:
+                targets[int(source_index)] += (
+                    direction / norm * max(float(distance_m), 0.0)
+                )
+        targets = np.clip(
+            targets,
+            float(map_min_m),
+            float(map_max_m),
+        )
+
+        if trace is not None:
+            trace.append(
+                {
+                    "global_micro_step": current_step,
+                    "ema_beta": beta,
+                    "raw_targets_m": raw_targets.copy(),
+                    "smoothed_targets_m": smoothed_targets.copy(),
+                    "commanded_targets_m": targets.copy(),
+                    "solver_diagnostics": diagnostics,
+                }
+            )
+
+        if env.macro_action_mode == "waypoint":
+            return target_waypoint_action(
+                targets,
+                env.macro_waypoint_origins,
+                env.macro_waypoint_radius_m,
+            )
+        raw_state = base_env.get_raw_state()
+        if env.macro_action_mode == "centroid_waypoint":
+            return target_centroid_waypoint_action(
+                targets,
+                raw_state["weighted_centroids"],
+                env.macro_waypoint_radius_m,
+            )
+        return target_delta_action(
+            raw_state["uav_coords"],
+            targets,
+            env.max_macro_displacement,
+            tolerance_m=0.5,
+        )
+
+    return _policy
 
 
 def checkpoint_rank(metrics):
@@ -610,7 +939,12 @@ def evaluate_paired_policies(
     micro_policy,
     episodes,
     eval_base_seed,
+    reference_name="learned_policy",
 ):
+    if reference_name not in policies:
+        raise KeyError(
+            f"reference_name '{reference_name}' is not present in policies."
+        )
     raw = {name: [] for name in policies}
     for eval_index in range(int(episodes)):
         seed = int(eval_base_seed) + eval_index
@@ -637,7 +971,6 @@ def evaluate_paired_policies(
         )
         for name, records in raw.items()
     }
-    reference_name = "learned_policy"
     differences = {
         name: {
             "task_delay_weighted_ms": paired_difference(

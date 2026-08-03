@@ -129,6 +129,30 @@ TRAIN_LOG_FIELDS = [
     "sac_actor_updates_total",
     "td3_buffer_size",
     "td3_updates",
+    "td3_actor_raw_norm_mean",
+    "td3_actor_raw_norm_p95",
+    "td3_actor_raw_norm_max",
+    "td3_actor_raw_saturation_fraction",
+    "td3_actor_projected_norm_mean",
+    "td3_actor_projected_norm_p95",
+    "td3_delay_q_actor_mean",
+    "td3_delay_q_zero_mean",
+    "td3_delay_q_actor_minus_zero_mean",
+    "td3_delay_q_actor_preference_fraction",
+    "td3_delay_q_twin_gap_actor_mean",
+    "td3_delay_q_twin_gap_zero_mean",
+    "td3_energy_q_actor_minus_zero_mean",
+    "td3_energy_q_twin_gap_actor_mean",
+    "td3_energy_q_twin_gap_zero_mean",
+    "td3_replay_action_norm_mean",
+    "td3_replay_action_norm_p95",
+    "td3_replay_action_norm_max",
+    "td3_replay_action_norm_le_0p10_fraction",
+    "td3_replay_action_norm_le_0p25_fraction",
+    "td3_replay_all_uavs_le_0p10_fraction",
+    "td3_replay_all_uavs_le_0p25_fraction",
+    "td3_replay_action_norm_ge_0p95_fraction",
+    "td3_replay_action_norm_histogram",
     "sac_trainable_micro_steps",
     "service_resource_decisions",
     "smdp_boundary_transitions",
@@ -285,8 +309,204 @@ class MacroReplayBuffer:
             )
         )
 
+    def action_norm_summary(self, num_agents):
+        num_agents = int(num_agents)
+        if num_agents <= 0 or self.action.shape[1] != 2 * num_agents:
+            raise ValueError(
+                "Replay action dimension must equal 2 * num_agents."
+            )
+        if self.size <= 0:
+            return {
+                "td3_replay_action_norm_mean": np.nan,
+                "td3_replay_action_norm_p95": np.nan,
+                "td3_replay_action_norm_max": np.nan,
+                "td3_replay_action_norm_le_0p10_fraction": np.nan,
+                "td3_replay_action_norm_le_0p25_fraction": np.nan,
+                "td3_replay_all_uavs_le_0p10_fraction": np.nan,
+                "td3_replay_all_uavs_le_0p25_fraction": np.nan,
+                "td3_replay_action_norm_ge_0p95_fraction": np.nan,
+                "td3_replay_action_norm_histogram": "{}",
+            }
+
+        action_pairs = self.action[: self.size].reshape(
+            self.size,
+            num_agents,
+            2,
+        )
+        norms = np.linalg.norm(action_pairs, axis=-1)
+        flat_norms = norms.reshape(-1)
+        bin_edges = np.asarray(
+            [
+                0.0,
+                0.05,
+                0.10,
+                0.20,
+                0.30,
+                0.40,
+                0.50,
+                0.60,
+                0.70,
+                0.80,
+                0.90,
+                1.00,
+                np.inf,
+            ],
+            dtype=np.float64,
+        )
+        counts, _ = np.histogram(flat_norms, bins=bin_edges)
+        labels = [
+            "0.00-0.05",
+            "0.05-0.10",
+            "0.10-0.20",
+            "0.20-0.30",
+            "0.30-0.40",
+            "0.40-0.50",
+            "0.50-0.60",
+            "0.60-0.70",
+            "0.70-0.80",
+            "0.80-0.90",
+            "0.90-1.00",
+            ">1.00",
+        ]
+        histogram = {
+            label: int(count)
+            for label, count in zip(labels, counts.tolist())
+        }
+        return {
+            "td3_replay_action_norm_mean": float(np.mean(flat_norms)),
+            "td3_replay_action_norm_p95": float(
+                np.percentile(flat_norms, 95.0)
+            ),
+            "td3_replay_action_norm_max": float(np.max(flat_norms)),
+            "td3_replay_action_norm_le_0p10_fraction": float(
+                np.mean(flat_norms <= 0.10)
+            ),
+            "td3_replay_action_norm_le_0p25_fraction": float(
+                np.mean(flat_norms <= 0.25)
+            ),
+            "td3_replay_all_uavs_le_0p10_fraction": float(
+                np.mean(np.all(norms <= 0.10, axis=1))
+            ),
+            "td3_replay_all_uavs_le_0p25_fraction": float(
+                np.mean(np.all(norms <= 0.25, axis=1))
+            ),
+            "td3_replay_action_norm_ge_0p95_fraction": float(
+                np.mean(flat_norms >= 0.95)
+            ),
+            "td3_replay_action_norm_histogram": json.dumps(
+                histogram,
+                separators=(",", ":"),
+            ),
+        }
+
     def __len__(self):
         return self.size
+
+
+def inspect_td3_policy_state(agent, state):
+    state_t = torch.as_tensor(
+        np.asarray(state, dtype=np.float32),
+        dtype=torch.float32,
+        device=agent.device,
+    ).reshape(1, -1)
+    with torch.no_grad():
+        raw_action = agent.actor.net(state_t)
+        projected_action = project_unit_disk_torch(
+            raw_action,
+            agent.num_agents,
+        )
+        zero_action = torch.zeros_like(projected_action)
+        delay_q1_actor, delay_q2_actor = agent.critic(
+            state_t,
+            projected_action,
+        )
+        delay_q1_zero, delay_q2_zero = agent.critic(
+            state_t,
+            zero_action,
+        )
+        energy_q1_actor, energy_q2_actor = agent.energy_critic(
+            state_t,
+            projected_action,
+        )
+        energy_q1_zero, energy_q2_zero = agent.energy_critic(
+            state_t,
+            zero_action,
+        )
+
+    raw_norms = torch.linalg.norm(
+        raw_action.reshape(agent.num_agents, 2),
+        dim=-1,
+    ).cpu().numpy()
+    projected_norms = torch.linalg.norm(
+        projected_action.reshape(agent.num_agents, 2),
+        dim=-1,
+    ).cpu().numpy()
+    delay_actor = float(
+        torch.minimum(delay_q1_actor, delay_q2_actor).mean().item()
+    )
+    delay_zero = float(
+        torch.minimum(delay_q1_zero, delay_q2_zero).mean().item()
+    )
+    energy_actor = float(
+        torch.maximum(energy_q1_actor, energy_q2_actor).mean().item()
+    )
+    energy_zero = float(
+        torch.maximum(energy_q1_zero, energy_q2_zero).mean().item()
+    )
+    return {
+        "td3_actor_raw_norm_mean": float(np.mean(raw_norms)),
+        "td3_actor_raw_norm_p95": float(np.percentile(raw_norms, 95.0)),
+        "td3_actor_raw_norm_max": float(np.max(raw_norms)),
+        "td3_actor_raw_saturation_fraction": float(
+            np.mean(raw_norms >= 1.0)
+        ),
+        "td3_actor_projected_norm_mean": float(
+            np.mean(projected_norms)
+        ),
+        "td3_actor_projected_norm_p95": float(
+            np.percentile(projected_norms, 95.0)
+        ),
+        "td3_delay_q_actor_mean": delay_actor,
+        "td3_delay_q_zero_mean": delay_zero,
+        "td3_delay_q_actor_minus_zero_mean": delay_actor - delay_zero,
+        "td3_delay_q_actor_preference_fraction": float(
+            delay_actor > delay_zero
+        ),
+        "td3_delay_q_twin_gap_actor_mean": float(
+            torch.abs(delay_q1_actor - delay_q2_actor).mean().item()
+        ),
+        "td3_delay_q_twin_gap_zero_mean": float(
+            torch.abs(delay_q1_zero - delay_q2_zero).mean().item()
+        ),
+        "td3_energy_q_actor_minus_zero_mean": energy_actor - energy_zero,
+        "td3_energy_q_twin_gap_actor_mean": float(
+            torch.abs(energy_q1_actor - energy_q2_actor).mean().item()
+        ),
+        "td3_energy_q_twin_gap_zero_mean": float(
+            torch.abs(energy_q1_zero - energy_q2_zero).mean().item()
+        ),
+    }
+
+
+def summarize_td3_policy_diagnostics(records):
+    if not records:
+        return {}
+    result = {}
+    for key in records[0]:
+        values = np.asarray(
+            [record[key] for record in records],
+            dtype=np.float64,
+        )
+        result[key] = float(np.mean(values))
+    result["td3_actor_raw_norm_max"] = float(
+        np.max(
+            [
+                record["td3_actor_raw_norm_max"]
+                for record in records
+            ]
+        )
+    )
+    return result
 
 
 class TD3Agent:
@@ -1301,6 +1521,7 @@ def main():
         ep_sac_critic_losses = []
         ep_sac_actor_grad_norms = []
         ep_sac_critic_grad_norms = []
+        ep_td3_policy_diagnostics = []
         ep_macro_feedback = []
         ep_macro_power_violation_penalties = []
         ep_macro_reconstruction_error = []
@@ -1348,6 +1569,9 @@ def main():
         ep_smdp_boundary_audit = None
 
         for macro_idx in range(args.macro_steps):
+            ep_td3_policy_diagnostics.append(
+                inspect_td3_policy_state(agent, global_state)
+            )
             if warmup_episode:
                 action = sample_training_warmup_action(
                     env.N,
@@ -1937,6 +2161,10 @@ def main():
                 "sac_actor_updates_total": sac_actor_update_count,
                 "td3_buffer_size": len(replay_buffer),
                 "td3_updates": agent.update_count,
+                **summarize_td3_policy_diagnostics(
+                    ep_td3_policy_diagnostics
+                ),
+                **replay_buffer.action_norm_summary(env.N),
                 "sac_trainable_micro_steps": sac_trainable_micro_steps,
                 "service_resource_decisions": ep_service_resource_decisions,
                 "smdp_boundary_transitions": ep_smdp_boundary_transitions,

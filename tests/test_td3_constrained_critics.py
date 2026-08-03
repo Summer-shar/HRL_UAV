@@ -1,4 +1,5 @@
 import copy
+import json
 import sys
 import unittest
 from collections import deque
@@ -18,6 +19,7 @@ for path in (ROOT, SCRIPTS):
 from train_centralized_td3 import MacroReplayBuffer
 from train_centralized_td3 import TD3Agent
 from train_centralized_td3 import build_checkpoint_payload
+from train_centralized_td3 import inspect_td3_policy_state
 from train_centralized_td3 import macro_power_violation_penalty
 from train_centralized_td3 import update_smoothed_energy_dual
 
@@ -167,6 +169,77 @@ class TD3ConstrainedCriticTests(unittest.TestCase):
                 for name in payload["macro_actor"]
             )
         )
+
+    def test_replay_action_norm_summary_reports_low_action_coverage(self):
+        buffer = MacroReplayBuffer(4, 6, 8)
+        buffer.add(
+            np.zeros(4, dtype=np.float32),
+            np.asarray([0.0, 0.0, 0.1, 0.0, 0.3, 0.4], dtype=np.float32),
+            reward=0.0,
+            next_state=np.zeros(4, dtype=np.float32),
+            done=False,
+        )
+        buffer.add(
+            np.zeros(4, dtype=np.float32),
+            np.asarray([1.0, 0.0, 0.2, 0.0, 0.6, 0.8], dtype=np.float32),
+            reward=0.0,
+            next_state=np.zeros(4, dtype=np.float32),
+            done=False,
+        )
+
+        summary = buffer.action_norm_summary(num_agents=3)
+
+        self.assertAlmostEqual(
+            summary["td3_replay_action_norm_mean"],
+            (0.0 + 0.1 + 0.5 + 1.0 + 0.2 + 1.0) / 6.0,
+        )
+        self.assertAlmostEqual(
+            summary["td3_replay_action_norm_le_0p10_fraction"],
+            2.0 / 6.0,
+        )
+        self.assertAlmostEqual(
+            summary["td3_replay_action_norm_le_0p25_fraction"],
+            3.0 / 6.0,
+        )
+        self.assertEqual(
+            summary["td3_replay_all_uavs_le_0p25_fraction"],
+            0.0,
+        )
+        histogram = json.loads(
+            summary["td3_replay_action_norm_histogram"]
+        )
+        self.assertEqual(sum(histogram.values()), 6)
+
+    def test_policy_diagnostics_do_not_change_rng_or_network_state(self):
+        args = make_args()
+        torch.manual_seed(41)
+        agent = TD3Agent(4, 6, 3, args, torch.device("cpu"))
+        before_state = {
+            name: tensor.detach().clone()
+            for name, tensor in agent.actor.state_dict().items()
+        }
+        np.random.seed(43)
+        torch.manual_seed(47)
+        numpy_rng_before = np.random.get_state()
+        torch_rng_before = torch.get_rng_state().clone()
+
+        diagnostics = inspect_td3_policy_state(
+            agent,
+            np.asarray([0.2, -0.1, 0.4, 0.7], dtype=np.float32),
+        )
+
+        numpy_rng_after = np.random.get_state()
+        torch_rng_after = torch.get_rng_state()
+        self.assertEqual(numpy_rng_before[0], numpy_rng_after[0])
+        self.assertTrue(
+            np.array_equal(numpy_rng_before[1], numpy_rng_after[1])
+        )
+        self.assertEqual(numpy_rng_before[2:], numpy_rng_after[2:])
+        self.assertTrue(torch.equal(torch_rng_before, torch_rng_after))
+        for name, tensor in agent.actor.state_dict().items():
+            self.assertTrue(torch.equal(before_state[name], tensor))
+        self.assertIn("td3_delay_q_actor_minus_zero_mean", diagnostics)
+        self.assertIn("td3_actor_raw_saturation_fraction", diagnostics)
 
 
 if __name__ == "__main__":

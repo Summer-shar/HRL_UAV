@@ -17,9 +17,11 @@ from search_position_oracle import checkpoint_rank
 from search_position_oracle import centroid_offset_targets
 from search_position_oracle import make_uav1_centroid_override_policy
 from search_position_oracle import project_targets
+from search_position_oracle import solve_uplink_reference_position
 from search_position_oracle import target_centroid_waypoint_action
 from search_position_oracle import target_delta_action
 from search_position_oracle import target_waypoint_action
+from search_position_oracle import uplink_reference_objective_and_gradient
 
 
 class PositionOracleTests(unittest.TestCase):
@@ -157,6 +159,97 @@ class PositionOracleTests(unittest.TestCase):
             np.linalg.norm(targets[2] - centroids[0]),
             np.linalg.norm(centroids[2] - centroids[0]),
         )
+
+    def test_uplink_reference_gradient_matches_finite_difference(self):
+        users = np.array(
+            [[-20.0, 5.0], [10.0, 30.0], [40.0, -10.0]],
+            dtype=np.float64,
+        )
+        loads = np.array([1.0, 2.0, 4.0], dtype=np.float64)
+        position = np.array([5.0, 8.0], dtype=np.float64)
+        kwargs = {
+            "altitude_m": 50.0,
+            "bandwidth_per_user_hz": 5e5,
+            "p_gt_power": 0.1,
+            "beta_0": 1e-6,
+            "noise_power": 1e-13,
+        }
+        _, analytic = uplink_reference_objective_and_gradient(
+            position,
+            users,
+            loads,
+            **kwargs,
+        )
+        step = 1e-4
+        numerical = np.zeros(2, dtype=np.float64)
+        for axis in range(2):
+            positive = position.copy()
+            negative = position.copy()
+            positive[axis] += step
+            negative[axis] -= step
+            positive_value, _ = uplink_reference_objective_and_gradient(
+                positive,
+                users,
+                loads,
+                **kwargs,
+            )
+            negative_value, _ = uplink_reference_objective_and_gradient(
+                negative,
+                users,
+                loads,
+                **kwargs,
+            )
+            numerical[axis] = (
+                positive_value - negative_value
+            ) / (2.0 * step)
+
+        np.testing.assert_allclose(
+            analytic,
+            numerical,
+            rtol=1e-5,
+            atol=1e-8,
+        )
+
+    def test_uplink_reference_is_center_for_symmetric_users(self):
+        users = np.array(
+            [[-50.0, 0.0], [50.0, 0.0], [0.0, -50.0], [0.0, 50.0]],
+            dtype=np.float64,
+        )
+        target, diagnostic = solve_uplink_reference_position(
+            users,
+            np.ones(4, dtype=np.float64),
+            initial_position=np.array([12.0, -9.0]),
+            altitude_m=50.0,
+            bandwidth_per_user_hz=5e5,
+            p_gt_power=0.1,
+            beta_0=1e-6,
+            noise_power=1e-13,
+            map_min_m=-100.0,
+            map_max_m=100.0,
+        )
+
+        np.testing.assert_allclose(target, [0.0, 0.0], atol=1e-3)
+        self.assertLessEqual(
+            diagnostic["final_objective"],
+            diagnostic["initial_objective"],
+        )
+
+    def test_uplink_reference_moves_toward_heavier_user(self):
+        target, _ = solve_uplink_reference_position(
+            user_coords=np.array([[0.0, 0.0], [100.0, 0.0]]),
+            weighted_load_mbps=np.array([1.0, 10.0]),
+            initial_position=np.array([50.0, 0.0]),
+            altitude_m=50.0,
+            bandwidth_per_user_hz=5e5,
+            p_gt_power=0.1,
+            beta_0=1e-6,
+            noise_power=1e-13,
+            map_min_m=0.0,
+            map_max_m=100.0,
+        )
+
+        self.assertGreater(target[0], 50.0)
+        self.assertAlmostEqual(target[1], 0.0, places=5)
 
     def test_uav1_override_preserves_teammate_actions(self):
         class BaseEnv:
