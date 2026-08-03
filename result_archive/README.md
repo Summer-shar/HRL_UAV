@@ -1,12 +1,12 @@
 # HRL-UAV 全版本实验结果归档
 
-本目录整合了 `results/` 中现存的 **43 个顶层实验版本**。导出基于提交 `709f12059106`。
+本目录整合了 `results/` 中现存的 **44 个顶层实验版本**。导出基于提交 `1f1fd773ce3d`。
 
 ## 归档范围
 
 - 已归档：全部 PNG/PDF/SVG 图、CSV/JSON 指标和文本日志。
 - 未归档：`.pt` 模型检查点、`.npz/.npy` 原始数组及其他大二进制文件。
-- 已归档体积约 **102.30 MB**；本地未归档大文件约 **8.66 GB**。
+- 已归档体积约 **103.96 MB**；本地未归档大文件约 **8.66 GB**。
 - `archive_manifest.csv` 记录每个归档文件的来源、大小和 SHA-256；`versions.csv` 是版本总表。
 
 > 重要：这些版本是研发过程记录，不是同一实验协议下的正式横向对比。场景、奖励、动作编码、训练轮数和通信模型在版本间发生过变化。
@@ -45,6 +45,7 @@
 | [joint_hrl_v1](joint_hrl_v1/) | 早期动态用户 HRL | 历史轨迹参考 | 19 | 24 | 6.56 | 早期曾出现 UAV-3 靠近 UAV-1 的清晰轨迹；协议较旧且缺少当前口径下的配对验证，不作为最终结论。 |
 | [joint_hrl_v2](joint_hrl_v2/) | 早期动态用户 HRL | 历史实验 | 17 | 16 | 5.69 | 早期联合 TD3-SAC 训练与宏观周期设置迭代。 |
 | [joint_hrl_v3](joint_hrl_v3/) | 早期动态用户 HRL | 历史实验 | 13 | 6 | 4.80 | 早期联合 TD3-SAC 训练与宏观周期设置迭代。 |
+| [load_switch_gate](load_switch_gate/) | 负载切换位置门禁 | 冻结门禁结果 | 6 | 74 | 1.66 | 20 个共同随机种子的 P0/P1/P2 纯重放；时延门槛通过，但 840 W 功率门槛未通过。 |
 | [oracle_smoke](oracle_smoke/) | 工具冒烟测试 | Smoke | 0 | 1 | 0.04 | 位置搜索或参考点审计工具的快速正确性测试。 |
 | [position_reference_audit_smoke](position_reference_audit_smoke/) | 工具冒烟测试 | Smoke | 0 | 2 | 0.05 | 位置搜索或参考点审计工具的快速正确性测试。 |
 | [tcom_communication_convergence_v1](tcom_communication_convergence_v1/) | 通信模型收敛验证 | 历史验证 | 10 | 18 | 3.32 | 切换到参考论文风格 U2U 动态带宽后的通信模型与收敛测试。 |

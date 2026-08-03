@@ -95,6 +95,12 @@ def version_metadata(version: str) -> tuple[str, str, str]:
         return ("跨版本诊断", "诊断数据", "宏观奖励、反事实分叉、动作覆盖和动态质心位置扫描。")
     if version == "dynamic_load_position_audit":
         return ("位置价值审计", "诊断数据", "动态负载条件下的位置敏感度与参考策略审计。")
+    if version == "load_switch_gate":
+        return (
+            "负载切换位置门禁",
+            "冻结门禁结果",
+            "20 个共同随机种子的 P0/P1/P2 纯重放；时延门槛通过，但 840 W 功率门槛未通过。",
+        )
     if version in {"oracle_smoke", "position_reference_audit_smoke"}:
         return ("工具冒烟测试", "Smoke", "位置搜索或参考点审计工具的快速正确性测试。")
     return ("其他实验", "历史/辅助", "保留的历史实验结果；请结合目录内指标与对应配置解读。")
@@ -129,6 +135,8 @@ def markdown_link(path: Path, label: str | None = None) -> str:
 
 def select_preview(image_paths: list[Path]) -> Path | None:
     priorities = [
+        "gate_summary.png",
+        "load_switch_trajectories.png",
         "trajectory_final.png",
         "trajectory_best.png",
         "training_convergence.png",
