@@ -17,6 +17,7 @@ ARCHIVE_DIR = ROOT / "result_archive"
 CONFIGS_DIR = ROOT / "configs"
 INCLUDED_EXTENSIONS = {".png", ".pdf", ".svg", ".csv", ".json", ".log", ".txt", ".md"}
 EXCLUDED_EXTENSIONS = {".pt", ".npz", ".npy", ".pth", ".pkl"}
+EXCLUDED_RESULT_DIRS = {"load_switch_gate_power_audit_smoke"}
 CURRENT_VERSION = "tcom_dynamic_u2u_sparse_v23_target_noise"
 SOFT_POWER_NOTES = {
     "tcom_fixed_region_soft_power_v2": "软功率固定区域基线。",
@@ -101,6 +102,12 @@ def version_metadata(version: str) -> tuple[str, str, str]:
             "冻结门禁结果",
             "20 个共同随机种子的 P0/P1/P2 纯重放；时延门槛通过，但 840 W 功率门槛未通过。",
         )
+    if version == "load_switch_gate_power_audit":
+        return (
+            "负载切换功率归因",
+            "只读重放审计",
+            "20 个共同随机种子的逐机推进、CPU、U2G/U2U 功率与速度分解；原门禁策略和物理模型均未修改。",
+        )
     if version in {"oracle_smoke", "position_reference_audit_smoke"}:
         return ("工具冒烟测试", "Smoke", "位置搜索或参考点审计工具的快速正确性测试。")
     return ("其他实验", "历史/辅助", "保留的历史实验结果；请结合目录内指标与对应配置解读。")
@@ -135,6 +142,7 @@ def markdown_link(path: Path, label: str | None = None) -> str:
 
 def select_preview(image_paths: list[Path]) -> Path | None:
     priorities = [
+        "power_decomposition.png",
         "gate_summary.png",
         "load_switch_trajectories.png",
         "trajectory_final.png",
@@ -332,7 +340,11 @@ def main() -> None:
 
     summaries: list[VersionSummary] = []
     manifest: list[dict[str, object]] = []
-    for source_dir in sorted(path for path in RESULTS_DIR.iterdir() if path.is_dir()):
+    for source_dir in sorted(
+        path
+        for path in RESULTS_DIR.iterdir()
+        if path.is_dir() and path.name not in EXCLUDED_RESULT_DIRS
+    ):
         summary, rows = archive_version(source_dir)
         summaries.append(summary)
         manifest.extend(rows)

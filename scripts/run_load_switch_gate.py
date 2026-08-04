@@ -358,6 +358,24 @@ def run_gate_episode(
     external_hasher = hashlib.sha256()
     total_service_energy_j = 0.0
     total_macro_energy_j = 0.0
+    propulsion_energy_per_uav_j = np.zeros(base_env.N, dtype=np.float64)
+    steady_propulsion_energy_per_uav_j = np.zeros(
+        base_env.N,
+        dtype=np.float64,
+    )
+    transient_propulsion_energy_per_uav_j = np.zeros(
+        base_env.N,
+        dtype=np.float64,
+    )
+    hover_energy_per_uav_j = np.zeros(base_env.N, dtype=np.float64)
+    cpu_energy_per_uav_j = np.zeros(base_env.N, dtype=np.float64)
+    uplink_energy_per_uav_j = np.zeros(base_env.N, dtype=np.float64)
+    u2u_energy_per_uav_j = np.zeros(base_env.N, dtype=np.float64)
+    flight_distance_per_uav_m = np.zeros(base_env.N, dtype=np.float64)
+    deployment_speed_sum_per_uav_mps = np.zeros(
+        base_env.N,
+        dtype=np.float64,
+    )
     total_u2g_active_time_s = 0.0
     total_u2u_active_time_s = 0.0
     total_flow = np.zeros((base_env.N, base_env.N), dtype=np.float64)
@@ -400,9 +418,57 @@ def run_gate_episode(
 
         _, _, mac_info = env.macro_step(macro_action)
         total_macro_energy_j += float(mac_info.get("E_macro_total", 0.0))
+        macro_propulsion_energy_per_uav_j = np.asarray(
+            mac_info.get("E_macro_per_uav", np.zeros(base_env.N)),
+            dtype=np.float64,
+        )
+        macro_steady_propulsion_energy_per_uav_j = np.asarray(
+            mac_info.get("E_steady_flying_per_uav", np.zeros(base_env.N)),
+            dtype=np.float64,
+        )
+        macro_transient_propulsion_energy_per_uav_j = np.asarray(
+            mac_info.get(
+                "E_deployment_transient_per_uav",
+                np.zeros(base_env.N),
+            ),
+            dtype=np.float64,
+        )
+        macro_hover_energy_per_uav_j = np.asarray(
+            mac_info.get("E_hover_per_uav", np.zeros(base_env.N)),
+            dtype=np.float64,
+        )
+        projected_uav_coords = np.asarray(
+            mac_info.get("projected_uav_coords", uav_before),
+            dtype=np.float64,
+        )
+        macro_flight_distance_per_uav_m = np.linalg.norm(
+            projected_uav_coords - uav_before,
+            axis=1,
+        )
+        macro_deployment_speed_per_uav_mps = (
+            macro_flight_distance_per_uav_m
+            / max(float(base_env.deployment_dt), 1e-12)
+        )
+
+        propulsion_energy_per_uav_j += macro_propulsion_energy_per_uav_j
+        steady_propulsion_energy_per_uav_j += (
+            macro_steady_propulsion_energy_per_uav_j
+        )
+        transient_propulsion_energy_per_uav_j += (
+            macro_transient_propulsion_energy_per_uav_j
+        )
+        hover_energy_per_uav_j += macro_hover_energy_per_uav_j
+        flight_distance_per_uav_m += macro_flight_distance_per_uav_m
+        deployment_speed_sum_per_uav_mps += (
+            macro_deployment_speed_per_uav_mps
+        )
+
         macro_flow = np.zeros((base_env.N, base_env.N), dtype=np.float64)
         macro_u2g_time_s = 0.0
         macro_u2u_time_s = 0.0
+        macro_cpu_energy_per_uav_j = np.zeros(base_env.N, dtype=np.float64)
+        macro_uplink_energy_per_uav_j = np.zeros(base_env.N, dtype=np.float64)
+        macro_u2u_energy_per_uav_j = np.zeros(base_env.N, dtype=np.float64)
 
         for _ in range(base_env.resource_frames_per_macro):
             service_paused = bool(
@@ -422,6 +488,24 @@ def run_gate_episode(
             done = bool(frame["done"])
             for raw_state, info in zip(frame["raw_states"], frame["infos"]):
                 total_service_energy_j += float(info.get("total_energy", 0.0))
+                cpu_step_energy = np.asarray(
+                    info.get("energy_comp_per_uav", np.zeros(base_env.N)),
+                    dtype=np.float64,
+                )
+                uplink_step_energy = np.asarray(
+                    info.get("energy_uplink_per_uav", np.zeros(base_env.N)),
+                    dtype=np.float64,
+                )
+                u2u_step_energy = np.asarray(
+                    info.get("energy_trans_per_uav", np.zeros(base_env.N)),
+                    dtype=np.float64,
+                )
+                cpu_energy_per_uav_j += cpu_step_energy
+                uplink_energy_per_uav_j += uplink_step_energy
+                u2u_energy_per_uav_j += u2u_step_energy
+                macro_cpu_energy_per_uav_j += cpu_step_energy
+                macro_uplink_energy_per_uav_j += uplink_step_energy
+                macro_u2u_energy_per_uav_j += u2u_step_energy
                 tx_flow = np.asarray(
                     info.get(
                         "tx_service_matrix_mbits",
@@ -491,6 +575,10 @@ def run_gate_episode(
             base_env.weighted_centroids,
             dtype=np.float64,
         ).copy()
+        macro_duration_s = max(float(base_env.macro_dt), 1e-12)
+        macro_communication_energy_per_uav_j = (
+            macro_uplink_energy_per_uav_j + macro_u2u_energy_per_uav_j
+        )
         macro_records.append(
             {
                 "seed": int(seed),
@@ -513,6 +601,33 @@ def run_gate_episode(
                 "tx_flow_mbits": macro_flow.copy(),
                 "u2g_active_time_s": macro_u2g_time_s,
                 "u2u_active_time_s": macro_u2u_time_s,
+                "deployment_speed_per_uav_mps": (
+                    macro_deployment_speed_per_uav_mps.copy()
+                ),
+                "propulsion_power_per_uav_w": (
+                    macro_propulsion_energy_per_uav_j / macro_duration_s
+                ),
+                "steady_propulsion_power_per_uav_w": (
+                    macro_steady_propulsion_energy_per_uav_j
+                    / macro_duration_s
+                ),
+                "transient_propulsion_power_per_uav_w": (
+                    macro_transient_propulsion_energy_per_uav_j
+                    / macro_duration_s
+                ),
+                "cpu_power_per_uav_w": (
+                    macro_cpu_energy_per_uav_j / macro_duration_s
+                ),
+                "communication_power_per_uav_w": (
+                    macro_communication_energy_per_uav_j
+                    / macro_duration_s
+                ),
+                "uplink_power_per_uav_w": (
+                    macro_uplink_energy_per_uav_j / macro_duration_s
+                ),
+                "u2u_power_per_uav_w": (
+                    macro_u2u_energy_per_uav_j / macro_duration_s
+                ),
                 "macro_reward": float(macro_reward),
                 "average_micro_reward": float(
                     macro_reward_info.get("micro_reward_mean", 0.0)
@@ -535,6 +650,16 @@ def run_gate_episode(
     task_stats = base_env.get_task_delay_stats()
     episode_duration_s = max(float(macro_steps) * float(base_env.macro_dt), 1e-12)
     total_energy_j = total_service_energy_j + total_macro_energy_j
+    communication_energy_per_uav_j = (
+        uplink_energy_per_uav_j + u2u_energy_per_uav_j
+    )
+    component_energy_per_uav_j = (
+        propulsion_energy_per_uav_j
+        + cpu_energy_per_uav_j
+        + communication_energy_per_uav_j
+    )
+    component_energy_j = float(np.sum(component_energy_per_uav_j))
+    closure_residual_j = float(total_energy_j - component_energy_j)
     cross_flow = float(total_flow.sum() - np.trace(total_flow))
     flow_sum = float(total_flow.sum())
     transition_delay_ms = (
@@ -554,6 +679,36 @@ def run_gate_episode(
         "transition_window_weighted_completed": float(transition_denominator),
         "average_power_w": float(total_energy_j / episode_duration_s),
         "total_energy_j": float(total_energy_j),
+        "propulsion_power_w": float(
+            np.sum(propulsion_energy_per_uav_j) / episode_duration_s
+        ),
+        "steady_propulsion_power_w": float(
+            np.sum(steady_propulsion_energy_per_uav_j) / episode_duration_s
+        ),
+        "transient_propulsion_power_w": float(
+            np.sum(transient_propulsion_energy_per_uav_j) / episode_duration_s
+        ),
+        "hover_power_w": float(
+            np.sum(hover_energy_per_uav_j) / episode_duration_s
+        ),
+        "cpu_power_w": float(
+            np.sum(cpu_energy_per_uav_j) / episode_duration_s
+        ),
+        "communication_power_w": float(
+            np.sum(communication_energy_per_uav_j) / episode_duration_s
+        ),
+        "uplink_power_w": float(
+            np.sum(uplink_energy_per_uav_j) / episode_duration_s
+        ),
+        "u2u_power_w": float(
+            np.sum(u2u_energy_per_uav_j) / episode_duration_s
+        ),
+        "component_power_sum_w": float(
+            component_energy_j / episode_duration_s
+        ),
+        "power_closure_residual_w": float(
+            closure_residual_j / episode_duration_s
+        ),
         "u2g_active_time_s": float(total_u2g_active_time_s),
         "u2u_active_time_s": float(total_u2u_active_time_s),
         "coop_ratio": float(cross_flow / max(flow_sum, 1e-12)),
@@ -564,6 +719,33 @@ def run_gate_episode(
         "micro_decision_count": int(micro_decision_count),
         "elapsed_s": float(time.perf_counter() - started_at),
     }
+    for uav_index in range(base_env.N):
+        suffix = f"uav{uav_index + 1}"
+        result[f"propulsion_power_{suffix}_w"] = float(
+            propulsion_energy_per_uav_j[uav_index] / episode_duration_s
+        )
+        result[f"cpu_power_{suffix}_w"] = float(
+            cpu_energy_per_uav_j[uav_index] / episode_duration_s
+        )
+        result[f"communication_power_{suffix}_w"] = float(
+            communication_energy_per_uav_j[uav_index] / episode_duration_s
+        )
+        result[f"uplink_power_{suffix}_w"] = float(
+            uplink_energy_per_uav_j[uav_index] / episode_duration_s
+        )
+        result[f"u2u_power_{suffix}_w"] = float(
+            u2u_energy_per_uav_j[uav_index] / episode_duration_s
+        )
+        result[f"deployment_speed_mean_{suffix}_mps"] = float(
+            deployment_speed_sum_per_uav_mps[uav_index]
+            / max(float(macro_steps), 1.0)
+        )
+        result[f"episode_path_speed_{suffix}_mps"] = float(
+            flight_distance_per_uav_m[uav_index] / episode_duration_s
+        )
+        result[f"flight_distance_{suffix}_m"] = float(
+            flight_distance_per_uav_m[uav_index]
+        )
     trace = {
         "macro_records": macro_records,
         "uav_trajectory_m": np.stack(uav_trajectory, axis=0),
@@ -587,6 +769,16 @@ RAW_FIELDNAMES = (
     "transition_window_weighted_completed",
     "average_power_w",
     "total_energy_j",
+    "propulsion_power_w",
+    "steady_propulsion_power_w",
+    "transient_propulsion_power_w",
+    "hover_power_w",
+    "cpu_power_w",
+    "communication_power_w",
+    "uplink_power_w",
+    "u2u_power_w",
+    "component_power_sum_w",
+    "power_closure_residual_w",
     "u2g_active_time_s",
     "u2u_active_time_s",
     "coop_ratio",
@@ -596,6 +788,19 @@ RAW_FIELDNAMES = (
     "external_trace_hash",
     "micro_decision_count",
     "elapsed_s",
+) + tuple(
+    field
+    for uav_index in range(1, 4)
+    for field in (
+        f"propulsion_power_uav{uav_index}_w",
+        f"cpu_power_uav{uav_index}_w",
+        f"communication_power_uav{uav_index}_w",
+        f"uplink_power_uav{uav_index}_w",
+        f"u2u_power_uav{uav_index}_w",
+        f"deployment_speed_mean_uav{uav_index}_mps",
+        f"episode_path_speed_uav{uav_index}_mps",
+        f"flight_distance_uav{uav_index}_m",
+    )
 )
 
 
@@ -696,6 +901,30 @@ def save_macro_trace(path, records, num_uavs):
         for index, value in enumerate(record["expected_loads_mbps"]):
             row[f"load_uav{index + 1}_mbps"] = float(value)
         for uav in range(num_uavs):
+            row[f"deployment_speed_uav{uav + 1}_mps"] = float(
+                record["deployment_speed_per_uav_mps"][uav]
+            )
+            row[f"propulsion_power_uav{uav + 1}_w"] = float(
+                record["propulsion_power_per_uav_w"][uav]
+            )
+            row[f"steady_propulsion_power_uav{uav + 1}_w"] = float(
+                record["steady_propulsion_power_per_uav_w"][uav]
+            )
+            row[f"transient_propulsion_power_uav{uav + 1}_w"] = float(
+                record["transient_propulsion_power_per_uav_w"][uav]
+            )
+            row[f"cpu_power_uav{uav + 1}_w"] = float(
+                record["cpu_power_per_uav_w"][uav]
+            )
+            row[f"communication_power_uav{uav + 1}_w"] = float(
+                record["communication_power_per_uav_w"][uav]
+            )
+            row[f"uplink_power_uav{uav + 1}_w"] = float(
+                record["uplink_power_per_uav_w"][uav]
+            )
+            row[f"u2u_power_uav{uav + 1}_w"] = float(
+                record["u2u_power_per_uav_w"][uav]
+            )
             for axis, axis_name in enumerate(("x", "y")):
                 row[f"uav{uav + 1}_{axis_name}_m"] = float(
                     record["uav_after_m"][uav, axis]
