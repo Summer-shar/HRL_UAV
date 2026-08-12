@@ -1,0 +1,112 @@
+{
+  "status": "READ_ONLY_REFERENCE",
+  "checkpoint": "C:\\Users\\PC\\Desktop\\HRL_UAV\\results\\tcom_dynamic_u2u_sparse_v25_dual_neutral_coverage\\pilot\\seed1\\joint_td3_sac\\checkpoints\\final.pt",
+  "frozen_system_lambda": 0.0053341209522687096,
+  "eval_seeds": [
+    1000,
+    1001,
+    1002,
+    1003,
+    1004,
+    1005,
+    1006,
+    1007,
+    1008,
+    1009,
+    1010,
+    1011,
+    1012,
+    1013,
+    1014,
+    1015,
+    1016,
+    1017,
+    1018,
+    1019
+  ],
+  "external_trajectory_match_all": true,
+  "macro_reference": "zero residual to current dynamic business centroid",
+  "metrics": {
+    "J": {
+      "n": 20,
+      "learned_mean": 0.5703236272645035,
+      "centroid_mean": 0.5510478416863773,
+      "learned_minus_centroid_mean": 0.019275785578126294,
+      "learned_minus_centroid_ci95_low": 0.016186999053550158,
+      "learned_minus_centroid_ci95_high": 0.02236457210270243,
+      "paired_p_value": 6.110078501029387e-11
+    },
+    "task_delay_weighted_ms": {
+      "n": 20,
+      "learned_mean": 774.6832442239418,
+      "centroid_mean": 751.982086934612,
+      "learned_minus_centroid_mean": 22.701157289329835,
+      "learned_minus_centroid_ci95_low": 19.07640156138382,
+      "learned_minus_centroid_ci95_high": 26.32591301727585,
+      "paired_p_value": 5.74757395568595e-11
+    },
+    "average_power_w": {
+      "n": 20,
+      "learned_mean": 844.4687369791666,
+      "centroid_mean": 833.353171875,
+      "learned_minus_centroid_mean": 11.115565104166672,
+      "learned_minus_centroid_ci95_low": 10.384358417813027,
+      "learned_minus_centroid_ci95_high": 11.846771790520316,
+      "paired_p_value": 6.0436362714837974e-18
+    },
+    "propulsion_energy_j": {
+      "n": 20,
+      "learned_mean": 181621.21796875,
+      "centroid_mean": 178152.6921875,
+      "learned_minus_centroid_mean": 3468.52578125,
+      "learned_minus_centroid_ci95_low": 3245.4625758197317,
+      "learned_minus_centroid_ci95_high": 3691.588986680268,
+      "paired_p_value": 3.961101735843367e-18
+    },
+    "compute_energy_j": {
+      "n": 20,
+      "learned_mean": 71010.917578125,
+      "centroid_mean": 71171.2359375,
+      "learned_minus_centroid_mean": -160.318359375,
+      "learned_minus_centroid_ci95_low": -206.05201215929628,
+      "learned_minus_centroid_ci95_high": -114.58470659070372,
+      "paired_p_value": 5.909211796607058e-07
+    },
+    "mean_centroid_distance_m": {
+      "n": 20,
+      "learned_mean": 70.58101717994371,
+      "centroid_mean": 4.561702466884491,
+      "learned_minus_centroid_mean": 66.01931471305923,
+      "learned_minus_centroid_ci95_low": 65.6497166047949,
+      "learned_minus_centroid_ci95_high": 66.38891282132356,
+      "paired_p_value": 3.3333603552567585e-38
+    },
+    "p95_centroid_distance_m": {
+      "n": 20,
+      "learned_mean": 104.44618499094732,
+      "centroid_mean": 9.963015618370573,
+      "learned_minus_centroid_mean": 94.48316937257673,
+      "learned_minus_centroid_ci95_low": 94.07693302274511,
+      "learned_minus_centroid_ci95_high": 94.88940572240834,
+      "paired_p_value": 2.2133379593078814e-40
+    },
+    "path_total_m": {
+      "n": 20,
+      "learned_mean": 732.9904836832477,
+      "centroid_mean": 607.7639274917822,
+      "learned_minus_centroid_mean": 125.22655619146553,
+      "learned_minus_centroid_ci95_low": 117.44887057578782,
+      "learned_minus_centroid_ci95_high": 133.00424180714325,
+      "paired_p_value": 2.0655078777561372e-18
+    },
+    "net_total_m": {
+      "n": 20,
+      "learned_mean": 309.8519370970283,
+      "centroid_mean": 411.2340203889864,
+      "learned_minus_centroid_mean": -101.38208329195797,
+      "learned_minus_centroid_ci95_low": -104.52844396857579,
+      "learned_minus_centroid_ci95_high": -98.23572261534015,
+      "paired_p_value": 4.35530944844431e-24
+    }
+  }
+}

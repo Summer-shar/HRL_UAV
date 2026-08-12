@@ -58,6 +58,15 @@ def parse_args():
     )
     parser.add_argument("--device", default="cuda")
     parser.add_argument("--output-dir", default="")
+    parser.add_argument(
+        "--support-replay",
+        default="",
+        help=(
+            "Optional macro_replay.npz used only to quantify state-action "
+            "support around each counterfactual query."
+        ),
+    )
+    parser.add_argument("--support-neighbors", type=int, default=64)
     return parser.parse_args()
 
 
@@ -175,6 +184,157 @@ def critic_values(critic, state, actor_action_value, device):
     return values
 
 
+def _state_distance_m(states, num_agents):
+    states = np.asarray(states, dtype=np.float32)
+    if states.ndim == 1:
+        states = states.reshape(1, -1)
+    if states.shape[1] % int(num_agents) != 0:
+        raise ValueError("Global state cannot be split evenly across UAVs.")
+    local_dim = states.shape[1] // int(num_agents)
+    local_states = states.reshape(-1, int(num_agents), local_dim)
+    return 1000.0 * np.mean(
+        np.linalg.norm(local_states[:, :, :2], axis=2),
+        axis=1,
+    )
+
+
+def _action_norm(actions, num_agents):
+    actions = np.asarray(actions, dtype=np.float32)
+    if actions.ndim == 1:
+        actions = actions.reshape(1, -1)
+    return np.mean(
+        np.linalg.norm(actions.reshape(-1, int(num_agents), 2), axis=2),
+        axis=1,
+    )
+
+
+def _state_region_index(distance_m):
+    if float(distance_m) <= 20.0 + 1e-7:
+        return 0
+    if float(distance_m) <= 50.0 + 1e-7:
+        return 1
+    return 2
+
+
+def _action_region_index(norm):
+    if float(norm) <= 0.10 + 1e-7:
+        return 0
+    if float(norm) <= 0.40 + 1e-7:
+        return 1
+    return 2
+
+
+def load_support_replay(path, num_agents, neighbors=64):
+    with np.load(path) as payload:
+        states = np.asarray(payload["state"], dtype=np.float32).copy()
+        actions = np.asarray(payload["action"], dtype=np.float32).copy()
+    if states.shape[0] != actions.shape[0] or states.shape[0] == 0:
+        raise ValueError("Support replay must contain aligned non-empty arrays.")
+    state_scale = np.maximum(np.std(states, axis=0), 1e-3)
+    action_scale = np.maximum(np.std(actions, axis=0), 5e-2)
+    state_mean = np.mean(states, axis=0)
+    action_mean = np.mean(actions, axis=0)
+    return {
+        "states": states,
+        "actions": actions,
+        "state_mean": state_mean,
+        "state_scale": state_scale,
+        "action_mean": action_mean,
+        "action_scale": action_scale,
+        "states_z": (states - state_mean) / state_scale,
+        "actions_z": (actions - action_mean) / action_scale,
+        "state_regions": np.asarray(
+            [
+                _state_region_index(value)
+                for value in _state_distance_m(states, num_agents)
+            ],
+            dtype=np.int8,
+        ),
+        "action_regions": np.asarray(
+            [
+                _action_region_index(value)
+                for value in _action_norm(actions, num_agents)
+            ],
+            dtype=np.int8,
+        ),
+        "num_agents": int(num_agents),
+        "neighbors": max(1, min(int(neighbors), states.shape[0])),
+    }
+
+
+def state_action_support_metrics(support, state, actor_action_value):
+    state = np.asarray(state, dtype=np.float32).reshape(-1)
+    actor_action_value = np.asarray(
+        actor_action_value,
+        dtype=np.float32,
+    ).reshape(-1)
+    zero_action = np.zeros_like(actor_action_value)
+    state_z = (state - support["state_mean"]) / support["state_scale"]
+    state_squared = np.sum(
+        np.square(support["states_z"] - state_z),
+        axis=1,
+    )
+    neighbor_count = int(support["neighbors"])
+    nearest_state_indices = np.argpartition(
+        state_squared,
+        neighbor_count - 1,
+    )[:neighbor_count]
+    state_distance = np.sqrt(
+        state_squared / float(state.size)
+    )
+    query_state_region = _state_region_index(
+        _state_distance_m(state, support["num_agents"])[0]
+    )
+    result = {
+        "state_support_nn_distance": float(np.min(state_distance)),
+        "state_distance_m": float(
+            _state_distance_m(state, support["num_agents"])[0]
+        ),
+        "state_region_index": int(query_state_region),
+    }
+    for label, action in (("actor", actor_action_value), ("zero", zero_action)):
+        action_z = (
+            action - support["action_mean"]
+        ) / support["action_scale"]
+        action_squared = np.sum(
+            np.square(support["actions_z"] - action_z),
+            axis=1,
+        )
+        joint_distance = np.sqrt(
+            (state_squared + action_squared)
+            / float(state.size + action.size)
+        )
+        conditional_action_distance = np.sqrt(
+            action_squared[nearest_state_indices] / float(action.size)
+        )
+        action_norm_value = float(
+            _action_norm(action, support["num_agents"])[0]
+        )
+        query_action_region = _action_region_index(action_norm_value)
+        coarse_mask = (
+            (support["state_regions"] == query_state_region)
+            & (support["action_regions"] == query_action_region)
+        )
+        result.update(
+            {
+                f"{label}_support_joint_nn_distance": float(
+                    np.min(joint_distance)
+                ),
+                f"{label}_support_conditional_action_nn_distance": float(
+                    np.min(conditional_action_distance)
+                ),
+                f"{label}_support_coarse_cell_count": int(
+                    np.sum(coarse_mask)
+                ),
+                f"{label}_query_action_norm": action_norm_value,
+                f"{label}_query_action_region_index": int(
+                    query_action_region
+                ),
+            }
+        )
+    return result
+
+
 def _hash_array(hasher, name, values, dtype):
     array = np.ascontiguousarray(np.asarray(values, dtype=dtype))
     hasher.update(name.encode("utf-8"))
@@ -286,6 +446,7 @@ def collect_reference_snapshots(
     branch_points,
     device,
     snapshot_policy,
+    support_replay=None,
 ):
     snapshots = {}
     critic_records = {}
@@ -296,6 +457,15 @@ def collect_reference_snapshots(
         candidate_actor_action = actor_action(actor, env)
         if macro_idx in branch_points:
             snapshots[macro_idx] = copy.deepcopy(env)
+            support_values = (
+                state_action_support_metrics(
+                    support_replay,
+                    state,
+                    candidate_actor_action,
+                )
+                if support_replay is not None
+                else {}
+            )
             critic_records[macro_idx] = {
                 **critic_values(
                     critic,
@@ -309,6 +479,7 @@ def collect_reference_snapshots(
                 "actor_action_norm_max": float(
                     np.max(np.linalg.norm(candidate_actor_action, axis=1))
                 ),
+                **support_values,
             }
         if snapshot_policy == "actor":
             reference_action = candidate_actor_action
@@ -436,6 +607,13 @@ def main():
         eval_args,
         device,
     )
+    support_replay = None
+    if cli_args.support_replay:
+        support_replay = load_support_replay(
+            os.path.abspath(cli_args.support_replay),
+            int(eval_args.num_agents),
+            neighbors=int(cli_args.support_neighbors),
+        )
 
     raw_rows = []
     episode_rows = []
@@ -458,6 +636,7 @@ def main():
                 branch_points,
                 device,
                 snapshot_policy,
+                support_replay=support_replay,
             )
             current_episode_rows = []
             for branch_macro in branch_points:
@@ -560,6 +739,11 @@ def main():
         "branch_points": list(branch_points),
         "statistical_unit": "episode",
         "exogenous_trace_match": True,
+        "support_replay": (
+            os.path.abspath(cli_args.support_replay)
+            if cli_args.support_replay
+            else None
+        ),
         "by_snapshot_policy": policy_summaries,
     }
     os.makedirs(output_dir, exist_ok=True)

@@ -1,0 +1,2 @@
+﻿checkpoint_episode,seed,fork_index,q_actor,q_zero,q_actor_minus_zero,return_actor,return_zero_once,return_sustained,return_zero_once_minus_actor,return_sustained_minus_actor,delay_sustained_minus_actor_ms,q_one_step_sign_agreement
+100,41999,5,-0.356100857257843,-0.36645573377609253,0.010354876518249512,-2.575829646563878,-2.5685935033620706,-2.129004809703869,0.007236143201807543,0.4468248368600092,-233.65023806128283,0

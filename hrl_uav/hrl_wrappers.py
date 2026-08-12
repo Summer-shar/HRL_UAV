@@ -56,6 +56,10 @@ class HRL_Wrapper(gym.Env):
         micro_stick_breaking_scale=4.0,
         micro_reward_scale=10.0,
         micro_state_mode="pressure",
+        u2u_state_representation="nominal_rate",
+        u2u_goal_representation="match_observation",
+        u2u_contention_aware_pressure=None,
+        u2u_prev_active_state=False,
         cpu_alloc_mode="priority_kkt",
         kkt_v=1.0,
         cpu_energy_prices=None,
@@ -85,6 +89,7 @@ class HRL_Wrapper(gym.Env):
         uav_power_budgets_w=None,
         energy_lagrange_multipliers=None,
         energy_dual_state_norm=10.0,
+        system_dual_state=False,
         users_static=False,
         gm_mean_speed_mps=0.5,
         gm_mean_heading_rad=np.pi / 4.0,
@@ -94,6 +99,17 @@ class HRL_Wrapper(gym.Env):
         gm_heading_noise_std=0.1,
         user_zone_radius=80.0,
         min_uav_separation_m=5.0,
+        gm_heading_mode="shared_mean",
+        rpgm_group_speed_mps=0.35,
+        rpgm_group_speed_memory=0.9,
+        rpgm_group_speed_noise_std=0.04,
+        rpgm_group_turn_std_rad_sqrt_s=0.12,
+        rpgm_local_velocity_memory=0.9,
+        rpgm_local_velocity_std_mps=0.18,
+        rpgm_local_restore_rate_s2=0.0002,
+        rpgm_local_speed_cap_mps=0.45,
+        delay_objective_weight=0.7,
+        energy_objective_weight=0.3,
     ):
         super(HRL_Wrapper, self).__init__()
 
@@ -131,6 +147,17 @@ class HRL_Wrapper(gym.Env):
             gm_heading_noise_std=gm_heading_noise_std,
             user_zone_radius=user_zone_radius,
             min_uav_separation_m=min_uav_separation_m,
+            gm_heading_mode=gm_heading_mode,
+            rpgm_group_speed_mps=rpgm_group_speed_mps,
+            rpgm_group_speed_memory=rpgm_group_speed_memory,
+            rpgm_group_speed_noise_std=rpgm_group_speed_noise_std,
+            rpgm_group_turn_std_rad_sqrt_s=(
+                rpgm_group_turn_std_rad_sqrt_s
+            ),
+            rpgm_local_velocity_memory=rpgm_local_velocity_memory,
+            rpgm_local_velocity_std_mps=rpgm_local_velocity_std_mps,
+            rpgm_local_restore_rate_s2=rpgm_local_restore_rate_s2,
+            rpgm_local_speed_cap_mps=rpgm_local_speed_cap_mps,
         )
 
         self.N = num_uavs
@@ -176,6 +203,7 @@ class HRL_Wrapper(gym.Env):
             raise ValueError(
                 "power_constraint_scope must be 'system' or 'per_uav'."
             )
+        self.system_dual_state = bool(system_dual_state)
         self.energy_lagrange_multiplier = max(
             float(energy_lagrange_multiplier),
             0.0,
@@ -233,6 +261,48 @@ class HRL_Wrapper(gym.Env):
             raise ValueError(
                 "micro_state_mode must be either 'pressure' or 'legacy'."
             )
+        self.u2u_state_representation = str(
+            u2u_state_representation
+        ).lower()
+        if self.u2u_state_representation not in (
+            "nominal_rate",
+            "spectral_efficiency",
+        ):
+            raise ValueError(
+                "u2u_state_representation must be 'nominal_rate' or "
+                "'spectral_efficiency'."
+            )
+        self.u2u_goal_representation = str(
+            u2u_goal_representation
+        ).strip().lower()
+        if self.u2u_goal_representation not in (
+            "match_observation",
+            "nominal_rate",
+        ):
+            raise ValueError(
+                "u2u_goal_representation must be 'match_observation' or "
+                "'nominal_rate'."
+            )
+        if u2u_contention_aware_pressure is None:
+            self.u2u_contention_aware_pressure = (
+                self.u2u_state_representation == "spectral_efficiency"
+            )
+        else:
+            self.u2u_contention_aware_pressure = bool(
+                u2u_contention_aware_pressure
+            )
+        self.u2u_prev_active_state = bool(u2u_prev_active_state)
+        self.u2u_total_directed_links = self.N * max(self.N - 1, 0)
+        anchor_eta = self.env.compute_u2u_spectral_efficiency(
+            self.env.anchor_points
+        )
+        off_diagonal = ~np.eye(self.N, dtype=bool)
+        self.u2u_eta_reference = float(np.median(anchor_eta[off_diagonal]))
+        if not np.isfinite(self.u2u_eta_reference) or self.u2u_eta_reference <= 0.0:
+            raise ValueError("The anchor U2U spectral-efficiency reference is invalid.")
+        self.prev_u2u_active_link_count = float(
+            self.u2u_total_directed_links
+        )
 
         # RL 惩罚系数体系（由包装器掌管，而非底层物理环境）
         self.w_D_high = 10.0
@@ -243,8 +313,22 @@ class HRL_Wrapper(gym.Env):
         # J = J_w_delay * (加权时延代理) + J_w_energy * (能耗)
         # 三处信号(微观奖励 / 宏观奖励 / 评估)全部由同一个 J 导出,
         # 从根本上消除“训练信号与考核信号错位”。
-        self.J_w_delay = 0.7          # 对应论文 ω_D (URLLC 场景偏延迟)
-        self.J_w_energy = 0.3         # 对应论文 ω_E
+        objective_weights = np.asarray(
+            [delay_objective_weight, energy_objective_weight],
+            dtype=np.float64,
+        )
+        if (
+            not np.all(np.isfinite(objective_weights))
+            or np.any(objective_weights < 0.0)
+            or float(np.sum(objective_weights)) <= 0.0
+        ):
+            raise ValueError(
+                "delay_objective_weight and energy_objective_weight must be "
+                "finite, non-negative, and not both zero."
+            )
+        objective_weights /= float(np.sum(objective_weights))
+        self.J_w_delay = float(objective_weights[0])
+        self.J_w_energy = float(objective_weights[1])
         self.J_delay_norm = 10.0      # 全局加权 holding cost 归一 (smoke 校准)
         self.J_energy_norm = 14.0     # 每微观步总能耗(J)归一 (smoke 校准)
         self.J_pressure_norm = 8.0    # per-UAV 加权 backlog/容量 归一
@@ -364,6 +448,8 @@ class HRL_Wrapper(gym.Env):
         if self.power_constraint_scope == "per_uav":
             self.macro_own_summary_dim += 1
             self.macro_teammate_feature_dim += 1
+        elif self.system_dual_state:
+            self.macro_own_summary_dim += 1
         self.macro_local_obs_dim = (
             self.macro_base_pos_dim
             + self.macro_own_summary_dim
@@ -376,8 +462,12 @@ class HRL_Wrapper(gym.Env):
         #   3N^2: Q_tx(高/低) + norm_u2u_rate
         #   N^2 : [HIERARCHY] 宏观派生的建议卸载分布 goal G
         self.sac_obs_dim = (4 * self.N) + (4 * self.N * self.N)
+        if self.u2u_prev_active_state:
+            self.sac_obs_dim += 1
         if self.power_constraint_scope == "per_uav":
             self.sac_obs_dim += self.N
+        elif self.system_dual_state:
+            self.sac_obs_dim += 1
 
         # 奖励缓存
         self.accumulated_micro_reward = 0.0
@@ -726,19 +816,94 @@ class HRL_Wrapper(gym.Env):
             nominal_rate_bps = self.env.compute_u2u_rate_bps(
                 uav_coords=uav_coords,
             )
+            spectral_efficiency = self.env.compute_u2u_spectral_efficiency(
+                uav_coords=uav_coords,
+            )
 
             self._u2u_cache_coords = uav_coords.copy()
             self._u2u_cache_result = (
                 dist_matrix.astype(np.float32),
                 (nominal_rate_bps / 1e6).astype(np.float32),
+                spectral_efficiency.astype(np.float32),
             )
 
-        dist_matrix, rate_mbps = self._u2u_cache_result
+        dist_matrix, rate_mbps, _ = self._u2u_cache_result
 
         link_demand_matrix = q_tx_matrix + q_tx_matrix.T
         np.fill_diagonal(link_demand_matrix, 0.0)
 
         return dist_matrix, rate_mbps, link_demand_matrix.astype(np.float32)
+
+    def _normalized_u2u_observation(self, uav_coords, nominal_rate_mbps=None):
+        if self.u2u_state_representation == "nominal_rate":
+            if nominal_rate_mbps is None:
+                _, nominal_rate_mbps, _ = self._compute_u2u_topology_metrics(
+                    uav_coords,
+                    np.zeros((self.N, self.N), dtype=np.float32),
+                )
+            return np.clip(
+                np.asarray(nominal_rate_mbps, dtype=np.float32)
+                / max(self.max_u2u_rate_mbps, 1e-8),
+                0.0,
+                1.0,
+            ).astype(np.float32)
+
+        self._compute_u2u_topology_metrics(
+            uav_coords,
+            np.zeros((self.N, self.N), dtype=np.float32),
+        )
+        spectral_efficiency = self._u2u_cache_result[2]
+        return (
+            spectral_efficiency / max(self.u2u_eta_reference, 1e-8)
+        ).astype(np.float32)
+
+    def _previous_u2u_active_fraction(self):
+        return float(
+            self.prev_u2u_active_link_count
+            / max(self.u2u_total_directed_links, 1)
+        )
+
+    def _goal_u2u_observation(self, uav_coords, nominal_rate_mbps):
+        if self.u2u_goal_representation == "match_observation":
+            return self._normalized_u2u_observation(
+                uav_coords,
+                nominal_rate_mbps=nominal_rate_mbps,
+            )
+        return np.clip(
+            np.asarray(nominal_rate_mbps, dtype=np.float32)
+            / max(self.max_u2u_rate_mbps, 1e-8),
+            0.0,
+            1.0,
+        ).astype(np.float32)
+
+    def _estimated_u2u_rate_mbps(self, uav_coords):
+        spectral_efficiency = self.env.compute_u2u_spectral_efficiency(
+            uav_coords=uav_coords
+        )
+        active_count = float(self.prev_u2u_active_link_count)
+        if active_count <= 0.0:
+            active_count = float(self.u2u_total_directed_links)
+        bandwidth_hz = self.env.B_u2u_total / max(active_count, 1.0)
+        return (bandwidth_hz * spectral_efficiency / 1e6).astype(np.float32)
+
+    def _update_previous_u2u_contention(self, infos):
+        counts = []
+        off_diagonal = ~np.eye(self.N, dtype=bool)
+        for info in infos:
+            bandwidth = np.asarray(
+                info.get(
+                    "u2u_link_bandwidth_hz",
+                    np.zeros((self.N, self.N)),
+                ),
+                dtype=np.float64,
+            )
+            if bandwidth.shape != (self.N, self.N):
+                continue
+            counts.append(float(np.count_nonzero(bandwidth[off_diagonal] > 0.0)))
+        mean_count = float(np.mean(counts)) if counts else 0.0
+        if mean_count <= 0.0:
+            mean_count = float(self.u2u_total_directed_links)
+        self.prev_u2u_active_link_count = mean_count
 
     def _build_macro_snapshot(self, raw_state):
         """
@@ -1003,6 +1168,9 @@ class HRL_Wrapper(gym.Env):
         # 清除 U2U 拓扑缓存
         self._u2u_cache_coords = None
         self._u2u_cache_result = None
+        self.prev_u2u_active_link_count = float(
+            self.u2u_total_directed_links
+        )
         self.current_macro_movement_penalty_per_uav.fill(0.0)
         self.current_macro_propulsion_delta_per_uav.fill(0.0)
         self.current_macro_propulsion_energy_share = 0.0
@@ -1121,17 +1289,19 @@ class HRL_Wrapper(gym.Env):
         _, u2u_rate_mbps, _ = self._compute_u2u_topology_metrics(
             uav_coords_m, (q_tx_high + q_tx_low).astype(np.float32)
         )
+        u2u_observation = self._normalized_u2u_observation(
+            uav_coords_m,
+            nominal_rate_mbps=u2u_rate_mbps,
+        )
         if self.N > 1:
             off_diag = ~np.eye(self.N, dtype=bool)
             own_u2u_mean = np.array(
-                [np.mean(u2u_rate_mbps[i][off_diag[i]]) for i in range(self.N)],
+                [np.mean(u2u_observation[i][off_diag[i]]) for i in range(self.N)],
                 dtype=np.float32,
             )
         else:
             own_u2u_mean = np.zeros(self.N, dtype=np.float32)
-        norm_u2u_mean = np.clip(
-            own_u2u_mean / max(self.max_u2u_rate_mbps, 1e-8), 0.0, 1.0
-        )
+        norm_u2u_mean = own_u2u_mean.astype(np.float32)
         flow_ref = self._estimate_macro_flow_reference(raw_state)
         flow_norm = max(float(self.macro_flow_norm_mbits), 1e-8)
         norm_flow = np.clip(flow_ref / flow_norm, 0.0, 1.0)
@@ -1170,6 +1340,14 @@ class HRL_Wrapper(gym.Env):
             0.0,
             1.0,
         ).astype(np.float32)
+        norm_system_energy_dual = np.float32(
+            np.clip(
+                self.energy_lagrange_multiplier
+                / max(self.energy_dual_state_norm, 1e-8),
+                0.0,
+                1.0,
+            )
+        )
 
         local_obs_list = []
         for i in range(self.N):
@@ -1195,6 +1373,8 @@ class HRL_Wrapper(gym.Env):
                 own_summary_values.append(norm_cpu_capacity[i])
             if self.power_constraint_scope == "per_uav":
                 own_summary_values.append(norm_energy_dual[i])
+            elif self.system_dual_state:
+                own_summary_values.append(norm_system_energy_dual)
             own_summary = np.asarray(own_summary_values, dtype=np.float32)
             if self.macro_action_mode == "waypoint":
                 waypoint_offset = (
@@ -1501,7 +1681,7 @@ class HRL_Wrapper(gym.Env):
 
         return self.get_macro_state(), h_flying_penalty, mac_info
 
-    def _compute_derived_goal(self, raw_state, u2u_rate_mbps):
+    def _compute_derived_goal(self, raw_state, u2u_observation):
         """
         [HIERARCHY] 由当前拓扑确定性推导的“管理者建议卸载分布” G (N x N)。
 
@@ -1523,9 +1703,7 @@ class HRL_Wrapper(gym.Env):
         # 可用度: 本地队列越空越可用, 落在 (0, 1]
         availability = mu_comp / (mu_comp + local_load + 1e-6)
 
-        rate_norm = np.clip(
-            u2u_rate_mbps / max(self.max_u2u_rate_mbps, 1e-8), 0.0, 1.0
-        ).astype(np.float32)
+        rate_norm = np.asarray(u2u_observation, dtype=np.float32)
         # j 的可用度沿列广播, 乘以 i->j 链路质量
         attractiveness = availability[None, :] * rate_norm
         np.fill_diagonal(attractiveness, availability)
@@ -1549,14 +1727,18 @@ class HRL_Wrapper(gym.Env):
             raw_state["uav_coords"],
             raw_state["Q_tx_high"] + raw_state["Q_tx_low"]
         )
-        goal_matrix = self._compute_derived_goal(
-            raw_state, u2u_rate_mbps
-        ).flatten()
-        norm_u2u_rate = np.clip(
-            u2u_rate_mbps.flatten() / max(self.max_u2u_rate_mbps, 1e-8), 
-            0.0, 
-            1.0
+        u2u_observation = self._normalized_u2u_observation(
+            raw_state["uav_coords"],
+            nominal_rate_mbps=u2u_rate_mbps,
         )
+        goal_observation = self._goal_u2u_observation(
+            raw_state["uav_coords"],
+            nominal_rate_mbps=u2u_rate_mbps,
+        )
+        goal_matrix = self._compute_derived_goal(
+            raw_state, goal_observation
+        ).flatten()
+        norm_u2u_rate = u2u_observation.flatten()
 
         if self.micro_state_mode == "pressure":
             mu_comp = (
@@ -1564,8 +1746,13 @@ class HRL_Wrapper(gym.Env):
                 / (self.env.C * 1e6)
             ).astype(np.float32)
             mu_comp = np.maximum(mu_comp, 1e-6)
+            pressure_rate_mbps = u2u_rate_mbps
+            if self.u2u_contention_aware_pressure:
+                pressure_rate_mbps = self._estimated_u2u_rate_mbps(
+                    raw_state["uav_coords"]
+                )
             mu_u2u = np.maximum(
-                u2u_rate_mbps * self.env.micro_dt,
+                pressure_rate_mbps * self.env.micro_dt,
                 1e-6,
             ).astype(np.float32)
             pressure_clip = 10.0
@@ -1642,6 +1829,13 @@ class HRL_Wrapper(gym.Env):
             norm_u2u_rate,
             goal_matrix,
         ]
+        if self.u2u_prev_active_state:
+            state_parts.append(
+                np.asarray(
+                    [self._previous_u2u_active_fraction()],
+                    dtype=np.float32,
+                )
+            )
         if self.power_constraint_scope == "per_uav":
             state_parts.append(
                 np.clip(
@@ -1650,6 +1844,20 @@ class HRL_Wrapper(gym.Env):
                     0.0,
                     1.0,
                 ).astype(np.float32)
+            )
+        elif self.system_dual_state:
+            state_parts.append(
+                np.asarray(
+                    [
+                        np.clip(
+                            self.energy_lagrange_multiplier
+                            / max(self.energy_dual_state_norm, 1e-8),
+                            0.0,
+                            1.0,
+                        )
+                    ],
+                    dtype=np.float32,
+                )
             )
         sac_state = np.concatenate(state_parts).astype(np.float32)
 
@@ -2110,6 +2318,10 @@ class HRL_Wrapper(gym.Env):
             )
             rewards.append(float(reward))
             done = done or bool(step_done)
+
+        self._update_previous_u2u_contention(infos)
+        if self.last_raw_state is not None:
+            next_state = self.get_sac_state(self.last_raw_state)
 
         primal_reward_sum = -self.micro_reward_scale * sum(
             float(info.get("primal_cost_step", 0.0)) for info in infos

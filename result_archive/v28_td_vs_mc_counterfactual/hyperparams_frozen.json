@@ -1,0 +1,24 @@
+{
+  "status": "FROZEN_V28_OFFLINE_ARMS",
+  "checkpoint": "C:\\Users\\PC\\Desktop\\HRL_UAV\\results\\tcom_dynamic_u2u_sparse_v24_dual_on\\pilot\\seed1\\joint_td3_sac\\checkpoints\\final.pt",
+  "train_dataset": "C:\\Users\\PC\\Desktop\\HRL_UAV\\result_archive\\v28_td_vs_mc_counterfactual\\train_transitions.npz",
+  "test_dataset": "C:\\Users\\PC\\Desktop\\HRL_UAV\\result_archive\\v28_td_vs_mc_counterfactual\\test_transitions.npz",
+  "critic_input_state_dim": 85,
+  "action_dim": 6,
+  "hidden_dim": 256,
+  "init_seeds": [
+    7101,
+    7102,
+    7103
+  ],
+  "learning_rate": 0.0003,
+  "batch_size": 128,
+  "gradient_updates": 20000,
+  "gamma": 0.99,
+  "tau": 0.005,
+  "gradient_clip": 10.0,
+  "target_smoothing": false,
+  "horizon": 30,
+  "checkpoint_rule": "final_update_only",
+  "shared_minibatch_indices_within_init_seed": true
+}

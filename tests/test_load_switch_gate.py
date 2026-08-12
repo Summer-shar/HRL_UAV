@@ -85,6 +85,40 @@ class LoadSwitchGateTests(unittest.TestCase):
         self.assertIsNotNone(controller.active_support)
         self.assertGreater(np.linalg.norm(controller.action(env)), 0.0)
 
+    def test_p1_prime_slews_residual_command_without_changing_p1_default(self):
+        env = FakeWrapper()
+        original = GatePolicyController("P1", offset_m=40.0)
+        original.reset(env)
+        original_action = original.action(env)
+        self.assertAlmostEqual(
+            np.linalg.norm(original_action[1]) * env.macro_waypoint_radius_m,
+            40.0,
+            places=5,
+        )
+
+        prime = GatePolicyController(
+            "P1",
+            offset_m=40.0,
+            residual_slew_cap_m=10.0,
+        )
+        prime.reset(env)
+        for expected_offset in (10.0, 20.0, 30.0, 40.0):
+            action = prime.action(env)
+            self.assertAlmostEqual(
+                np.linalg.norm(action[1]) * env.macro_waypoint_radius_m,
+                expected_offset,
+                places=5,
+            )
+
+        env.env.zone_expected_offered_load_mbps = LOAD_PHASES_MBPS[1].copy()
+        prime.before_macro(env, 10, switched=True)
+        return_action = prime.action(env)
+        self.assertAlmostEqual(
+            np.linalg.norm(return_action[1]) * env.macro_waypoint_radius_m,
+            30.0,
+            places=5,
+        )
+
     def test_p2_starts_next_phase_support_five_periods_early(self):
         env = FakeWrapper()
         controller = GatePolicyController("P2")

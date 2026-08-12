@@ -1,0 +1,18 @@
+{
+  "checkpoint": "C:\\Users\\PC\\Desktop\\HRL_UAV\\results\\tcom_dynamic_load_switch_v32b_formal\\formal\\seed1\\joint_td3_sac\\checkpoints\\best.pt",
+  "output_dir": "result_archive\\v32c_stage_residual_benchmark_smoke",
+  "search_base_seed": 2990,
+  "search_episodes": 1,
+  "validation_base_seed": 3990,
+  "validation_episodes": 2,
+  "population": 4,
+  "iterations": 1,
+  "elite_fraction": 0.25,
+  "initial_std_m": 40.0,
+  "minimum_std_m": 5.0,
+  "max_offset_m": 80.0,
+  "anticipation_steps": 5,
+  "search_power_gate_w": 838.0,
+  "power_budget_w": 840.0,
+  "device": "cpu"
+}

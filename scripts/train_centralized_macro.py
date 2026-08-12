@@ -20,7 +20,11 @@ PROJECT_ROOT = bootstrap()
 
 from compare_common import EvaluationHistory
 from compare_common import add_common_args
+from compare_common import advance_load_switch_before_macro
+from compare_common import append_load_switch_trace
 from compare_common import evaluate_policy
+from compare_common import initialize_episode_load_switch
+from compare_common import initialize_load_switch_trace
 from compare_common import make_env_from_args
 from compare_common import prepare_results_dirs
 from compare_common import print_evaluation_summary
@@ -34,6 +38,7 @@ from hrl_uav.agents.sac_agent import Critic as SAC_Critic
 from hrl_uav.agents.sac_agent import Entroy as SAC_Entropy
 from hrl_uav.agents.sac_agent import Memory as SAC_Memory
 from hrl_uav.hrl_wrappers import normalized_power_residual
+from hrl_uav.load_switching import apply_load_switch_phase
 import hrl_uav.agents.ppo_agent as ppo_agent_mod
 import hrl_uav.agents.sac_agent as sac_agent_mod
 
@@ -89,6 +94,10 @@ TRAIN_LOG_FIELDS = [
     "start_offset_max_m",
     "load_scale",
     "cpu_ghz",
+    "load_switch_mode",
+    "load_switch_count",
+    "load_switch_steps",
+    "load_switch_dwell_steps",
     "advisor_weight",
     "macro_shaping_weight",
     "macro_move_penalty_weight",
@@ -259,6 +268,16 @@ def parse_args():
         description="Centralized macro PPO + SAC micro training"
     )
     add_common_args(parser, default_results_subdir="central_macro")
+    parser.add_argument(
+        "--frozen_macro_policy",
+        choices=["actor", "zero"],
+        default="actor",
+        help=(
+            "Macro action source while --freeze_macro is active: preserve the "
+            "historical deterministic actor behavior or force zero residual "
+            "actions for centroid tracking"
+        ),
+    )
     parser.add_argument(
         "--device",
         type=str,
@@ -565,6 +584,8 @@ def parse_args():
         args.advisor_weight > 0.0 or args.advisor_final_weight > 0.0
     ):
         parser.error("--freeze_macro is incompatible with advisor imitation")
+    if not args.freeze_macro and args.frozen_macro_policy != "actor":
+        parser.error("--frozen_macro_policy zero requires --freeze_macro")
     if args.macro_propulsion_energy_norm <= 0.0:
         parser.error("--macro_propulsion_energy_norm must be positive")
     if args.checkpoint_epsilon_relative < 0.0:
@@ -685,7 +706,11 @@ def update_energy_dual(env, args, average_power_w):
         0.0,
         float(args.energy_dual_max),
     )
-    env.energy_lagrange_multiplier = float(updated)
+    setter = getattr(env, "set_energy_lagrange_multipliers", None)
+    if callable(setter):
+        setter(float(updated))
+    else:
+        env.energy_lagrange_multiplier = float(updated)
     return current, float(updated), float(normalized_violation)
 
 
@@ -1168,6 +1193,20 @@ def centralized_macro_policy(actor, deterministic=False):
     return _policy
 
 
+def zero_macro_policy(env, _local_obs_batch, _eval_mode):
+    """Return the centroid-waypoint residual used during v33 micro training."""
+    return np.zeros((env.N, 2), dtype=np.float32)
+
+
+def evaluation_macro_policy(args, actor):
+    if (
+        bool(getattr(args, "freeze_macro", False))
+        and str(getattr(args, "frozen_macro_policy", "actor")) == "zero"
+    ):
+        return zero_macro_policy
+    return centralized_macro_policy(actor, deterministic=True)
+
+
 def configure_ppo_hover_policy(actor, args, initialize_hover=False):
     actor.configure_zero_inflated_actions(
         enabled=bool(int(getattr(args, "ppo_zero_inflated_actions", 0))),
@@ -1271,7 +1310,7 @@ def save_final_policy_trajectory(results_dirs, args, macro_actor, micro_policy):
     evaluate_policy(
         traj_env,
         traj_args,
-        centralized_macro_policy(macro_actor, deterministic=True),
+        evaluation_macro_policy(args, macro_actor),
         micro_policy,
     )
     final_path = os.path.join(results_dirs["trajectory_dir"], "trajectory_final.npz")
@@ -1802,6 +1841,9 @@ def main():
             + 1,
             recent_window=SAC_RECENT_WINDOW,
             recent_ratio=SAC_RECENT_RATIO,
+            rng=np.random.default_rng(
+                np.random.SeedSequence([int(args.seed), 0x534143])
+            ),
         )
         if use_sac and not args.freeze_micro
         else None
@@ -1830,8 +1872,8 @@ def main():
                 env.set_energy_lagrange_multipliers(inherited_dual)
                 eval_env.set_energy_lagrange_multipliers(inherited_dual)
             else:
-                env.energy_lagrange_multiplier = inherited_dual
-                eval_env.energy_lagrange_multiplier = inherited_dual
+                env.set_energy_lagrange_multipliers(inherited_dual)
+                eval_env.set_energy_lagrange_multipliers(inherited_dual)
             args.energy_lagrange_multiplier_current = inherited_dual
             print(
                 "[INFO] Inherited energy dual -> "
@@ -1900,10 +1942,16 @@ def main():
         )
         print(f"[INFO] Loaded centralized macro PPO -> {loaded_macro_path}")
     if args.freeze_macro:
-        print(
-            "[INFO] Macro PPO frozen; deterministic actions are used and "
-            "only the micro layer is trained"
-        )
+        if args.frozen_macro_policy == "zero":
+            print(
+                "[INFO] Macro PPO frozen; zero residual centroid tracking is "
+                "used and only the micro layer is trained"
+            )
+        else:
+            print(
+                "[INFO] Macro PPO frozen; deterministic actor actions are used "
+                "and only the micro layer is trained"
+            )
     for param_group in macro_actor.optimizer.param_groups:
         param_group["lr"] = float(args.ppo_actor_lr)
 
@@ -1933,7 +1981,13 @@ def main():
         "local": "eval_central_no_coop",
     }[args.micro_solver]
     eval_csv = os.path.join(results_dirs["results_dir"], f"{eval_stem}.csv")
+    load_switch_trace_csv = os.path.join(
+        results_dirs["results_dir"],
+        "load_switch_macro_trace.csv",
+    )
     initialize_training_log(train_csv)
+    if str(getattr(args, "load_switch_mode", "off")) != "off":
+        initialize_load_switch_trace(load_switch_trace_csv)
     eval_history.save_csv(eval_csv)
 
     for episode in range(args.episodes):
@@ -1971,7 +2025,20 @@ def main():
             - np.asarray(env.env.anchor_points, dtype=np.float64),
             axis=1,
         )
-        _, info = env.reset(seed=args.seed + episode)
+        episode_seed = args.seed + episode
+        load_switch_schedule = initialize_episode_load_switch(
+            env,
+            args,
+            episode_seed,
+        )
+        _, info = env.reset(seed=episode_seed)
+        if load_switch_schedule is not None:
+            apply_load_switch_phase(
+                env,
+                load_switch_schedule,
+                0,
+                force=True,
+            )
         _local_state, global_state = env.get_macro_state()
 
         ep_states = []
@@ -2027,13 +2094,27 @@ def main():
 
         bc_weight = advisor_weight_for_episode(args, episode)
 
-        for _ in range(args.macro_steps):
+        for macro_idx in range(args.macro_steps):
+            switched = advance_load_switch_before_macro(
+                env,
+                load_switch_schedule,
+                macro_idx,
+            )
+            if switched:
+                _local_state, global_state = env.get_macro_state()
+            macro_service_energy_start = len(ep_service_energy)
+            macro_delay_start = len(ep_delay_objective)
+            macro_energy_current = 0.0
+            macro_move_current = 0.0
             advisor_action = (
                 compute_advisor_action(env, args)
                 if bc_weight > 0.0
                 else np.zeros((env.N, 2), dtype=np.float32)
             )
-            if args.freeze_macro or args.macro_deterministic:
+            if args.freeze_macro and args.frozen_macro_policy == "zero":
+                action_flat = np.zeros((env.N * 2,), dtype=np.float32)
+                logprob = np.zeros((1,), dtype=np.float32)
+            elif args.freeze_macro or args.macro_deterministic:
                 action_flat = macro_actor.choose_action_deterministic(global_state)
                 logprob = np.zeros((1,), dtype=np.float32)
             else:
@@ -2050,8 +2131,14 @@ def main():
             if isinstance(mac_info, dict):
                 ep_comm.append(float(mac_info.get("projected_macro_comm_cost", 0.0)))
                 ep_u2g.append(float(mac_info.get("projected_mean_u2g_distance_m", 0.0)))
-                ep_move.append(float(mac_info.get("macro_move_distance_mean", 0.0)))
-                ep_macro_energy.append(float(mac_info.get("E_macro_total", 0.0)))
+                macro_move_current = float(
+                    mac_info.get("macro_move_distance_mean", 0.0)
+                )
+                ep_move.append(macro_move_current)
+                macro_energy_current = float(
+                    mac_info.get("E_macro_total", 0.0)
+                )
+                ep_macro_energy.append(macro_energy_current)
                 ep_macro_energy_per_uav += np.asarray(
                     mac_info.get("E_macro_per_uav", np.zeros(env.N)),
                     dtype=np.float64,
@@ -2264,6 +2351,48 @@ def main():
                 macro_reward_info,
                 env,
             )
+            if load_switch_schedule is not None:
+                macro_service_energy_current = float(
+                    np.sum(ep_service_energy[macro_service_energy_start:])
+                )
+                macro_delay_values = ep_delay_objective[macro_delay_start:]
+                append_load_switch_trace(
+                    load_switch_trace_csv,
+                    {
+                        "episode": episode + 1,
+                        "episode_seed": episode_seed,
+                        "macro_index": macro_idx,
+                        "phase_index": load_switch_schedule.phase_index(
+                            macro_idx
+                        ),
+                        "switch_flag": int(switched),
+                        "phase_loads_mbps": json.dumps(
+                            load_switch_schedule.loads(macro_idx).tolist(),
+                            separators=(",", ":"),
+                        ),
+                        "energy_dual": float(
+                            np.mean(
+                                np.atleast_1d(
+                                    env.energy_lagrange_multiplier
+                                )
+                            )
+                        ),
+                        "macro_energy_j": macro_energy_current,
+                        "service_energy_j": macro_service_energy_current,
+                        "macro_average_power_w": (
+                            macro_energy_current
+                            + macro_service_energy_current
+                        )
+                        / max(float(env.env.macro_dt), 1e-8),
+                        "macro_reward": macro_reward,
+                        "delay_objective_mean": float(
+                            np.mean(macro_delay_values)
+                        )
+                        if macro_delay_values
+                        else 0.0,
+                        "movement_mean_m": macro_move_current,
+                    },
+                )
             ep_macro_feedback.append(
                 float(macro_reward_info.get("global_micro_signal", 0.0))
             )
@@ -2637,6 +2766,26 @@ def main():
                 "start_offset_max_m": float(np.max(start_offsets)),
                 "load_scale": episode_load,
                 "cpu_ghz": episode_cpu_ghz,
+                "load_switch_mode": str(
+                    getattr(args, "load_switch_mode", "off")
+                ),
+                "load_switch_count": (
+                    len(load_switch_schedule.switch_steps)
+                    if load_switch_schedule is not None
+                    else 0
+                ),
+                "load_switch_steps": json.dumps(
+                    list(load_switch_schedule.switch_steps)
+                    if load_switch_schedule is not None
+                    else [],
+                    separators=(",", ":"),
+                ),
+                "load_switch_dwell_steps": json.dumps(
+                    list(load_switch_schedule.dwell_steps)
+                    if load_switch_schedule is not None
+                    else [int(args.macro_steps)],
+                    separators=(",", ":"),
+                ),
                 "advisor_weight": bc_weight,
                 "macro_shaping_weight": shaping_weight,
                 "macro_move_penalty_weight": args.macro_move_penalty_weight,
@@ -2800,14 +2949,13 @@ def main():
                     env.energy_lagrange_multipliers
                 )
             else:
-                eval_env.energy_lagrange_multiplier = float(
+                eval_env.set_energy_lagrange_multipliers(
                     env.energy_lagrange_multiplier
                 )
-                eval_env._sync_cpu_energy_prices()
             metrics = evaluate_policy(
                 eval_env,
                 args,
-                centralized_macro_policy(macro_actor, deterministic=True),
+                evaluation_macro_policy(args, macro_actor),
                 eval_micro_policy,
             )
             eval_history.append(episode + 1, metrics)
@@ -2848,14 +2996,13 @@ def main():
                 env.energy_lagrange_multipliers
             )
         else:
-            eval_env.energy_lagrange_multiplier = float(
+            eval_env.set_energy_lagrange_multipliers(
                 env.energy_lagrange_multiplier
             )
-            eval_env._sync_cpu_energy_prices()
         metrics = evaluate_policy(
             eval_env,
             args,
-            centralized_macro_policy(macro_actor, deterministic=True),
+            evaluation_macro_policy(args, macro_actor),
             eval_micro_policy,
         )
         eval_history.append(args.episodes, metrics)

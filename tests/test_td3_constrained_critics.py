@@ -1,6 +1,7 @@
 import copy
 import json
 import sys
+import tempfile
 import unittest
 from collections import deque
 from pathlib import Path
@@ -18,6 +19,7 @@ for path in (ROOT, SCRIPTS):
 
 from train_centralized_td3 import MacroReplayBuffer
 from train_centralized_td3 import TD3Agent
+from train_centralized_td3 import aggregate_td3_actor_delay_value
 from train_centralized_td3 import build_checkpoint_payload
 from train_centralized_td3 import inspect_td3_policy_state
 from train_centralized_td3 import macro_power_violation_penalty
@@ -58,6 +60,22 @@ def clone_agent(source, args):
 
 
 class TD3ConstrainedCriticTests(unittest.TestCase):
+    def test_actor_delay_aggregation_preserves_q1_and_supports_min(self):
+        q1 = torch.as_tensor([[3.0], [-1.0]])
+        q2 = torch.as_tensor([[2.0], [4.0]])
+
+        self.assertTrue(
+            torch.equal(aggregate_td3_actor_delay_value(q1, q2, "q1"), q1)
+        )
+        self.assertTrue(
+            torch.equal(
+                aggregate_td3_actor_delay_value(q1, q2, "min"),
+                torch.minimum(q1, q2),
+            )
+        )
+        with self.assertRaises(ValueError):
+            aggregate_td3_actor_delay_value(q1, q2, "mean")
+
     def make_buffer(self):
         buffer = MacroReplayBuffer(4, 6, 64)
         rng = np.random.default_rng(7)
@@ -210,6 +228,46 @@ class TD3ConstrainedCriticTests(unittest.TestCase):
         )
         self.assertEqual(sum(histogram.values()), 6)
 
+    def test_replay_export_preserves_order_and_diagnostic_metadata(self):
+        buffer = MacroReplayBuffer(2, 2, 3)
+        for index in range(5):
+            value = float(index)
+            buffer.add(
+                np.asarray([value, value + 0.5], dtype=np.float32),
+                np.asarray([value, -value], dtype=np.float32),
+                reward=value,
+                next_state=np.asarray(
+                    [value + 1.0, value + 1.5], dtype=np.float32
+                ),
+                done=index == 4,
+                energy_ratio=value / 10.0,
+                episode_index=index + 1,
+                macro_index=index * 2,
+                neutral_episode=index % 2 == 0,
+            )
+
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "macro_replay.npz"
+            buffer.save_npz(path)
+            with np.load(path) as replay:
+                self.assertEqual(int(replay["capacity"]), 3)
+                self.assertEqual(int(replay["size"]), 3)
+                self.assertTrue(
+                    np.array_equal(replay["state"][:, 0], [2.0, 3.0, 4.0])
+                )
+                self.assertTrue(
+                    np.array_equal(replay["episode_index"], [3, 4, 5])
+                )
+                self.assertTrue(
+                    np.array_equal(replay["macro_index"], [4, 6, 8])
+                )
+                self.assertTrue(
+                    np.array_equal(replay["neutral_episode"], [1, 0, 1])
+                )
+
+        sampled = buffer.sample(2, torch.device("cpu"))
+        self.assertEqual(len(sampled), 6)
+
     def test_policy_diagnostics_do_not_change_rng_or_network_state(self):
         args = make_args()
         torch.manual_seed(41)
@@ -239,6 +297,8 @@ class TD3ConstrainedCriticTests(unittest.TestCase):
         for name, tensor in agent.actor.state_dict().items():
             self.assertTrue(torch.equal(before_state[name], tensor))
         self.assertIn("td3_delay_q_actor_minus_zero_mean", diagnostics)
+        self.assertIn("td3_delay_q1_minus_q2_actor_mean", diagnostics)
+        self.assertIn("td3_delay_q1_minus_q2_zero_mean", diagnostics)
         self.assertIn("td3_actor_raw_saturation_fraction", diagnostics)
 
 

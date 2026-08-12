@@ -1,0 +1,26 @@
+{
+  "episodes": 5,
+  "integration_samples": 13500,
+  "active_samples": 13283,
+  "dynamic_u2u_bandwidth": true,
+  "total_u2u_bandwidth_mhz": 3.0,
+  "state_assumption": "compute_u2u_rate_bps(active_link_mask=None), so all six directed links share the total bandwidth",
+  "active_link_count_histogram": {
+    "0": 217,
+    "1": 1415,
+    "2": 3952,
+    "3": 4976,
+    "4": 2548,
+    "5": 384,
+    "6": 8
+  },
+  "active_link_count_mean_when_active": 2.7408717910110667,
+  "nominal_state_rate_normalized_mean": 0.05289528893044577,
+  "actual_active_rate_normalized_mean": 0.13811043434100131,
+  "actual_to_nominal_rate_ratio_mean": 2.6039900624858845,
+  "actual_to_nominal_rate_ratio_p05_p50_p95": [
+    1.5,
+    2.0,
+    6.0
+  ]
+}

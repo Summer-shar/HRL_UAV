@@ -1,4 +1,5 @@
 import sys
+import json
 import unittest
 from pathlib import Path
 
@@ -17,11 +18,206 @@ from run_experiment import common_args
 from run_experiment import normalized_macro_distance
 from run_experiment import stage_config
 from train_centralized_td3 import sample_training_exploration
+from train_centralized_td3 import sample_neutral_episode_schedule
 from train_centralized_td3 import joint_sac_training_enabled
 from train_centralized_td3 import td3_exploration_scope
 
 
 class JointTrainingProtocolTest(unittest.TestCase):
+    def test_v27_min_actor_is_a_single_factor_change_from_v24(self):
+        config_dir = PROJECT_ROOT / "configs"
+        with (config_dir / "tcom_dynamic_u2u_sparse_v24_dual_on.json").open(
+            encoding="utf-8"
+        ) as file:
+            control = json.load(file)
+        with (config_dir / "tcom_dynamic_u2u_sparse_v27_min_actor.json").open(
+            encoding="utf-8"
+        ) as file:
+            experiment = json.load(file)
+
+        ignored = {"results_version", "td3_actor_delay_aggregation"}
+        self.assertEqual(
+            {key: value for key, value in control.items() if key not in ignored},
+            {
+                key: value
+                for key, value in experiment.items()
+                if key not in ignored
+            },
+        )
+        self.assertNotIn("td3_actor_delay_aggregation", control)
+        self.assertEqual(experiment["td3_actor_delay_aggregation"], "min")
+        self.assertNotIn("td3_neutral_episode_probability", experiment)
+
+    def test_v26_joint_support_audit_only_enables_replay_export(self):
+        config_dir = PROJECT_ROOT / "configs"
+        with (
+            config_dir
+            / "tcom_dynamic_u2u_sparse_v25_dual_neutral_coverage.json"
+        ).open(encoding="utf-8") as file:
+            control = json.load(file)
+        with (
+            config_dir
+            / "tcom_dynamic_u2u_sparse_v26_joint_support_audit.json"
+        ).open(encoding="utf-8") as file:
+            audit = json.load(file)
+
+        ignored = {"results_version", "save_macro_replay"}
+        self.assertEqual(
+            {key: value for key, value in control.items() if key not in ignored},
+            {key: value for key, value in audit.items() if key not in ignored},
+        )
+        self.assertNotIn("save_macro_replay", control)
+        self.assertTrue(audit["save_macro_replay"])
+
+    def test_v25_neutral_coverage_is_a_single_factor_change(self):
+        config_dir = PROJECT_ROOT / "configs"
+        with (config_dir / "tcom_dynamic_u2u_sparse_v24_dual_on.json").open(
+            encoding="utf-8"
+        ) as file:
+            control = json.load(file)
+        with (
+            config_dir
+            / "tcom_dynamic_u2u_sparse_v25_dual_neutral_coverage.json"
+        ).open(encoding="utf-8") as file:
+            coverage = json.load(file)
+
+        ignored = {
+            "results_version",
+            "td3_neutral_episode_probability",
+        }
+        self.assertEqual(
+            {key: value for key, value in control.items() if key not in ignored},
+            {
+                key: value
+                for key, value in coverage.items()
+                if key not in ignored
+            },
+        )
+        self.assertEqual(coverage["td3_neutral_episode_probability"], 0.25)
+        self.assertEqual(
+            coverage["micro_pretrain_source_results_version"],
+            control["results_version"],
+        )
+        self.assertEqual(coverage["constraint_form"], "pure_lagrangian")
+        self.assertEqual(coverage["macro_power_violation_penalty_weight"], 0.0)
+
+    def test_neutral_episode_schedule_is_deterministic_and_rng_isolated(self):
+        np.random.seed(1234)
+        expected = np.random.random(8)
+        np.random.seed(1234)
+        first = sample_neutral_episode_schedule(100, 0.25, seed=1)
+        observed = np.random.random(8)
+        second = sample_neutral_episode_schedule(100, 0.25, seed=1)
+
+        self.assertTrue(np.array_equal(observed, expected))
+        self.assertTrue(np.array_equal(first, second))
+        self.assertEqual(first.dtype, np.dtype(bool))
+        self.assertTrue(np.array_equal(
+            sample_neutral_episode_schedule(5, 0.0, seed=1),
+            np.zeros(5, dtype=bool),
+        ))
+        self.assertTrue(np.array_equal(
+            sample_neutral_episode_schedule(5, 1.0, seed=1),
+            np.ones(5, dtype=bool),
+        ))
+
+    def test_runner_forwards_neutral_episode_probability(self):
+        import run_experiment
+
+        original = run_experiment.TD3_NEUTRAL_EPISODE_PROB
+        try:
+            run_experiment.TD3_NEUTRAL_EPISODE_PROB = 0.25
+            experiments = build_experiments(
+                "smoke",
+                seeds=[1],
+                config=stage_config("smoke"),
+                device="cpu",
+            )
+        finally:
+            run_experiment.TD3_NEUTRAL_EPISODE_PROB = original
+
+        experiment = next(
+            item
+            for item in experiments
+            if item["method"] == "joint_td3_sac"
+        )
+        index = experiment["args"].index("--td3_neutral_episode_prob")
+        self.assertEqual(float(experiment["args"][index + 1]), 0.25)
+
+    def test_runner_forwards_macro_replay_export_flag(self):
+        import run_experiment
+
+        original = run_experiment.SAVE_MACRO_REPLAY
+        try:
+            run_experiment.SAVE_MACRO_REPLAY = True
+            experiments = build_experiments(
+                "smoke",
+                seeds=[1],
+                config=stage_config("smoke"),
+                device="cpu",
+            )
+        finally:
+            run_experiment.SAVE_MACRO_REPLAY = original
+
+        experiment = next(
+            item
+            for item in experiments
+            if item["method"] == "joint_td3_sac"
+        )
+        index = experiment["args"].index("--save_macro_replay")
+        self.assertEqual(experiment["args"][index + 1], "1")
+
+    def test_runner_forwards_actor_delay_aggregation(self):
+        import run_experiment
+
+        original = run_experiment.TD3_ACTOR_DELAY_AGGREGATION
+        try:
+            run_experiment.TD3_ACTOR_DELAY_AGGREGATION = "min"
+            experiments = build_experiments(
+                "smoke",
+                seeds=[1],
+                config=stage_config("smoke"),
+                device="cpu",
+            )
+        finally:
+            run_experiment.TD3_ACTOR_DELAY_AGGREGATION = original
+
+        experiment = next(
+            item
+            for item in experiments
+            if item["method"] == "joint_td3_sac"
+        )
+        index = experiment["args"].index("--td3_actor_delay_aggregation")
+        self.assertEqual(experiment["args"][index + 1], "min")
+
+    def test_v24_dual_pilot_is_a_single_factor_pure_lagrangian_pair(self):
+        config_dir = PROJECT_ROOT / "configs"
+        with (config_dir / "tcom_dynamic_u2u_sparse_v24_dual_off.json").open(
+            encoding="utf-8"
+        ) as file:
+            dual_off = json.load(file)
+        with (config_dir / "tcom_dynamic_u2u_sparse_v24_dual_on.json").open(
+            encoding="utf-8"
+        ) as file:
+            dual_on = json.load(file)
+
+        ignored = {
+            "results_version",
+            "micro_pretrain_source_results_version",
+            "energy_dual_lr",
+        }
+        self.assertEqual(
+            {key: value for key, value in dual_off.items() if key not in ignored},
+            {key: value for key, value in dual_on.items() if key not in ignored},
+        )
+        self.assertEqual(dual_off["energy_dual_lr"], 0.0)
+        self.assertGreater(dual_on["energy_dual_lr"], 0.0)
+        for config in (dual_off, dual_on):
+            self.assertEqual(config["objective_mode"], "constrained_delay")
+            self.assertEqual(config["constraint_form"], "pure_lagrangian")
+            self.assertEqual(config["macro_power_violation_penalty_weight"], 0.0)
+            self.assertTrue(config["system_dual_state"])
+
     def test_joint_sac_starts_after_macro_replay_warmup(self):
         self.assertFalse(joint_sac_training_enabled(True, False, True))
         self.assertTrue(joint_sac_training_enabled(True, False, False))
@@ -51,6 +247,7 @@ class JointTrainingProtocolTest(unittest.TestCase):
             run_experiment.MICRO_REWARD_SCALE = 1.0
             run_experiment.SAC_GRAD_CLIP_NORM = 1.0
             config = stage_config("smoke")
+            config["micro_pretrain_macro_policy"] = "zero"
             experiment = build_micro_pretrain(
                 "smoke",
                 seed=1,
@@ -65,6 +262,8 @@ class JointTrainingProtocolTest(unittest.TestCase):
 
         self.assertIn("--freeze_macro", experiment["args"])
         self.assertNotIn("--freeze_micro", experiment["args"])
+        frozen_policy_index = experiment["args"].index("--frozen_macro_policy")
+        self.assertEqual(experiment["args"][frozen_policy_index + 1], "zero")
         scale_index = experiment["args"].index("--micro_reward_scale")
         clip_index = experiment["args"].index("--sac_grad_clip_norm")
         self.assertEqual(float(experiment["args"][scale_index + 1]), 1.0)
@@ -104,6 +303,10 @@ class JointTrainingProtocolTest(unittest.TestCase):
             "--td3_hover_exploration_prob"
         )
         self.assertEqual(experiment["args"][hover_index + 1], "0.0")
+        neutral_index = experiment["args"].index(
+            "--td3_neutral_episode_prob"
+        )
+        self.assertEqual(experiment["args"][neutral_index + 1], "0.0")
         persistence_index = experiment["args"].index(
             "--td3_exploration_persistence"
         )
@@ -194,6 +397,53 @@ class JointTrainingProtocolTest(unittest.TestCase):
                 )
             ),
         )
+
+    def test_joint_run_can_freeze_one_shared_micro_checkpoint(self):
+        import run_experiment
+
+        original = (
+            run_experiment.MICRO_PRETRAIN_SOURCE_VERSION,
+            run_experiment.MICRO_PRETRAIN_SOURCE_SEED,
+            run_experiment.FREEZE_MICRO_IN_JOINT,
+        )
+        try:
+            run_experiment.MICRO_PRETRAIN_SOURCE_VERSION = "shared_micro_v2"
+            run_experiment.MICRO_PRETRAIN_SOURCE_SEED = 1
+            run_experiment.FREEZE_MICRO_IN_JOINT = True
+            experiments = build_experiments(
+                "pilot",
+                seeds=[42],
+                config=stage_config("pilot"),
+                device="cpu",
+            )
+        finally:
+            (
+                run_experiment.MICRO_PRETRAIN_SOURCE_VERSION,
+                run_experiment.MICRO_PRETRAIN_SOURCE_SEED,
+                run_experiment.FREEZE_MICRO_IN_JOINT,
+            ) = original
+
+        experiment = next(
+            item
+            for item in experiments
+            if item["method"] == "joint_td3_sac"
+        )
+        index = experiment["args"].index("--micro_ckpt")
+        self.assertEqual(
+            experiment["args"][index + 1],
+            str(
+                Path(
+                    "results",
+                    "shared_micro_v2",
+                    "pilot",
+                    "seed1",
+                    "micro_pretrain",
+                    "checkpoints",
+                    "best.pt",
+                )
+            ),
+        )
+        self.assertIn("--freeze_micro", experiment["args"])
 
     def test_delta_exploration_can_persist_for_a_whole_episode(self):
         episode_noise = np.array(

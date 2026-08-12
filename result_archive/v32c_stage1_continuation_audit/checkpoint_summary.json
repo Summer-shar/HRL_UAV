@@ -1,0 +1,114 @@
+[
+  {
+    "checkpoint": "C:\\Users\\PC\\Desktop\\HRL_UAV\\results\\tcom_dynamic_load_switch_v32b_formal\\formal\\seed1\\joint_td3_sac\\checkpoints\\eval_candidates\\eval_ep_0100.pt",
+    "checkpoint_episode": 100,
+    "eligible_seed_count": 20,
+    "excluded_seeds": [],
+    "q_actor_minus_zero": {
+      "mean": 0.012837046384811401,
+      "ci95_low": 0.009337056475046799,
+      "ci95_high": 0.016337036294576
+    },
+    "return_zero_once_minus_actor": {
+      "mean": -0.00869173106828296,
+      "ci95_low": -0.020309349533081972,
+      "ci95_high": 0.0029258873965160494
+    },
+    "return_sustained_minus_actor": {
+      "mean": 0.18273429755628107,
+      "ci95_low": 0.03925386320345153,
+      "ci95_high": 0.3262147319091106
+    },
+    "delay_sustained_minus_actor_ms": {
+      "mean": -105.7990092337667,
+      "ci95_low": -176.1536244797457,
+      "ci95_high": -35.44439398778769
+    },
+    "q_one_step_sign_agreement": 0.7,
+    "verdict": "INCONCLUSIVE_OR_MIXED"
+  },
+  {
+    "checkpoint": "C:\\Users\\PC\\Desktop\\HRL_UAV\\results\\tcom_dynamic_load_switch_v32b_formal\\formal\\seed1\\joint_td3_sac\\checkpoints\\eval_candidates\\eval_ep_0150.pt",
+    "checkpoint_episode": 150,
+    "eligible_seed_count": 20,
+    "excluded_seeds": [],
+    "q_actor_minus_zero": {
+      "mean": 0.015532761812210083,
+      "ci95_low": 0.007088797214446465,
+      "ci95_high": 0.0239767264099737
+    },
+    "return_zero_once_minus_actor": {
+      "mean": -0.022654483466347398,
+      "ci95_low": -0.031079014351877102,
+      "ci95_high": -0.014229952580817693
+    },
+    "return_sustained_minus_actor": {
+      "mean": -0.11148562332970839,
+      "ci95_low": -0.14850538185729606,
+      "ci95_high": -0.07446586480212072
+    },
+    "delay_sustained_minus_actor_ms": {
+      "mean": 1278.862560350588,
+      "ci95_low": 915.9519177595383,
+      "ci95_high": 1641.7732029416375
+    },
+    "q_one_step_sign_agreement": 0.7,
+    "verdict": "SUSTAINED_RECOVERY_NOT_VALUABLE"
+  },
+  {
+    "checkpoint": "C:\\Users\\PC\\Desktop\\HRL_UAV\\results\\tcom_dynamic_load_switch_v32b_formal\\formal\\seed1\\joint_td3_sac\\checkpoints\\eval_candidates\\eval_ep_0300.pt",
+    "checkpoint_episode": 300,
+    "eligible_seed_count": 20,
+    "excluded_seeds": [],
+    "q_actor_minus_zero": {
+      "mean": 0.08979973793029786,
+      "ci95_low": 0.08378771695621247,
+      "ci95_high": 0.09581175890438325
+    },
+    "return_zero_once_minus_actor": {
+      "mean": 0.01590026576194257,
+      "ci95_low": 0.002883770246521828,
+      "ci95_high": 0.02891676127736331
+    },
+    "return_sustained_minus_actor": {
+      "mean": -0.005499684493738943,
+      "ci95_low": -0.023881192744060004,
+      "ci95_high": 0.012881823756582117
+    },
+    "delay_sustained_minus_actor_ms": {
+      "mean": 205.85019591157226,
+      "ci95_low": 5.499102933374218,
+      "ci95_high": 406.2012888897703
+    },
+    "q_one_step_sign_agreement": 0.25,
+    "verdict": "ONE_STEP_CRITIC_RANKING_ERROR"
+  },
+  {
+    "checkpoint": "C:\\Users\\PC\\Desktop\\HRL_UAV\\results\\tcom_dynamic_load_switch_v32b_formal\\formal\\seed1\\joint_td3_sac\\checkpoints\\eval_candidates\\eval_ep_0450.pt",
+    "checkpoint_episode": 450,
+    "eligible_seed_count": 20,
+    "excluded_seeds": [],
+    "q_actor_minus_zero": {
+      "mean": 0.08855972290039063,
+      "ci95_low": 0.06756046594175905,
+      "ci95_high": 0.10955897985902222
+    },
+    "return_zero_once_minus_actor": {
+      "mean": 0.19995355805578585,
+      "ci95_low": 0.179759155186311,
+      "ci95_high": 0.2201479609252607
+    },
+    "return_sustained_minus_actor": {
+      "mean": 0.9903565184532119,
+      "ci95_low": 0.9390118411879184,
+      "ci95_high": 1.0417011957185056
+    },
+    "delay_sustained_minus_actor_ms": {
+      "mean": 3104.3614442070716,
+      "ci95_low": 2698.3717833785213,
+      "ci95_high": 3510.351105035622
+    },
+    "q_one_step_sign_agreement": 0.05,
+    "verdict": "ONE_STEP_CRITIC_RANKING_ERROR"
+  }
+]

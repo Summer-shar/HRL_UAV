@@ -1,0 +1,157 @@
+Candidate long-term research protocol
+  stage=pilot, episodes=100, seeds=[1]
+  methods=['joint_td3_sac']
+  capacity_audit={'load_scale': 1.15, 'arrival_mbits_per_macro': [143.74999999999997, 63.24999999999999, 40.24999999999999], 'compute_capacity_mbits_per_macro': [90.0, 90.0, 90.0], 'locally_overloaded': [True, False, False], 'globally_feasible': True, 'global_margin_mbits': 22.75000000000003}
+  CPU=priced_maxweight, aggregate_cpu_cap=disabled, power_constraint=system, system_average_budget=840.0W, constraint_form=pure_lagrangian, system_dual_state=1
+  deployment=arrivals+mobility, service=paused for exactly 1s
+
+[START] joint_td3_sac_s1 at 2026-08-10 20:47:35
+[INFO] Training on CUDA
+[INFO] Macro solver: centralized TD3, joint 6D centroid_waypoint action
+[INFO] Micro solver: SAC
+[INFO] TD3 exploration scope: episode
+[INFO] TD3 Actor delay aggregation: q1
+[INFO] TD3 delay target: n=5, replay_sequence_span=5
+[INFO] PPO trainer remains available as the macro-layer comparator
+[INFO] macro_comm_weight=0.0
+[INFO] Macro reward mode: strict_global
+[INFO] Objective: constrained_delay power_budget=840.00W
+[INFO] training scenario mode: independent
+[INFO] Loaded lower SAC -> C:\Users\PC\Desktop\HRL_UAV\results\tcom_dynamic_u2u_sparse_v24_dual_on\pilot\seed1\micro_pretrain\checkpoints\best.pt
+[INFO] Inherited energy dual -> 0.0
+[INFO] Lower SAC frozen; training actions are deterministic
+Episode 1 | Macro R -17.71 | Micro R -1771.29 | J 0.5904 | U2G 52.5 | Move 20.0 | Start 0.0m | CPU 10.00GHz | Psys 951.6W | Pcon 951.6W | PemaMax 951.6W | Dual 0.0000 | Noise 0.300 | Neutral 0 | Buffer 30
+Episode 2 | Macro R -16.61 | Micro R -1660.53 | J 0.5535 | U2G 59.4 | Move 19.8 | Start 0.0m | CPU 10.00GHz | Psys 943.2W | Pcon 943.2W | PemaMax 943.2W | Dual 0.0000 | Noise 0.299 | Neutral 0 | Buffer 60
+Episode 3 | Macro R -16.50 | Micro R -1649.70 | J 0.5499 | U2G 39.6 | Move 19.9 | Start 0.0m | CPU 10.00GHz | Psys 944.8W | Pcon 944.8W | PemaMax 944.8W | Dual 0.0000 | Noise 0.298 | Neutral 0 | Buffer 90
+Episode 4 | Macro R -16.27 | Micro R -1627.27 | J 0.5424 | U2G 50.4 | Move 20.0 | Start 0.0m | CPU 10.00GHz | Psys 950.0W | Pcon 950.0W | PemaMax 950.0W | Dual 0.0000 | Noise 0.297 | Neutral 0 | Buffer 120
+Episode 5 | Macro R -16.63 | Micro R -1663.03 | J 0.5543 | U2G 36.9 | Move 20.0 | Start 0.0m | CPU 10.00GHz | Psys 947.3W | Pcon 947.3W | PemaMax 947.3W | Dual 0.0000 | Noise 0.296 | Neutral 0 | Buffer 150
+Episode 6 | Macro R -16.02 | Micro R -1602.24 | J 0.5341 | U2G 38.3 | Move 20.0 | Start 0.0m | CPU 10.00GHz | Psys 946.4W | Pcon 946.4W | PemaMax 946.4W | Dual 0.0000 | Noise 0.295 | Neutral 0 | Buffer 180
+Episode 7 | Macro R -16.14 | Micro R -1614.14 | J 0.5380 | U2G 46.4 | Move 20.0 | Start 0.0m | CPU 10.00GHz | Psys 948.4W | Pcon 948.4W | PemaMax 948.4W | Dual 0.0000 | Noise 0.294 | Neutral 0 | Buffer 210
+Episode 8 | Macro R -16.05 | Micro R -1605.13 | J 0.5350 | U2G 42.9 | Move 19.8 | Start 0.0m | CPU 10.00GHz | Psys 944.8W | Pcon 944.8W | PemaMax 944.8W | Dual 0.0000 | Noise 0.294 | Neutral 0 | Buffer 240
+Episode 9 | Macro R -15.70 | Micro R -1570.47 | J 0.5235 | U2G 46.4 | Move 20.0 | Start 0.0m | CPU 10.00GHz | Psys 943.3W | Pcon 943.3W | PemaMax 943.3W | Dual 0.0000 | Noise 0.293 | Neutral 0 | Buffer 270
+Episode 10 | Macro R -16.77 | Micro R -1676.70 | J 0.5589 | U2G 48.9 | Move 20.0 | Start 0.0m | CPU 10.00GHz | Psys 946.3W | Pcon 946.3W | PemaMax 946.3W | Dual 0.0000 | Noise 0.292 | Neutral 0 | Buffer 300
+  Eval@10 | Score: -54.99 | J: 0.5499 | Dh(ms): 95.4 | Dl(ms): 528.3 | Dw(ms): 436.3 | Ttask(ms): 1136.2 | TwE2E(ms): 750.5 | Done: 8976/8988 | Dmax(ms): 634.9 | Eservice/step(J): 23.95 | Pavg(W): 833.38 | Pucb95(W): 834.87 | Pvio(W): 0.00 | Eep: 250012.84 | Coop: 0.45 | CPU sat: 0.75 | Press imbal: 0.45 | U2G: 0.81 | Decision: 1.775 ms
+  Eval task delay(ms) H/L/S/C/V: 623.4/1396.9/1180.8/743.3/1618.5 | CPU service(Mb) H/L/S/C/V: 1580.09/5841.91/3746.18/1327.07/2348.75
+Episode 11 | Macro R -17.81 | Micro R -1781.19 | J 0.5937 | U2G 54.0 | Move 20.0 | Start 0.0m | CPU 10.00GHz | Psys 954.2W | Pcon 954.2W | PemaMax 954.2W | Dual 0.0000 | Noise 0.291 | Neutral 0 | Buffer 330
+Episode 12 | Macro R -17.61 | Micro R -1760.72 | J 0.5869 | U2G 43.9 | Move 20.0 | Start 0.0m | CPU 10.00GHz | Psys 951.8W | Pcon 951.8W | PemaMax 951.8W | Dual 0.0000 | Noise 0.290 | Neutral 0 | Buffer 360
+Episode 13 | Macro R -17.05 | Micro R -1705.16 | J 0.5684 | U2G 65.9 | Move 19.9 | Start 0.0m | CPU 10.00GHz | Psys 947.5W | Pcon 947.5W | PemaMax 947.5W | Dual 0.0000 | Noise 0.289 | Neutral 0 | Buffer 390
+Episode 14 | Macro R -16.66 | Micro R -1665.77 | J 0.5553 | U2G 40.5 | Move 19.5 | Start 0.0m | CPU 10.00GHz | Psys 943.5W | Pcon 943.5W | PemaMax 943.5W | Dual 0.0000 | Noise 0.288 | Neutral 0 | Buffer 420
+Episode 15 | Macro R -16.20 | Micro R -1620.42 | J 0.5401 | U2G 40.2 | Move 20.0 | Start 0.0m | CPU 10.00GHz | Psys 945.6W | Pcon 945.6W | PemaMax 945.6W | Dual 0.0000 | Noise 0.287 | Neutral 0 | Buffer 450
+Episode 16 | Macro R -16.24 | Micro R -1623.69 | J 0.5412 | U2G 57.8 | Move 20.0 | Start 0.0m | CPU 10.00GHz | Psys 946.4W | Pcon 946.4W | PemaMax 946.4W | Dual 0.0000 | Noise 0.286 | Neutral 0 | Buffer 480
+Episode 17 | Macro R -15.37 | Micro R -1536.89 | J 0.5123 | U2G 42.9 | Move 19.9 | Start 0.0m | CPU 10.00GHz | Psys 941.8W | Pcon 941.8W | PemaMax 941.8W | Dual 0.0000 | Noise 0.285 | Neutral 0 | Buffer 510
+Episode 18 | Macro R -15.66 | Micro R -1566.33 | J 0.5221 | U2G 36.8 | Move 19.8 | Start 0.0m | CPU 10.00GHz | Psys 946.2W | Pcon 946.2W | PemaMax 946.2W | Dual 0.0000 | Noise 0.284 | Neutral 0 | Buffer 540
+Episode 19 | Macro R -16.19 | Micro R -1619.44 | J 0.5398 | U2G 59.5 | Move 19.8 | Start 0.0m | CPU 10.00GHz | Psys 942.0W | Pcon 942.0W | PemaMax 942.0W | Dual 0.0000 | Noise 0.283 | Neutral 0 | Buffer 570
+Episode 20 | Macro R -18.71 | Micro R -1871.36 | J 0.6238 | U2G 44.0 | Move 20.0 | Start 0.0m | CPU 10.00GHz | Psys 955.7W | Pcon 955.7W | PemaMax 955.7W | Dual 0.0000 | Noise 0.283 | Neutral 0 | Buffer 600
+  Eval@20 | Score: -54.99 | J: 0.5499 | Dh(ms): 95.4 | Dl(ms): 528.3 | Dw(ms): 436.3 | Ttask(ms): 1136.2 | TwE2E(ms): 750.5 | Done: 8976/8988 | Dmax(ms): 634.9 | Eservice/step(J): 23.95 | Pavg(W): 833.38 | Pucb95(W): 834.87 | Pvio(W): 0.00 | Eep: 250012.84 | Coop: 0.45 | CPU sat: 0.75 | Press imbal: 0.45 | U2G: 0.81 | Decision: 1.762 ms
+  Eval task delay(ms) H/L/S/C/V: 623.4/1396.9/1180.8/743.3/1618.5 | CPU service(Mb) H/L/S/C/V: 1580.09/5841.91/3746.18/1327.07/2348.75
+Episode 21 | Macro R -17.22 | Micro R -1722.24 | J 0.5741 | U2G 36.9 | Move 20.0 | Start 0.0m | CPU 10.00GHz | Psys 950.8W | Pcon 950.8W | PemaMax 950.8W | Dual 0.0000 | Noise 0.282 | Neutral 0 | Buffer 630
+Episode 22 | Macro R -16.70 | Micro R -1670.12 | J 0.5567 | U2G 41.7 | Move 20.0 | Start 0.0m | CPU 10.00GHz | Psys 949.5W | Pcon 949.5W | PemaMax 949.5W | Dual 0.0000 | Noise 0.281 | Neutral 0 | Buffer 660
+Episode 23 | Macro R -17.25 | Micro R -1725.01 | J 0.5750 | U2G 56.5 | Move 20.0 | Start 0.0m | CPU 10.00GHz | Psys 949.1W | Pcon 949.1W | PemaMax 949.1W | Dual 0.0000 | Noise 0.280 | Neutral 0 | Buffer 690
+Episode 24 | Macro R -16.20 | Micro R -1619.65 | J 0.5399 | U2G 49.4 | Move 19.8 | Start 0.0m | CPU 10.00GHz | Psys 947.6W | Pcon 947.6W | PemaMax 947.6W | Dual 0.0000 | Noise 0.279 | Neutral 0 | Buffer 720
+Episode 25 | Macro R -16.61 | Micro R -1660.55 | J 0.5535 | U2G 46.1 | Move 19.9 | Start 0.0m | CPU 10.00GHz | Psys 949.0W | Pcon 949.0W | PemaMax 949.0W | Dual 0.0000 | Noise 0.278 | Neutral 0 | Buffer 750
+Episode 26 | Macro R -18.45 | Micro R -1845.27 | J 0.6151 | U2G 50.9 | Move 19.8 | Start 0.0m | CPU 10.00GHz | Psys 956.2W | Pcon 956.2W | PemaMax 956.2W | Dual 0.0000 | Noise 0.277 | Neutral 0 | Buffer 780
+Episode 27 | Macro R -16.58 | Micro R -1657.79 | J 0.5526 | U2G 48.8 | Move 20.0 | Start 0.0m | CPU 10.00GHz | Psys 948.1W | Pcon 948.1W | PemaMax 948.1W | Dual 0.0000 | Noise 0.276 | Neutral 0 | Buffer 810
+Episode 28 | Macro R -15.53 | Micro R -1553.08 | J 0.5177 | U2G 45.6 | Move 19.8 | Start 0.0m | CPU 10.00GHz | Psys 937.4W | Pcon 937.4W | PemaMax 937.4W | Dual 0.0000 | Noise 0.275 | Neutral 0 | Buffer 840
+Episode 29 | Macro R -18.42 | Micro R -1841.79 | J 0.6139 | U2G 57.2 | Move 20.0 | Start 0.0m | CPU 10.00GHz | Psys 953.2W | Pcon 953.2W | PemaMax 953.2W | Dual 0.0000 | Noise 0.274 | Neutral 0 | Buffer 870
+Episode 30 | Macro R -16.13 | Micro R -1612.51 | J 0.5375 | U2G 42.2 | Move 20.0 | Start 0.0m | CPU 10.00GHz | Psys 946.2W | Pcon 946.2W | PemaMax 946.2W | Dual 0.0000 | Noise 0.273 | Neutral 0 | Buffer 900
+  Eval@30 | Score: -54.99 | J: 0.5499 | Dh(ms): 95.4 | Dl(ms): 528.3 | Dw(ms): 436.3 | Ttask(ms): 1136.2 | TwE2E(ms): 750.5 | Done: 8976/8988 | Dmax(ms): 634.9 | Eservice/step(J): 23.95 | Pavg(W): 833.38 | Pucb95(W): 834.87 | Pvio(W): 0.00 | Eep: 250012.84 | Coop: 0.45 | CPU sat: 0.75 | Press imbal: 0.45 | U2G: 0.81 | Decision: 1.756 ms
+  Eval task delay(ms) H/L/S/C/V: 623.4/1396.9/1180.8/743.3/1618.5 | CPU service(Mb) H/L/S/C/V: 1580.09/5841.91/3746.18/1327.07/2348.75
+Episode 31 | Macro R -17.49 | Micro R -1748.82 | J 0.5829 | U2G 32.9 | Move 19.8 | Start 0.0m | CPU 10.00GHz | Psys 947.7W | Pcon 947.7W | PemaMax 947.7W | Dual 0.0000 | Noise 0.272 | Neutral 0 | Buffer 930
+Episode 32 | Macro R -16.61 | Micro R -1661.40 | J 0.5538 | U2G 28.4 | Move 19.8 | Start 0.0m | CPU 10.00GHz | Psys 946.9W | Pcon 946.9W | PemaMax 946.9W | Dual 0.0000 | Noise 0.272 | Neutral 0 | Buffer 960
+Episode 33 | Macro R -15.90 | Micro R -1590.23 | J 0.5301 | U2G 47.4 | Move 20.0 | Start 0.0m | CPU 10.00GHz | Psys 946.7W | Pcon 946.7W | PemaMax 946.7W | Dual 0.0000 | Noise 0.271 | Neutral 0 | Buffer 990
+Episode 34 | Macro R -17.24 | Micro R -1724.06 | J 0.5747 | U2G 37.3 | Move 20.0 | Start 0.0m | CPU 10.00GHz | Psys 953.3W | Pcon 953.3W | PemaMax 953.3W | Dual 0.0000 | Noise 0.270 | Neutral 0 | Buffer 1020
+Episode 35 | Macro R -16.33 | Micro R -1632.71 | J 0.5442 | U2G 43.7 | Move 20.0 | Start 0.0m | CPU 10.00GHz | Psys 946.0W | Pcon 946.0W | PemaMax 946.0W | Dual 0.0000 | Noise 0.269 | Neutral 0 | Buffer 1050
+Episode 36 | Macro R -15.90 | Micro R -1590.31 | J 0.5301 | U2G 45.3 | Move 20.0 | Start 0.0m | CPU 10.00GHz | Psys 942.8W | Pcon 942.8W | PemaMax 942.8W | Dual 0.0000 | Noise 0.268 | Neutral 0 | Buffer 1080
+Episode 37 | Macro R -15.79 | Micro R -1578.84 | J 0.5263 | U2G 49.0 | Move 20.0 | Start 0.0m | CPU 10.00GHz | Psys 944.6W | Pcon 944.6W | PemaMax 944.6W | Dual 0.0000 | Noise 0.267 | Neutral 0 | Buffer 1110
+Episode 38 | Macro R -16.53 | Micro R -1653.09 | J 0.5510 | U2G 57.3 | Move 19.8 | Start 0.0m | CPU 10.00GHz | Psys 947.4W | Pcon 947.4W | PemaMax 947.4W | Dual 0.0000 | Noise 0.266 | Neutral 0 | Buffer 1140
+Episode 39 | Macro R -17.54 | Micro R -1754.27 | J 0.5848 | U2G 47.4 | Move 19.9 | Start 0.0m | CPU 10.00GHz | Psys 953.8W | Pcon 953.8W | PemaMax 953.8W | Dual 0.0000 | Noise 0.265 | Neutral 0 | Buffer 1170
+Episode 40 | Macro R -16.05 | Micro R -1605.31 | J 0.5351 | U2G 48.8 | Move 19.9 | Start 0.0m | CPU 10.00GHz | Psys 944.8W | Pcon 944.8W | PemaMax 944.8W | Dual 0.0000 | Noise 0.264 | Neutral 0 | Buffer 1200
+  Eval@40 | Score: -54.99 | J: 0.5499 | Dh(ms): 95.4 | Dl(ms): 528.3 | Dw(ms): 436.3 | Ttask(ms): 1136.2 | TwE2E(ms): 750.5 | Done: 8976/8988 | Dmax(ms): 634.9 | Eservice/step(J): 23.95 | Pavg(W): 833.38 | Pucb95(W): 834.87 | Pvio(W): 0.00 | Eep: 250012.84 | Coop: 0.45 | CPU sat: 0.75 | Press imbal: 0.45 | U2G: 0.81 | Decision: 1.750 ms
+  Eval task delay(ms) H/L/S/C/V: 623.4/1396.9/1180.8/743.3/1618.5 | CPU service(Mb) H/L/S/C/V: 1580.09/5841.91/3746.18/1327.07/2348.75
+Episode 41 | Macro R -17.99 | Micro R -1798.95 | J 0.5997 | U2G 39.8 | Move 20.0 | Start 0.0m | CPU 10.00GHz | Psys 948.0W | Pcon 948.0W | PemaMax 948.0W | Dual 0.0000 | Noise 0.263 | Neutral 0 | Buffer 1230
+Episode 42 | Macro R -16.14 | Micro R -1613.76 | J 0.5379 | U2G 38.4 | Move 20.0 | Start 0.0m | CPU 10.00GHz | Psys 946.2W | Pcon 946.2W | PemaMax 946.2W | Dual 0.0000 | Noise 0.262 | Neutral 0 | Buffer 1260
+Episode 43 | Macro R -16.07 | Micro R -1606.57 | J 0.5355 | U2G 39.2 | Move 19.9 | Start 0.0m | CPU 10.00GHz | Psys 945.3W | Pcon 945.3W | PemaMax 945.3W | Dual 0.0000 | Noise 0.262 | Neutral 0 | Buffer 1290
+Episode 44 | Macro R -16.39 | Micro R -1639.09 | J 0.5464 | U2G 39.2 | Move 20.0 | Start 0.0m | CPU 10.00GHz | Psys 952.9W | Pcon 952.9W | PemaMax 952.9W | Dual 0.0000 | Noise 0.261 | Neutral 0 | Buffer 1320
+Episode 45 | Macro R -16.77 | Micro R -1677.28 | J 0.5591 | U2G 46.5 | Move 20.0 | Start 0.0m | CPU 10.00GHz | Psys 949.9W | Pcon 949.9W | PemaMax 949.9W | Dual 0.0000 | Noise 0.260 | Neutral 0 | Buffer 1350
+Episode 46 | Macro R -16.45 | Micro R -1645.32 | J 0.5484 | U2G 56.9 | Move 19.8 | Start 0.0m | CPU 10.00GHz | Psys 944.3W | Pcon 944.3W | PemaMax 944.3W | Dual 0.0000 | Noise 0.259 | Neutral 0 | Buffer 1380
+Episode 47 | Macro R -17.06 | Micro R -1705.70 | J 0.5686 | U2G 40.1 | Move 19.9 | Start 0.0m | CPU 10.00GHz | Psys 950.7W | Pcon 950.7W | PemaMax 950.7W | Dual 0.0000 | Noise 0.258 | Neutral 0 | Buffer 1410
+Episode 48 | Macro R -17.69 | Micro R -1769.02 | J 0.5897 | U2G 50.6 | Move 19.9 | Start 0.0m | CPU 10.00GHz | Psys 950.5W | Pcon 950.5W | PemaMax 950.5W | Dual 0.0000 | Noise 0.257 | Neutral 0 | Buffer 1440
+Episode 49 | Macro R -16.60 | Micro R -1659.66 | J 0.5532 | U2G 48.7 | Move 20.0 | Start 0.0m | CPU 10.00GHz | Psys 949.8W | Pcon 949.8W | PemaMax 949.8W | Dual 0.0000 | Noise 0.256 | Neutral 0 | Buffer 1470
+Episode 50 | Macro R -15.60 | Micro R -1560.30 | J 0.5201 | U2G 39.2 | Move 20.0 | Start 0.0m | CPU 10.00GHz | Psys 943.9W | Pcon 943.9W | PemaMax 943.9W | Dual 0.0000 | Noise 0.255 | Neutral 0 | Buffer 1500
+  Eval@50 | Score: -54.99 | J: 0.5499 | Dh(ms): 95.4 | Dl(ms): 528.3 | Dw(ms): 436.3 | Ttask(ms): 1136.2 | TwE2E(ms): 750.5 | Done: 8976/8988 | Dmax(ms): 634.9 | Eservice/step(J): 23.95 | Pavg(W): 833.38 | Pucb95(W): 834.87 | Pvio(W): 0.00 | Eep: 250012.84 | Coop: 0.45 | CPU sat: 0.75 | Press imbal: 0.45 | U2G: 0.81 | Decision: 1.769 ms
+  Eval task delay(ms) H/L/S/C/V: 623.4/1396.9/1180.8/743.3/1618.5 | CPU service(Mb) H/L/S/C/V: 1580.09/5841.91/3746.18/1327.07/2348.75
+Episode 51 | Macro R -18.57 | Micro R -1857.05 | J 0.6190 | U2G 93.1 | Move 9.1 | Start 0.0m | CPU 10.00GHz | Psys 855.7W | Pcon 855.7W | PemaMax 855.7W | Dual 0.0187 | Noise 0.254 | Neutral 0 | Buffer 1530
+Episode 52 | Macro R -17.52 | Micro R -1751.97 | J 0.5840 | U2G 86.7 | Move 8.5 | Start 0.0m | CPU 10.00GHz | Psys 851.3W | Pcon 851.3W | PemaMax 853.5W | Dual 0.0348 | Noise 0.253 | Neutral 0 | Buffer 1560
+Episode 53 | Macro R -30.91 | Micro R -3091.50 | J 1.0305 | U2G 71.0 | Move 8.4 | Start 0.0m | CPU 10.00GHz | Psys 844.3W | Pcon 844.3W | PemaMax 850.4W | Dual 0.0472 | Noise 0.252 | Neutral 0 | Buffer 1590
+Episode 54 | Macro R -16.50 | Micro R -1650.33 | J 0.5501 | U2G 54.3 | Move 7.1 | Start 0.0m | CPU 10.00GHz | Psys 827.6W | Pcon 827.6W | PemaMax 844.7W | Dual 0.0528 | Noise 0.251 | Neutral 0 | Buffer 1620
+Episode 55 | Macro R -16.72 | Micro R -1671.74 | J 0.5572 | U2G 55.1 | Move 7.6 | Start 0.0m | CPU 10.00GHz | Psys 832.7W | Pcon 832.7W | PemaMax 842.3W | Dual 0.0556 | Noise 0.251 | Neutral 0 | Buffer 1650
+Episode 56 | Macro R -17.09 | Micro R -1709.49 | J 0.5698 | U2G 57.1 | Move 7.9 | Start 0.0m | CPU 10.00GHz | Psys 834.9W | Pcon 834.9W | PemaMax 841.1W | Dual 0.0569 | Noise 0.250 | Neutral 0 | Buffer 1680
+Episode 57 | Macro R -16.33 | Micro R -1633.15 | J 0.5444 | U2G 86.9 | Move 8.8 | Start 0.0m | CPU 10.00GHz | Psys 833.5W | Pcon 833.5W | PemaMax 840.0W | Dual 0.0569 | Noise 0.249 | Neutral 0 | Buffer 1710
+Episode 58 | Macro R -15.99 | Micro R -1598.64 | J 0.5329 | U2G 34.9 | Move 7.1 | Start 0.0m | CPU 10.00GHz | Psys 823.7W | Pcon 823.7W | PemaMax 838.0W | Dual 0.0545 | Noise 0.248 | Neutral 0 | Buffer 1740
+Episode 59 | Macro R -16.72 | Micro R -1671.83 | J 0.5573 | U2G 57.6 | Move 8.4 | Start 0.0m | CPU 10.00GHz | Psys 834.7W | Pcon 834.7W | PemaMax 837.6W | Dual 0.0517 | Noise 0.247 | Neutral 0 | Buffer 1770
+Episode 60 | Macro R -18.09 | Micro R -1809.45 | J 0.6031 | U2G 78.7 | Move 8.5 | Start 0.0m | CPU 10.00GHz | Psys 843.1W | Pcon 843.1W | PemaMax 838.2W | Dual 0.0495 | Noise 0.246 | Neutral 0 | Buffer 1800
+  Eval@60 | Score: -56.29 | J: 0.5622 | Dh(ms): 100.2 | Dl(ms): 566.3 | Dw(ms): 467.3 | Ttask(ms): 1170.9 | TwE2E(ms): 766.0 | Done: 8975/8988 | Dmax(ms): 666.2 | Eservice/step(J): 23.33 | Pavg(W): 827.18 | Pucb95(W): 828.86 | Pvio(W): 0.00 | Eep: 248154.54 | Coop: 0.46 | CPU sat: 0.68 | Press imbal: 0.42 | U2G: 0.81 | Decision: 1.763 ms
+  Eval task delay(ms) H/L/S/C/V: 632.4/1444.6/1221.5/760.6/1663.5 | CPU service(Mb) H/L/S/C/V: 1580.07/5840.90/3745.52/1327.05/2348.40
+Episode 61 | Macro R -17.56 | Micro R -1755.54 | J 0.5852 | U2G 49.3 | Move 8.0 | Start 0.0m | CPU 10.00GHz | Psys 844.5W | Pcon 844.5W | PemaMax 838.7W | Dual 0.0480 | Noise 0.245 | Neutral 0 | Buffer 1830
+Episode 62 | Macro R -18.05 | Micro R -1804.92 | J 0.6016 | U2G 49.3 | Move 7.4 | Start 0.0m | CPU 10.00GHz | Psys 835.1W | Pcon 835.1W | PemaMax 838.4W | Dual 0.0461 | Noise 0.244 | Neutral 0 | Buffer 1860
+Episode 63 | Macro R -16.58 | Micro R -1657.65 | J 0.5526 | U2G 76.4 | Move 8.5 | Start 0.0m | CPU 10.00GHz | Psys 835.0W | Pcon 835.0W | PemaMax 838.2W | Dual 0.0439 | Noise 0.243 | Neutral 0 | Buffer 1890
+Episode 64 | Macro R -18.14 | Micro R -1813.91 | J 0.6046 | U2G 66.1 | Move 9.0 | Start 0.0m | CPU 10.00GHz | Psys 839.9W | Pcon 839.9W | PemaMax 838.3W | Dual 0.0419 | Noise 0.242 | Neutral 0 | Buffer 1920
+Episode 65 | Macro R -18.60 | Micro R -1860.11 | J 0.6200 | U2G 68.9 | Move 8.0 | Start 0.0m | CPU 10.00GHz | Psys 840.0W | Pcon 840.0W | PemaMax 838.4W | Dual 0.0400 | Noise 0.241 | Neutral 0 | Buffer 1950
+Episode 66 | Macro R -16.52 | Micro R -1651.71 | J 0.5506 | U2G 89.7 | Move 9.4 | Start 0.0m | CPU 10.00GHz | Psys 845.8W | Pcon 845.8W | PemaMax 838.9W | Dual 0.0387 | Noise 0.240 | Neutral 0 | Buffer 1980
+Episode 67 | Macro R -19.38 | Micro R -1937.94 | J 0.6460 | U2G 60.3 | Move 7.5 | Start 0.0m | CPU 10.00GHz | Psys 842.4W | Pcon 842.4W | PemaMax 839.1W | Dual 0.0376 | Noise 0.239 | Neutral 0 | Buffer 2010
+Episode 68 | Macro R -16.75 | Micro R -1674.92 | J 0.5583 | U2G 52.9 | Move 8.1 | Start 0.0m | CPU 10.00GHz | Psys 834.8W | Pcon 834.8W | PemaMax 838.8W | Dual 0.0362 | Noise 0.239 | Neutral 0 | Buffer 2040
+Episode 69 | Macro R -18.58 | Micro R -1857.89 | J 0.6193 | U2G 54.3 | Move 7.8 | Start 0.0m | CPU 10.00GHz | Psys 851.8W | Pcon 851.8W | PemaMax 839.5W | Dual 0.0356 | Noise 0.238 | Neutral 0 | Buffer 2070
+Episode 70 | Macro R -17.55 | Micro R -1755.10 | J 0.5850 | U2G 112.8 | Move 8.6 | Start 0.0m | CPU 10.00GHz | Psys 846.0W | Pcon 846.0W | PemaMax 839.8W | Dual 0.0354 | Noise 0.237 | Neutral 0 | Buffer 2100
+  Eval@70 | Score: -56.94 | J: 0.5694 | Dh(ms): 95.7 | Dl(ms): 533.3 | Dw(ms): 440.3 | Ttask(ms): 1170.7 | TwE2E(ms): 773.7 | Done: 8975/8988 | Dmax(ms): 641.6 | Eservice/step(J): 23.68 | Pavg(W): 839.03 | Pucb95(W): 840.70 | Pvio(W): 0.00 | Eep: 251708.69 | Coop: 0.46 | CPU sat: 0.71 | Press imbal: 0.44 | U2G: 52.27 | Decision: 1.767 ms
+  Eval task delay(ms) H/L/S/C/V: 642.8/1439.0/1215.6/759.1/1680.6 | CPU service(Mb) H/L/S/C/V: 1580.03/5840.98/3745.79/1326.96/2348.26
+Episode 71 | Macro R -16.04 | Micro R -1604.16 | J 0.5347 | U2G 53.4 | Move 6.6 | Start 0.0m | CPU 10.00GHz | Psys 834.2W | Pcon 834.2W | PemaMax 838.8W | Dual 0.0340 | Noise 0.236 | Neutral 0 | Buffer 2130
+Episode 72 | Macro R -17.94 | Micro R -1794.02 | J 0.5980 | U2G 80.8 | Move 8.1 | Start 0.0m | CPU 10.00GHz | Psys 843.9W | Pcon 843.9W | PemaMax 838.4W | Dual 0.0321 | Noise 0.235 | Neutral 0 | Buffer 2160
+Episode 73 | Macro R -16.15 | Micro R -1615.06 | J 0.5384 | U2G 96.9 | Move 8.3 | Start 0.0m | CPU 10.00GHz | Psys 841.8W | Pcon 841.8W | PemaMax 838.3W | Dual 0.0300 | Noise 0.234 | Neutral 0 | Buffer 2190
+Episode 74 | Macro R -18.38 | Micro R -1838.30 | J 0.6128 | U2G 105.2 | Move 8.2 | Start 0.0m | CPU 10.00GHz | Psys 846.4W | Pcon 846.4W | PemaMax 839.2W | Dual 0.0291 | Noise 0.233 | Neutral 0 | Buffer 2220
+Episode 75 | Macro R -17.86 | Micro R -1786.08 | J 0.5954 | U2G 132.2 | Move 9.5 | Start 0.0m | CPU 10.00GHz | Psys 853.0W | Pcon 853.0W | PemaMax 840.2W | Dual 0.0293 | Noise 0.232 | Neutral 0 | Buffer 2250
+Episode 76 | Macro R -19.12 | Micro R -1912.30 | J 0.6374 | U2G 141.9 | Move 9.2 | Start 0.0m | CPU 10.00GHz | Psys 855.6W | Pcon 855.6W | PemaMax 841.3W | Dual 0.0309 | Noise 0.231 | Neutral 0 | Buffer 2280
+Episode 77 | Macro R -17.18 | Micro R -1717.93 | J 0.5726 | U2G 129.7 | Move 9.6 | Start 0.0m | CPU 10.00GHz | Psys 850.1W | Pcon 850.1W | PemaMax 842.1W | Dual 0.0333 | Noise 0.230 | Neutral 0 | Buffer 2310
+Episode 78 | Macro R -17.76 | Micro R -1776.29 | J 0.5921 | U2G 146.5 | Move 10.0 | Start 0.0m | CPU 10.00GHz | Psys 856.9W | Pcon 856.9W | PemaMax 843.8W | Dual 0.0378 | Noise 0.229 | Neutral 0 | Buffer 2340
+Episode 79 | Macro R -18.60 | Micro R -1859.51 | J 0.6198 | U2G 138.3 | Move 9.9 | Start 0.0m | CPU 10.00GHz | Psys 850.0W | Pcon 850.0W | PemaMax 844.5W | Dual 0.0432 | Noise 0.228 | Neutral 0 | Buffer 2370
+Episode 80 | Macro R -16.94 | Micro R -1693.87 | J 0.5646 | U2G 124.1 | Move 9.6 | Start 0.0m | CPU 10.00GHz | Psys 842.4W | Pcon 842.4W | PemaMax 844.5W | Dual 0.0485 | Noise 0.228 | Neutral 0 | Buffer 2400
+  Eval@80 | Score: -61.65 | J: 0.6169 | Dh(ms): 92.0 | Dl(ms): 539.2 | Dw(ms): 444.1 | Ttask(ms): 1273.0 | TwE2E(ms): 829.4 | Done: 8973/8988 | Dmax(ms): 590.7 | Eservice/step(J): 23.24 | Pavg(W): 846.89 | Pucb95(W): 848.56 | Pvio(W): 6.89 | Eep: 254066.44 | Coop: 0.43 | CPU sat: 0.67 | Press imbal: 0.41 | U2G: 115.73 | Decision: 1.779 ms
+  Eval task delay(ms) H/L/S/C/V: 683.1/1573.0/1326.8/800.5/1852.6 | CPU service(Mb) H/L/S/C/V: 1579.95/5838.00/3743.93/1326.97/2347.04
+Episode 81 | Macro R -17.89 | Micro R -1788.51 | J 0.5962 | U2G 140.4 | Move 9.5 | Start 0.0m | CPU 10.00GHz | Psys 844.5W | Pcon 844.5W | PemaMax 844.5W | Dual 0.0539 | Noise 0.227 | Neutral 0 | Buffer 2430
+Episode 82 | Macro R -16.62 | Micro R -1661.83 | J 0.5539 | U2G 89.2 | Move 8.7 | Start 0.0m | CPU 10.00GHz | Psys 833.6W | Pcon 833.6W | PemaMax 844.4W | Dual 0.0591 | Noise 0.226 | Neutral 0 | Buffer 2460
+Episode 83 | Macro R -16.84 | Micro R -1684.43 | J 0.5615 | U2G 43.3 | Move 7.4 | Start 0.0m | CPU 10.00GHz | Psys 825.8W | Pcon 825.8W | PemaMax 843.9W | Dual 0.0638 | Noise 0.225 | Neutral 0 | Buffer 2490
+Episode 84 | Macro R -19.20 | Micro R -1920.16 | J 0.6401 | U2G 76.1 | Move 8.9 | Start 0.0m | CPU 10.00GHz | Psys 842.2W | Pcon 842.2W | PemaMax 844.1W | Dual 0.0687 | Noise 0.224 | Neutral 0 | Buffer 2520
+Episode 85 | Macro R -19.23 | Micro R -1922.61 | J 0.6409 | U2G 103.5 | Move 8.9 | Start 0.0m | CPU 10.00GHz | Psys 837.6W | Pcon 837.6W | PemaMax 843.9W | Dual 0.0734 | Noise 0.223 | Neutral 0 | Buffer 2550
+Episode 86 | Macro R -17.06 | Micro R -1706.05 | J 0.5687 | U2G 104.1 | Move 8.3 | Start 0.0m | CPU 10.00GHz | Psys 825.8W | Pcon 825.8W | PemaMax 842.9W | Dual 0.0769 | Noise 0.222 | Neutral 0 | Buffer 2580
+Episode 87 | Macro R -17.46 | Micro R -1745.99 | J 0.5820 | U2G 71.7 | Move 7.9 | Start 0.0m | CPU 10.00GHz | Psys 828.2W | Pcon 828.2W | PemaMax 842.2W | Dual 0.0795 | Noise 0.221 | Neutral 0 | Buffer 2610
+Episode 88 | Macro R -18.98 | Micro R -1898.19 | J 0.6327 | U2G 81.5 | Move 8.1 | Start 0.0m | CPU 10.00GHz | Psys 837.3W | Pcon 837.3W | PemaMax 842.4W | Dual 0.0824 | Noise 0.220 | Neutral 0 | Buffer 2640
+Episode 89 | Macro R -18.66 | Micro R -1865.51 | J 0.6218 | U2G 67.7 | Move 7.6 | Start 0.0m | CPU 10.00GHz | Psys 831.7W | Pcon 831.7W | PemaMax 841.4W | Dual 0.0840 | Noise 0.219 | Neutral 0 | Buffer 2670
+Episode 90 | Macro R -17.91 | Micro R -1790.88 | J 0.5970 | U2G 54.6 | Move 7.8 | Start 0.0m | CPU 10.00GHz | Psys 827.3W | Pcon 827.3W | PemaMax 840.4W | Dual 0.0845 | Noise 0.218 | Neutral 0 | Buffer 2700
+  Eval@90 | Score: -60.73 | J: 0.6061 | Dh(ms): 109.7 | Dl(ms): 637.3 | Dw(ms): 525.2 | Ttask(ms): 1262.1 | TwE2E(ms): 818.5 | Done: 8973/8988 | Dmax(ms): 730.9 | Eservice/step(J): 22.69 | Pavg(W): 828.77 | Pucb95(W): 830.80 | Pvio(W): 0.00 | Eep: 248631.36 | Coop: 0.48 | CPU sat: 0.60 | Press imbal: 0.36 | U2G: 55.80 | Decision: 1.669 ms
+  Eval task delay(ms) H/L/S/C/V: 672.2/1562.0/1320.0/803.4/1809.2 | CPU service(Mb) H/L/S/C/V: 1579.93/5838.50/3743.90/1326.87/2347.66
+Episode 91 | Macro R -17.60 | Micro R -1760.48 | J 0.5868 | U2G 101.3 | Move 8.2 | Start 0.0m | CPU 10.00GHz | Psys 823.6W | Pcon 823.6W | PemaMax 839.9W | Dual 0.0843 | Noise 0.217 | Neutral 0 | Buffer 2730
+Episode 92 | Macro R -16.94 | Micro R -1693.59 | J 0.5645 | U2G 33.4 | Move 7.1 | Start 0.0m | CPU 10.00GHz | Psys 821.2W | Pcon 821.2W | PemaMax 838.8W | Dual 0.0829 | Noise 0.217 | Neutral 0 | Buffer 2760
+Episode 93 | Macro R -17.26 | Micro R -1726.43 | J 0.5755 | U2G 30.8 | Move 6.9 | Start 0.0m | CPU 10.00GHz | Psys 820.7W | Pcon 820.7W | PemaMax 837.7W | Dual 0.0801 | Noise 0.216 | Neutral 0 | Buffer 2790
+Episode 94 | Macro R -18.57 | Micro R -1857.50 | J 0.6192 | U2G 89.4 | Move 8.7 | Start 0.0m | CPU 10.00GHz | Psys 829.1W | Pcon 829.1W | PemaMax 836.8W | Dual 0.0763 | Noise 0.215 | Neutral 0 | Buffer 2820
+Episode 95 | Macro R -18.22 | Micro R -1821.79 | J 0.6073 | U2G 104.5 | Move 8.6 | Start 0.0m | CPU 10.00GHz | Psys 841.8W | Pcon 841.8W | PemaMax 836.3W | Dual 0.0719 | Noise 0.214 | Neutral 0 | Buffer 2850
+Episode 96 | Macro R -16.00 | Micro R -1600.28 | J 0.5334 | U2G 75.0 | Move 8.0 | Start 0.0m | CPU 10.00GHz | Psys 822.4W | Pcon 822.4W | PemaMax 834.6W | Dual 0.0655 | Noise 0.213 | Neutral 0 | Buffer 2880
+Episode 97 | Macro R -17.16 | Micro R -1715.69 | J 0.5719 | U2G 66.8 | Move 8.1 | Start 0.0m | CPU 10.00GHz | Psys 835.7W | Pcon 835.7W | PemaMax 833.9W | Dual 0.0582 | Noise 0.212 | Neutral 0 | Buffer 2910
+Episode 98 | Macro R -17.76 | Micro R -1775.72 | J 0.5919 | U2G 67.6 | Move 8.3 | Start 0.0m | CPU 10.00GHz | Psys 844.0W | Pcon 844.0W | PemaMax 833.2W | Dual 0.0502 | Noise 0.211 | Neutral 0 | Buffer 2940
+Episode 99 | Macro R -16.72 | Micro R -1671.90 | J 0.5573 | U2G 35.3 | Move 7.0 | Start 0.0m | CPU 10.00GHz | Psys 828.0W | Pcon 828.0W | PemaMax 832.1W | Dual 0.0408 | Noise 0.210 | Neutral 0 | Buffer 2970
+Episode 100 | Macro R -16.59 | Micro R -1659.09 | J 0.5530 | U2G 46.7 | Move 7.2 | Start 0.0m | CPU 10.00GHz | Psys 833.3W | Pcon 833.3W | PemaMax 831.7W | Dual 0.0309 | Noise 0.209 | Neutral 0 | Buffer 3000
+  Saved trajectory data -> C:\Users\PC\Desktop\HRL_UAV\results\tcom_dynamic_u2u_sparse_v32a_treatment_n5/pilot/seed1/joint_td3_sac\trajectory_snapshots\trajectory_ep_0100.npz (814.9 KB)
+  Saved trajectory figure -> C:\Users\PC\Desktop\HRL_UAV\results\tcom_dynamic_u2u_sparse_v32a_treatment_n5/pilot/seed1/joint_td3_sac\trajectory_snapshots\trajectory_ep_0100.png (332.2 KB)
+  Eval@100 | Score: -55.96 | J: 0.5595 | Dh(ms): 95.1 | Dl(ms): 522.8 | Dw(ms): 431.9 | Ttask(ms): 1145.2 | TwE2E(ms): 762.1 | Done: 8976/8988 | Dmax(ms): 633.4 | Eservice/step(J): 23.76 | Pavg(W): 837.54 | Pucb95(W): 839.30 | Pvio(W): 0.00 | Eep: 251262.50 | Coop: 0.46 | CPU sat: 0.73 | Press imbal: 0.44 | U2G: 45.95 | Decision: 1.778 ms
+  Eval task delay(ms) H/L/S/C/V: 635.7/1404.2/1189.2/745.1/1640.2 | CPU service(Mb) H/L/S/C/V: 1580.09/5841.23/3745.76/1327.07/2348.49
+Saved macro replay audit -> C:\Users\PC\Desktop\HRL_UAV\results\tcom_dynamic_u2u_sparse_v32a_treatment_n5/pilot/seed1/joint_td3_sac\checkpoints\macro_replay.npz
+  Saved trajectory data -> C:\Users\PC\Desktop\HRL_UAV\results\tcom_dynamic_u2u_sparse_v32a_treatment_n5/pilot/seed1/joint_td3_sac\trajectory_snapshots\trajectory_final.npz (808.4 KB)
+  Saved trajectory figure -> C:\Users\PC\Desktop\HRL_UAV\results\tcom_dynamic_u2u_sparse_v32a_treatment_n5/pilot/seed1/joint_td3_sac\trajectory_snapshots\trajectory_final.png (325.9 KB)
+  Saved trajectory data -> C:\Users\PC\Desktop\HRL_UAV\results\tcom_dynamic_u2u_sparse_v32a_treatment_n5/pilot/seed1/joint_td3_sac\trajectory_snapshots\trajectory_best.npz (808.4 KB)
+  Saved trajectory figure -> C:\Users\PC\Desktop\HRL_UAV\results\tcom_dynamic_u2u_sparse_v32a_treatment_n5/pilot/seed1/joint_td3_sac\trajectory_snapshots\trajectory_best.png (318.2 KB)
+Saved evaluation CSV -> C:\Users\PC\Desktop\HRL_UAV\results\tcom_dynamic_u2u_sparse_v32a_treatment_n5/pilot/seed1/joint_td3_sac\eval_central_td3.csv
+Saved per-episode training CSV -> C:\Users\PC\Desktop\HRL_UAV\results\tcom_dynamic_u2u_sparse_v32a_treatment_n5/pilot/seed1/joint_td3_sac\train_td3.csv
+Best fixed-evaluation rank -> (0, 0.5498732166666667)
+Training complete.
+[OK] joint_td3_sac_s1 in 1593.5s; log=C:\Users\PC\Desktop\HRL_UAV\results\tcom_dynamic_u2u_sparse_v32a_treatment_n5\_logs\pilot\joint_td3_sac_s1.log
+
+Summary
+  [OK] joint_td3_sac_s1

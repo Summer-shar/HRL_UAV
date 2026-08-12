@@ -1,6 +1,7 @@
 import argparse
 import copy
 import csv
+import hashlib
 import json
 import os
 import sys
@@ -21,7 +22,11 @@ PROJECT_ROOT = bootstrap()
 
 from compare_common import EvaluationHistory
 from compare_common import add_common_args
+from compare_common import advance_load_switch_before_macro
+from compare_common import append_load_switch_trace
 from compare_common import evaluate_policy
+from compare_common import initialize_episode_load_switch
+from compare_common import initialize_load_switch_trace
 from compare_common import make_env_from_args
 from compare_common import prepare_results_dirs
 from compare_common import print_evaluation_summary
@@ -32,6 +37,7 @@ from hrl_uav.agents.sac_agent import Actor as SAC_Actor
 from hrl_uav.agents.sac_agent import Critic as SAC_Critic
 from hrl_uav.agents.sac_agent import Entroy as SAC_Entropy
 from hrl_uav.agents.sac_agent import Memory as SAC_Memory
+from hrl_uav.load_switching import apply_load_switch_phase
 import hrl_uav.agents.sac_agent as sac_agent_mod
 from train_centralized_macro import SAC_MEMORY_CAPACITY
 from train_centralized_macro import SAC_MEMORY_WARMUP
@@ -113,8 +119,14 @@ TRAIN_LOG_FIELDS = [
     "start_offset_max_m",
     "load_scale",
     "cpu_ghz",
+    "load_switch_mode",
+    "load_switch_count",
+    "load_switch_steps",
+    "load_switch_dwell_steps",
     "deployment_transient_energy_episode_j",
     "exploration_noise",
+    "td3_neutral_episode",
+    "td3_neutral_episode_fraction_cumulative",
     "td3_actor_loss",
     "td3_critic_loss",
     "td3_delay_critic_loss",
@@ -141,6 +153,8 @@ TRAIN_LOG_FIELDS = [
     "td3_delay_q_actor_preference_fraction",
     "td3_delay_q_twin_gap_actor_mean",
     "td3_delay_q_twin_gap_zero_mean",
+    "td3_delay_q1_minus_q2_actor_mean",
+    "td3_delay_q1_minus_q2_zero_mean",
     "td3_energy_q_actor_minus_zero_mean",
     "td3_energy_q_twin_gap_actor_mean",
     "td3_energy_q_twin_gap_zero_mean",
@@ -181,6 +195,21 @@ TRAIN_LOG_FIELDS = [
     "episode_seconds",
 ]
 
+NSTEP_DIAGNOSTIC_FIELDS = [
+    "episode",
+    "delay_n_step",
+    "sequence_span",
+    "age_bucket",
+    "samples",
+    "y5_minus_y1_mean",
+    "abs_y5_minus_y1_mean",
+    "q_y5_gap_abs_mean",
+    "policy_mismatch_mean",
+    "sequence_resamples",
+    "sample_start_sha256",
+    "target_noise_sha256",
+]
+
 
 def initialize_training_log(path):
     os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -192,6 +221,83 @@ def append_training_log(path, row):
     with open(path, "a", newline="", encoding="utf-8") as fp:
         writer = csv.DictWriter(fp, fieldnames=TRAIN_LOG_FIELDS)
         writer.writerow({field: row.get(field, "") for field in TRAIN_LOG_FIELDS})
+
+
+def initialize_nstep_diagnostic_log(path):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", newline="", encoding="utf-8") as fp:
+        csv.DictWriter(fp, fieldnames=NSTEP_DIAGNOSTIC_FIELDS).writeheader()
+
+
+def append_nstep_diagnostic_log(path, rows):
+    if not rows:
+        return
+    with open(path, "a", newline="", encoding="utf-8") as fp:
+        writer = csv.DictWriter(fp, fieldnames=NSTEP_DIAGNOSTIC_FIELDS)
+        for row in rows:
+            writer.writerow(
+                {field: row.get(field, "") for field in NSTEP_DIAGNOSTIC_FIELDS}
+            )
+
+
+def summarize_nstep_diagnostics(records, episode, delay_n_step, sequence_span):
+    if not records:
+        return []
+    ages = np.concatenate([record["age"] for record in records]).astype(int)
+    target_delta = np.concatenate(
+        [record["y5_minus_y1"] for record in records]
+    ).astype(float)
+    q_y5_gap = np.concatenate(
+        [record["q_y5_gap_abs"] for record in records]
+    ).astype(float)
+    mismatch = np.concatenate(
+        [record["policy_mismatch"] for record in records]
+    ).astype(float)
+    resamples = int(sum(record["sequence_resamples"] for record in records))
+
+    def combined_hash(field):
+        digest = hashlib.sha256()
+        for record in records:
+            digest.update(str(record[field]).encode("ascii"))
+        return digest.hexdigest()
+
+    sample_start_sha256 = combined_hash("sample_start_sha256")
+    target_noise_sha256 = combined_hash("target_noise_sha256")
+    buckets = (
+        ("0-4", (ages >= 0) & (ages <= 4)),
+        ("5-14", (ages >= 5) & (ages <= 14)),
+        ("15-29", (ages >= 15) & (ages <= 29)),
+        (">=30", ages >= 30),
+    )
+    rows = []
+    for label, selected in buckets:
+        if not np.any(selected):
+            continue
+        selected_mismatch = mismatch[selected]
+        finite_mismatch = selected_mismatch[np.isfinite(selected_mismatch)]
+        rows.append(
+            {
+                "episode": int(episode),
+                "delay_n_step": int(delay_n_step),
+                "sequence_span": int(sequence_span),
+                "age_bucket": label,
+                "samples": int(np.sum(selected)),
+                "y5_minus_y1_mean": float(np.mean(target_delta[selected])),
+                "abs_y5_minus_y1_mean": float(
+                    np.mean(np.abs(target_delta[selected]))
+                ),
+                "q_y5_gap_abs_mean": float(np.mean(q_y5_gap[selected])),
+                "policy_mismatch_mean": (
+                    float(np.mean(finite_mismatch))
+                    if finite_mismatch.size
+                    else np.nan
+                ),
+                "sequence_resamples": resamples,
+                "sample_start_sha256": sample_start_sha256,
+                "target_noise_sha256": target_noise_sha256,
+            }
+        )
+    return rows
 
 
 def project_unit_disk_torch(action, num_agents):
@@ -259,7 +365,14 @@ class TwinCritic(nn.Module):
 
 
 class MacroReplayBuffer:
-    def __init__(self, state_dim, action_dim, capacity, energy_dim=1):
+    def __init__(
+        self,
+        state_dim,
+        action_dim,
+        capacity,
+        energy_dim=1,
+        rng=None,
+    ):
         self.capacity = int(capacity)
         self.state = np.zeros((self.capacity, int(state_dim)), dtype=np.float32)
         self.action = np.zeros((self.capacity, int(action_dim)), dtype=np.float32)
@@ -273,10 +386,30 @@ class MacroReplayBuffer:
             (self.capacity, int(state_dim)), dtype=np.float32
         )
         self.done = np.zeros((self.capacity, 1), dtype=np.float32)
+        self.episode_index = np.full(self.capacity, -1, dtype=np.int32)
+        self.macro_index = np.full(self.capacity, -1, dtype=np.int16)
+        self.neutral_episode = np.zeros(self.capacity, dtype=np.uint8)
         self.position = 0
         self.size = 0
+        self.rng = np.random if rng is None else rng
 
-    def add(self, state, action, reward, next_state, done, energy_ratio=0.0):
+    def _integers(self, low, high, size=None):
+        if isinstance(self.rng, np.random.Generator):
+            return self.rng.integers(low, high, size=size)
+        return self.rng.randint(low, high, size=size)
+
+    def add(
+        self,
+        state,
+        action,
+        reward,
+        next_state,
+        done,
+        energy_ratio=0.0,
+        episode_index=-1,
+        macro_index=-1,
+        neutral_episode=False,
+    ):
         index = self.position
         self.state[index] = np.asarray(state, dtype=np.float32).reshape(-1)
         self.action[index] = np.asarray(action, dtype=np.float32).reshape(-1)
@@ -292,11 +425,42 @@ class MacroReplayBuffer:
         self.energy_ratio[index] = energy_values
         self.next_state[index] = np.asarray(next_state, dtype=np.float32).reshape(-1)
         self.done[index, 0] = float(done)
+        self.episode_index[index] = int(episode_index)
+        self.macro_index[index] = int(macro_index)
+        self.neutral_episode[index] = int(bool(neutral_episode))
         self.position = (self.position + 1) % self.capacity
         self.size = min(self.size + 1, self.capacity)
 
+    def ordered_indices(self):
+        if self.size < self.capacity:
+            return np.arange(self.size, dtype=np.int64)
+        return np.concatenate(
+            (
+                np.arange(self.position, self.capacity, dtype=np.int64),
+                np.arange(0, self.position, dtype=np.int64),
+            )
+        )
+
+    def save_npz(self, path):
+        indices = self.ordered_indices()
+        np.savez_compressed(
+            path,
+            state=self.state[indices],
+            action=self.action[indices],
+            reward=self.reward[indices],
+            energy_ratio=self.energy_ratio[indices],
+            next_state=self.next_state[indices],
+            done=self.done[indices],
+            episode_index=self.episode_index[indices],
+            macro_index=self.macro_index[indices],
+            neutral_episode=self.neutral_episode[indices],
+            capacity=np.asarray(self.capacity, dtype=np.int64),
+            size=np.asarray(self.size, dtype=np.int64),
+        )
+        return path
+
     def sample(self, batch_size, device):
-        indices = np.random.randint(0, self.size, size=int(batch_size))
+        indices = self._integers(0, self.size, size=int(batch_size))
         return tuple(
             torch.as_tensor(array[indices], dtype=torch.float32, device=device)
             for array in (
@@ -308,6 +472,136 @@ class MacroReplayBuffer:
                 self.done,
             )
         )
+
+    def sequence_indices(self, start_index, sequence_span, episode_horizon):
+        start_index = int(start_index)
+        sequence_span = max(int(sequence_span), 1)
+        episode_horizon = max(int(episode_horizon), 1)
+        if start_index < 0 or start_index >= self.size:
+            return None
+        episode = int(self.episode_index[start_index])
+        macro = int(self.macro_index[start_index])
+        if episode < 0 or macro < 0 or macro >= episode_horizon:
+            return None
+        required = min(sequence_span, episode_horizon - macro)
+        indices = []
+        for offset in range(required):
+            index = (start_index + offset) % self.capacity
+            if self.size < self.capacity and index >= self.size:
+                return None
+            if int(self.episode_index[index]) != episode:
+                return None
+            if int(self.macro_index[index]) != macro + offset:
+                return None
+            indices.append(index)
+        return np.asarray(indices, dtype=np.int64)
+
+    def sample_sequence_batch(
+        self,
+        batch_size,
+        device,
+        delay_n_step,
+        sequence_span,
+        episode_horizon,
+        current_episode_index,
+    ):
+        batch_size = int(batch_size)
+        delay_n_step = max(int(delay_n_step), 1)
+        sequence_span = max(int(sequence_span), delay_n_step)
+        if self.size <= 0:
+            raise ValueError("Cannot sample an empty macro replay buffer.")
+        starts = []
+        sequences = []
+        resamples = 0
+        max_attempts = max(batch_size * 100, 1000)
+        attempts = 0
+        while len(starts) < batch_size and attempts < max_attempts:
+            candidate = int(self._integers(0, self.size))
+            attempts += 1
+            indices = self.sequence_indices(
+                candidate,
+                sequence_span,
+                episode_horizon,
+            )
+            if indices is None:
+                resamples += 1
+                continue
+            starts.append(candidate)
+            sequences.append(indices)
+        if len(starts) != batch_size:
+            raise RuntimeError(
+                "Unable to sample enough contiguous macro replay sequences."
+            )
+
+        state = np.zeros((batch_size, self.state.shape[1]), dtype=np.float32)
+        action = np.zeros((batch_size, self.action.shape[1]), dtype=np.float32)
+        energy_ratio = np.zeros((batch_size, self.energy_dim), dtype=np.float32)
+        next_state_one = np.zeros_like(state)
+        done_one = np.zeros((batch_size, 1), dtype=np.float32)
+        reward_sequence = np.zeros(
+            (batch_size, sequence_span, 1), dtype=np.float32
+        )
+        state_sequence = np.zeros(
+            (batch_size, sequence_span, self.state.shape[1]), dtype=np.float32
+        )
+        action_sequence = np.zeros(
+            (batch_size, sequence_span, self.action.shape[1]), dtype=np.float32
+        )
+        sequence_mask = np.zeros((batch_size, sequence_span, 1), dtype=np.float32)
+        target_length = np.zeros((batch_size, 1), dtype=np.int64)
+        span_length = np.zeros((batch_size, 1), dtype=np.int64)
+        next_state_n = np.zeros_like(state)
+        next_state_span = np.zeros_like(state)
+        done_n = np.zeros((batch_size, 1), dtype=np.float32)
+        done_span = np.zeros((batch_size, 1), dtype=np.float32)
+        age = np.zeros(batch_size, dtype=np.int32)
+
+        for row, (start, indices) in enumerate(zip(starts, sequences)):
+            length = int(indices.size)
+            n_length = min(delay_n_step, length)
+            state[row] = self.state[start]
+            action[row] = self.action[start]
+            energy_ratio[row] = self.energy_ratio[start]
+            next_state_one[row] = self.next_state[start]
+            done_one[row] = self.done[start]
+            reward_sequence[row, :length] = self.reward[indices]
+            state_sequence[row, :length] = self.state[indices]
+            action_sequence[row, :length] = self.action[indices]
+            sequence_mask[row, :length] = 1.0
+            target_length[row, 0] = n_length
+            span_length[row, 0] = length
+            next_state_n[row] = self.next_state[indices[n_length - 1]]
+            next_state_span[row] = self.next_state[indices[length - 1]]
+            done_n[row] = self.done[indices[n_length - 1]]
+            done_span[row] = self.done[indices[length - 1]]
+            age[row] = max(
+                int(current_episode_index) - int(self.episode_index[start]),
+                0,
+            )
+
+        def tensor(array, dtype=torch.float32):
+            return torch.as_tensor(array, dtype=dtype, device=device)
+
+        return {
+            "state": tensor(state),
+            "action": tensor(action),
+            "energy_ratio": tensor(energy_ratio),
+            "next_state_one": tensor(next_state_one),
+            "done_one": tensor(done_one),
+            "reward_sequence": tensor(reward_sequence),
+            "state_sequence": tensor(state_sequence),
+            "action_sequence": tensor(action_sequence),
+            "sequence_mask": tensor(sequence_mask),
+            "target_length": tensor(target_length, dtype=torch.long),
+            "span_length": tensor(span_length, dtype=torch.long),
+            "next_state_n": tensor(next_state_n),
+            "next_state_span": tensor(next_state_span),
+            "done_n": tensor(done_n),
+            "done_span": tensor(done_span),
+            "age": age,
+            "sequence_resamples": int(resamples),
+            "start_indices": np.asarray(starts, dtype=np.int64),
+        }
 
     def action_norm_summary(self, num_agents):
         num_agents = int(num_agents)
@@ -478,6 +772,12 @@ def inspect_td3_policy_state(agent, state):
         "td3_delay_q_twin_gap_zero_mean": float(
             torch.abs(delay_q1_zero - delay_q2_zero).mean().item()
         ),
+        "td3_delay_q1_minus_q2_actor_mean": float(
+            (delay_q1_actor - delay_q2_actor).mean().item()
+        ),
+        "td3_delay_q1_minus_q2_zero_mean": float(
+            (delay_q1_zero - delay_q2_zero).mean().item()
+        ),
         "td3_energy_q_actor_minus_zero_mean": energy_actor - energy_zero,
         "td3_energy_q_twin_gap_actor_mean": float(
             torch.abs(energy_q1_actor - energy_q2_actor).mean().item()
@@ -507,6 +807,60 @@ def summarize_td3_policy_diagnostics(records):
         )
     )
     return result
+
+
+def aggregate_td3_actor_delay_value(q1, q2, mode):
+    mode = str(mode).lower()
+    if mode == "q1":
+        return q1
+    if mode == "min":
+        return torch.minimum(q1, q2)
+    raise ValueError("TD3 Actor delay aggregation must be 'q1' or 'min'")
+
+
+def discounted_sequence_target(
+    reward_sequence,
+    lengths,
+    bootstrap_value,
+    done,
+    gamma,
+):
+    """Build a variable-horizon discounted target without crossing episodes."""
+    if reward_sequence.ndim != 3 or reward_sequence.shape[-1] != 1:
+        raise ValueError("reward_sequence must have shape [batch, horizon, 1]")
+    lengths = lengths.to(dtype=torch.long).reshape(-1, 1)
+    horizon = int(reward_sequence.shape[1])
+    if torch.any(lengths < 1) or torch.any(lengths > horizon):
+        raise ValueError("Each target length must lie in [1, horizon]")
+    steps = torch.arange(
+        horizon,
+        dtype=reward_sequence.dtype,
+        device=reward_sequence.device,
+    ).reshape(1, horizon, 1)
+    valid = steps < lengths.reshape(-1, 1, 1)
+    discount = torch.pow(
+        torch.as_tensor(
+            float(gamma),
+            dtype=reward_sequence.dtype,
+            device=reward_sequence.device,
+        ),
+        steps,
+    )
+    reward_return = torch.sum(
+        reward_sequence * discount * valid.to(reward_sequence.dtype),
+        dim=1,
+    )
+    bootstrap_discount = torch.pow(
+        torch.as_tensor(
+            float(gamma),
+            dtype=reward_sequence.dtype,
+            device=reward_sequence.device,
+        ),
+        lengths.to(dtype=reward_sequence.dtype),
+    )
+    return reward_return + (
+        (1.0 - done) * bootstrap_discount * bootstrap_value
+    )
 
 
 class TD3Agent:
@@ -563,9 +917,30 @@ class TD3Agent:
             int(getattr(args, "td3_actor_warmup_updates", 0)),
             0,
         )
+        self.actor_delay_aggregation = str(
+            getattr(args, "td3_actor_delay_aggregation", "q1")
+        ).lower()
+        if self.actor_delay_aggregation not in {"q1", "min"}:
+            raise ValueError(
+                "td3_actor_delay_aggregation must be 'q1' or 'min'"
+            )
         self.objective_mode = str(args.objective_mode)
         self.reward_scale = float(args.td3_reward_scale)
         self.constraint_cost_scale = 10.0 * self.reward_scale
+        self.delay_n_step = max(
+            int(getattr(args, "td3_delay_n_step", 1)),
+            1,
+        )
+        self.replay_sequence_span = max(
+            int(getattr(args, "td3_replay_sequence_span", 1)),
+            1,
+        )
+        if self.delay_n_step > self.replay_sequence_span:
+            raise ValueError(
+                "td3_delay_n_step cannot exceed td3_replay_sequence_span"
+            )
+        self.episode_horizon = max(int(getattr(args, "macro_steps", 30)), 1)
+        self.last_nstep_diagnostics = None
         self.update_count = 0
 
     def choose_action(self, state):
@@ -576,11 +951,34 @@ class TD3Agent:
         replay_buffer,
         batch_size,
         energy_lagrange_multiplier=0.0,
+        current_episode_index=None,
     ):
-        state, action, reward, energy_ratio, next_state, done = replay_buffer.sample(
-            batch_size,
-            self.device,
-        )
+        use_sequence_sampler = self.replay_sequence_span > 1
+        sequence_batch = None
+        if use_sequence_sampler:
+            if current_episode_index is None:
+                raise ValueError(
+                    "current_episode_index is required by the sequence sampler"
+                )
+            sequence_batch = replay_buffer.sample_sequence_batch(
+                batch_size,
+                self.device,
+                delay_n_step=self.delay_n_step,
+                sequence_span=self.replay_sequence_span,
+                episode_horizon=self.episode_horizon,
+                current_episode_index=current_episode_index,
+            )
+            state = sequence_batch["state"]
+            action = sequence_batch["action"]
+            reward = sequence_batch["reward_sequence"][:, 0]
+            energy_ratio = sequence_batch["energy_ratio"]
+            next_state = sequence_batch["next_state_one"]
+            done = sequence_batch["done_one"]
+        else:
+            state, action, reward, energy_ratio, next_state, done = (
+                replay_buffer.sample(batch_size, self.device)
+            )
+        self.last_nstep_diagnostics = None
         energy_cost = self.constraint_cost_scale * (energy_ratio - 1.0)
         with torch.no_grad():
             noise = torch.randn_like(action) * self.policy_noise
@@ -588,10 +986,52 @@ class TD3Agent:
             next_action = (self.actor_target(next_state) + noise).clamp(-1.0, 1.0)
             next_action = project_unit_disk_torch(next_action, self.num_agents)
             target_q1, target_q2 = self.critic_target(next_state, next_action)
-            target_q = reward + (1.0 - done) * self.gamma * torch.minimum(
-                target_q1,
-                target_q2,
+            target_q_one = reward + (
+                (1.0 - done)
+                * self.gamma
+                * torch.minimum(target_q1, target_q2)
             )
+            target_q = target_q_one
+            target_q_span = target_q_one
+            if sequence_batch is not None:
+                next_action_n = (
+                    self.actor_target(sequence_batch["next_state_n"]) + noise
+                ).clamp(-1.0, 1.0)
+                next_action_n = project_unit_disk_torch(
+                    next_action_n,
+                    self.num_agents,
+                )
+                target_q1_n, target_q2_n = self.critic_target(
+                    sequence_batch["next_state_n"],
+                    next_action_n,
+                )
+                target_q = discounted_sequence_target(
+                    sequence_batch["reward_sequence"],
+                    sequence_batch["target_length"],
+                    torch.minimum(target_q1_n, target_q2_n),
+                    sequence_batch["done_n"],
+                    self.gamma,
+                )
+
+                next_action_span = (
+                    self.actor_target(sequence_batch["next_state_span"])
+                    + noise
+                ).clamp(-1.0, 1.0)
+                next_action_span = project_unit_disk_torch(
+                    next_action_span,
+                    self.num_agents,
+                )
+                target_q1_span, target_q2_span = self.critic_target(
+                    sequence_batch["next_state_span"],
+                    next_action_span,
+                )
+                target_q_span = discounted_sequence_target(
+                    sequence_batch["reward_sequence"],
+                    sequence_batch["span_length"],
+                    torch.minimum(target_q1_span, target_q2_span),
+                    sequence_batch["done_span"],
+                    self.gamma,
+                )
             target_energy_q1, target_energy_q2 = self.energy_critic_target(
                 next_state,
                 next_action,
@@ -603,6 +1043,67 @@ class TD3Agent:
             )
 
         current_q1, current_q2 = self.critic(state, action)
+        if sequence_batch is not None:
+            with torch.no_grad():
+                sequence_states = sequence_batch["state_sequence"]
+                sequence_actions = sequence_batch["action_sequence"]
+                batch_size_actual, sequence_span, state_dim = (
+                    sequence_states.shape
+                )
+                target_policy_actions = self.actor_target(
+                    sequence_states.reshape(-1, state_dim)
+                ).reshape(batch_size_actual, sequence_span, -1)
+                action_distance = torch.linalg.norm(
+                    sequence_actions - target_policy_actions,
+                    dim=-1,
+                )
+                continuation_mask = (
+                    sequence_batch["sequence_mask"].squeeze(-1).clone()
+                )
+                continuation_mask[:, 0] = 0.0
+                continuation_count = torch.sum(
+                    continuation_mask,
+                    dim=1,
+                )
+                mismatch_sum = torch.sum(
+                    action_distance * continuation_mask,
+                    dim=1,
+                )
+                policy_mismatch = torch.full_like(
+                    continuation_count,
+                    torch.nan,
+                )
+                valid_continuation = continuation_count > 0
+                policy_mismatch[valid_continuation] = (
+                    mismatch_sum[valid_continuation]
+                    / continuation_count[valid_continuation]
+                )
+                current_conservative_q = torch.minimum(
+                    current_q1,
+                    current_q2,
+                )
+                self.last_nstep_diagnostics = {
+                    "age": sequence_batch["age"].copy(),
+                    "y5_minus_y1": (
+                        target_q_span - target_q_one
+                    ).squeeze(-1).cpu().numpy(),
+                    "q_y5_gap_abs": torch.abs(
+                        current_conservative_q - target_q_span
+                    ).squeeze(-1).cpu().numpy(),
+                    "policy_mismatch": policy_mismatch.cpu().numpy(),
+                    "sequence_resamples": int(
+                        sequence_batch["sequence_resamples"]
+                    ),
+                    "sample_start_sha256": hashlib.sha256(
+                        sequence_batch["start_indices"].tobytes()
+                    ).hexdigest(),
+                    "target_noise_sha256": hashlib.sha256(
+                        noise.detach().cpu().numpy().astype(
+                            np.float32,
+                            copy=False,
+                        ).tobytes()
+                    ).hexdigest(),
+                }
         critic_loss = F.mse_loss(current_q1, target_q) + F.mse_loss(
             current_q2,
             target_q,
@@ -627,7 +1128,12 @@ class TD3Agent:
         if self.update_count % self.policy_delay == 0:
             if self.update_count > self.actor_warmup_updates:
                 actor_action = self.actor(state)
-                delay_value = self.critic.q1(state, actor_action)
+                delay_q1, delay_q2 = self.critic(state, actor_action)
+                delay_value = aggregate_td3_actor_delay_value(
+                    delay_q1,
+                    delay_q2,
+                    self.actor_delay_aggregation,
+                )
                 energy_q1, energy_q2 = self.energy_critic(state, actor_action)
                 conservative_energy_value = torch.maximum(energy_q1, energy_q2)
                 multipliers = torch.as_tensor(
@@ -749,12 +1255,44 @@ def parse_args():
     parser.add_argument("--td3_tau", type=float, default=0.005)
     parser.add_argument("--td3_batch_size", type=int, default=128)
     parser.add_argument("--td3_replay_capacity", type=int, default=50000)
+    parser.add_argument(
+        "--save_macro_replay",
+        type=int,
+        choices=(0, 1),
+        default=0,
+        help="Save macro replay and read-only metadata for diagnosis.",
+    )
     parser.add_argument("--td3_warmup_steps", type=int, default=300)
     parser.add_argument("--td3_updates_per_step", type=int, default=1)
+    parser.add_argument(
+        "--td3_delay_n_step",
+        type=int,
+        default=1,
+        help="Backup horizon used only by the macro delay Critic.",
+    )
+    parser.add_argument(
+        "--td3_replay_sequence_span",
+        type=int,
+        default=1,
+        help=(
+            "Contiguous replay span sampled for delay targets and read-only "
+            "target-horizon diagnostics."
+        ),
+    )
     parser.add_argument("--td3_policy_noise", type=float, default=0.2)
     parser.add_argument("--td3_noise_clip", type=float, default=0.5)
     parser.add_argument("--td3_policy_delay", type=int, default=2)
     parser.add_argument("--td3_actor_warmup_updates", type=int, default=0)
+    parser.add_argument(
+        "--td3_actor_delay_aggregation",
+        choices=("q1", "min"),
+        default="q1",
+        help=(
+            "Delay Critic aggregation used only by the Actor objective. "
+            "The standard TD3 setting is q1; min is a conservative "
+            "single-factor diagnostic variant."
+        ),
+    )
     parser.add_argument(
         "--td3_actor_ema_decay",
         type=float,
@@ -789,6 +1327,15 @@ def parse_args():
         type=float,
         default=0.25,
         help="Probability of adding an exact joint-hover action to off-policy exploration",
+    )
+    parser.add_argument(
+        "--td3_neutral_episode_prob",
+        type=float,
+        default=0.0,
+        help=(
+            "Probability that an entire training episode uses the joint "
+            "zero-residual centroid action. A separate RNG stream is used."
+        ),
     )
     parser.add_argument("--td3_exploration_decay_episodes", type=int, default=300)
     parser.add_argument(
@@ -878,10 +1425,33 @@ def parse_args():
         parser.error("--sac_grad_clip_norm must be non-negative")
     if args.td3_dual_power_window <= 0:
         parser.error("--td3_dual_power_window must be positive")
+    if args.td3_delay_n_step <= 0:
+        parser.error("--td3_delay_n_step must be positive")
+    if args.td3_replay_sequence_span <= 0:
+        parser.error("--td3_replay_sequence_span must be positive")
+    if args.td3_delay_n_step > args.td3_replay_sequence_span:
+        parser.error(
+            "--td3_delay_n_step cannot exceed "
+            "--td3_replay_sequence_span"
+        )
+    if args.td3_replay_sequence_span > args.macro_steps:
+        parser.error(
+            "--td3_replay_sequence_span cannot exceed --macro_steps"
+        )
     if not 0.0 <= args.td3_actor_ema_decay < 1.0:
         parser.error("--td3_actor_ema_decay must be in [0, 1)")
     if not 0.0 <= args.td3_hover_exploration_prob <= 1.0:
         parser.error("--td3_hover_exploration_prob must be in [0, 1]")
+    if not 0.0 <= args.td3_neutral_episode_prob <= 1.0:
+        parser.error("--td3_neutral_episode_prob must be in [0, 1]")
+    if (
+        args.td3_hover_exploration_prob > 0.0
+        and args.td3_neutral_episode_prob > 0.0
+    ):
+        parser.error(
+            "Use either legacy hover exploration or neutral-episode "
+            "coverage, not both."
+        )
     if not 0.0 < args.td3_warmup_action_radius <= 1.0:
         parser.error("--td3_warmup_action_radius must be in (0, 1]")
     if args.objective_mode == "constrained_delay" and args.power_budget_w <= 0.0:
@@ -964,10 +1534,9 @@ def copy_energy_constraint_state(source_env, target_env, args):
             source_env.energy_lagrange_multipliers
         )
     else:
-        target_env.energy_lagrange_multiplier = float(
+        target_env.set_energy_lagrange_multipliers(
             source_env.energy_lagrange_multiplier
         )
-        target_env._sync_cpu_energy_prices()
 
 
 def sample_random_macro_action(
@@ -1017,6 +1586,23 @@ def sample_episode_exploration(num_agents, noise_std, hover_probability=0.0):
         size=(int(num_agents), 2),
     ).astype(np.float32)
     return noise, False
+
+
+def sample_neutral_episode_schedule(episodes, probability, seed):
+    """Draw persistent joint-neutral episodes without advancing the main RNG."""
+    episodes = int(episodes)
+    probability = float(probability)
+    if episodes < 0:
+        raise ValueError("episodes must be non-negative")
+    if not 0.0 <= probability <= 1.0:
+        raise ValueError("probability must be in [0, 1]")
+    if probability <= 0.0:
+        return np.zeros(episodes, dtype=bool)
+    if probability >= 1.0:
+        return np.ones(episodes, dtype=bool)
+    seed_sequence = np.random.SeedSequence([int(seed), 0x4E455554])
+    rng = np.random.default_rng(seed_sequence)
+    return rng.random(episodes) < probability
 
 
 def td3_exploration_scope(macro_action_mode, persistence="auto"):
@@ -1177,6 +1763,9 @@ def build_checkpoint_payload(args, agent, sac_actor, sac_critic, sac_entropy):
         "macro_update_count": int(agent.update_count),
         "macro_actor_policy": "ema" if using_ema else "raw",
         "td3_actor_ema_decay": float(agent.actor_ema_decay),
+        "td3_actor_delay_aggregation": agent.actor_delay_aggregation,
+        "td3_delay_n_step": int(agent.delay_n_step),
+        "td3_replay_sequence_span": int(agent.replay_sequence_span),
         "micro_solver": str(args.micro_solver),
         "args": vars(args),
     }
@@ -1319,6 +1908,15 @@ def main():
         "[INFO] TD3 exploration scope: "
         f"{td3_exploration_scope(args.macro_action_mode, args.td3_exploration_persistence)}"
     )
+    print(
+        "[INFO] TD3 Actor delay aggregation: "
+        f"{args.td3_actor_delay_aggregation}"
+    )
+    print(
+        "[INFO] TD3 delay target: "
+        f"n={args.td3_delay_n_step}, "
+        f"replay_sequence_span={args.td3_replay_sequence_span}"
+    )
     print("[INFO] PPO trainer remains available as the macro-layer comparator")
     print(f"[INFO] macro_comm_weight={args.macro_comm_weight}")
     print(f"[INFO] Macro reward mode: {args.macro_reward_mode}")
@@ -1369,6 +1967,9 @@ def main():
             + 1,
             recent_window=SAC_RECENT_WINDOW,
             recent_ratio=SAC_RECENT_RATIO,
+            rng=np.random.default_rng(
+                np.random.SeedSequence([int(args.seed), 0x534143])
+            ),
         )
     if use_sac and args.micro_ckpt:
         loaded_path = load_micro_checkpoint(
@@ -1395,8 +1996,8 @@ def main():
                 env.set_energy_lagrange_multipliers(inherited_dual)
                 eval_env.set_energy_lagrange_multipliers(inherited_dual)
             else:
-                env.energy_lagrange_multiplier = inherited_dual
-                eval_env.energy_lagrange_multiplier = inherited_dual
+                env.set_energy_lagrange_multipliers(inherited_dual)
+                eval_env.set_energy_lagrange_multipliers(inherited_dual)
             args.energy_lagrange_multiplier_current = inherited_dual
             print(
                 "[INFO] Inherited energy dual -> "
@@ -1447,6 +2048,9 @@ def main():
         macro_action_dim,
         args.td3_replay_capacity,
         energy_dim=(env.N if args.power_constraint_scope == "per_uav" else 1),
+        rng=np.random.default_rng(
+            np.random.SeedSequence([int(args.seed), 0x544433])
+        ),
     )
     eval_micro_policy = (
         sac_micro_policy(sac_actor)
@@ -1469,8 +2073,32 @@ def main():
     os.makedirs(ckpt_dir, exist_ok=True)
     train_csv = os.path.join(results_dirs["results_dir"], "train_td3.csv")
     eval_csv = os.path.join(results_dirs["results_dir"], "eval_central_td3.csv")
+    nstep_diagnostic_csv = os.path.join(
+        results_dirs["results_dir"],
+        "nstep_replay_diagnostics.csv",
+    )
+    load_switch_trace_csv = os.path.join(
+        results_dirs["results_dir"],
+        "load_switch_macro_trace.csv",
+    )
     initialize_training_log(train_csv)
+    if int(args.td3_replay_sequence_span) > 1:
+        initialize_nstep_diagnostic_log(nstep_diagnostic_csv)
+    if str(getattr(args, "load_switch_mode", "off")) != "off":
+        initialize_load_switch_trace(load_switch_trace_csv)
     eval_history.save_csv(eval_csv)
+    neutral_episode_schedule = sample_neutral_episode_schedule(
+        args.episodes,
+        args.td3_neutral_episode_prob,
+        args.seed,
+    )
+    neutral_episode_count = int(np.sum(neutral_episode_schedule))
+    if args.td3_neutral_episode_prob > 0.0:
+        print(
+            "[INFO] Joint-neutral episode coverage: "
+            f"requested={args.td3_neutral_episode_prob:.3f}, "
+            f"realized={neutral_episode_count}/{args.episodes}"
+        )
 
     for episode in range(args.episodes):
         episode_started = time.perf_counter()
@@ -1493,8 +2121,22 @@ def main():
             - np.asarray(env.env.anchor_points, dtype=np.float64),
             axis=1,
         )
-        env.reset(seed=args.seed + episode)
+        episode_seed = args.seed + episode
+        load_switch_schedule = initialize_episode_load_switch(
+            env,
+            args,
+            episode_seed,
+        )
+        env.reset(seed=episode_seed)
+        if load_switch_schedule is not None:
+            apply_load_switch_phase(
+                env,
+                load_switch_schedule,
+                0,
+                force=True,
+            )
         _, global_state = env.get_macro_state()
+        neutral_episode = bool(neutral_episode_schedule[episode])
 
         ep_macro_reward = 0.0
         ep_macro_actor_reward = 0.0
@@ -1522,6 +2164,7 @@ def main():
         ep_sac_actor_grad_norms = []
         ep_sac_critic_grad_norms = []
         ep_td3_policy_diagnostics = []
+        ep_nstep_diagnostics = []
         ep_macro_feedback = []
         ep_macro_power_violation_penalties = []
         ep_macro_reconstruction_error = []
@@ -1569,6 +2212,17 @@ def main():
         ep_smdp_boundary_audit = None
 
         for macro_idx in range(args.macro_steps):
+            switched = advance_load_switch_before_macro(
+                env,
+                load_switch_schedule,
+                macro_idx,
+            )
+            if switched:
+                _, global_state = env.get_macro_state()
+            macro_service_energy_start = len(ep_service_energy)
+            macro_delay_start = len(ep_delay_objective)
+            macro_energy_current = 0.0
+            macro_move_current = 0.0
             ep_td3_policy_diagnostics.append(
                 inspect_td3_policy_state(agent, global_state)
             )
@@ -1604,6 +2258,10 @@ def main():
                     episode_noise=step_noise,
                     force_hover=step_hover,
                 )
+            # Consume the original exploration RNG first so enabling neutral
+            # coverage changes only the action stored and executed this episode.
+            if neutral_episode:
+                action = np.zeros((env.N, 2), dtype=np.float32)
             action_flat = action.reshape(-1).astype(np.float32)
             hover_mask = np.linalg.norm(action, axis=1) <= 1e-8
             ep_all_hover.append(float(np.all(hover_mask)))
@@ -1620,8 +2278,14 @@ def main():
                 ep_move.append(
                     float(macro_info.get("macro_move_distance_mean", 0.0))
                 )
+                macro_move_current = float(
+                    macro_info.get("macro_move_distance_mean", 0.0)
+                )
                 ep_macro_energy.append(
                     float(macro_info.get("E_macro_total", 0.0))
+                )
+                macro_energy_current = float(
+                    macro_info.get("E_macro_total", 0.0)
                 )
                 ep_macro_energy_per_uav += np.asarray(
                     macro_info.get("E_macro_per_uav", np.zeros(env.N)),
@@ -1838,6 +2502,48 @@ def main():
                 macro_reward_info,
                 MACRO_REWARD_DIAGNOSTIC_SOURCES,
             )
+            if load_switch_schedule is not None:
+                macro_service_energy_current = float(
+                    np.sum(ep_service_energy[macro_service_energy_start:])
+                )
+                macro_delay_values = ep_delay_objective[macro_delay_start:]
+                append_load_switch_trace(
+                    load_switch_trace_csv,
+                    {
+                        "episode": episode + 1,
+                        "episode_seed": episode_seed,
+                        "macro_index": macro_idx,
+                        "phase_index": load_switch_schedule.phase_index(
+                            macro_idx
+                        ),
+                        "switch_flag": int(switched),
+                        "phase_loads_mbps": json.dumps(
+                            load_switch_schedule.loads(macro_idx).tolist(),
+                            separators=(",", ":"),
+                        ),
+                        "energy_dual": float(
+                            np.mean(
+                                np.atleast_1d(
+                                    env.energy_lagrange_multiplier
+                                )
+                            )
+                        ),
+                        "macro_energy_j": macro_energy_current,
+                        "service_energy_j": macro_service_energy_current,
+                        "macro_average_power_w": (
+                            macro_energy_current
+                            + macro_service_energy_current
+                        )
+                        / max(float(env.env.macro_dt), 1e-8),
+                        "macro_reward": macro_reward,
+                        "delay_objective_mean": float(
+                            np.mean(macro_delay_values)
+                        )
+                        if macro_delay_values
+                        else 0.0,
+                        "movement_mean_m": macro_move_current,
+                    },
+                )
             ep_macro_feedback.append(
                 float(macro_reward_info.get("global_micro_signal", 0.0))
             )
@@ -1896,6 +2602,9 @@ def main():
                 next_global_state,
                 terminal,
                 energy_ratio=macro_energy_ratio,
+                episode_index=episode + 1,
+                macro_index=macro_idx,
+                neutral_episode=neutral_episode,
             )
             total_macro_steps += 1
 
@@ -1912,7 +2621,12 @@ def main():
                             if args.power_constraint_scope == "per_uav"
                             else env.energy_lagrange_multiplier
                         ),
+                        current_episode_index=episode + 1,
                     )
+                    if agent.last_nstep_diagnostics is not None:
+                        ep_nstep_diagnostics.append(
+                            agent.last_nstep_diagnostics
+                        )
                     if np.isfinite(actor_loss):
                         ep_actor_losses.append(actor_loss)
                     ep_critic_losses.append(critic_loss)
@@ -2042,7 +2756,8 @@ def main():
             f"Psys {average_power_w:.1f}W | Pcon {constrained_power_display}W | "
             f"PemaMax {dual_update_power_w_log:.1f}W | "
             f"Dual {dual_display} | "
-            f"Noise {exploration_noise:.3f} | Buffer {len(replay_buffer)}"
+            f"Noise {exploration_noise:.3f} | Neutral {int(neutral_episode)} | "
+            f"Buffer {len(replay_buffer)}"
         )
         append_training_log(
             train_csv,
@@ -2123,10 +2838,34 @@ def main():
                 "start_offset_max_m": float(np.max(start_offsets)),
                 "load_scale": episode_load,
                 "cpu_ghz": episode_cpu_ghz,
+                "load_switch_mode": str(
+                    getattr(args, "load_switch_mode", "off")
+                ),
+                "load_switch_count": (
+                    len(load_switch_schedule.switch_steps)
+                    if load_switch_schedule is not None
+                    else 0
+                ),
+                "load_switch_steps": json.dumps(
+                    list(load_switch_schedule.switch_steps)
+                    if load_switch_schedule is not None
+                    else [],
+                    separators=(",", ":"),
+                ),
+                "load_switch_dwell_steps": json.dumps(
+                    list(load_switch_schedule.dwell_steps)
+                    if load_switch_schedule is not None
+                    else [int(args.macro_steps)],
+                    separators=(",", ":"),
+                ),
                 "deployment_transient_energy_episode_j": float(
                     np.sum(ep_deployment_transient_energy)
                 ),
                 "exploration_noise": exploration_noise,
+                "td3_neutral_episode": int(neutral_episode),
+                "td3_neutral_episode_fraction_cumulative": float(
+                    np.mean(neutral_episode_schedule[: episode + 1])
+                ),
                 "td3_actor_loss": mean_actor_loss,
                 "td3_critic_loss": mean_critic_loss,
                 "td3_delay_critic_loss": mean_critic_loss,
@@ -2244,6 +2983,16 @@ def main():
                 "episode_seconds": time.perf_counter() - episode_started,
             },
         )
+        if int(args.td3_replay_sequence_span) > 1:
+            append_nstep_diagnostic_log(
+                nstep_diagnostic_csv,
+                summarize_nstep_diagnostics(
+                    ep_nstep_diagnostics,
+                    episode + 1,
+                    args.td3_delay_n_step,
+                    args.td3_replay_sequence_span,
+                ),
+            )
 
         if should_record:
             trajectory_path = os.path.join(
@@ -2325,6 +3074,11 @@ def main():
         build_checkpoint_payload(args, agent, sac_actor, sac_critic, sac_entropy),
         os.path.join(ckpt_dir, "final.pt"),
     )
+    if bool(args.save_macro_replay):
+        macro_replay_path = replay_buffer.save_npz(
+            os.path.join(ckpt_dir, "macro_replay.npz")
+        )
+        print(f"Saved macro replay audit -> {macro_replay_path}")
     replay_path = save_sac_replay(
         os.path.join(ckpt_dir, "micro_replay.pt"),
         sac_memory,

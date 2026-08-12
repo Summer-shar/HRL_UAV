@@ -1,0 +1,38 @@
+[
+  {
+    "seed": 1,
+    "task_delay_weighted_ms": 2394.5917572555754,
+    "task_arrived_count": 7822,
+    "task_completed_count": 7479,
+    "terminal_queue_mbit": 370.39997866749763,
+    "tail_queue_slope_mbit_per_macro": -7.407271953423823,
+    "average_power_w": 796.8593857649391,
+    "initial_mean_heading_resultant": 0.31754635365801714,
+    "net_displacement_direction_resultant": 0.31650831124389156,
+    "mean_user_displacement_m": 148.8670605826695
+  },
+  {
+    "seed": 7,
+    "task_delay_weighted_ms": 2210.145700663478,
+    "task_arrived_count": 7933,
+    "task_completed_count": 7529,
+    "terminal_queue_mbit": 419.5999782383442,
+    "tail_queue_slope_mbit_per_macro": 1.2921223588061992,
+    "average_power_w": 797.5376169171521,
+    "initial_mean_heading_resultant": 0.1872726464451087,
+    "net_displacement_direction_resultant": 0.1889968345006104,
+    "mean_user_displacement_m": 148.13101799434867
+  },
+  {
+    "seed": 42,
+    "task_delay_weighted_ms": 2120.536958368727,
+    "task_arrived_count": 7653,
+    "task_completed_count": 7357,
+    "terminal_queue_mbit": 298.74997997283936,
+    "tail_queue_slope_mbit_per_macro": -8.08818072730845,
+    "average_power_w": 797.1852241837038,
+    "initial_mean_heading_resultant": 0.11925507057955052,
+    "net_displacement_direction_resultant": 0.11601731174135398,
+    "mean_user_displacement_m": 148.0621494816826
+  }
+]

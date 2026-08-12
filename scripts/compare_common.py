@@ -16,6 +16,9 @@ if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
 from hrl_uav.hrl_wrappers import HRL_Wrapper
+from hrl_uav.load_switching import apply_load_switch_phase
+from hrl_uav.load_switching import build_load_switch_schedule
+from hrl_uav.load_switching import parse_load_switch_phases
 from hrl_uav.plot_utils import (
     plot_evaluation_metrics,
     plot_macro_diagnostics,
@@ -36,6 +39,22 @@ EVAL_W_U2G = 0.1
 MacroPolicy = Callable[[HRL_Wrapper, np.ndarray, bool], np.ndarray]
 MicroPolicy = Callable[[HRL_Wrapper, bool], np.ndarray]
 EpisodeStartHook = Callable[[HRL_Wrapper, int], None]
+
+LOAD_SWITCH_TRACE_FIELDS = [
+    "episode",
+    "episode_seed",
+    "macro_index",
+    "phase_index",
+    "switch_flag",
+    "phase_loads_mbps",
+    "energy_dual",
+    "macro_energy_j",
+    "service_energy_j",
+    "macro_average_power_w",
+    "macro_reward",
+    "delay_objective_mean",
+    "movement_mean_m",
+]
 
 
 def add_common_args(
@@ -113,6 +132,33 @@ def add_common_args(
         ),
     )
     parser.add_argument(
+        "--load_switch_mode",
+        choices=["off", "cyclic_random"],
+        default="off",
+        help=(
+            "Episode load process. cyclic_random cycles through the frozen "
+            "load phases with an independently seeded random dwell."
+        ),
+    )
+    parser.add_argument(
+        "--load_switch_phases",
+        type=str,
+        default="",
+        help="Semicolon-separated load vectors, e.g. 12.5,5.5,3.5;...",
+    )
+    parser.add_argument(
+        "--load_switch_dwell_min",
+        type=int,
+        default=8,
+        help="Minimum macro periods per load phase.",
+    )
+    parser.add_argument(
+        "--load_switch_dwell_max",
+        type=int,
+        default=12,
+        help="Maximum macro periods per load phase.",
+    )
+    parser.add_argument(
         "--uav_initial_positions",
         type=str,
         default="",
@@ -173,6 +219,67 @@ def add_common_args(
         type=float,
         default=float(np.pi / 4.0),
         help="Mean ground-user heading in radians",
+    )
+    parser.add_argument(
+        "--gm_heading_mode",
+        choices=[
+            "shared_mean",
+            "independent_episode_mean",
+            "reference_point_group",
+        ],
+        default="shared_mean",
+        help=(
+            "Use one shared mean heading or independently sample a persistent "
+            "mean heading for every user at each episode reset"
+        ),
+    )
+    parser.add_argument(
+        "--rpgm_group_speed_mps",
+        type=float,
+        default=0.35,
+        help="Mean speed of each moving group reference point",
+    )
+    parser.add_argument(
+        "--rpgm_group_speed_memory",
+        type=float,
+        default=0.9,
+        help="Temporal correlation of group-reference speed",
+    )
+    parser.add_argument(
+        "--rpgm_group_speed_noise_std",
+        type=float,
+        default=0.04,
+        help="Speed innovation standard deviation for group references",
+    )
+    parser.add_argument(
+        "--rpgm_group_turn_std_rad_sqrt_s",
+        type=float,
+        default=0.12,
+        help="Angular diffusion of group references in rad/sqrt(s)",
+    )
+    parser.add_argument(
+        "--rpgm_local_velocity_memory",
+        type=float,
+        default=0.9,
+        help="Temporal correlation of user-local velocity",
+    )
+    parser.add_argument(
+        "--rpgm_local_velocity_std_mps",
+        type=float,
+        default=0.18,
+        help="Stationary per-axis scale of local user velocity",
+    )
+    parser.add_argument(
+        "--rpgm_local_restore_rate_s2",
+        type=float,
+        default=0.0002,
+        help="Smooth restoring acceleration toward the moving group reference",
+    )
+    parser.add_argument(
+        "--rpgm_local_speed_cap_mps",
+        type=float,
+        default=0.45,
+        help="Maximum speed of a user's local motion component",
     )
     parser.add_argument(
         "--gm_speed_memory",
@@ -295,11 +402,49 @@ def add_common_args(
         help="Positive numerical scale applied to the SAC reward",
     )
     parser.add_argument(
+        "--delay_objective_weight",
+        type=float,
+        default=0.7,
+        help="Normalized delay weight used by the weighted objective",
+    )
+    parser.add_argument(
+        "--energy_objective_weight",
+        type=float,
+        default=0.3,
+        help="Normalized energy weight used by the weighted objective",
+    )
+    parser.add_argument(
         "--micro_state_mode",
         type=str,
         choices=["pressure", "legacy"],
         default="pressure",
         help="Micro-state normalization mode",
+    )
+    parser.add_argument(
+        "--u2u_state_representation",
+        choices=["nominal_rate", "spectral_efficiency"],
+        default="nominal_rate",
+        help="U2U observation primitive used by both hierarchy levels",
+    )
+    parser.add_argument(
+        "--u2u_goal_representation",
+        choices=["match_observation", "nominal_rate"],
+        default="match_observation",
+        help="U2U primitive used by the derived micro routing goal",
+    )
+    parser.add_argument(
+        "--u2u_contention_aware_pressure",
+        type=int,
+        choices=[-1, 0, 1],
+        default=-1,
+        help="Use previous active-link count in micro pressure capacity; -1 preserves legacy auto behavior",
+    )
+    parser.add_argument(
+        "--u2u_prev_active_state",
+        type=int,
+        choices=[0, 1],
+        default=0,
+        help="Append the previous resource-frame active-link fraction",
     )
     parser.add_argument(
         "--macro_comm_weight",
@@ -403,6 +548,16 @@ def add_common_args(
         type=float,
         default=10.0,
         help="Normalization denominator for dual prices included in RL states",
+    )
+    parser.add_argument(
+        "--system_dual_state",
+        type=int,
+        choices=[0, 1],
+        default=0,
+        help=(
+            "Include the normalized system-level energy multiplier in both "
+            "macro and micro observations"
+        ),
     )
     parser.add_argument(
         "--energy_dual_initial",
@@ -616,6 +771,56 @@ def parse_zone_loads(text: str) -> Optional[List[float]]:
     return loads
 
 
+def make_episode_load_switch_schedule(args, episode_seed, num_agents):
+    mode = str(getattr(args, "load_switch_mode", "off")).lower()
+    if mode == "off":
+        return None
+    phases = parse_load_switch_phases(
+        getattr(args, "load_switch_phases", ""),
+        num_agents,
+    )
+    return build_load_switch_schedule(
+        mode=mode,
+        phases_mbps=phases,
+        macro_steps=int(args.macro_steps),
+        episode_seed=int(episode_seed),
+        dwell_min=int(getattr(args, "load_switch_dwell_min", 8)),
+        dwell_max=int(getattr(args, "load_switch_dwell_max", 12)),
+    )
+
+
+def initialize_episode_load_switch(env, args, episode_seed):
+    """Set phase zero before reset without touching any shared RNG stream."""
+    schedule = make_episode_load_switch_schedule(
+        args,
+        episode_seed,
+        int(env.N),
+    )
+    if schedule is not None:
+        apply_load_switch_phase(env, schedule, 0, force=True)
+    return schedule
+
+
+def advance_load_switch_before_macro(env, schedule, macro_index):
+    if schedule is None:
+        return False
+    return apply_load_switch_phase(env, schedule, macro_index, force=False)
+
+
+def initialize_load_switch_trace(path):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", newline="", encoding="utf-8") as fp:
+        csv.DictWriter(fp, fieldnames=LOAD_SWITCH_TRACE_FIELDS).writeheader()
+
+
+def append_load_switch_trace(path, row):
+    with open(path, "a", newline="", encoding="utf-8") as fp:
+        writer = csv.DictWriter(fp, fieldnames=LOAD_SWITCH_TRACE_FIELDS)
+        writer.writerow(
+            {field: row.get(field, "") for field in LOAD_SWITCH_TRACE_FIELDS}
+        )
+
+
 def parse_nonnegative_vector(text: str) -> Optional[List[float]]:
     if text is None:
         return None
@@ -673,6 +878,21 @@ def make_env_from_args(
     args: argparse.Namespace,
     record_trajectory: bool = False,
 ) -> HRL_Wrapper:
+    objective_mode = str(getattr(args, "objective_mode", "weighted"))
+    constraint_scope = str(
+        getattr(args, "power_constraint_scope", "system")
+    )
+    system_dual_state = bool(int(getattr(args, "system_dual_state", 0)))
+    if (
+        objective_mode == "constrained_delay"
+        and constraint_scope == "system"
+        and float(getattr(args, "energy_dual_lr", 0.0)) > 0.0
+        and not system_dual_state
+    ):
+        raise ValueError(
+            "A learned system energy multiplier changes priced_maxweight "
+            "transitions and must be observable: set --system_dual_state 1."
+        )
     env = HRL_Wrapper(
         num_uavs=args.num_agents,
         num_users=args.num_users,
@@ -697,7 +917,27 @@ def make_env_from_args(
             getattr(args, "micro_stick_breaking_scale", 4.0)
         ),
         micro_reward_scale=float(getattr(args, "micro_reward_scale", 10.0)),
+        delay_objective_weight=float(
+            getattr(args, "delay_objective_weight", 0.7)
+        ),
+        energy_objective_weight=float(
+            getattr(args, "energy_objective_weight", 0.3)
+        ),
         micro_state_mode=str(getattr(args, "micro_state_mode", "pressure")),
+        u2u_state_representation=str(
+            getattr(args, "u2u_state_representation", "nominal_rate")
+        ),
+        u2u_goal_representation=str(
+            getattr(args, "u2u_goal_representation", "match_observation")
+        ),
+        u2u_contention_aware_pressure=(
+            None
+            if int(getattr(args, "u2u_contention_aware_pressure", -1)) < 0
+            else bool(int(getattr(args, "u2u_contention_aware_pressure", 0)))
+        ),
+        u2u_prev_active_state=bool(
+            int(getattr(args, "u2u_prev_active_state", 0))
+        ),
         cpu_alloc_mode=str(getattr(args, "cpu_alloc_mode", "priority_kkt")),
         kkt_v=float(getattr(args, "kkt_v", 1.0)),
         fixed_cpu_util=float(getattr(args, "fixed_cpu_util", 0.5)),
@@ -740,7 +980,7 @@ def make_env_from_args(
         arrivals_during_deployment=bool(
             int(getattr(args, "arrivals_during_deployment", 0))
         ),
-        objective_mode=str(getattr(args, "objective_mode", "weighted")),
+        objective_mode=objective_mode,
         power_budget_w=float(getattr(args, "power_budget_w", 0.0)),
         energy_lagrange_multiplier=float(
             getattr(
@@ -749,9 +989,7 @@ def make_env_from_args(
                 getattr(args, "energy_dual_initial", 0.0),
             )
         ),
-        power_constraint_scope=str(
-            getattr(args, "power_constraint_scope", "system")
-        ),
+        power_constraint_scope=constraint_scope,
         uav_power_budgets_w=parse_nonnegative_vector(
             getattr(args, "uav_power_budgets_w", "")
         ),
@@ -761,16 +999,42 @@ def make_env_from_args(
         energy_dual_state_norm=float(
             getattr(args, "energy_dual_state_norm", 10.0)
         ),
+        system_dual_state=system_dual_state,
         users_static=bool(int(getattr(args, "users_static", 0))),
         gm_mean_speed_mps=float(getattr(args, "gm_mean_speed_mps", 0.5)),
         gm_mean_heading_rad=float(
             getattr(args, "gm_mean_heading_rad", np.pi / 4.0)
         ),
+        gm_heading_mode=str(getattr(args, "gm_heading_mode", "shared_mean")),
         gm_speed_memory=float(getattr(args, "gm_speed_memory", 0.5)),
         gm_heading_memory=float(getattr(args, "gm_heading_memory", 0.5)),
         gm_speed_noise_std=float(getattr(args, "gm_speed_noise_std", 0.1)),
         gm_heading_noise_std=float(
             getattr(args, "gm_heading_noise_std", 0.1)
+        ),
+        rpgm_group_speed_mps=float(
+            getattr(args, "rpgm_group_speed_mps", 0.35)
+        ),
+        rpgm_group_speed_memory=float(
+            getattr(args, "rpgm_group_speed_memory", 0.9)
+        ),
+        rpgm_group_speed_noise_std=float(
+            getattr(args, "rpgm_group_speed_noise_std", 0.04)
+        ),
+        rpgm_group_turn_std_rad_sqrt_s=float(
+            getattr(args, "rpgm_group_turn_std_rad_sqrt_s", 0.12)
+        ),
+        rpgm_local_velocity_memory=float(
+            getattr(args, "rpgm_local_velocity_memory", 0.9)
+        ),
+        rpgm_local_velocity_std_mps=float(
+            getattr(args, "rpgm_local_velocity_std_mps", 0.18)
+        ),
+        rpgm_local_restore_rate_s2=float(
+            getattr(args, "rpgm_local_restore_rate_s2", 0.0002)
+        ),
+        rpgm_local_speed_cap_mps=float(
+            getattr(args, "rpgm_local_speed_cap_mps", 0.45)
         ),
         user_zone_radius=float(getattr(args, "user_zone_radius", 80.0)),
         min_uav_separation_m=float(
@@ -824,6 +1088,20 @@ def save_scenario_metadata(
         "load_scale": float(getattr(args, "load_scale", 1.0)),
         "zone_loads": getattr(args, "zone_loads", ""),
         "zone_target_load_mbps": zone_loads,
+        "load_switch_mode": str(
+            getattr(args, "load_switch_mode", "off")
+        ),
+        "load_switch_phases": str(
+            getattr(args, "load_switch_phases", "")
+        ),
+        "load_switch_dwell_min": int(
+            getattr(args, "load_switch_dwell_min", 8)
+        ),
+        "load_switch_dwell_max": int(
+            getattr(args, "load_switch_dwell_max", 12)
+        ),
+        "load_switch_timing": "before_macro_state_observation",
+        "load_switch_future_information": False,
         "uav_initial_positions": getattr(args, "uav_initial_positions", ""),
         "arrival_dt": float(getattr(args, "arrival_dt", 0.5)),
         "resource_frame_dt": float(
@@ -859,6 +1137,9 @@ def save_scenario_metadata(
         "gm_mean_heading_rad": float(
             getattr(args, "gm_mean_heading_rad", np.pi / 4.0)
         ),
+        "gm_heading_mode": str(
+            getattr(args, "gm_heading_mode", "shared_mean")
+        ),
         "gm_speed_memory": float(getattr(args, "gm_speed_memory", 0.5)),
         "gm_heading_memory": float(
             getattr(args, "gm_heading_memory", 0.5)
@@ -868,6 +1149,30 @@ def save_scenario_metadata(
         ),
         "gm_heading_noise_std": float(
             getattr(args, "gm_heading_noise_std", 0.1)
+        ),
+        "rpgm_group_speed_mps": float(
+            getattr(args, "rpgm_group_speed_mps", 0.35)
+        ),
+        "rpgm_group_speed_memory": float(
+            getattr(args, "rpgm_group_speed_memory", 0.9)
+        ),
+        "rpgm_group_speed_noise_std": float(
+            getattr(args, "rpgm_group_speed_noise_std", 0.04)
+        ),
+        "rpgm_group_turn_std_rad_sqrt_s": float(
+            getattr(args, "rpgm_group_turn_std_rad_sqrt_s", 0.12)
+        ),
+        "rpgm_local_velocity_memory": float(
+            getattr(args, "rpgm_local_velocity_memory", 0.9)
+        ),
+        "rpgm_local_velocity_std_mps": float(
+            getattr(args, "rpgm_local_velocity_std_mps", 0.18)
+        ),
+        "rpgm_local_restore_rate_s2": float(
+            getattr(args, "rpgm_local_restore_rate_s2", 0.0002)
+        ),
+        "rpgm_local_speed_cap_mps": float(
+            getattr(args, "rpgm_local_speed_cap_mps", 0.45)
         ),
         "user_zone_radius": float(getattr(args, "user_zone_radius", 80.0)),
         "uplink_bandwidth_mhz": float(
@@ -909,7 +1214,25 @@ def save_scenario_metadata(
         "micro_reward_scale": float(
             getattr(args, "micro_reward_scale", 10.0)
         ),
+        "delay_objective_weight": float(
+            getattr(args, "delay_objective_weight", 0.7)
+        ),
+        "energy_objective_weight": float(
+            getattr(args, "energy_objective_weight", 0.3)
+        ),
         "micro_state_mode": getattr(args, "micro_state_mode", "pressure"),
+        "u2u_state_representation": getattr(
+            args, "u2u_state_representation", "nominal_rate"
+        ),
+        "u2u_goal_representation": getattr(
+            args, "u2u_goal_representation", "match_observation"
+        ),
+        "u2u_contention_aware_pressure": int(
+            getattr(args, "u2u_contention_aware_pressure", -1)
+        ),
+        "u2u_prev_active_state": int(
+            getattr(args, "u2u_prev_active_state", 0)
+        ),
         "micro_solver": getattr(args, "micro_solver", "sac"),
         "sac_actor_lr": float(getattr(args, "sac_actor_lr", 3e-4)),
         "sac_critic_lr": float(getattr(args, "sac_critic_lr", 3e-4)),
@@ -960,6 +1283,9 @@ def save_scenario_metadata(
         ),
         "energy_dual_state_norm": float(
             getattr(args, "energy_dual_state_norm", 10.0)
+        ),
+        "system_dual_state": int(
+            getattr(args, "system_dual_state", 0)
         ),
         "uav_battery_energy_scope": [
             "propulsion",
@@ -1063,6 +1389,9 @@ def save_scenario_metadata(
         ),
         "freeze_micro": int(bool(getattr(args, "freeze_micro", False))),
         "freeze_macro": int(bool(getattr(args, "freeze_macro", False))),
+        "frozen_macro_policy": str(
+            getattr(args, "frozen_macro_policy", "actor")
+        ),
         "train_load_min": float(getattr(args, "train_load_min", 0.0)),
         "train_load_max": float(getattr(args, "train_load_max", 0.0)),
         "episodes": int(getattr(args, "episodes", 0)),
@@ -2816,7 +3145,19 @@ def evaluate_policy(
 
     for eval_idx in range(args.eval_episodes):
         seed = args.eval_base_seed + eval_idx
+        load_switch_schedule = initialize_episode_load_switch(
+            eval_env,
+            args,
+            seed,
+        )
         eval_env.reset(seed=seed)
+        if load_switch_schedule is not None:
+            apply_load_switch_phase(
+                eval_env,
+                load_switch_schedule,
+                0,
+                force=True,
+            )
         if on_episode_start is not None:
             on_episode_start(eval_env, seed)
 
@@ -2862,7 +3203,14 @@ def evaluate_policy(
         mappo_local_state, _ = eval_env.get_macro_state()
         done = False
 
-        for _ in range(args.macro_steps):
+        for macro_index in range(args.macro_steps):
+            switched = advance_load_switch_before_macro(
+                eval_env,
+                load_switch_schedule,
+                macro_index,
+            )
+            if switched:
+                mappo_local_state, _ = eval_env.get_macro_state()
             local_obs_batch = np.vstack(mappo_local_state).astype(np.float32)
             macro_action = np.asarray(
                 macro_policy(eval_env, local_obs_batch, True),

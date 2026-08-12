@@ -1,0 +1,31 @@
+{
+  "checkpoint": "C:\\Users\\PC\\Desktop\\HRL_UAV\\results\\tcom_dynamic_u2u_sparse_v26_joint_support_audit\\pilot\\seed1\\joint_td3_sac\\checkpoints\\eval_candidates\\eval_ep_0060.pt",
+  "episodes_per_snapshot_policy": 5,
+  "branch_points": [
+    0,
+    5,
+    10,
+    15,
+    20,
+    25
+  ],
+  "statistical_unit": "episode",
+  "exogenous_trace_match": true,
+  "support_replay": null,
+  "by_snapshot_policy": {
+    "centroid": {
+      "episodes": 5,
+      "return_actor_minus_zero_mean": 3.0761933570618495e-05,
+      "return_actor_minus_zero_ci95": [
+        -0.00036257433030240647,
+        0.0004240981974436435
+      ],
+      "q_actor_minus_zero_mean": -7.052222887674968e-06,
+      "q_actor_minus_zero_ci95": [
+        -1.3473397769696285e-05,
+        -6.31048005653651e-07
+      ],
+      "ranking_agreement_fraction_mean": 0.4333333333333333
+    }
+  }
+}

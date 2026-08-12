@@ -1,0 +1,134 @@
+[
+  {
+    "split": "train",
+    "episode_seed": 63027,
+    "snapshot_policy": "actor",
+    "fork_macro_index": 0,
+    "fork_state_id": "train:63027:actor:0",
+    "g30_actor": -1.45038588338955,
+    "g30_zero": -1.45176377386897,
+    "g30_actor_minus_zero": 0.001377890479419941,
+    "external_trace_match": true
+  },
+  {
+    "split": "train",
+    "episode_seed": 63027,
+    "snapshot_policy": "actor",
+    "fork_macro_index": 5,
+    "fork_state_id": "train:63027:actor:5",
+    "g30_actor": -1.436092019684504,
+    "g30_zero": -1.431100069337273,
+    "g30_actor_minus_zero": -0.004991950347230878,
+    "external_trace_match": true
+  },
+  {
+    "split": "train",
+    "episode_seed": 63027,
+    "snapshot_policy": "actor",
+    "fork_macro_index": 10,
+    "fork_state_id": "train:63027:actor:10",
+    "g30_actor": -1.376336931956949,
+    "g30_zero": -1.376265967342949,
+    "g30_actor_minus_zero": -7.096461400002418e-05,
+    "external_trace_match": true
+  },
+  {
+    "split": "train",
+    "episode_seed": 63027,
+    "snapshot_policy": "actor",
+    "fork_macro_index": 15,
+    "fork_state_id": "train:63027:actor:15",
+    "g30_actor": -1.349781444848,
+    "g30_zero": -1.348663753455,
+    "g30_actor_minus_zero": -0.0011176913929999976,
+    "external_trace_match": true
+  },
+  {
+    "split": "train",
+    "episode_seed": 63027,
+    "snapshot_policy": "actor",
+    "fork_macro_index": 20,
+    "fork_state_id": "train:63027:actor:20",
+    "g30_actor": -1.3656650542071955,
+    "g30_zero": -1.3652101242071957,
+    "g30_actor_minus_zero": -0.0004549299999998535,
+    "external_trace_match": true
+  },
+  {
+    "split": "train",
+    "episode_seed": 63027,
+    "snapshot_policy": "actor",
+    "fork_macro_index": 25,
+    "fork_state_id": "train:63027:actor:25",
+    "g30_actor": -1.432393027671457,
+    "g30_zero": -1.4328955576714568,
+    "g30_actor_minus_zero": 0.00050252999999989,
+    "external_trace_match": true
+  },
+  {
+    "split": "train",
+    "episode_seed": 63027,
+    "snapshot_policy": "centroid",
+    "fork_macro_index": 0,
+    "fork_state_id": "train:63027:centroid:0",
+    "g30_actor": -1.45038588338955,
+    "g30_zero": -1.45176377386897,
+    "g30_actor_minus_zero": 0.001377890479419941,
+    "external_trace_match": true
+  },
+  {
+    "split": "train",
+    "episode_seed": 63027,
+    "snapshot_policy": "centroid",
+    "fork_macro_index": 5,
+    "fork_state_id": "train:63027:centroid:5",
+    "g30_actor": -1.440954106970574,
+    "g30_zero": -1.435873605553253,
+    "g30_actor_minus_zero": -0.005080501417320971,
+    "external_trace_match": true
+  },
+  {
+    "split": "train",
+    "episode_seed": 63027,
+    "snapshot_policy": "centroid",
+    "fork_macro_index": 10,
+    "fork_state_id": "train:63027:centroid:10",
+    "g30_actor": -1.3760816705519487,
+    "g30_zero": -1.3719216577018547,
+    "g30_actor_minus_zero": -0.004160012850094041,
+    "external_trace_match": true
+  },
+  {
+    "split": "train",
+    "episode_seed": 63027,
+    "snapshot_policy": "centroid",
+    "fork_macro_index": 15,
+    "fork_state_id": "train:63027:centroid:15",
+    "g30_actor": -1.3494079068159999,
+    "g30_zero": -1.3464159760981398,
+    "g30_actor_minus_zero": -0.0029919307178600807,
+    "external_trace_match": true
+  },
+  {
+    "split": "train",
+    "episode_seed": 63027,
+    "snapshot_policy": "centroid",
+    "fork_macro_index": 20,
+    "fork_state_id": "train:63027:centroid:20",
+    "g30_actor": -1.3644385716071956,
+    "g30_zero": -1.3633227690435856,
+    "g30_actor_minus_zero": -0.001115802563609991,
+    "external_trace_match": true
+  },
+  {
+    "split": "train",
+    "episode_seed": 63027,
+    "snapshot_policy": "centroid",
+    "fork_macro_index": 25,
+    "fork_state_id": "train:63027:centroid:25",
+    "g30_actor": -1.4310794734714567,
+    "g30_zero": -1.4281869285714568,
+    "g30_actor_minus_zero": -0.002892544899999905,
+    "external_trace_match": true
+  }
+]

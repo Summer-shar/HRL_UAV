@@ -24,6 +24,7 @@ from train_centralized_td3 import update_smoothed_per_uav_energy_duals
 from train_centralized_macro import checkpoint_rank
 from train_centralized_macro import load_checkpoint_energy_dual
 from train_centralized_macro import split_macro_lagrangian_reward
+from train_centralized_macro import update_energy_dual
 from compare_sca import _sca_cache_key
 
 
@@ -50,6 +51,32 @@ def make_research_env(load_scale=1.15):
     )
     env.env.F_max_array[:] = 10e9
     env.macro_shaping_lambda = 0.0
+    return env
+
+
+def make_system_dual_env(dual=0.0):
+    env = HRL_Wrapper(
+        num_uavs=3,
+        num_users=39,
+        arrival_dt=0.5,
+        resource_frame_dt=0.5,
+        deployment_dt=1.0,
+        zone_loads=[12.5, 5.5, 3.5],
+        load_scale=1.15,
+        cpu_alloc_mode="priced_maxweight",
+        cpu_power_cap_w=0.0,
+        users_static=False,
+        objective_mode="constrained_delay",
+        power_budget_w=840.0,
+        power_constraint_scope="system",
+        energy_lagrange_multiplier=dual,
+        energy_dual_state_norm=10.0,
+        system_dual_state=True,
+        macro_flow_state=False,
+        macro_load_state=False,
+        macro_capacity_state=False,
+    )
+    env.env.F_max_array[:] = 10e9
     return env
 
 
@@ -321,6 +348,60 @@ class LongTermResearchProtocolTests(unittest.TestCase):
             np.asarray([1.0, 2.0, 3.0]) / 280.0,
         )
 
+    def test_system_dual_closes_both_states_and_cpu_response_chain(self):
+        env = make_system_dual_env()
+        env.reset(seed=312)
+        legacy_macro_dim = env.macro_global_obs_dim - env.N
+        legacy_micro_dim = env.sac_obs_dim - 1
+
+        env.set_energy_lagrange_multipliers(2.0)
+        local_states, macro_state = env.get_macro_state()
+        micro_state = env.get_sac_state()
+
+        self.assertEqual(env.macro_global_obs_dim, legacy_macro_dim + env.N)
+        self.assertEqual(env.sac_obs_dim, legacy_micro_dim + 1)
+        self.assertEqual(macro_state.size, env.macro_global_obs_dim)
+        self.assertEqual(micro_state.size, env.sac_obs_dim)
+        for local_state in local_states:
+            self.assertAlmostEqual(float(local_state[7]), 0.2, places=7)
+        self.assertAlmostEqual(float(micro_state[-1]), 0.2, places=7)
+        np.testing.assert_allclose(
+            env.env.cpu_energy_prices,
+            np.full(env.N, 2.0 / 840.0),
+        )
+
+        env.env.Q_loc_high[:] = 0.5
+        env.env.Q_loc_low[:] = 1.0
+        low_price_frequency = env.env._allocate_cpu_frequencies()[2]
+        env.set_energy_lagrange_multipliers(10.0)
+        high_price_frequency = env.env._allocate_cpu_frequencies()[2]
+        self.assertTrue(np.all(high_price_frequency < low_price_frequency))
+
+    def test_system_dual_update_immediately_syncs_observation_and_cpu_price(self):
+        env = make_system_dual_env()
+        args = SimpleNamespace(
+            objective_mode="constrained_delay",
+            power_budget_w=840.0,
+            power_constraint_margin_w=0.0,
+            energy_dual_lr=0.2,
+            energy_dual_max=20.0,
+        )
+
+        before, after, violation = update_energy_dual(env, args, 882.0)
+        self.assertEqual(before, 0.0)
+        self.assertGreater(after, 0.0)
+        self.assertGreater(violation, 0.0)
+        self.assertAlmostEqual(env.energy_lagrange_multiplier, after)
+        self.assertAlmostEqual(env.get_sac_state()[-1], after / 10.0)
+        np.testing.assert_allclose(
+            env.env.cpu_energy_prices,
+            np.full(env.N, after / 840.0),
+        )
+
+        _, lower, lower_violation = update_energy_dual(env, args, 798.0)
+        self.assertLess(lower, after)
+        self.assertLess(lower_violation, 0.0)
+
     def test_td3_energy_critic_and_dual_update_are_per_uav(self):
         args = SimpleNamespace(
             td3_hidden_dim=32,
@@ -401,6 +482,21 @@ class LongTermResearchProtocolTests(unittest.TestCase):
                 num_uavs=3,
             )
             np.testing.assert_allclose(restored, [0.1, 0.2, 0.3])
+
+    def test_checkpoint_restores_system_dual_scalar(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            checkpoint = Path(tmpdir) / "micro.pt"
+            torch.save(
+                {
+                    "args": {
+                        "energy_lagrange_multiplier_current": 0.75,
+                        "system_dual_state": 1,
+                    }
+                },
+                checkpoint,
+            )
+            restored = load_checkpoint_energy_dual(str(checkpoint))
+            self.assertAlmostEqual(restored, 0.75)
 
     def test_sca_cache_and_objective_preserve_per_uav_energy_prices(self):
         env = make_research_env()

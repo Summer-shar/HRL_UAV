@@ -151,6 +151,15 @@ class UAV_MEC_Env:
         user_zone_radius=80.0,
         min_uav_separation_m=5.0,
         u2u_link_bandwidth_matrix_mhz=None,
+        gm_heading_mode="shared_mean",
+        rpgm_group_speed_mps=0.35,
+        rpgm_group_speed_memory=0.9,
+        rpgm_group_speed_noise_std=0.04,
+        rpgm_group_turn_std_rad_sqrt_s=0.12,
+        rpgm_local_velocity_memory=0.9,
+        rpgm_local_velocity_std_mps=0.18,
+        rpgm_local_restore_rate_s2=0.0002,
+        rpgm_local_speed_cap_mps=0.45,
     ):
 
         # ================== 1. 系统物理设定与参数 ==================
@@ -399,6 +408,17 @@ class UAV_MEC_Env:
         # the 0.1 s physical step.
         self.gm_mean_speed_mps = float(gm_mean_speed_mps)
         self.gm_mean_heading_rad = float(gm_mean_heading_rad)
+        self.gm_heading_mode = str(gm_heading_mode).lower()
+        if self.gm_heading_mode not in {
+            "shared_mean",
+            "independent_episode_mean",
+            "reference_point_group",
+        }:
+            raise ValueError(
+                "gm_heading_mode must be 'shared_mean', "
+                "'independent_episode_mean', or "
+                "'reference_point_group'."
+            )
         self.gm_speed_memory = float(gm_speed_memory)
         self.gm_heading_memory = float(gm_heading_memory)
         self.gm_speed_noise_std = max(float(gm_speed_noise_std), 0.0)
@@ -412,8 +432,42 @@ class UAV_MEC_Env:
         self.alpha_gmmm = self.gm_speed_memory
         self.max_infantry_speed = 3.0
         self.user_speeds = np.full(self.M, self.gm_mean_speed_mps)
+        self.user_mean_headings = np.full(self.M, self.gm_mean_heading_rad)
         self.user_headings = np.full(self.M, self.gm_mean_heading_rad)
         self.user_velocities = np.zeros((self.M, 2))
+        self.rpgm_group_speed_mps = max(float(rpgm_group_speed_mps), 0.0)
+        self.rpgm_group_speed_memory = float(rpgm_group_speed_memory)
+        self.rpgm_group_speed_noise_std = max(
+            float(rpgm_group_speed_noise_std), 0.0
+        )
+        self.rpgm_group_turn_std_rad_sqrt_s = max(
+            float(rpgm_group_turn_std_rad_sqrt_s), 0.0
+        )
+        self.rpgm_local_velocity_memory = float(
+            rpgm_local_velocity_memory
+        )
+        self.rpgm_local_velocity_std_mps = max(
+            float(rpgm_local_velocity_std_mps), 0.0
+        )
+        self.rpgm_local_restore_rate_s2 = max(
+            float(rpgm_local_restore_rate_s2), 0.0
+        )
+        self.rpgm_local_speed_cap_mps = max(
+            float(rpgm_local_speed_cap_mps), 0.0
+        )
+        for name, value in (
+            ("rpgm_group_speed_memory", self.rpgm_group_speed_memory),
+            ("rpgm_local_velocity_memory", self.rpgm_local_velocity_memory),
+        ):
+            if not 0.0 <= value <= 1.0:
+                raise ValueError(f"{name} must be in [0, 1].")
+        self.mobility_group_centers = self.base_anchor_points.copy()
+        self.mobility_group_speeds = np.full(
+            self.N, self.rpgm_group_speed_mps, dtype=np.float64
+        )
+        self.mobility_group_headings = np.zeros(self.N, dtype=np.float64)
+        self.mobility_group_velocities = np.zeros((self.N, 2), dtype=np.float64)
+        self.user_local_velocities = np.zeros((self.M, 2), dtype=np.float64)
         self.users_static = bool(users_static)
         self.user_zone_radius = float(user_zone_radius)
         self.user_zone_scatter_std = 40.0
@@ -454,6 +508,9 @@ class UAV_MEC_Env:
             self.uav_trajectory = []
             self.centroid_trajectory = []
             self.users_trajectory = []
+            self.group_center_trajectory = []
+            self.arrival_high_trajectory = []
+            self.arrival_low_trajectory = []
 
     def record_trajectory_snapshot(self):
         if not self.record_trajectory:
@@ -461,6 +518,9 @@ class UAV_MEC_Env:
         self.uav_trajectory.append(self.uav_coords.copy())
         self.centroid_trajectory.append(self.weighted_centroids.copy())
         self.users_trajectory.append(self.user_coords.copy())
+        self.group_center_trajectory.append(
+            self.mobility_group_centers.copy()
+        )
 
     def _current_time(self):
         return float(self.global_micro_step) * float(self.micro_dt)
@@ -568,27 +628,32 @@ class UAV_MEC_Env:
             bandwidth_hz[active] = self.B_u2u_total / active_count
         return bandwidth_hz
 
+    def compute_u2u_spectral_efficiency(self, uav_coords=None):
+        if uav_coords is None:
+            return self._get_u2u_spectral_efficiency().copy()
+        coords = np.asarray(uav_coords, dtype=np.float64)
+        if coords.shape != (self.N, 2):
+            raise ValueError(f"uav_coords must have shape ({self.N}, 2).")
+        diff = coords[:, None, :] - coords[None, :, :]
+        dist_sq = np.sum(diff**2, axis=-1)
+        np.fill_diagonal(dist_sq, np.inf)
+        channel_gain = self.beta_0 / np.maximum(dist_sq, 1e-12)
+        np.fill_diagonal(channel_gain, 0.0)
+        spectral_efficiency = np.log2(
+            1.0 + (self.p_u2u * channel_gain) / self.noise_power
+        )
+        np.fill_diagonal(spectral_efficiency, 0.0)
+        return spectral_efficiency
+
     def compute_u2u_rate_bps(
         self,
         uav_coords=None,
         active_link_mask=None,
         return_bandwidth=False,
     ):
-        if uav_coords is None:
-            spectral_efficiency = self._get_u2u_spectral_efficiency()
-        else:
-            coords = np.asarray(uav_coords, dtype=np.float64)
-            if coords.shape != (self.N, 2):
-                raise ValueError(f"uav_coords must have shape ({self.N}, 2).")
-            diff = coords[:, None, :] - coords[None, :, :]
-            dist_sq = np.sum(diff**2, axis=-1)
-            np.fill_diagonal(dist_sq, np.inf)
-            channel_gain = self.beta_0 / np.maximum(dist_sq, 1e-12)
-            np.fill_diagonal(channel_gain, 0.0)
-            spectral_efficiency = np.log2(
-                1.0 + (self.p_u2u * channel_gain) / self.noise_power
-            )
-            np.fill_diagonal(spectral_efficiency, 0.0)
+        spectral_efficiency = self.compute_u2u_spectral_efficiency(
+            uav_coords=uav_coords
+        )
         bandwidth_hz = self.allocate_u2u_link_bandwidth_hz(
             active_link_mask
         )
@@ -1537,12 +1602,55 @@ class UAV_MEC_Env:
             0.0 if self.users_static else self.gm_mean_speed_mps,
             dtype=np.float64,
         )
-        self.user_headings = np.full(
-            self.M,
-            self.gm_mean_heading_rad,
-            dtype=np.float64,
-        )
-        self._sync_user_velocity_vectors()
+        if self.gm_heading_mode == "reference_point_group":
+            self.mobility_group_centers = self.anchor_points.copy()
+            self.mobility_group_speeds = np.full(
+                self.N,
+                self.rpgm_group_speed_mps,
+                dtype=np.float64,
+            )
+            self.mobility_group_headings = self.np_random.uniform(
+                -np.pi,
+                np.pi,
+                size=self.N,
+            )
+            self.mobility_group_velocities = np.column_stack(
+                [
+                    self.mobility_group_speeds
+                    * np.cos(self.mobility_group_headings),
+                    self.mobility_group_speeds
+                    * np.sin(self.mobility_group_headings),
+                ]
+            )
+            self.user_local_velocities = self.np_random.normal(
+                0.0,
+                self.rpgm_local_velocity_std_mps,
+                size=(self.M, 2),
+            )
+            self._clip_user_local_velocities()
+            self.user_mean_headings = self.mobility_group_headings[
+                self.user_allocations
+            ].copy()
+            total_velocities = (
+                self.mobility_group_velocities[self.user_allocations]
+                + self.user_local_velocities
+            )
+            self._set_user_velocity_vectors(total_velocities)
+        elif self.gm_heading_mode == "independent_episode_mean":
+            self.user_mean_headings = self.np_random.uniform(
+                -np.pi,
+                np.pi,
+                size=self.M,
+            )
+        else:
+            self.user_mean_headings = np.full(
+                self.M,
+                self.gm_mean_heading_rad,
+                dtype=np.float64,
+            )
+        if self.gm_heading_mode != "reference_point_group":
+            self.user_headings = self.user_mean_headings.copy()
+            self._sync_user_velocity_vectors()
         
         # 5. 清空控制指令缓存与流水队列
         self.current_macro_v = np.zeros(self.N)
@@ -1576,6 +1684,9 @@ class UAV_MEC_Env:
             self.uav_trajectory = []
             self.centroid_trajectory = []
             self.users_trajectory = []
+            self.group_center_trajectory = []
+            self.arrival_high_trajectory = []
+            self.arrival_low_trajectory = []
             self.record_trajectory_snapshot()
             
         return self.get_raw_state(), {}
@@ -1612,11 +1723,95 @@ class UAV_MEC_Env:
             ]
         )
 
+    def _set_user_velocity_vectors(self, velocities):
+        self.user_velocities = np.asarray(velocities, dtype=np.float64).copy()
+        self.user_speeds = np.linalg.norm(self.user_velocities, axis=1)
+        self.user_headings = np.arctan2(
+            self.user_velocities[:, 1],
+            self.user_velocities[:, 0],
+        )
+
+    def _clip_user_local_velocities(self):
+        cap = float(self.rpgm_local_speed_cap_mps)
+        if cap <= 0.0:
+            self.user_local_velocities.fill(0.0)
+            return
+        speeds = np.linalg.norm(self.user_local_velocities, axis=1)
+        scale = np.minimum(1.0, cap / np.maximum(speeds, 1e-12))
+        self.user_local_velocities *= scale[:, None]
+
+    def _update_reference_point_group_mobility(self):
+        frame_dt = float(self.resource_frame_dt)
+        group_speed_noise = self.np_random.normal(
+            0.0,
+            self.rpgm_group_speed_noise_std,
+            size=self.N,
+        )
+        group_turn_noise = self.np_random.normal(
+            0.0,
+            self.rpgm_group_turn_std_rad_sqrt_s * np.sqrt(frame_dt),
+            size=self.N,
+        )
+        c_group = self.rpgm_group_speed_memory
+        self.mobility_group_speeds = (
+            c_group * self.mobility_group_speeds
+            + (1.0 - c_group) * self.rpgm_group_speed_mps
+            + np.sqrt(max(1.0 - c_group**2, 0.0)) * group_speed_noise
+        )
+        self.mobility_group_speeds = np.clip(
+            self.mobility_group_speeds,
+            0.0,
+            self.max_infantry_speed,
+        )
+        self.mobility_group_headings = self._wrap_angle(
+            self.mobility_group_headings + group_turn_noise
+        )
+        self.mobility_group_velocities = np.column_stack(
+            [
+                self.mobility_group_speeds
+                * np.cos(self.mobility_group_headings),
+                self.mobility_group_speeds
+                * np.sin(self.mobility_group_headings),
+            ]
+        )
+
+        c_local = self.rpgm_local_velocity_memory
+        local_innovation = self.np_random.normal(
+            0.0,
+            np.sqrt(max(1.0 - c_local**2, 0.0))
+            * self.rpgm_local_velocity_std_mps,
+            size=(self.M, 2),
+        )
+        restoring_velocity = (
+            -self.rpgm_local_restore_rate_s2
+            * self.user_offsets
+            * frame_dt
+        )
+        self.user_local_velocities = (
+            c_local * self.user_local_velocities
+            + local_innovation
+            + restoring_velocity
+        )
+        self._clip_user_local_velocities()
+        self.user_mean_headings = self.mobility_group_headings[
+            self.user_allocations
+        ].copy()
+        total_velocities = (
+            self.mobility_group_velocities[self.user_allocations]
+            + self.user_local_velocities
+        )
+        self._set_user_velocity_vectors(total_velocities)
+
     def _update_gauss_markov_mobility(self):
         if self.users_static:
             self.user_speeds.fill(0.0)
-            self.user_headings.fill(self.gm_mean_heading_rad)
+            self.user_headings[:] = self.user_mean_headings
             self._sync_user_velocity_vectors()
+            return
+
+        if self.gm_heading_mode == "reference_point_group":
+            self._update_reference_point_group_mobility()
+            self.mobility_update_count += 1
             return
 
         speed_noise = self.np_random.normal(
@@ -1641,11 +1836,22 @@ class UAV_MEC_Env:
             0.0,
             self.max_infantry_speed,
         )
-        self.user_headings = self._wrap_angle(
-            c_heading * self.user_headings
-            + (1.0 - c_heading) * self.gm_mean_heading_rad
-            + np.sqrt(max(1.0 - c_heading**2, 0.0)) * heading_noise
-        )
+        if self.gm_heading_mode == "independent_episode_mean":
+            heading_offset = self._wrap_angle(
+                self.user_headings - self.user_mean_headings
+            )
+            self.user_headings = self._wrap_angle(
+                self.user_mean_headings
+                + c_heading * heading_offset
+                + np.sqrt(max(1.0 - c_heading**2, 0.0)) * heading_noise
+            )
+        else:
+            # Keep the historical shared-heading update exactly reproducible.
+            self.user_headings = self._wrap_angle(
+                c_heading * self.user_headings
+                + (1.0 - c_heading) * self.gm_mean_heading_rad
+                + np.sqrt(max(1.0 - c_heading**2, 0.0)) * heading_noise
+            )
         self._sync_user_velocity_vectors()
         self.mobility_update_count += 1
 
@@ -1657,6 +1863,47 @@ class UAV_MEC_Env:
                 0.0,
                 1000.0,
             )
+            return
+
+        if self.gm_heading_mode == "reference_point_group":
+            proposed_centers = (
+                self.mobility_group_centers
+                + self.mobility_group_velocities * self.micro_dt
+            )
+            center_hits = (proposed_centers < 0.0) | (proposed_centers > 1000.0)
+            if np.any(center_hits):
+                self.mobility_group_velocities[center_hits] *= -1.0
+                affected_groups = np.any(center_hits, axis=1)
+                reflected = self.mobility_group_velocities[affected_groups]
+                self.mobility_group_headings[affected_groups] = np.arctan2(
+                    reflected[:, 1],
+                    reflected[:, 0],
+                )
+                proposed_centers = np.clip(proposed_centers, 0.0, 1000.0)
+            self.mobility_group_centers = proposed_centers
+            self.user_offsets = (
+                self.user_offsets + self.user_local_velocities * self.micro_dt
+            )
+            proposed_coords = (
+                self.mobility_group_centers[self.user_allocations]
+                + self.user_offsets
+            )
+            boundary_hits = (
+                (proposed_coords < 0.0) | (proposed_coords > 1000.0)
+            )
+            if np.any(boundary_hits):
+                self.user_local_velocities[boundary_hits] *= -1.0
+                proposed_coords = np.clip(proposed_coords, 0.0, 1000.0)
+                self.user_offsets = (
+                    proposed_coords
+                    - self.mobility_group_centers[self.user_allocations]
+                )
+            self.user_coords = proposed_coords
+            total_velocities = (
+                self.mobility_group_velocities[self.user_allocations]
+                + self.user_local_velocities
+            )
+            self._set_user_velocity_vectors(total_velocities)
             return
 
         if self.user_zone_radius <= 0.0:
@@ -1739,6 +1986,9 @@ class UAV_MEC_Env:
             counts_low = self.np_random.poisson(
                 self.user_lambda_low * self.arrival_dt
             ).astype(np.float32)
+        if self.record_trajectory:
+            self.arrival_high_trajectory.append(counts_high.copy())
+            self.arrival_low_trajectory.append(counts_low.copy())
 
         self.current_user_associations = self.user_allocations.copy()
         high_bits = counts_high * self.user_task_size_high_mbits

@@ -1,0 +1,48 @@
+{
+  "status": "FAIL",
+  "delay_delta_two_way_bootstrap_ms": {
+    "mean": 8.3022114912937,
+    "ci95_low": -35.337352136394664,
+    "ci95_high": 38.959378834512705,
+    "one_sided_95_upper": 35.623693998865114,
+    "analysis_seed": 30030,
+    "replicates": 20000
+  },
+  "conditions": {
+    "noninferiority_upper_le_3ms": false,
+    "no_training_seed_degrades_over_10ms": false,
+    "all_treatment_power_ucb95_le_840w": true,
+    "external_traces_match": true,
+    "task_conservation_exact": true
+  },
+  "per_training_seed": [
+    {
+      "training_seed": 1,
+      "delay_delta_mean_ms": -36.463090158264464,
+      "delay_delta_ci95_low_ms": -41.59358543278977,
+      "delay_delta_ci95_high_ms": -31.33259488373915,
+      "treatment_power_mean_w": 833.2165963541668,
+      "treatment_power_ucb95_w": 835.4189402574157,
+      "routing_total_variation_mean": 0.23839449450339695
+    },
+    {
+      "training_seed": 42,
+      "delay_delta_mean_ms": 39.97274953134234,
+      "delay_delta_ci95_low_ms": 34.569748304623594,
+      "delay_delta_ci95_high_ms": 45.37575075806108,
+      "treatment_power_mean_w": 833.4374739583333,
+      "treatment_power_ucb95_w": 835.6128357343722,
+      "routing_total_variation_mean": 0.2368508760919971
+    },
+    {
+      "training_seed": 123,
+      "delay_delta_mean_ms": 21.39697510080323,
+      "delay_delta_ci95_low_ms": 15.857574038223099,
+      "delay_delta_ci95_high_ms": 26.936376163383358,
+      "treatment_power_mean_w": 831.7803385416667,
+      "treatment_power_ucb95_w": 834.0826761055941,
+      "routing_total_variation_mean": 0.11742679629934402
+    }
+  ],
+  "mean_routing_total_variation": 0.19755738896491265
+}

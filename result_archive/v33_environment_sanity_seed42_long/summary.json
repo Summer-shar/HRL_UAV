@@ -1,0 +1,17 @@
+[
+  {
+    "seed": 42,
+    "micro_policy": "capacity",
+    "task_delay_weighted_ms": 1301.2052062204493,
+    "task_arrived_count": 30696,
+    "task_completed_count": 30606,
+    "terminal_queue_mbit": 2.9971110108892116,
+    "tail_queue_slope_mbit_per_macro": 0.18344110487471685,
+    "cycle_boundary_count": 4,
+    "cycle_boundary_growth_mbit_per_cycle": -0.6506669497489613,
+    "average_power_w": 855.479457398385,
+    "initial_mean_heading_resultant": 0.11925507057955052,
+    "net_displacement_direction_resultant": 0.10968264910702322,
+    "mean_user_displacement_m": 529.8258349835697
+  }
+]

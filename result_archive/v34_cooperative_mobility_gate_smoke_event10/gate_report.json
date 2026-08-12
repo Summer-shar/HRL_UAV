@@ -1,0 +1,232 @@
+{
+  "seeds": [
+    1000,
+    1001,
+    1002
+  ],
+  "policy_means": {
+    "fixed": {
+      "task_delay_weighted_ms": {
+        "mean": 663.1720076293858,
+        "ci_low": 588.420028485022,
+        "ci_high": 737.9239867737496,
+        "std": 30.091721079593306
+      },
+      "mean_queue_mbits": {
+        "mean": 5.693315648622554,
+        "ci_low": 4.750634508252357,
+        "ci_high": 6.635996788992751,
+        "std": 0.3794802260449816
+      },
+      "terminal_queue_mbits": {
+        "mean": 6.753573085020879,
+        "ci_low": -1.961691729620462,
+        "ci_high": 15.46883789966222,
+        "std": 3.5083662123580677
+      },
+      "tail_queue_slope_mbps": {
+        "mean": -0.0027926535003123944,
+        "ci_low": -0.11413831774455632,
+        "ci_high": 0.10855301074393153,
+        "std": 0.044822661690188385
+      },
+      "average_power_w": {
+        "mean": 823.3883213617406,
+        "ci_low": 808.5444728699154,
+        "ci_high": 838.2321698535659,
+        "std": 5.975453140860801
+      },
+      "coop_ratio": {
+        "mean": 1.0,
+        "ci_low": 1.0,
+        "ci_high": 1.0,
+        "std": 0.0
+      }
+    },
+    "centroid": {
+      "task_delay_weighted_ms": {
+        "mean": 668.5197381003077,
+        "ci_low": 569.8375819371424,
+        "ci_high": 767.2018942634729,
+        "std": 39.72491367833891
+      },
+      "mean_queue_mbits": {
+        "mean": 6.6224432931657455,
+        "ci_low": 4.558960496802678,
+        "ci_high": 8.685926089528813,
+        "std": 0.8306636087959486
+      },
+      "terminal_queue_mbits": {
+        "mean": 8.82940119528781,
+        "ci_low": -12.873170599150301,
+        "ci_high": 30.531972989725922,
+        "std": 8.736460821817872
+      },
+      "tail_queue_slope_mbps": {
+        "mean": -0.01982859381678366,
+        "ci_low": -0.24260294087085132,
+        "ci_high": 0.20294575323728398,
+        "std": 0.08967874285031523
+      },
+      "average_power_w": {
+        "mean": 833.9070639485825,
+        "ci_low": 821.4708516615115,
+        "ci_high": 846.3432762356535,
+        "std": 5.0062491416639805
+      },
+      "coop_ratio": {
+        "mean": 1.0,
+        "ci_low": 1.0,
+        "ci_high": 1.0,
+        "std": 0.0
+      }
+    },
+    "cooperative": {
+      "task_delay_weighted_ms": {
+        "mean": 660.3551142178441,
+        "ci_low": 580.1732653345573,
+        "ci_high": 740.5369631011308,
+        "std": 32.27753779712318
+      },
+      "mean_queue_mbits": {
+        "mean": 6.044780337850842,
+        "ci_low": 4.904259018151016,
+        "ci_high": 7.185301657550667,
+        "std": 0.4591216156492165
+      },
+      "terminal_queue_mbits": {
+        "mean": 8.201290587112068,
+        "ci_low": -7.485364223557545,
+        "ci_high": 23.887945397781678,
+        "std": 6.314728340809716
+      },
+      "tail_queue_slope_mbps": {
+        "mean": -0.0033660556076115775,
+        "ci_low": -0.1394824827754528,
+        "ci_high": 0.13275037156022965,
+        "std": 0.0547942356519438
+      },
+      "average_power_w": {
+        "mean": 852.9044727312724,
+        "ci_low": 843.1916489819866,
+        "ci_high": 862.6172964805583,
+        "std": 3.909937723445486
+      },
+      "coop_ratio": {
+        "mean": 1.0,
+        "ci_low": 1.0,
+        "ci_high": 1.0,
+        "std": 0.0
+      }
+    }
+  },
+  "paired": {
+    "cooperative_vs_centroid_delay": {
+      "mean": -8.164623882463653,
+      "ci_low": -27.19845240650971,
+      "ci_high": 10.869204641582405,
+      "std": 7.662147083975729,
+      "treatment": "cooperative",
+      "control": "centroid",
+      "field": "task_delay_weighted_ms",
+      "n": 3,
+      "mean_gain": 8.164623882463653,
+      "seeds": [
+        1000,
+        1001,
+        1002
+      ],
+      "deltas": [
+        -16.829438437391786,
+        -2.283268741768893,
+        -5.381164468230281
+      ]
+    },
+    "cooperative_vs_fixed_delay": {
+      "mean": -2.8168934115417037,
+      "ci_low": -8.658546357211662,
+      "ci_high": 3.0247595341282545,
+      "std": 2.351581765419239,
+      "treatment": "cooperative",
+      "control": "fixed",
+      "field": "task_delay_weighted_ms",
+      "n": 3,
+      "mean_gain": 2.8168934115417037,
+      "seeds": [
+        1000,
+        1001,
+        1002
+      ],
+      "deltas": [
+        -0.22588059390295712,
+        -4.81590975886661,
+        -3.4088898818555435
+      ]
+    },
+    "centroid_vs_fixed_delay": {
+      "mean": 5.34773047092195,
+      "ci_low": -19.505294959521805,
+      "ci_high": 30.200755901365703,
+      "std": 10.004689077096387,
+      "treatment": "centroid",
+      "control": "fixed",
+      "field": "task_delay_weighted_ms",
+      "n": 3,
+      "mean_gain": -5.34773047092195,
+      "seeds": [
+        1000,
+        1001,
+        1002
+      ],
+      "deltas": [
+        16.60355784348883,
+        -2.532641017097717,
+        1.9722745863747377
+      ]
+    },
+    "cooperative_vs_centroid_queue": {
+      "mean": -0.5776629553149037,
+      "ci_low": -1.5310462030944751,
+      "ci_high": 0.37572029246466765,
+      "std": 0.3837884040332167,
+      "treatment": "cooperative",
+      "control": "centroid",
+      "field": "mean_queue_mbits",
+      "n": 3,
+      "mean_gain": 0.5776629553149037,
+      "seeds": [
+        1000,
+        1001,
+        1002
+      ],
+      "deltas": [
+        -1.0075964317569293,
+        -0.45576309329707776,
+        -0.2696293408907042
+      ]
+    }
+  },
+  "pre_registered_thresholds": {
+    "practical_delay_gain_ms": 5.0,
+    "queue_noninferiority_fraction": 0.05,
+    "queue_noninferiority_margin_mbits": 0.3311221646582873,
+    "power_role": "descriptive_only_no_hard_threshold"
+  },
+  "checks": {
+    "cooperative_beats_centroid_statistically": false,
+    "cooperative_beats_centroid_practically": true,
+    "cooperative_beats_fixed_statistically": false,
+    "cooperative_beats_fixed_practically": false,
+    "queue_noninferior_to_centroid": false
+  },
+  "pass": false,
+  "config": "C:\\Users\\PC\\Desktop\\HRL_UAV\\configs\\tcom_v34_cooperative_mobility.json",
+  "micro_checkpoint": "C:\\Users\\PC\\Desktop\\HRL_UAV\\results\\tcom_v33_soft_energy_random_mobility\\formal\\seed1\\micro_pretrain\\checkpoints\\final.pt",
+  "device": "cuda",
+  "cooperative_offset_m": 60.0,
+  "movement_trigger_m": 10.0,
+  "load_scale": 1.15,
+  "fixed_policy_definition": "move once toward the initial business centroid using the common event trigger, then hover",
+  "centroid_policy_definition": "causal event-triggered dynamic weighted-business-centroid tracking",
+  "cooperative_policy_definition": "centroid tracking plus a 60 m causal residual from the lightest support UAV toward the current heavy UAV"
+}

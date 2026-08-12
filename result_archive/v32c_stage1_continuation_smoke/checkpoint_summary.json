@@ -1,0 +1,30 @@
+[
+  {
+    "checkpoint": "C:\\Users\\PC\\Desktop\\HRL_UAV\\results\\tcom_dynamic_load_switch_v32b_formal\\formal\\seed1\\joint_td3_sac\\checkpoints\\eval_candidates\\eval_ep_0100.pt",
+    "checkpoint_episode": 100,
+    "eligible_seed_count": 1,
+    "excluded_seeds": [],
+    "q_actor_minus_zero": {
+      "mean": 0.010354876518249512,
+      "ci95_low": NaN,
+      "ci95_high": NaN
+    },
+    "return_zero_once_minus_actor": {
+      "mean": 0.007236143201807543,
+      "ci95_low": NaN,
+      "ci95_high": NaN
+    },
+    "return_sustained_minus_actor": {
+      "mean": 0.4468248368600092,
+      "ci95_low": NaN,
+      "ci95_high": NaN
+    },
+    "delay_sustained_minus_actor_ms": {
+      "mean": -233.65023806128283,
+      "ci95_low": NaN,
+      "ci95_high": NaN
+    },
+    "q_one_step_sign_agreement": 0.0,
+    "verdict": "INCONCLUSIVE_OR_MIXED"
+  }
+]

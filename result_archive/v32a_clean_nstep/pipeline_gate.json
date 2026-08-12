@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "checks": {
+    "n1_target_exact": true,
+    "global_numpy_rng_unchanged": true,
+    "start_indices_equal": true,
+    "sampled_states_equal": true,
+    "reward_sequences_equal": true
+  },
+  "control_resamples": 0,
+  "treatment_resamples": 0
+}

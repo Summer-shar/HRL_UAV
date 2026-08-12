@@ -1,0 +1,94 @@
+{
+  "status": "ZERO_TRAINING_AUDIT",
+  "episodes": 5,
+  "link_samples": 81000,
+  "active_link_samples": 36309,
+  "channel_model": "beta_0 / d^2 with no additional fading term",
+  "anchor_eta_reference_bps_hz": 6.490070890987665,
+  "normalization": "eta / median off-diagonal eta at initial anchors",
+  "old_effective_eta_denominator": 120.0,
+  "feature_sensitivity_multiplier_new_over_old": 18.489782625739284,
+  "distance_m_p05_p50_p95": [
+    301.71860465399357,
+    339.1490344012075,
+    421.8053263557676
+  ],
+  "eta_p05_p50_p95": [
+    5.838072377715602,
+    6.458444994244758,
+    6.792450994086251
+  ],
+  "old_feature_p05_p50_p95": [
+    0.04865060314763002,
+    0.053820374952039646,
+    0.05660375828405209
+  ],
+  "new_feature_p05_p50_p95": [
+    0.8995390768107864,
+    0.9951270336989964,
+    1.0465911864720123
+  ],
+  "new_feature_max": 1.0591999624558464,
+  "new_feature_fraction_above_3": 0.0,
+  "rate_reconstruction": {
+    "pearson_r": 1.0,
+    "max_absolute_error_bps": 0.0,
+    "max_relative_error": 0.0
+  },
+  "distance_response_table": [
+    {
+      "distance_m": 100.0,
+      "eta_bps_hz": 9.967226258835993,
+      "old_feature": 0.08306021882363328,
+      "new_feature": 1.5357653908953175,
+      "old_feature_gain_toward_20m": 0.005361143709075389,
+      "new_feature_gain_toward_20m": 0.09912638180615359
+    },
+    {
+      "distance_m": 200.0,
+      "eta_bps_hz": 7.971543553950772,
+      "old_feature": 0.06642952961625644,
+      "new_feature": 1.2282675625346913,
+      "old_feature_gain_toward_20m": 0.0025242807786078608,
+      "new_feature_gain_toward_20m": 0.04667340288279125
+    },
+    {
+      "distance_m": 300.0,
+      "eta_bps_hz": 6.808785457664045,
+      "old_feature": 0.05673987881386704,
+      "new_feature": 1.0491080254791911,
+      "old_feature_gain_toward_20m": 0.0016450982842173723,
+      "new_feature_gain_toward_20m": 0.030417509673155874
+    },
+    {
+      "distance_m": 400.0,
+      "eta_bps_hz": 5.9886846867721655,
+      "old_feature": 0.04990570572310138,
+      "new_feature": 0.9227456506042574,
+      "old_feature_gain_toward_20m": 0.0012148691570962914,
+      "new_feature_gain_toward_20m": 0.022462666633425537
+    },
+    {
+      "distance_m": 500.0,
+      "eta_bps_hz": 5.357552004618084,
+      "old_feature": 0.0446462667051507,
+      "new_feature": 0.8254997664290176,
+      "old_feature_gain_toward_20m": 0.0009585501893343654,
+      "new_feature_gain_toward_20m": 0.01772338463665365
+    },
+    {
+      "distance_m": 600.0,
+      "eta_bps_hz": 4.846883286244242,
+      "old_feature": 0.040390694052035346,
+      "new_feature": 0.7468151531248741,
+      "old_feature_gain_toward_20m": 0.0007877416987751573,
+      "new_feature_gain_toward_20m": 0.014565172775583252
+    }
+  ],
+  "validity_gates": {
+    "formula_equivalent": true,
+    "correlation_at_least_0_999999": true,
+    "no_feature_above_3": true,
+    "sensitivity_multiplier_descriptive": 18.489782625739284
+  }
+}

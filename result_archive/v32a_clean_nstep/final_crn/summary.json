@@ -1,0 +1,20 @@
+{
+  "seed_delay_point_estimates_ms": {
+    "1": -4.666829770269937,
+    "42": 151.10344149196246,
+    "123": 389.06399842695504
+  },
+  "delay_n5_minus_n1_hierarchical_ci95_ms": [
+    178.50020338288252,
+    -4.478869998033372,
+    387.01873536177635
+  ],
+  "all_seed_delay_points_negative": false,
+  "delay_pass": false,
+  "treatment_power_ucb95_w_by_seed": {
+    "1": 839.3000899539388,
+    "42": 825.2313209319906,
+    "123": 833.4140892692527
+  },
+  "constraint_pass": true
+}

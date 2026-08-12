@@ -128,6 +128,7 @@ class GatePolicyController:
         switch_period=10,
         offset_m=40.0,
         anticipation_steps=5,
+        residual_slew_cap_m=None,
     ):
         if name not in POLICY_NAMES:
             raise ValueError(f"Unknown gate policy: {name}")
@@ -135,12 +136,23 @@ class GatePolicyController:
         self.switch_period = int(switch_period)
         self.offset_m = float(offset_m)
         self.anticipation_steps = int(anticipation_steps)
+        self.residual_slew_cap_m = (
+            None
+            if residual_slew_cap_m is None
+            else float(residual_slew_cap_m)
+        )
+        if (
+            self.residual_slew_cap_m is not None
+            and self.residual_slew_cap_m <= 0.0
+        ):
+            raise ValueError("residual_slew_cap_m must be positive when set")
         self.active_heavy = None
         self.active_support = None
         self.pending_role = None
         self.pending_activation_step = None
         self.previous_observed_heavy = None
         self.last_event = ""
+        self.residual_command_m = None
 
     @staticmethod
     def observed_heavy_uav(base_env):
@@ -163,6 +175,9 @@ class GatePolicyController:
         self.previous_observed_heavy = observed_heavy
         self.pending_role = None
         self.pending_activation_step = None
+        self.residual_command_m = np.zeros(
+            (int(env.env.N), 2), dtype=np.float64
+        )
         if self.name == "P0":
             self.active_heavy = None
             self.active_support = None
@@ -248,7 +263,7 @@ class GatePolicyController:
             )
         raw_state = env.env.get_raw_state()
         centroids = np.asarray(raw_state["weighted_centroids"], dtype=np.float64)
-        targets = centroids.copy()
+        desired_residual = np.zeros_like(centroids, dtype=np.float64)
         if self.active_support is not None and self.active_heavy is not None:
             support = int(self.active_support)
             heavy = int(self.active_heavy)
@@ -258,7 +273,28 @@ class GatePolicyController:
             )
             norm = float(np.linalg.norm(toward_heavy))
             if norm > 1e-12:
-                targets[support] += toward_heavy / norm * self.offset_m
+                desired_residual[support] = (
+                    toward_heavy / norm * self.offset_m
+                )
+        if self.residual_slew_cap_m is None:
+            commanded_residual = desired_residual
+        else:
+            if self.residual_command_m is None:
+                self.residual_command_m = np.zeros_like(centroids)
+            residual_delta = desired_residual - self.residual_command_m
+            residual_distance = np.linalg.norm(
+                residual_delta, axis=1, keepdims=True
+            )
+            residual_scale = np.minimum(
+                1.0,
+                self.residual_slew_cap_m
+                / np.maximum(residual_distance, 1e-12),
+            )
+            self.residual_command_m = (
+                self.residual_command_m + residual_delta * residual_scale
+            )
+            commanded_residual = self.residual_command_m
+        targets = centroids + commanded_residual
         targets = np.clip(targets, 0.0, 1000.0)
         return target_centroid_waypoint_action(
             targets,
@@ -273,6 +309,12 @@ class GatePolicyController:
                 -1 if self.active_support is None else self.active_support
             ),
             "event": self.last_event,
+            "residual_slew_cap_m": self.residual_slew_cap_m,
+            "residual_command_m": (
+                np.zeros((0, 2), dtype=np.float64)
+                if self.residual_command_m is None
+                else self.residual_command_m.copy()
+            ),
         }
 
 
@@ -341,19 +383,39 @@ def run_gate_episode(
     switch_period=10,
     offset_m=40.0,
     anticipation_steps=5,
+    residual_slew_cap_m=None,
+    load_switch_schedule=None,
+    macro_policy=None,
+    macro_metadata_provider=None,
 ):
     base_env = env.env
-    base_env.set_zone_target_loads(LOAD_PHASES_MBPS[0])
+    if load_switch_schedule is None:
+        phase_loads = LOAD_PHASES_MBPS
+        initial_loads = phase_loads[0]
+    else:
+        if int(load_switch_schedule.macro_steps) != int(macro_steps):
+            raise ValueError(
+                "Load-switch schedule length does not match macro_steps."
+            )
+        phase_loads = np.asarray(
+            load_switch_schedule.phases_mbps,
+            dtype=np.float64,
+        )
+        initial_loads = load_switch_schedule.loads(0)
+    base_env.set_zone_target_loads(initial_loads)
     env.reset(seed=int(seed))
-    base_env.set_zone_target_loads(LOAD_PHASES_MBPS[0])
+    base_env.set_zone_target_loads(initial_loads)
 
-    controller = GatePolicyController(
-        policy_name,
-        switch_period=switch_period,
-        offset_m=offset_m,
-        anticipation_steps=anticipation_steps,
-    )
-    controller.reset(env)
+    controller = None
+    if macro_policy is None:
+        controller = GatePolicyController(
+            policy_name,
+            switch_period=switch_period,
+            offset_m=offset_m,
+            anticipation_steps=anticipation_steps,
+            residual_slew_cap_m=residual_slew_cap_m,
+        )
+        controller.reset(env)
 
     external_hasher = hashlib.sha256()
     total_service_energy_j = 0.0
@@ -380,11 +442,11 @@ def run_gate_episode(
     total_u2u_active_time_s = 0.0
     total_flow = np.zeros((base_env.N, base_env.N), dtype=np.float64)
     phase_flow = np.zeros(
-        (len(LOAD_PHASES_MBPS), base_env.N, base_env.N),
+        (len(phase_loads), base_env.N, base_env.N),
         dtype=np.float64,
     )
-    phase_u2g_time = np.zeros(len(LOAD_PHASES_MBPS), dtype=np.float64)
-    phase_u2u_time = np.zeros(len(LOAD_PHASES_MBPS), dtype=np.float64)
+    phase_u2g_time = np.zeros(len(phase_loads), dtype=np.float64)
+    phase_u2u_time = np.zeros(len(phase_loads), dtype=np.float64)
     transition_numerator_s = 0.0
     transition_denominator = 0.0
     micro_decision_count = 0
@@ -394,6 +456,27 @@ def run_gate_episode(
         np.asarray(base_env.weighted_centroids, dtype=np.float64).copy()
     ]
     trajectory_phases = [0]
+    initial_queue_counters = base_env.get_task_cumulative_counters()
+    queue_high_trajectory_mbits = [
+        float(
+            np.sum(
+                initial_queue_counters["queue_high_mbits_per_uav"]
+            )
+        )
+    ]
+    queue_low_trajectory_mbits = [
+        float(
+            np.sum(
+                initial_queue_counters["queue_low_mbits_per_uav"]
+            )
+        )
+    ]
+    queue_per_uav_trajectory_mbits = [
+        np.asarray(
+            initial_queue_counters["queue_total_mbits_per_uav"],
+            dtype=np.float64,
+        ).copy()
+    ]
 
     high_weight = float(base_env.w_D_high)
     low_weight = float(base_env.w_D_low)
@@ -401,14 +484,31 @@ def run_gate_episode(
     done = False
 
     for macro_index in range(int(macro_steps)):
-        phase_index = phase_index_for_step(macro_index, switch_period)
-        switched = switch_happens_at_step(macro_index, switch_period)
+        if load_switch_schedule is None:
+            phase_index = phase_index_for_step(macro_index, switch_period)
+            switched = switch_happens_at_step(macro_index, switch_period)
+            current_phase_loads = phase_loads[phase_index]
+        else:
+            phase_index = load_switch_schedule.phase_index(macro_index)
+            switched = load_switch_schedule.switched(macro_index)
+            current_phase_loads = load_switch_schedule.loads(macro_index)
         if macro_index == 0 or switched:
-            base_env.set_zone_target_loads(LOAD_PHASES_MBPS[phase_index])
+            base_env.set_zone_target_loads(current_phase_loads)
 
-        controller.before_macro(env, macro_index, switched)
+        if controller is not None:
+            controller.before_macro(env, macro_index, switched)
         local_state, global_state = env.get_macro_state()
-        macro_action = np.asarray(controller.action(env), dtype=np.float32)
+        if macro_policy is None:
+            macro_action = np.asarray(
+                controller.action(env),
+                dtype=np.float32,
+            )
+        else:
+            local_obs_batch = np.vstack(local_state).astype(np.float32)
+            macro_action = np.asarray(
+                macro_policy(env, local_obs_batch, True),
+                dtype=np.float32,
+            )
         counters_before = base_env.get_task_cumulative_counters()
         uav_before = np.asarray(base_env.uav_coords, dtype=np.float64).copy()
         centroids_before = np.asarray(
@@ -537,13 +637,40 @@ def run_gate_episode(
                     env,
                     raw_state,
                     info,
-                    LOAD_PHASES_MBPS[phase_index],
+                    current_phase_loads,
                 )
             if done:
                 break
 
         macro_reward = float(env.get_macro_reward())
         macro_reward_info = env.get_last_macro_reward_info()
+        macro_energy_ratio = np.asarray(
+            macro_reward_info.get("energy_constraint_ratio_mean", 0.0),
+            dtype=np.float64,
+        )
+        macro_violation_penalty = float(
+            getattr(
+                checkpoint_args,
+                "macro_power_violation_penalty_weight",
+                0.0,
+            )
+        ) * float(np.mean(np.maximum(macro_energy_ratio - 1.0, 0.0)))
+        if str(getattr(checkpoint_args, "objective_mode", "weighted")) == (
+            "constrained_delay"
+        ):
+            replay_primal_cost = float(
+                macro_reward_info.get("primal_cost_mean", 0.0)
+            ) + macro_violation_penalty
+            td3_replay_reward = (
+                -float(env.micro_reward_scale)
+                * replay_primal_cost
+                * float(getattr(checkpoint_args, "td3_reward_scale", 1.0))
+            )
+        else:
+            replay_primal_cost = float("nan")
+            td3_replay_reward = macro_reward * float(
+                getattr(checkpoint_args, "td3_reward_scale", 1.0)
+            )
         counters_after = base_env.get_task_cumulative_counters()
         window_delta = task_window_delta(
             counters_before,
@@ -551,10 +678,16 @@ def run_gate_episode(
             high_weight,
             low_weight,
         )
-        in_transition_window = (
-            switch_period <= macro_index < switch_period + 5
-            or 2 * switch_period <= macro_index < 2 * switch_period + 5
-        )
+        if load_switch_schedule is None:
+            in_transition_window = (
+                switch_period <= macro_index < switch_period + 5
+                or 2 * switch_period <= macro_index < 2 * switch_period + 5
+            )
+        else:
+            in_transition_window = any(
+                int(step) <= macro_index < int(step) + 5
+                for step in load_switch_schedule.switch_steps
+            )
         if in_transition_window:
             transition_numerator_s += window_delta[
                 "weighted_delay_numerator_s"
@@ -569,7 +702,20 @@ def run_gate_episode(
         total_u2u_active_time_s += macro_u2u_time_s
         phase_u2g_time[phase_index] += macro_u2g_time_s
         phase_u2u_time[phase_index] += macro_u2u_time_s
-        metadata = controller.metadata()
+        if controller is not None:
+            metadata = controller.metadata()
+        elif macro_metadata_provider is not None:
+            metadata = macro_metadata_provider()
+        else:
+            metadata = {
+                "heavy_uav": -1,
+                "support_uav": -1,
+                "event": "frozen_macro_policy",
+                "residual_command_m": np.zeros(
+                    (int(base_env.N), 2),
+                    dtype=np.float64,
+                ),
+            }
         uav_after = np.asarray(base_env.uav_coords, dtype=np.float64).copy()
         centroids_after = np.asarray(
             base_env.weighted_centroids,
@@ -593,6 +739,9 @@ def run_gate_episode(
                 "heavy_uav": int(metadata["heavy_uav"]),
                 "support_uav": int(metadata["support_uav"]),
                 "policy_event": str(metadata["event"]),
+                "residual_command_m": np.asarray(
+                    metadata["residual_command_m"], dtype=np.float64
+                ).copy(),
                 "macro_action": macro_action.copy(),
                 "uav_before_m": uav_before,
                 "uav_after_m": uav_after,
@@ -632,12 +781,32 @@ def run_gate_episode(
                 "average_micro_reward": float(
                     macro_reward_info.get("micro_reward_mean", 0.0)
                 ),
+                "primal_cost_mean": float(
+                    macro_reward_info.get("primal_cost_mean", 0.0)
+                ),
+                "energy_constraint_ratio_mean": float(
+                    np.mean(macro_energy_ratio)
+                ),
+                "macro_power_violation_penalty": macro_violation_penalty,
+                "td3_replay_reward": float(td3_replay_reward),
                 "global_state_dim": int(np.asarray(global_state).size),
             }
         )
         uav_trajectory.append(uav_after)
         centroid_trajectory.append(centroids_after)
         trajectory_phases.append(phase_index)
+        queue_high_trajectory_mbits.append(
+            float(np.sum(counters_after["queue_high_mbits_per_uav"]))
+        )
+        queue_low_trajectory_mbits.append(
+            float(np.sum(counters_after["queue_low_mbits_per_uav"]))
+        )
+        queue_per_uav_trajectory_mbits.append(
+            np.asarray(
+                counters_after["queue_total_mbits_per_uav"],
+                dtype=np.float64,
+            ).copy()
+        )
         if done:
             break
 
@@ -751,6 +920,18 @@ def run_gate_episode(
         "uav_trajectory_m": np.stack(uav_trajectory, axis=0),
         "centroid_trajectory_m": np.stack(centroid_trajectory, axis=0),
         "trajectory_phases": np.asarray(trajectory_phases, dtype=np.int64),
+        "queue_high_trajectory_mbits": np.asarray(
+            queue_high_trajectory_mbits,
+            dtype=np.float64,
+        ),
+        "queue_low_trajectory_mbits": np.asarray(
+            queue_low_trajectory_mbits,
+            dtype=np.float64,
+        ),
+        "queue_per_uav_trajectory_mbits": np.stack(
+            queue_per_uav_trajectory_mbits,
+            axis=0,
+        ),
         "phase_flow_mbits": phase_flow,
         "total_flow_mbits": total_flow,
         "phase_u2g_active_time_s": phase_u2g_time,
@@ -897,6 +1078,16 @@ def save_macro_trace(path, records, num_uavs):
             "u2u_active_time_s": record["u2u_active_time_s"],
             "macro_reward": record["macro_reward"],
             "average_micro_reward": record["average_micro_reward"],
+            "primal_cost_mean": record.get("primal_cost_mean", float("nan")),
+            "energy_constraint_ratio_mean": record.get(
+                "energy_constraint_ratio_mean", float("nan")
+            ),
+            "macro_power_violation_penalty": record.get(
+                "macro_power_violation_penalty", float("nan")
+            ),
+            "td3_replay_reward": record.get(
+                "td3_replay_reward", float("nan")
+            ),
         }
         for index, value in enumerate(record["expected_loads_mbps"]):
             row[f"load_uav{index + 1}_mbps"] = float(value)
@@ -935,6 +1126,10 @@ def save_macro_trace(path, records, num_uavs):
                 row[f"action_uav{uav + 1}_{axis_name}"] = float(
                     record["macro_action"][uav, axis]
                 )
+                if record["residual_command_m"].shape == (num_uavs, 2):
+                    row[f"residual_uav{uav + 1}_{axis_name}_m"] = float(
+                        record["residual_command_m"][uav, axis]
+                    )
         rows.append(row)
     fieldnames = list(rows[0].keys()) if rows else []
     write_csv_atomic(path, rows, fieldnames)

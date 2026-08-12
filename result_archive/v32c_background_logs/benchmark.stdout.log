@@ -1,0 +1,266 @@
+[unconstrained 1/6] delay=977.272 ms power_ucb=882.429 W
+[unconstrained 2/6] delay=952.350 ms power_ucb=879.184 W
+[unconstrained 3/6] delay=920.779 ms power_ucb=856.138 W
+[unconstrained 4/6] delay=920.779 ms power_ucb=856.138 W
+[unconstrained 5/6] delay=920.779 ms power_ucb=856.138 W
+[unconstrained 6/6] delay=920.779 ms power_ucb=856.138 W
+[feasibility_first 1/6] delay=993.192 ms power_ucb=838.715 W
+[feasibility_first 2/6] delay=993.192 ms power_ucb=838.715 W
+[feasibility_first 3/6] delay=993.192 ms power_ucb=838.715 W
+[feasibility_first 4/6] delay=993.192 ms power_ucb=838.715 W
+[feasibility_first 5/6] delay=993.192 ms power_ucb=838.715 W
+[feasibility_first 6/6] delay=993.192 ms power_ucb=838.715 W
+{
+  "checkpoint": "C:\\Users\\PC\\Desktop\\HRL_UAV\\results\\tcom_dynamic_load_switch_v32b_formal\\formal\\seed1\\joint_td3_sac\\checkpoints\\best.pt",
+  "search_seeds": [
+    2000,
+    2001,
+    2002,
+    2003,
+    2004
+  ],
+  "validation_seeds": [
+    3000,
+    3001,
+    3002,
+    3003,
+    3004,
+    3005,
+    3006,
+    3007,
+    3008,
+    3009,
+    3010,
+    3011,
+    3012,
+    3013,
+    3014,
+    3015,
+    3016,
+    3017,
+    3018,
+    3019
+  ],
+  "search_power_gate_w": 838.0,
+  "validation_power_budget_w": 840.0,
+  "best_offsets_m": {
+    "unconstrained": [
+      [
+        [
+          18.473571538104274,
+          34.93976836575747
+        ],
+        [
+          -30.971657234772792,
+          -8.769666912059233
+        ],
+        [
+          -44.28978509706434,
+          0.06029489520983233
+        ]
+      ],
+      [
+        [
+          60.959298007190014,
+          23.277844225163157
+        ],
+        [
+          -28.65823750694316,
+          18.81415580065987
+        ],
+        [
+          -22.99022370909404,
+          8.17336401768446
+        ]
+      ],
+      [
+        [
+          29.003092012034063,
+          28.171662591060546
+        ],
+        [
+          2.5016462477728876,
+          70.40337913808159
+        ],
+        [
+          -50.392263154551884,
+          7.794393853577773
+        ]
+      ]
+    ],
+    "feasibility_first": [
+      [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ],
+      [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ],
+      [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ]
+    ]
+  },
+  "search_best_metrics": {
+    "unconstrained": {
+      "delay_mean_ms": 920.7788425240084,
+      "delay_std_ms": 50.300062902923,
+      "power_mean_w": 852.5381465347997,
+      "power_std_w": 3.776097307143832,
+      "power_ucb95_w": 856.1382432179481
+    },
+    "feasibility_first": {
+      "delay_mean_ms": 993.1923521724627,
+      "delay_std_ms": 120.7432801016063,
+      "power_mean_w": 835.8533170961995,
+      "power_std_w": 3.0020945553850766,
+      "power_ucb95_w": 838.7154866252772
+    }
+  },
+  "validation": {
+    "unconstrained": {
+      "seeds": [
+        3000,
+        3001,
+        3002,
+        3003,
+        3004,
+        3005,
+        3006,
+        3007,
+        3008,
+        3009,
+        3010,
+        3011,
+        3012,
+        3013,
+        3014,
+        3015,
+        3016,
+        3017,
+        3018,
+        3019
+      ],
+      "delay_candidate_minus_p0_ms": {
+        "mean": -2.457221270178451,
+        "ci95_low": -17.397841111664977,
+        "ci95_high": 12.483398571308076,
+        "values": [
+          76.40893939063596,
+          -12.084341214042297,
+          -33.16165150455174,
+          -24.9100984495675,
+          -48.39632531756149,
+          -3.0180721513293065,
+          3.8547413994824637,
+          13.453792829716235,
+          3.8483026759254244,
+          2.2425633840409773,
+          -7.281366105822826,
+          50.705341692574166,
+          -14.013578722930788,
+          -69.65755291595326,
+          26.128962220338394,
+          -3.5133230402120716,
+          -12.041729553632763,
+          1.0899130215046853,
+          -18.075433021846266,
+          19.276489979662983
+        ]
+      },
+      "gain_ms": 2.457221270178451,
+      "power_mean_w": 849.9576980097465,
+      "power_ucb95_w": 852.0490360347536
+    },
+    "feasibility_first": {
+      "seeds": [
+        3000,
+        3001,
+        3002,
+        3003,
+        3004,
+        3005,
+        3006,
+        3007,
+        3008,
+        3009,
+        3010,
+        3011,
+        3012,
+        3013,
+        3014,
+        3015,
+        3016,
+        3017,
+        3018,
+        3019
+      ],
+      "delay_candidate_minus_p0_ms": {
+        "mean": 0.0,
+        "ci95_low": 0.0,
+        "ci95_high": 0.0,
+        "values": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "gain_ms": -0.0,
+      "power_mean_w": 833.584040622407,
+      "power_ucb95_w": 835.39675333457
+    }
+  },
+  "best_feasible_validation_arm": "feasibility_first",
+  "verdict": "NO_MATERIAL_FEASIBLE_GAIN_FOUND_IN_FROZEN_FAMILY",
+  "elapsed_s": 6689.4640768,
+  "scope": "noncausal best-found benchmark in the frozen 18-dimensional stage-residual family; not a theoretical upper bound"
+}

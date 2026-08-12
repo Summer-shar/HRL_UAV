@@ -1,0 +1,44 @@
+{
+  "status": "FROZEN",
+  "training_seeds": [
+    1,
+    42,
+    123
+  ],
+  "evaluation_seeds": [
+    1000,
+    1001,
+    1002,
+    1003,
+    1004,
+    1005,
+    1006,
+    1007,
+    1008,
+    1009,
+    1010,
+    1011,
+    1012,
+    1013,
+    1014,
+    1015,
+    1016,
+    1017,
+    1018,
+    1019
+  ],
+  "files": {
+    "protocol": {
+      "path": "docs\\v32a_clean_nstep_protocol.md",
+      "sha256": "22e23020af9a6069ac80f28637c562fde6233fb265077b64919d2bc13b1d8cc9"
+    },
+    "control_config": {
+      "path": "configs\\tcom_dynamic_u2u_sparse_v32a_control_n1.json",
+      "sha256": "976f6d67178ee99478fa14a3b0e9861270d8e53cc4d943964d78691c272bea6b"
+    },
+    "treatment_config": {
+      "path": "configs\\tcom_dynamic_u2u_sparse_v32a_treatment_n5.json",
+      "sha256": "dfbef7ffcbadd5d1552b34fc1c228a934a6e91e0a977b0816087cc5045a8ba9d"
+    }
+  }
+}

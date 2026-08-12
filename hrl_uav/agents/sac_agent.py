@@ -80,12 +80,25 @@ class CriticNet(nn.Module):
 
 
 class Memory():
-    def __init__(self, capacity, dims, recent_window=50000, recent_ratio=0.75):
+    def __init__(
+        self,
+        capacity,
+        dims,
+        recent_window=50000,
+        recent_ratio=0.75,
+        rng=None,
+    ):
         self.capacity = int(capacity)
         self.mem = np.zeros((self.capacity, dims), dtype=np.float32)
         self.memory_counter = 0
         self.recent_window = max(1, min(int(recent_window), self.capacity))
         self.recent_ratio = float(np.clip(recent_ratio, 0.0, 1.0))
+        self.rng = np.random if rng is None else rng
+
+    def _integers(self, low, high, size):
+        if isinstance(self.rng, np.random.Generator):
+            return self.rng.integers(low, high, size=size)
+        return self.rng.randint(low, high, size=size)
 
     def store_transition(self, s, a, r, s_, extras=None):
         extra_values = (
@@ -109,7 +122,7 @@ class Memory():
             raise ValueError("Cannot sample from an empty replay buffer.")
 
         if self.recent_ratio <= 0.0:
-            sample_index = np.random.randint(0, pool_size, size=n)
+            sample_index = self._integers(0, pool_size, size=n)
             return self.mem[sample_index, :]
 
         start_global = max(0, self.memory_counter - pool_size)
@@ -121,7 +134,7 @@ class Memory():
         sample_parts = []
 
         if recent_count > 0:
-            recent_global = np.random.randint(
+            recent_global = self._integers(
                 recent_start_global,
                 self.memory_counter,
                 size=recent_count,
@@ -130,14 +143,14 @@ class Memory():
 
         if historical_count > 0:
             if recent_start_global > start_global:
-                historical_global = np.random.randint(
+                historical_global = self._integers(
                     start_global,
                     recent_start_global,
                     size=historical_count,
                 )
                 sample_parts.append(historical_global % self.capacity)
             else:
-                recent_global = np.random.randint(
+                recent_global = self._integers(
                     recent_start_global,
                     self.memory_counter,
                     size=historical_count,
@@ -145,7 +158,7 @@ class Memory():
                 sample_parts.append(recent_global % self.capacity)
 
         sample_index = np.concatenate(sample_parts, axis=0)
-        np.random.shuffle(sample_index)
+        self.rng.shuffle(sample_index)
         new_mem = self.mem[sample_index, :]
         return new_mem
 
@@ -157,12 +170,15 @@ class Memory():
             self.memory_counter,
             dtype=np.int64,
         ) % self.capacity
-        return {
+        state = {
             "transitions": self.mem[indices, :].copy(),
             "transition_width": int(self.mem.shape[1]),
             "recent_window": int(self.recent_window),
             "recent_ratio": float(self.recent_ratio),
         }
+        if isinstance(self.rng, np.random.Generator):
+            state["rng_state"] = self.rng.bit_generator.state
+        return state
 
     def load_state_dict(self, state):
         if not isinstance(state, dict) or "transitions" not in state:
@@ -179,6 +195,11 @@ class Memory():
         self.mem.fill(0.0)
         self.mem[: retained.shape[0], :] = retained
         self.memory_counter = int(retained.shape[0])
+        if (
+            isinstance(self.rng, np.random.Generator)
+            and "rng_state" in state
+        ):
+            self.rng.bit_generator.state = state["rng_state"]
         return self.memory_counter
 
 

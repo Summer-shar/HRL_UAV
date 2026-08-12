@@ -36,14 +36,55 @@ RESULTS_VERSION = str(PROTOCOL["results_version"])
 MICRO_PRETRAIN_SOURCE_VERSION = str(
     PROTOCOL.get("micro_pretrain_source_results_version", RESULTS_VERSION)
 )
+_micro_pretrain_source_seed = PROTOCOL.get("micro_pretrain_source_seed", None)
+MICRO_PRETRAIN_SOURCE_SEED = (
+    None
+    if _micro_pretrain_source_seed is None
+    else int(_micro_pretrain_source_seed)
+)
+FREEZE_MICRO_IN_JOINT = bool(
+    PROTOCOL.get("freeze_micro_in_joint", False)
+)
 FORMAL_SEEDS = [int(value) for value in PROTOCOL["formal_seeds"]]
 TRAINING_HORIZON = int(PROTOCOL["training_episodes"])
 MICRO_PRETRAIN_HORIZON = int(PROTOCOL["micro_pretrain_episodes"])
+MICRO_PRETRAIN_MACRO_POLICY = str(
+    PROTOCOL.get("micro_pretrain_macro_policy", "actor")
+).lower()
+if MICRO_PRETRAIN_MACRO_POLICY not in {"actor", "zero"}:
+    raise ValueError(
+        "micro_pretrain_macro_policy must be either 'actor' or 'zero'"
+    )
+MICRO_PRETRAIN_CHECKPOINT = str(
+    PROTOCOL.get("micro_pretrain_checkpoint", "best")
+).lower()
+if MICRO_PRETRAIN_CHECKPOINT not in {"best", "final"}:
+    raise ValueError("micro_pretrain_checkpoint must be either 'best' or 'final'")
 MAIN_LOAD = float(PROTOCOL["load_scale"])
 ZONE_LOADS_MBPS = [float(value) for value in PROTOCOL["zone_loads_mbps"]]
+LOAD_SWITCH_MODE = str(
+    PROTOCOL.get("load_switch_mode", "off")
+).lower()
+LOAD_SWITCH_PHASES_MBPS = [
+    [float(item) for item in phase]
+    for phase in PROTOCOL.get(
+        "load_switch_phases_mbps",
+        [ZONE_LOADS_MBPS],
+    )
+]
+LOAD_SWITCH_DWELL_MIN = int(
+    PROTOCOL.get("load_switch_dwell_min", 8)
+)
+LOAD_SWITCH_DWELL_MAX = int(
+    PROTOCOL.get("load_switch_dwell_max", 12)
+)
 CPU_GHZ = float(PROTOCOL["cpu_ghz"])
 NUM_UAVS = int(PROTOCOL["num_uavs"])
 NUM_USERS = int(PROTOCOL["num_users"])
+OBJECTIVE_MODE = str(
+    PROTOCOL.get("objective_mode", "constrained_delay")
+).lower()
+CONSTRAINT_FORM = str(PROTOCOL.get("constraint_form", "legacy")).lower()
 POWER_CONSTRAINT_SCOPE = str(
     PROTOCOL.get(
         "power_constraint_scope",
@@ -76,17 +117,70 @@ RESOURCE_FRAME_S = float(PROTOCOL["resource_frame_s"])
 INTEGRATION_STEP_S = float(PROTOCOL["integration_step_s"])
 USER_ZONE_RADIUS_M = float(PROTOCOL["user_zone_radius_m"])
 USERS_STATIC = bool(PROTOCOL.get("users_static", False))
+GM_MEAN_SPEED_MPS = float(PROTOCOL.get("gm_mean_speed_mps", 0.5))
+GM_MEAN_HEADING_RAD = float(
+    PROTOCOL.get("gm_mean_heading_rad", math.pi / 4.0)
+)
+GM_HEADING_MODE = str(
+    PROTOCOL.get("gm_heading_mode", "shared_mean")
+).lower()
+GM_SPEED_MEMORY = float(PROTOCOL.get("gm_speed_memory", 0.5))
+GM_HEADING_MEMORY = float(PROTOCOL.get("gm_heading_memory", 0.5))
+GM_SPEED_NOISE_STD = float(PROTOCOL.get("gm_speed_noise_std", 0.1))
+GM_HEADING_NOISE_STD = float(PROTOCOL.get("gm_heading_noise_std", 0.1))
+RPGM_GROUP_SPEED_MPS = float(PROTOCOL.get("rpgm_group_speed_mps", 0.35))
+RPGM_GROUP_SPEED_MEMORY = float(
+    PROTOCOL.get("rpgm_group_speed_memory", 0.9)
+)
+RPGM_GROUP_SPEED_NOISE_STD = float(
+    PROTOCOL.get("rpgm_group_speed_noise_std", 0.04)
+)
+RPGM_GROUP_TURN_STD_RAD_SQRT_S = float(
+    PROTOCOL.get("rpgm_group_turn_std_rad_sqrt_s", 0.12)
+)
+RPGM_LOCAL_VELOCITY_MEMORY = float(
+    PROTOCOL.get("rpgm_local_velocity_memory", 0.9)
+)
+RPGM_LOCAL_VELOCITY_STD_MPS = float(
+    PROTOCOL.get("rpgm_local_velocity_std_mps", 0.18)
+)
+RPGM_LOCAL_RESTORE_RATE_S2 = float(
+    PROTOCOL.get("rpgm_local_restore_rate_s2", 0.0002)
+)
+RPGM_LOCAL_SPEED_CAP_MPS = float(
+    PROTOCOL.get("rpgm_local_speed_cap_mps", 0.45)
+)
+CPU_ALLOC_MODE = str(PROTOCOL.get("cpu_alloc_mode", "priced_maxweight"))
+DELAY_OBJECTIVE_WEIGHT = float(
+    PROTOCOL.get("delay_objective_weight", 0.7)
+)
+ENERGY_OBJECTIVE_WEIGHT = float(
+    PROTOCOL.get("energy_objective_weight", 0.3)
+)
 TD3_REPLAY_CAPACITY = int(PROTOCOL.get("td3_replay_capacity", 12000))
+SAVE_MACRO_REPLAY = bool(PROTOCOL.get("save_macro_replay", False))
 TD3_WARMUP_STEPS = int(PROTOCOL.get("td3_warmup_steps", 300))
 TD3_UPDATES_PER_STEP = int(PROTOCOL.get("td3_updates_per_step", 1))
+TD3_DELAY_N_STEP = int(PROTOCOL.get("td3_delay_n_step", 1))
+TD3_REPLAY_SEQUENCE_SPAN = int(
+    PROTOCOL.get("td3_replay_sequence_span", 1)
+)
 TD3_POLICY_DELAY = int(PROTOCOL.get("td3_policy_delay", 2))
 TD3_ACTOR_WARMUP_UPDATES = int(
     PROTOCOL.get("td3_actor_warmup_updates", 0)
 )
+TD3_ACTOR_DELAY_AGGREGATION = str(
+    PROTOCOL.get("td3_actor_delay_aggregation", "q1")
+).lower()
+if TD3_ACTOR_DELAY_AGGREGATION not in {"q1", "min"}:
+    raise ValueError("td3_actor_delay_aggregation must be 'q1' or 'min'")
 TD3_POLICY_NOISE = float(PROTOCOL.get("td3_policy_noise", 0.2))
 TD3_NOISE_CLIP = float(PROTOCOL.get("td3_noise_clip", 0.5))
 TD3_HOVER_EXPLORATION_PROB = float(
     PROTOCOL.get("td3_hover_exploration_probability", 0.0)
+)
+TD3_NEUTRAL_EPISODE_PROB = float(
+    PROTOCOL.get("td3_neutral_episode_probability", 0.0)
 )
 TD3_EXPLORATION_PERSISTENCE = str(
     PROTOCOL.get("td3_exploration_persistence", "episode")
@@ -104,10 +198,12 @@ TD3_EXPLORATION_DECAY_EPISODES = int(
     PROTOCOL.get("td3_exploration_decay_episodes", TRAINING_HORIZON)
 )
 TD3_REWARD_SCALE = float(PROTOCOL.get("td3_reward_scale", 0.01))
+PILOT_EVAL_INTERVAL = int(PROTOCOL.get("pilot_eval_interval", 20))
 MACRO_POWER_VIOLATION_PENALTY_WEIGHT = float(
     PROTOCOL.get("macro_power_violation_penalty_weight", 0.0)
 )
 ENERGY_DUAL_LR = float(PROTOCOL.get("energy_dual_lr", 0.02))
+SYSTEM_DUAL_STATE = bool(PROTOCOL.get("system_dual_state", False))
 PPO_EXPLORATION_INITIAL_M = float(
     PROTOCOL.get("ppo_exploration_initial_m", 2.0)
 )
@@ -139,6 +235,39 @@ MICRO_PRETRAIN_SAC_INITIAL_ALPHA = float(
     PROTOCOL.get("micro_pretrain_sac_initial_alpha", 1.0)
 )
 MICRO_REWARD_SCALE = float(PROTOCOL.get("micro_reward_scale", 10.0))
+U2U_STATE_REPRESENTATION = str(
+    PROTOCOL.get("u2u_state_representation", "nominal_rate")
+).lower()
+if U2U_STATE_REPRESENTATION not in {
+    "nominal_rate",
+    "spectral_efficiency",
+}:
+    raise ValueError("Unsupported u2u_state_representation")
+U2U_GOAL_REPRESENTATION = str(
+    PROTOCOL.get("u2u_goal_representation", "match_observation")
+).lower()
+if U2U_GOAL_REPRESENTATION not in {"match_observation", "nominal_rate"}:
+    raise ValueError("Unsupported u2u_goal_representation")
+_contention_pressure = PROTOCOL.get("u2u_contention_aware_pressure", None)
+U2U_CONTENTION_AWARE_PRESSURE = (
+    -1 if _contention_pressure is None else int(bool(_contention_pressure))
+)
+U2U_PREV_ACTIVE_STATE = bool(
+    PROTOCOL.get("u2u_prev_active_state", False)
+)
+
+if LOAD_SWITCH_MODE not in {"off", "cyclic_random"}:
+    raise ValueError("Unsupported load_switch_mode")
+if LOAD_SWITCH_MODE != "off":
+    if len(LOAD_SWITCH_PHASES_MBPS) < 2:
+        raise ValueError("Load switching requires at least two phases")
+    if any(len(phase) != NUM_UAVS for phase in LOAD_SWITCH_PHASES_MBPS):
+        raise ValueError("Every load-switch phase must match num_uavs")
+    phase_totals = [sum(phase) for phase in LOAD_SWITCH_PHASES_MBPS]
+    if any(abs(total - phase_totals[0]) > 1e-9 for total in phase_totals):
+        raise ValueError("Load-switch phases must preserve total load")
+    if not (0 < LOAD_SWITCH_DWELL_MIN <= LOAD_SWITCH_DWELL_MAX):
+        raise ValueError("Invalid load-switch dwell range")
 SAC_GRAD_CLIP_NORM = float(PROTOCOL.get("sac_grad_clip_norm", 0.0))
 MICRO_ACTION_ENCODING = str(
     PROTOCOL.get("micro_action_encoding", "projected_full")
@@ -147,9 +276,31 @@ MICRO_STICK_BREAKING_SCALE = float(
     PROTOCOL.get("micro_stick_breaking_scale", 4.0)
 )
 RESUME_MICRO_REPLAY = bool(PROTOCOL.get("resume_micro_replay", False))
+RESUME_MICRO_OPTIMIZER_IN_JOINT = bool(
+    PROTOCOL.get("resume_micro_optimizer_in_joint", False)
+)
 ENERGY_DUAL_POWER_WINDOW = int(
     PROTOCOL.get("energy_dual_power_window", 5)
 )
+
+if CONSTRAINT_FORM == "pure_lagrangian":
+    if OBJECTIVE_MODE != "constrained_delay":
+        raise ValueError(
+            "pure_lagrangian requires objective_mode='constrained_delay'"
+        )
+    if MACRO_POWER_VIOLATION_PENALTY_WEIGHT != 0.0:
+        raise ValueError(
+            "pure_lagrangian cannot also use the fixed macro power penalty"
+        )
+if (
+    OBJECTIVE_MODE == "constrained_delay"
+    and POWER_CONSTRAINT_SCOPE == "system"
+    and ENERGY_DUAL_LR > 0.0
+    and not SYSTEM_DUAL_STATE
+):
+    raise ValueError(
+        "A nonzero learned system dual requires system_dual_state=true"
+    )
 
 
 def normalized_macro_distance(distance_m, action_mode=None):
@@ -180,6 +331,25 @@ def compute_capacity_audit():
         user_zone_radius=USER_ZONE_RADIUS_M,
     )
     env.F_max_array[:] = CPU_GHZ * 1e9
+    phase_audits = []
+    phases = (
+        LOAD_SWITCH_PHASES_MBPS
+        if LOAD_SWITCH_MODE != "off"
+        else [ZONE_LOADS_MBPS]
+    )
+    for phase_index, phase_loads in enumerate(phases):
+        env.set_zone_target_loads(phase_loads)
+        audit = env.get_compute_capacity_audit()
+        phase_audits.append(
+            {
+                "phase_index": int(phase_index),
+                "offered_load_mbps": audit["offered_load_mbps"].tolist(),
+                "locally_overloaded": audit["locally_overloaded"].tolist(),
+                "globally_feasible": bool(audit["globally_feasible"]),
+                "global_margin_mbits": float(audit["global_margin_mbits"]),
+            }
+        )
+    env.set_zone_target_loads(phases[0])
     audit = env.get_compute_capacity_audit()
     return {
         "load_scale": MAIN_LOAD,
@@ -192,6 +362,7 @@ def compute_capacity_audit():
         "locally_overloaded": audit["locally_overloaded"].tolist(),
         "globally_feasible": bool(audit["globally_feasible"]),
         "global_margin_mbits": float(audit["global_margin_mbits"]),
+        "phase_audits": phase_audits,
     }
 
 
@@ -207,7 +378,7 @@ def stage_config(stage):
         "smoke": {
             "episodes": 2,
             "seeds": [1],
-            "macro_steps": 2,
+            "macro_steps": int(PROTOCOL.get("smoke_macro_steps", 2)),
             "eval_interval": 1,
             "eval_episodes": 2,
             "trajectory_interval": 0,
@@ -226,7 +397,7 @@ def stage_config(stage):
             "episodes": 100,
             "seeds": [1],
             "macro_steps": MACRO_STEPS,
-            "eval_interval": 20,
+            "eval_interval": PILOT_EVAL_INTERVAL,
             "eval_episodes": 20,
             "trajectory_interval": 100,
             "micro_pretrain_episodes": MICRO_PRETRAIN_HORIZON,
@@ -271,6 +442,13 @@ def common_args(config, device):
         "--eval_episodes", str(config["eval_episodes"]),
         "--trajectory_plot_interval", str(config["trajectory_interval"]),
         "--zone_loads", ",".join(str(value) for value in ZONE_LOADS_MBPS),
+        "--load_switch_mode", LOAD_SWITCH_MODE,
+        "--load_switch_phases", ";".join(
+            ",".join(str(value) for value in phase)
+            for phase in LOAD_SWITCH_PHASES_MBPS
+        ),
+        "--load_switch_dwell_min", str(LOAD_SWITCH_DWELL_MIN),
+        "--load_switch_dwell_max", str(LOAD_SWITCH_DWELL_MAX),
         "--load_scale", str(MAIN_LOAD),
         "--traffic_profile", "normal",
         "--traffic_scale", "0.5",
@@ -282,30 +460,48 @@ def common_args(config, device):
         "--deployment_transient_energy_mode", "kinetic_lower_bound",
         "--uav_mass_kg", "2.038735983690112",
         "--users_static", "1" if USERS_STATIC else "0",
-        "--gm_mean_speed_mps", "0.5",
-        "--gm_mean_heading_rad", "0.7853981633974483",
-        "--gm_speed_memory", "0.5",
-        "--gm_heading_memory", "0.5",
-        "--gm_speed_noise_std", "0.1",
-        "--gm_heading_noise_std", "0.1",
+        "--gm_mean_speed_mps", str(GM_MEAN_SPEED_MPS),
+        "--gm_mean_heading_rad", str(GM_MEAN_HEADING_RAD),
+        "--gm_heading_mode", GM_HEADING_MODE,
+        "--gm_speed_memory", str(GM_SPEED_MEMORY),
+        "--gm_heading_memory", str(GM_HEADING_MEMORY),
+        "--gm_speed_noise_std", str(GM_SPEED_NOISE_STD),
+        "--gm_heading_noise_std", str(GM_HEADING_NOISE_STD),
+        "--rpgm_group_speed_mps", str(RPGM_GROUP_SPEED_MPS),
+        "--rpgm_group_speed_memory", str(RPGM_GROUP_SPEED_MEMORY),
+        "--rpgm_group_speed_noise_std", str(RPGM_GROUP_SPEED_NOISE_STD),
+        "--rpgm_group_turn_std_rad_sqrt_s", str(
+            RPGM_GROUP_TURN_STD_RAD_SQRT_S
+        ),
+        "--rpgm_local_velocity_memory", str(RPGM_LOCAL_VELOCITY_MEMORY),
+        "--rpgm_local_velocity_std_mps", str(RPGM_LOCAL_VELOCITY_STD_MPS),
+        "--rpgm_local_restore_rate_s2", str(RPGM_LOCAL_RESTORE_RATE_S2),
+        "--rpgm_local_speed_cap_mps", str(RPGM_LOCAL_SPEED_CAP_MPS),
         "--user_zone_radius", str(USER_ZONE_RADIUS_M),
         "--uplink_bandwidth_mhz", "20",
         "--u2u_bandwidth_mhz", "3",
         "--cpu_ghz", str(CPU_GHZ),
-        "--cpu_alloc_mode", "priced_maxweight",
+        "--cpu_alloc_mode", CPU_ALLOC_MODE,
         "--cpu_power_cap_w", "0",
         "--micro_diag_bias", "0",
         "--micro_action_scale", "1",
         "--micro_action_encoding", MICRO_ACTION_ENCODING,
         "--micro_stick_breaking_scale", str(MICRO_STICK_BREAKING_SCALE),
         "--micro_reward_scale", str(MICRO_REWARD_SCALE),
+        "--delay_objective_weight", str(DELAY_OBJECTIVE_WEIGHT),
+        "--energy_objective_weight", str(ENERGY_OBJECTIVE_WEIGHT),
         "--sac_grad_clip_norm", str(SAC_GRAD_CLIP_NORM),
         "--micro_state_mode", "pressure",
-        "--objective_mode", "constrained_delay",
+        "--u2u_state_representation", U2U_STATE_REPRESENTATION,
+        "--u2u_goal_representation", U2U_GOAL_REPRESENTATION,
+        "--u2u_contention_aware_pressure", str(U2U_CONTENTION_AWARE_PRESSURE),
+        "--u2u_prev_active_state", "1" if U2U_PREV_ACTIVE_STATE else "0",
+        "--objective_mode", OBJECTIVE_MODE,
     ] + constraint_args + [
         "--energy_dual_lr", str(ENERGY_DUAL_LR),
         "--energy_dual_max", "20",
         "--energy_dual_state_norm", "10",
+        "--system_dual_state", "1" if SYSTEM_DUAL_STATE else "0",
         "--checkpoint_power_rule", "ucb95",
         "--power_budget_tolerance", "0",
         "--power_constraint_margin_w", "0",
@@ -325,23 +521,33 @@ def common_args(config, device):
 
 
 def micro_checkpoint_path(stage, seed):
+    source_seed = (
+        int(seed)
+        if MICRO_PRETRAIN_SOURCE_SEED is None
+        else MICRO_PRETRAIN_SOURCE_SEED
+    )
     return os.path.join(
         "results",
         MICRO_PRETRAIN_SOURCE_VERSION,
         stage,
-        f"seed{int(seed)}",
+        f"seed{source_seed}",
         "micro_pretrain",
         "checkpoints",
-        "best.pt",
+        f"{MICRO_PRETRAIN_CHECKPOINT}.pt",
     )
 
 
 def micro_replay_path(stage, seed):
+    source_seed = (
+        int(seed)
+        if MICRO_PRETRAIN_SOURCE_SEED is None
+        else MICRO_PRETRAIN_SOURCE_SEED
+    )
     return os.path.join(
         "results",
         MICRO_PRETRAIN_SOURCE_VERSION,
         stage,
-        f"seed{int(seed)}",
+        f"seed{source_seed}",
         "micro_pretrain",
         "checkpoints",
         "micro_replay.pt",
@@ -357,6 +563,12 @@ def build_micro_pretrain(stage, seed, config, device):
     args += [
         "--micro_solver", "sac",
         "--freeze_macro",
+        "--frozen_macro_policy", str(
+            config.get(
+                "micro_pretrain_macro_policy",
+                MICRO_PRETRAIN_MACRO_POLICY,
+            )
+        ),
         "--ppo_zero_inflated_actions", "0",
         "--ppo_initial_log_std", str(ppo_log_std_for_distance(2.0)),
         "--macro_shaping_initial", "0",
@@ -385,10 +597,14 @@ def build_micro_pretrain(stage, seed, config, device):
 def method_specs():
     td3_common = [
         "--td3_replay_capacity", str(TD3_REPLAY_CAPACITY),
+        "--save_macro_replay", str(int(SAVE_MACRO_REPLAY)),
         "--td3_warmup_steps", str(TD3_WARMUP_STEPS),
         "--td3_updates_per_step", str(TD3_UPDATES_PER_STEP),
+        "--td3_delay_n_step", str(TD3_DELAY_N_STEP),
+        "--td3_replay_sequence_span", str(TD3_REPLAY_SEQUENCE_SPAN),
         "--td3_policy_delay", str(TD3_POLICY_DELAY),
         "--td3_actor_warmup_updates", str(TD3_ACTOR_WARMUP_UPDATES),
+        "--td3_actor_delay_aggregation", TD3_ACTOR_DELAY_AGGREGATION,
         "--td3_exploration_decay_episodes",
         str(TD3_EXPLORATION_DECAY_EPISODES),
         "--td3_exploration_persistence", TD3_EXPLORATION_PERSISTENCE,
@@ -408,6 +624,8 @@ def method_specs():
         str(MACRO_POWER_VIOLATION_PENALTY_WEIGHT),
         "--td3_hover_exploration_prob",
         str(TD3_HOVER_EXPLORATION_PROB),
+        "--td3_neutral_episode_prob",
+        str(TD3_NEUTRAL_EPISODE_PROB),
         "--td3_dual_power_window", str(ENERGY_DUAL_POWER_WINDOW),
         "--macro_shaping_initial", "0",
         "--macro_shaping_final", "0",
@@ -492,7 +710,12 @@ def build_experiments(stage, seeds, config, device):
                     method_args += [
                         "--micro_replay", micro_replay_path(stage, seed),
                     ]
-                method_args += ["--resume_micro_optimizer", "0"]
+                method_args += [
+                    "--resume_micro_optimizer",
+                    "1" if RESUME_MICRO_OPTIMIZER_IN_JOINT else "0",
+                ]
+                if FREEZE_MICRO_IN_JOINT:
+                    method_args += ["--freeze_micro"]
             experiments.append(
                 {
                     "name": f"{spec['method']}_s{seed}",
@@ -642,14 +865,25 @@ def main():
         experiments = []
 
     audit_summary = compute_capacity_audit()
-    if not audit_summary["globally_feasible"]:
+    phase_audits = audit_summary.get("phase_audits", [])
+    if any(not item["globally_feasible"] for item in phase_audits):
         raise RuntimeError(
             "Main protocol is globally infeasible according to the current "
             f"environment: {audit_summary}"
         )
-    if audit_summary["locally_overloaded"] != [True, False, False]:
+    if LOAD_SWITCH_MODE == "off" and (
+        audit_summary["locally_overloaded"] != [True, False, False]
+    ):
         raise RuntimeError(
             "Main protocol no longer has exactly one overloaded source zone: "
+            f"{audit_summary}"
+        )
+    if LOAD_SWITCH_MODE != "off" and any(
+        sum(bool(value) for value in item["locally_overloaded"]) != 1
+        for item in phase_audits
+    ):
+        raise RuntimeError(
+            "Every load-switch phase must have exactly one overloaded zone: "
             f"{audit_summary}"
         )
     print("Candidate long-term research protocol")
@@ -657,9 +891,22 @@ def main():
     print(f"  methods={[exp['method'] for exp in experiments]}")
     print(f"  capacity_audit={audit_summary}")
     print(
-        "  CPU=priced_maxweight, aggregate_cpu_cap=disabled, "
+        "  load_switch="
+        f"{LOAD_SWITCH_MODE}, phases={LOAD_SWITCH_PHASES_MBPS}, "
+        f"dwell=[{LOAD_SWITCH_DWELL_MIN},{LOAD_SWITCH_DWELL_MAX}]"
+    )
+    print(
+        f"  CPU={CPU_ALLOC_MODE}, aggregate_cpu_cap=disabled, "
         f"power_constraint={POWER_CONSTRAINT_SCOPE}, "
-        f"system_average_budget={SYSTEM_POWER_BUDGET_W:.1f}W"
+        f"system_average_budget={SYSTEM_POWER_BUDGET_W:.1f}W, "
+        f"constraint_form={CONSTRAINT_FORM}, "
+        f"system_dual_state={int(SYSTEM_DUAL_STATE)}"
+    )
+    print(
+        "  objective="
+        f"{OBJECTIVE_MODE}, delay_weight={DELAY_OBJECTIVE_WEIGHT:.3f}, "
+        f"energy_weight={ENERGY_OBJECTIVE_WEIGHT:.3f}, "
+        f"mobility_heading={GM_HEADING_MODE}"
     )
     print("  deployment=arrivals+mobility, service=paused for exactly 1s")
 
