@@ -1,0 +1,493 @@
+{
+  "seeds": [
+    5000,
+    5001,
+    5002,
+    5003,
+    5004,
+    5005,
+    5006,
+    5007,
+    5008,
+    5009,
+    5010,
+    5011,
+    5012,
+    5013,
+    5014,
+    5015,
+    5016,
+    5017,
+    5018,
+    5019
+  ],
+  "policy_means": {
+    "fixed": {
+      "task_delay_weighted_ms": {
+        "mean": 695.2321329947113,
+        "ci_low": 682.7541160340807,
+        "ci_high": 707.7101499553419,
+        "std": 26.661608680129252
+      },
+      "mean_queue_mbits": {
+        "mean": 6.794595083045458,
+        "ci_low": 6.191481569539361,
+        "ci_high": 7.3977085965515545,
+        "std": 1.2886644197977417
+      },
+      "terminal_queue_mbits": {
+        "mean": 12.829716830490483,
+        "ci_low": 7.455659519391059,
+        "ci_high": 18.203774141589907,
+        "std": 11.482674971927555
+      },
+      "tail_queue_slope_mbps": {
+        "mean": 0.05854816391128985,
+        "ci_low": 0.012679338549017996,
+        "ci_high": 0.1044169892735617,
+        "std": 0.09800729364966955
+      },
+      "average_power_w": {
+        "mean": 823.7447800145015,
+        "ci_low": 821.3638526290074,
+        "ci_high": 826.1257073999957,
+        "std": 5.087295076463792
+      },
+      "coop_ratio": {
+        "mean": 1.0,
+        "ci_low": 1.0,
+        "ci_high": 1.0,
+        "std": 0.0
+      },
+      "soft_objective_j": {
+        "mean": 0.7923640893683184,
+        "ci_low": 0.7746352031265338,
+        "ci_high": 0.810092975610103,
+        "std": 0.03788106946835731
+      },
+      "target_occupancy_fraction": {
+        "mean": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.0,
+        "std": 0.0
+      },
+      "target_reach_segment_fraction": {
+        "mean": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.0,
+        "std": 0.0
+      },
+      "target_arrival_time_reached_s": {
+        "mean": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.0,
+        "std": 0.0
+      },
+      "target_arrival_time_capped_s": {
+        "mean": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.0,
+        "std": 0.0
+      },
+      "target_error_mean_m": {
+        "mean": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.0,
+        "std": 0.0
+      }
+    },
+    "centroid": {
+      "task_delay_weighted_ms": {
+        "mean": 692.8700155229495,
+        "ci_low": 678.6005503201499,
+        "ci_high": 707.1394807257492,
+        "std": 30.48937170963263
+      },
+      "mean_queue_mbits": {
+        "mean": 6.979773989614925,
+        "ci_low": 6.305705293297724,
+        "ci_high": 7.653842685932126,
+        "std": 1.4402733913118413
+      },
+      "terminal_queue_mbits": {
+        "mean": 13.300945022506436,
+        "ci_low": 8.18416412508878,
+        "ci_high": 18.417725919924095,
+        "std": 10.932955967228935
+      },
+      "tail_queue_slope_mbps": {
+        "mean": 0.05805912463046801,
+        "ci_low": 0.013998347617109323,
+        "ci_high": 0.1021199016438267,
+        "std": 0.0941440613984577
+      },
+      "average_power_w": {
+        "mean": 832.2026189665241,
+        "ci_low": 830.1336095330653,
+        "ci_high": 834.271628399983,
+        "std": 4.4208242418983525
+      },
+      "coop_ratio": {
+        "mean": 1.0,
+        "ci_low": 1.0,
+        "ci_high": 1.0,
+        "std": 0.0
+      },
+      "soft_objective_j": {
+        "mean": 0.7959598030504601,
+        "ci_low": 0.7772028314041514,
+        "ci_high": 0.8147167746967688,
+        "std": 0.04007776553245618
+      },
+      "target_occupancy_fraction": {
+        "mean": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.0,
+        "std": 0.0
+      },
+      "target_reach_segment_fraction": {
+        "mean": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.0,
+        "std": 0.0
+      },
+      "target_arrival_time_reached_s": {
+        "mean": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.0,
+        "std": 0.0
+      },
+      "target_arrival_time_capped_s": {
+        "mean": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.0,
+        "std": 0.0
+      },
+      "target_error_mean_m": {
+        "mean": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.0,
+        "std": 0.0
+      }
+    },
+    "cooperative": {
+      "task_delay_weighted_ms": {
+        "mean": 682.848377296609,
+        "ci_low": 670.9765099580227,
+        "ci_high": 694.7202446351953,
+        "std": 25.36645704862052
+      },
+      "mean_queue_mbits": {
+        "mean": 6.441913890723198,
+        "ci_low": 5.894161699637382,
+        "ci_high": 6.9896660818090135,
+        "std": 1.1703746371310726
+      },
+      "terminal_queue_mbits": {
+        "mean": 12.027464880836645,
+        "ci_low": 7.511498138301349,
+        "ci_high": 16.54343162337194,
+        "std": 9.649204555646742
+      },
+      "tail_queue_slope_mbps": {
+        "mean": 0.05317743915775199,
+        "ci_low": 0.013149383042642168,
+        "ci_high": 0.09320549527286182,
+        "std": 0.08552740164839298
+      },
+      "average_power_w": {
+        "mean": 852.201008359956,
+        "ci_low": 849.3108410641694,
+        "ci_high": 855.0911756557425,
+        "std": 6.175381048406077
+      },
+      "coop_ratio": {
+        "mean": 1.0,
+        "ci_low": 1.0,
+        "ci_high": 1.0,
+        "std": 0.0
+      },
+      "soft_objective_j": {
+        "mean": 0.7995090174394273,
+        "ci_low": 0.7825074603438236,
+        "ci_high": 0.816510574535031,
+        "std": 0.036326995200121275
+      },
+      "target_occupancy_fraction": {
+        "mean": 0.5516666666666666,
+        "ci_low": 0.5198659261088115,
+        "ci_high": 0.5834674072245217,
+        "std": 0.0679482086910868
+      },
+      "target_reach_segment_fraction": {
+        "mean": 0.95,
+        "ci_low": 0.9019827350549189,
+        "ci_high": 0.998017264945081,
+        "std": 0.10259783520851541
+      },
+      "target_arrival_time_reached_s": {
+        "mean": 32.166666666666664,
+        "ci_low": 30.44372315889055,
+        "ci_high": 33.88961017444278,
+        "std": 3.6813898977081148
+      },
+      "target_arrival_time_capped_s": {
+        "mean": 31.416666666666664,
+        "ci_low": 29.57818082493559,
+        "ci_high": 33.25515250839774,
+        "std": 3.9282676270472714
+      },
+      "target_error_mean_m": {
+        "mean": 13.134465410614135,
+        "ci_low": 12.463798653299877,
+        "ci_high": 13.805132167928393,
+        "std": 1.43300451463566
+      }
+    }
+  },
+  "paired": {
+    "cooperative_vs_centroid_delay": {
+      "mean": -10.021638226340395,
+      "ci_low": -13.446400364163326,
+      "ci_high": -6.5968760885174635,
+      "std": 7.3176425572468045,
+      "treatment": "cooperative",
+      "control": "centroid",
+      "field": "task_delay_weighted_ms",
+      "n": 20,
+      "mean_gain": 10.021638226340395,
+      "seeds": [
+        5000,
+        5001,
+        5002,
+        5003,
+        5004,
+        5005,
+        5006,
+        5007,
+        5008,
+        5009,
+        5010,
+        5011,
+        5012,
+        5013,
+        5014,
+        5015,
+        5016,
+        5017,
+        5018,
+        5019
+      ],
+      "deltas": [
+        -10.568508005973172,
+        -15.31001137656358,
+        -31.39831737742975,
+        -7.818582253097816,
+        -8.901328383317264,
+        -7.95847750865039,
+        -3.4385846401989966,
+        -2.5890246000346906,
+        -4.0633026160202235,
+        -12.944784915982268,
+        -3.515402978287625,
+        -6.405990016638725,
+        -9.995954224943944,
+        -14.296247331707605,
+        -5.2242609582057185,
+        -7.211940404134793,
+        -17.718352639885552,
+        -22.159321043797263,
+        -2.7087106222683133,
+        -6.205662629670201
+      ]
+    },
+    "cooperative_vs_fixed_delay": {
+      "mean": -12.38375569810234,
+      "ci_low": -14.76392083557107,
+      "ci_high": -10.003590560633608,
+      "std": 5.0856663915025155,
+      "treatment": "cooperative",
+      "control": "fixed",
+      "field": "task_delay_weighted_ms",
+      "n": 20,
+      "mean_gain": 12.38375569810234,
+      "seeds": [
+        5000,
+        5001,
+        5002,
+        5003,
+        5004,
+        5005,
+        5006,
+        5007,
+        5008,
+        5009,
+        5010,
+        5011,
+        5012,
+        5013,
+        5014,
+        5015,
+        5016,
+        5017,
+        5018,
+        5019
+      ],
+      "deltas": [
+        -13.977666407115748,
+        -13.862343572241798,
+        -5.959215229051438,
+        -15.055518153840467,
+        -19.497169934197927,
+        -18.45162029866833,
+        -13.803220004835225,
+        -14.005963644705957,
+        -5.8326888455574135,
+        -14.345839944539193,
+        -18.128339206545547,
+        -0.4066451658709411,
+        -8.290949023235726,
+        -14.439633489135304,
+        -9.12336341687103,
+        -8.104134232832394,
+        -12.551740567582215,
+        -20.564725821430216,
+        -10.714146435776456,
+        -10.560190568013468
+      ]
+    },
+    "centroid_vs_fixed_delay": {
+      "mean": -2.3621174717619455,
+      "ci_low": -6.44730212328331,
+      "ci_high": 1.7230671797594193,
+      "std": 8.728758336246763,
+      "treatment": "centroid",
+      "control": "fixed",
+      "field": "task_delay_weighted_ms",
+      "n": 20,
+      "mean_gain": 2.3621174717619455,
+      "seeds": [
+        5000,
+        5001,
+        5002,
+        5003,
+        5004,
+        5005,
+        5006,
+        5007,
+        5008,
+        5009,
+        5010,
+        5011,
+        5012,
+        5013,
+        5014,
+        5015,
+        5016,
+        5017,
+        5018,
+        5019
+      ],
+      "deltas": [
+        -3.4091584011425766,
+        1.4476678043217817,
+        25.43910214837831,
+        -7.236935900742651,
+        -10.595841550880664,
+        -10.493142790017941,
+        -10.364635364636229,
+        -11.416939044671267,
+        -1.76938622953719,
+        -1.4010550285569252,
+        -14.612936228257922,
+        5.999344850767784,
+        1.705005201708218,
+        -0.1433861574276989,
+        -3.899102458665311,
+        -0.8921938286976001,
+        5.166612072303337,
+        1.5945952223670474,
+        -8.005435813508143,
+        -4.354527938343267
+      ]
+    },
+    "cooperative_vs_centroid_queue": {
+      "mean": -0.5378600988917277,
+      "ci_low": -0.7117206388538555,
+      "ci_high": -0.36399955892959995,
+      "std": 0.37148544484363055,
+      "treatment": "cooperative",
+      "control": "centroid",
+      "field": "mean_queue_mbits",
+      "n": 20,
+      "mean_gain": 0.5378600988917277,
+      "seeds": [
+        5000,
+        5001,
+        5002,
+        5003,
+        5004,
+        5005,
+        5006,
+        5007,
+        5008,
+        5009,
+        5010,
+        5011,
+        5012,
+        5013,
+        5014,
+        5015,
+        5016,
+        5017,
+        5018,
+        5019
+      ],
+      "deltas": [
+        -0.5613374350723008,
+        -0.45813914350784923,
+        -1.4881533147194599,
+        -0.5531614636363225,
+        -0.24133200312562053,
+        -0.7345065208250574,
+        -0.37559707586323743,
+        -0.09968568460676774,
+        -0.4786765928211798,
+        -0.6964166244954741,
+        -0.18281095295848182,
+        -0.3341172076281662,
+        -0.7376681828021283,
+        -0.5360096152867317,
+        -0.16859467318790866,
+        -0.2589690120955419,
+        -0.7555415861969594,
+        -1.4211052287859527,
+        -0.4047093468165466,
+        -0.2706703134028654
+      ]
+    }
+  },
+  "pre_registered_thresholds": {
+    "practical_delay_gain_ms": 5.0,
+    "queue_noninferiority_fraction": 0.05,
+    "queue_noninferiority_margin_mbits": 0.3489886994807463,
+    "power_role": "descriptive_only_no_hard_threshold"
+  },
+  "checks": {
+    "cooperative_beats_centroid_statistically": true,
+    "cooperative_beats_centroid_practically": true,
+    "cooperative_beats_fixed_statistically": true,
+    "cooperative_beats_fixed_practically": true,
+    "queue_noninferior_to_centroid": true
+  },
+  "pass": true,
+  "config": "C:\\Users\\PC\\Desktop\\HRL_UAV\\configs\\tcom_v37_imbalanced_load_gate.json",
+  "micro_checkpoint": "C:\\Users\\PC\\Desktop\\HRL_UAV\\results\\tcom_v33_soft_energy_random_mobility\\formal\\seed1\\micro_pretrain\\checkpoints\\final.pt",
+  "device": "cuda",
+  "cooperative_offset_m": 60.0,
+  "movement_trigger_m": 10.0,
+  "load_scale": 1.15,
+  "fixed_policy_definition": "move once toward the initial business centroid using the common event trigger, then hover",
+  "centroid_policy_definition": "causal event-triggered dynamic weighted-business-centroid tracking",
+  "cooperative_policy_definition": "centroid tracking plus a 60 m causal residual from the lightest support UAV toward the current heavy UAV"
+}

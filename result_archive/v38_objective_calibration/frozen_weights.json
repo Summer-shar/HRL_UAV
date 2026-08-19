@@ -1,0 +1,12 @@
+{
+  "status": "FROZEN_FOR_NEXT_SAC_RETRAIN",
+  "exchange_rate_ms_per_w": 0.25,
+  "delay_weight": 0.960408028711155,
+  "energy_weight": 0.03959197128884489,
+  "paper_display": {
+    "delay_weight": 0.96,
+    "energy_weight": 0.04
+  },
+  "calibration_seeds": "5000-5019",
+  "formal_gate_seed_rule": "Use 20 new CRN seeds disjoint from calibration seeds 5000-5019."
+}
