@@ -1,0 +1,92 @@
+{
+  "comparison": "联合 TD3-SAC_final_td3_vs_dynamic_centroid",
+  "micro_policy": "same final SAC from selected joint checkpoint",
+  "checkpoint": "C:\\Users\\PC\\Desktop\\HRL_UAV\\results\\tcom_v44_joint_cooperation_finetune\\formal\\seed1\\joint_td3_sac\\checkpoints\\final.pt",
+  "macro_action_mode": "cooperation_waypoint",
+  "seeds": [
+    8000,
+    8001,
+    8002,
+    8003,
+    8004,
+    8005,
+    8006,
+    8007,
+    8008,
+    8009,
+    8010,
+    8011,
+    8012,
+    8013,
+    8014,
+    8015,
+    8016,
+    8017,
+    8018,
+    8019
+  ],
+  "policy_means": {
+    "centroid": {
+      "task_delay_weighted_ms": 1087.3363036673516,
+      "J": 1.2317040675134,
+      "queue_mbits": 40.735909005336495,
+      "average_power_w": 821.9837760416667,
+      "u2g_distance_m": 0.03258769173833917,
+      "coop_ratio": 0.5613748074713127
+    },
+    "td3": {
+      "task_delay_weighted_ms": 698.7790019321804,
+      "J": 0.8104098647708586,
+      "queue_mbits": 12.55373356923008,
+      "average_power_w": 846.5245546875,
+      "u2g_distance_m": 47.34497904939808,
+      "coop_ratio": 0.5356117825925762
+    }
+  },
+  "paired": {
+    "td3_minus_centroid_task_delay_weighted_ms": {
+      "mean": -388.55730173517134,
+      "ci95_low": -492.06947900928844,
+      "ci95_high": -285.04512446105423,
+      "std": 221.17559950686547,
+      "n": 20
+    },
+    "td3_minus_centroid_J": {
+      "mean": -0.4212942027425416,
+      "ci95_low": -0.5434599471983491,
+      "ci95_high": -0.29912845828673407,
+      "std": 0.26103288019594245,
+      "n": 20
+    },
+    "td3_minus_centroid_queue_mbits": {
+      "mean": -28.182175436106412,
+      "ci95_low": -36.57901020942477,
+      "ci95_high": -19.78534066278805,
+      "std": 17.94160855133673,
+      "n": 20
+    },
+    "td3_minus_centroid_average_power_w": {
+      "mean": 24.540778645833324,
+      "ci95_low": 22.142118623457282,
+      "ci95_high": 26.939438668209366,
+      "std": 5.125243062536067,
+      "n": 20
+    },
+    "td3_minus_centroid_u2g_distance_m": {
+      "mean": 47.31239135765974,
+      "ci95_low": 46.809035765767646,
+      "ci95_high": 47.81574694955184,
+      "std": 1.0755253897041184,
+      "n": 20
+    },
+    "td3_minus_centroid_coop_ratio": {
+      "mean": -0.025763024878736586,
+      "ci95_low": -0.029703025625872133,
+      "ci95_high": -0.02182302413160104,
+      "std": 0.008418642620157709,
+      "n": 20
+    }
+  },
+  "td3_faster_seed_count": 20,
+  "centroid_faster_seed_count": 0
+}
