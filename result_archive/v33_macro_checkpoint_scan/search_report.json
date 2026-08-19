@@ -1,0 +1,156 @@
+{
+  "final_micro_checkpoint": "C:\\Users\\PC\\Desktop\\HRL_UAV\\results\\tcom_v33_soft_energy_random_mobility\\formal\\seed1\\joint_td3_sac\\checkpoints\\final.pt",
+  "search_seeds": [
+    6000,
+    6001,
+    6002
+  ],
+  "centroid_mean_delay_ms": 609.8230132651852,
+  "ranked_candidates": [
+    {
+      "episode": 700,
+      "mean_delay_ms": 611.5578200730876,
+      "mean_delay_delta_ms": 1.7348068079023353,
+      "delay_ci95_low": 0.630683423133761,
+      "delay_ci95_high": 2.83893019267091,
+      "mean_J_delta": 0.014660553343339785,
+      "mean_queue_delta_mbits": -0.22779405993562532,
+      "mean_u2g_distance_m": 44.48795087449389,
+      "faster_count": 0,
+      "seed_count": 3
+    },
+    {
+      "episode": 650,
+      "mean_delay_ms": 613.6242474970853,
+      "mean_delay_delta_ms": 3.8012342319000254,
+      "delay_ci95_low": 2.656485005814568,
+      "delay_ci95_high": 4.9459834579854824,
+      "mean_J_delta": 0.014231550255065542,
+      "mean_queue_delta_mbits": -0.17306467083923227,
+      "mean_u2g_distance_m": 39.9915588059611,
+      "faster_count": 0,
+      "seed_count": 3
+    },
+    {
+      "episode": 600,
+      "mean_delay_ms": 615.211471259554,
+      "mean_delay_delta_ms": 5.3884579943686886,
+      "delay_ci95_low": 3.578253258992989,
+      "delay_ci95_high": 7.198662729744388,
+      "mean_J_delta": 0.019135206934965954,
+      "mean_queue_delta_mbits": -0.1631967203782588,
+      "mean_u2g_distance_m": 43.80818087926689,
+      "faster_count": 0,
+      "seed_count": 3
+    },
+    {
+      "episode": 50,
+      "mean_delay_ms": 615.3862627406949,
+      "mean_delay_delta_ms": 5.563249475509565,
+      "delay_ci95_low": 2.374316597257797,
+      "delay_ci95_high": 8.752182353761333,
+      "mean_J_delta": 0.009049373747670933,
+      "mean_queue_delta_mbits": -0.1759872569844315,
+      "mean_u2g_distance_m": 40.078763532434984,
+      "faster_count": 0,
+      "seed_count": 3
+    },
+    {
+      "episode": 400,
+      "mean_delay_ms": 616.4743721985993,
+      "mean_delay_delta_ms": 6.651358933414069,
+      "delay_ci95_low": 4.749422222099558,
+      "delay_ci95_high": 8.553295644728578,
+      "mean_J_delta": 0.019060656750644684,
+      "mean_queue_delta_mbits": -0.046522188184613476,
+      "mean_u2g_distance_m": 45.49543621612437,
+      "faster_count": 0,
+      "seed_count": 3
+    },
+    {
+      "episode": 500,
+      "mean_delay_ms": 616.7323064544903,
+      "mean_delay_delta_ms": 6.909293189305117,
+      "delay_ci95_low": 4.584065756807213,
+      "delay_ci95_high": 9.234520621803021,
+      "mean_J_delta": 0.01812546118490958,
+      "mean_queue_delta_mbits": -0.1767451234360573,
+      "mean_u2g_distance_m": 51.006804152166715,
+      "faster_count": 0,
+      "seed_count": 3
+    },
+    {
+      "episode": 300,
+      "mean_delay_ms": 617.0413915528893,
+      "mean_delay_delta_ms": 7.218378287704013,
+      "delay_ci95_low": 3.5650339156534216,
+      "delay_ci95_high": 10.871722659754605,
+      "mean_J_delta": 0.021592102939728835,
+      "mean_queue_delta_mbits": -0.13214338594148897,
+      "mean_u2g_distance_m": 49.0982945069199,
+      "faster_count": 0,
+      "seed_count": 3
+    },
+    {
+      "episode": 900,
+      "mean_delay_ms": 618.2074139978546,
+      "mean_delay_delta_ms": 8.384400732669405,
+      "delay_ci95_low": 7.79322687632019,
+      "delay_ci95_high": 8.97557458901862,
+      "mean_J_delta": 0.025489879205692678,
+      "mean_queue_delta_mbits": -0.026827265835328202,
+      "mean_u2g_distance_m": 45.14964315139378,
+      "faster_count": 0,
+      "seed_count": 3
+    },
+    {
+      "episode": 200,
+      "mean_delay_ms": 618.2287270044017,
+      "mean_delay_delta_ms": 8.405713739216367,
+      "delay_ci95_low": 7.106153236557694,
+      "delay_ci95_high": 9.705274241875038,
+      "mean_J_delta": 0.0187179345856255,
+      "mean_queue_delta_mbits": -0.053695824463004214,
+      "mean_u2g_distance_m": 43.855520835385796,
+      "faster_count": 0,
+      "seed_count": 3
+    },
+    {
+      "episode": 100,
+      "mean_delay_ms": 619.4472149848117,
+      "mean_delay_delta_ms": 9.624201719626361,
+      "delay_ci95_low": 7.113344026962507,
+      "delay_ci95_high": 12.135059412290216,
+      "mean_J_delta": 0.016276082334396924,
+      "mean_queue_delta_mbits": 0.07126140478260368,
+      "mean_u2g_distance_m": 38.41560233789294,
+      "faster_count": 0,
+      "seed_count": 3
+    },
+    {
+      "episode": 800,
+      "mean_delay_ms": 621.7176474707709,
+      "mean_delay_delta_ms": 11.894634205585627,
+      "delay_ci95_low": 8.473520545360902,
+      "delay_ci95_high": 15.315747865810351,
+      "mean_J_delta": 0.02684098001636004,
+      "mean_queue_delta_mbits": 0.18928581367429764,
+      "mean_u2g_distance_m": 42.29136171605401,
+      "faster_count": 0,
+      "seed_count": 3
+    },
+    {
+      "episode": 1000,
+      "mean_delay_ms": 623.8757908238864,
+      "mean_delay_delta_ms": 14.05277755870111,
+      "delay_ci95_low": 12.617425417332232,
+      "delay_ci95_high": 15.488129700069987,
+      "mean_J_delta": 0.031086628703058932,
+      "mean_queue_delta_mbits": -0.05041323190223886,
+      "mean_u2g_distance_m": 57.050342930857994,
+      "faster_count": 0,
+      "seed_count": 3
+    }
+  ],
+  "best_episode": 700
+}

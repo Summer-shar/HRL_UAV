@@ -1,0 +1,57 @@
+{
+  "evidence_role": "V39_MATCHED_CENTROID_REFERENCE",
+  "source_report": "C:\\Users\\PC\\Desktop\\HRL_UAV\\result_archive\\v39_calibrated_objective_gate\\imbalanced_load\\gate_report.json",
+  "source_report_sha256": "4876ab8ad3ebe69add66301edce6cd3d5588acd4217a22c8bfc487b3a98ecccd",
+  "evaluation_seeds": [
+    6000,
+    6001,
+    6002,
+    6003,
+    6004,
+    6005,
+    6006,
+    6007,
+    6008,
+    6009,
+    6010,
+    6011,
+    6012,
+    6013,
+    6014,
+    6015,
+    6016,
+    6017,
+    6018,
+    6019
+  ],
+  "task_delay_weighted_ms": {
+    "mean": 1052.4201192610549,
+    "ci_low": 962.7478466220783,
+    "ci_high": 1142.0923919000313,
+    "std": 191.601522108961
+  },
+  "mean_queue_mbits": {
+    "mean": 26.68393623453955,
+    "ci_low": 20.31698126770386,
+    "ci_high": 33.050891201375244,
+    "std": 13.604185853037961
+  },
+  "terminal_queue_mbits": {
+    "mean": 53.69265663533696,
+    "ci_low": 26.81104144067268,
+    "ci_high": 80.57427183000124,
+    "std": 57.43758060846037
+  },
+  "average_power_w": {
+    "mean": 830.5501697097674,
+    "ci_low": 828.5583895468129,
+    "ci_high": 832.5419498727218,
+    "std": 4.2558095127682325
+  },
+  "soft_objective_j": {
+    "mean": 1.1527170944556857,
+    "ci_low": 1.0313278782688962,
+    "ci_high": 1.2741063106424753,
+    "std": 0.25937068287140996
+  }
+}

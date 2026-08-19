@@ -1,0 +1,394 @@
+{
+  "status": "FROZEN_V39_FORMAL_PROBE_REFERENCE",
+  "scientific_scope": "Checkpoint monitoring only. The episode-level gate establishes the policy-level preference; it is not a per-state ground-truth label.",
+  "config": "C:\\Users\\PC\\Desktop\\HRL_UAV\\configs\\tcom_v39_calibrated_soft_objective.json",
+  "config_sha256": "835161e776c52a0fc447f91960eb766c29cc6fc14a938b326d054e7053d974a8",
+  "micro_checkpoint": "C:\\Users\\PC\\Desktop\\HRL_UAV\\results\\tcom_v39_calibrated_soft_objective\\formal\\seed1\\micro_pretrain\\checkpoints\\final.pt",
+  "micro_checkpoint_sha256": "44fe17eb867a207f114b85e15ab0d873d01e4a16120a9754be46bade7faf7582",
+  "device": "cuda",
+  "probe_episode_seeds": [
+    7000,
+    7001,
+    7002,
+    7003,
+    7004,
+    7005,
+    7006,
+    7007,
+    7008,
+    7009,
+    7010,
+    7011,
+    7012,
+    7013,
+    7014,
+    7015,
+    7016,
+    7017,
+    7018,
+    7019
+  ],
+  "probe_macro_indices": [
+    0,
+    5,
+    10,
+    15,
+    20,
+    25
+  ],
+  "probe_count": 120,
+  "state_dim": 81,
+  "macro_action_dim": 6,
+  "reference_policy": "causal dynamic centroid tracking",
+  "compared_action": "60 m causal cooperative residual",
+  "continuation_policy": "not encoded; checkpoint-specific audit must define it",
+  "schedules": [
+    {
+      "seed": 7000,
+      "switch_steps": [
+        11,
+        23
+      ],
+      "dwell_steps": [
+        11,
+        12,
+        7
+      ],
+      "external_trace_hash": "0275f80e001607e94a848df42abe319349250594333c1596ff26617ade6d8d0c"
+    },
+    {
+      "seed": 7001,
+      "switch_steps": [
+        8,
+        17,
+        29
+      ],
+      "dwell_steps": [
+        8,
+        9,
+        12,
+        1
+      ],
+      "external_trace_hash": "fbbac8f037572c3faeac6098a2b9d7ed9fe1c7b3141b951fb09a24e5991334a7"
+    },
+    {
+      "seed": 7002,
+      "switch_steps": [
+        9,
+        19
+      ],
+      "dwell_steps": [
+        9,
+        10,
+        11
+      ],
+      "external_trace_hash": "7551fc7f43fff69c20fa38f61c805de3415736ed946af4f5f53c1ba88d5ce5dc"
+    },
+    {
+      "seed": 7003,
+      "switch_steps": [
+        12,
+        21
+      ],
+      "dwell_steps": [
+        12,
+        9,
+        9
+      ],
+      "external_trace_hash": "e57a6953fb0f2a4414370bcb69330d430472155cab32535ddc8d1aa45d42a840"
+    },
+    {
+      "seed": 7004,
+      "switch_steps": [
+        8,
+        16,
+        25
+      ],
+      "dwell_steps": [
+        8,
+        8,
+        9,
+        5
+      ],
+      "external_trace_hash": "6a030135bbf25c49dd608e9e551dc3f1f50b0def9de7aa1dd28a504444037a80"
+    },
+    {
+      "seed": 7005,
+      "switch_steps": [
+        11,
+        21
+      ],
+      "dwell_steps": [
+        11,
+        10,
+        9
+      ],
+      "external_trace_hash": "808bbad8b81ef9bf71d2f4f1146088c93973fdcd85cabd2f092b88eb2c3ea46a"
+    },
+    {
+      "seed": 7006,
+      "switch_steps": [
+        12,
+        22
+      ],
+      "dwell_steps": [
+        12,
+        10,
+        8
+      ],
+      "external_trace_hash": "9721ad35bdb35a3ae389ad626daa31f7cf1851472fed0f6e22cd7e7793479f37"
+    },
+    {
+      "seed": 7007,
+      "switch_steps": [
+        12,
+        21
+      ],
+      "dwell_steps": [
+        12,
+        9,
+        9
+      ],
+      "external_trace_hash": "785616c1d65b948f9afa44345791cc83ea18ce591ec16554ccf3982ac1872783"
+    },
+    {
+      "seed": 7008,
+      "switch_steps": [
+        12,
+        22
+      ],
+      "dwell_steps": [
+        12,
+        10,
+        8
+      ],
+      "external_trace_hash": "0d2a9bf779fd5876ec4d2741cfb38d4ff61abe2db31859f977a91685acac31b5"
+    },
+    {
+      "seed": 7009,
+      "switch_steps": [
+        9,
+        19
+      ],
+      "dwell_steps": [
+        9,
+        10,
+        11
+      ],
+      "external_trace_hash": "02330c6404aa74cb3955da60ea5aeb0be759ce7db64b04589150821a963df09c"
+    },
+    {
+      "seed": 7010,
+      "switch_steps": [
+        10,
+        21
+      ],
+      "dwell_steps": [
+        10,
+        11,
+        9
+      ],
+      "external_trace_hash": "9b99dd6b6ca442b9ef291840dc0d615cc587cd70780849de4556b1002c18f464"
+    },
+    {
+      "seed": 7011,
+      "switch_steps": [
+        10,
+        20
+      ],
+      "dwell_steps": [
+        10,
+        10,
+        10
+      ],
+      "external_trace_hash": "fec5dc404a4a01550c5c95dc0a5f35da6b2fbf047192c2999a6abf337b79de32"
+    },
+    {
+      "seed": 7012,
+      "switch_steps": [
+        12,
+        24
+      ],
+      "dwell_steps": [
+        12,
+        12,
+        6
+      ],
+      "external_trace_hash": "3207b8658bfc209ac9c08a50b16195fcfc9d3cb6bec81dee52a1561f06f3c1ca"
+    },
+    {
+      "seed": 7013,
+      "switch_steps": [
+        8,
+        19
+      ],
+      "dwell_steps": [
+        8,
+        11,
+        11
+      ],
+      "external_trace_hash": "1718cd1deebbde9dedff527aa375a6993dda34dfea2cdd54d8dc18fcb2540b1c"
+    },
+    {
+      "seed": 7014,
+      "switch_steps": [
+        8,
+        20,
+        29
+      ],
+      "dwell_steps": [
+        8,
+        12,
+        9,
+        1
+      ],
+      "external_trace_hash": "baba8c7e9586be2776795b537c7c63abb765519dd618b856dde361bf313fb416"
+    },
+    {
+      "seed": 7015,
+      "switch_steps": [
+        8,
+        19
+      ],
+      "dwell_steps": [
+        8,
+        11,
+        11
+      ],
+      "external_trace_hash": "ea489b3b006a1bb563645be3efc790a69bc3517f3c7f05249132718c79df14c0"
+    },
+    {
+      "seed": 7016,
+      "switch_steps": [
+        8,
+        19
+      ],
+      "dwell_steps": [
+        8,
+        11,
+        11
+      ],
+      "external_trace_hash": "8b3dce315c53dbe55727b3e5eac398730e12a3f659ac09a4bb3ebb8aa84eadda"
+    },
+    {
+      "seed": 7017,
+      "switch_steps": [
+        9,
+        17,
+        25
+      ],
+      "dwell_steps": [
+        9,
+        8,
+        8,
+        5
+      ],
+      "external_trace_hash": "e90a99630225429552977edb07579cf7dde01316991f69303581935da6b3eea4"
+    },
+    {
+      "seed": 7018,
+      "switch_steps": [
+        12,
+        24
+      ],
+      "dwell_steps": [
+        12,
+        12,
+        6
+      ],
+      "external_trace_hash": "1da0b9125b34994d157f52d7a4f3ee6d2968d4ad544d0f3bde985647e4362e25"
+    },
+    {
+      "seed": 7019,
+      "switch_steps": [
+        8,
+        20
+      ],
+      "dwell_steps": [
+        8,
+        12,
+        10
+      ],
+      "external_trace_hash": "258f07e3b9c6d36ab9887c2e547b8acbdda8c4b14d1484f5cdd76e8a36a998dd"
+    }
+  ],
+  "external_trace_hashes": {
+    "7000": "0275f80e001607e94a848df42abe319349250594333c1596ff26617ade6d8d0c",
+    "7001": "fbbac8f037572c3faeac6098a2b9d7ed9fe1c7b3141b951fb09a24e5991334a7",
+    "7002": "7551fc7f43fff69c20fa38f61c805de3415736ed946af4f5f53c1ba88d5ce5dc",
+    "7003": "e57a6953fb0f2a4414370bcb69330d430472155cab32535ddc8d1aa45d42a840",
+    "7004": "6a030135bbf25c49dd608e9e551dc3f1f50b0def9de7aa1dd28a504444037a80",
+    "7005": "808bbad8b81ef9bf71d2f4f1146088c93973fdcd85cabd2f092b88eb2c3ea46a",
+    "7006": "9721ad35bdb35a3ae389ad626daa31f7cf1851472fed0f6e22cd7e7793479f37",
+    "7007": "785616c1d65b948f9afa44345791cc83ea18ce591ec16554ccf3982ac1872783",
+    "7008": "0d2a9bf779fd5876ec4d2741cfb38d4ff61abe2db31859f977a91685acac31b5",
+    "7009": "02330c6404aa74cb3955da60ea5aeb0be759ce7db64b04589150821a963df09c",
+    "7010": "9b99dd6b6ca442b9ef291840dc0d615cc587cd70780849de4556b1002c18f464",
+    "7011": "fec5dc404a4a01550c5c95dc0a5f35da6b2fbf047192c2999a6abf337b79de32",
+    "7012": "3207b8658bfc209ac9c08a50b16195fcfc9d3cb6bec81dee52a1561f06f3c1ca",
+    "7013": "1718cd1deebbde9dedff527aa375a6993dda34dfea2cdd54d8dc18fcb2540b1c",
+    "7014": "baba8c7e9586be2776795b537c7c63abb765519dd618b856dde361bf313fb416",
+    "7015": "ea489b3b006a1bb563645be3efc790a69bc3517f3c7f05249132718c79df14c0",
+    "7016": "8b3dce315c53dbe55727b3e5eac398730e12a3f659ac09a4bb3ebb8aa84eadda",
+    "7017": "e90a99630225429552977edb07579cf7dde01316991f69303581935da6b3eea4",
+    "7018": "1da0b9125b34994d157f52d7a4f3ee6d2968d4ad544d0f3bde985647e4362e25",
+    "7019": "258f07e3b9c6d36ab9887c2e547b8acbdda8c4b14d1484f5cdd76e8a36a998dd"
+  },
+  "centroid_reference": {
+    "evidence_role": "V39_MATCHED_CENTROID_REFERENCE",
+    "source_report": "C:\\Users\\PC\\Desktop\\HRL_UAV\\result_archive\\v39_calibrated_objective_gate\\imbalanced_load\\gate_report.json",
+    "source_report_sha256": "4876ab8ad3ebe69add66301edce6cd3d5588acd4217a22c8bfc487b3a98ecccd",
+    "evaluation_seeds": [
+      6000,
+      6001,
+      6002,
+      6003,
+      6004,
+      6005,
+      6006,
+      6007,
+      6008,
+      6009,
+      6010,
+      6011,
+      6012,
+      6013,
+      6014,
+      6015,
+      6016,
+      6017,
+      6018,
+      6019
+    ],
+    "task_delay_weighted_ms": {
+      "mean": 1052.4201192610549,
+      "ci_low": 962.7478466220783,
+      "ci_high": 1142.0923919000313,
+      "std": 191.601522108961
+    },
+    "mean_queue_mbits": {
+      "mean": 26.68393623453955,
+      "ci_low": 20.31698126770386,
+      "ci_high": 33.050891201375244,
+      "std": 13.604185853037961
+    },
+    "terminal_queue_mbits": {
+      "mean": 53.69265663533696,
+      "ci_low": 26.81104144067268,
+      "ci_high": 80.57427183000124,
+      "std": 57.43758060846037
+    },
+    "average_power_w": {
+      "mean": 830.5501697097674,
+      "ci_low": 828.5583895468129,
+      "ci_high": 832.5419498727218,
+      "std": 4.2558095127682325
+    },
+    "soft_objective_j": {
+      "mean": 1.1527170944556857,
+      "ci_low": 1.0313278782688962,
+      "ci_high": 1.2741063106424753,
+      "std": 0.25937068287140996
+    }
+  }
+}
