@@ -36,15 +36,55 @@ RESULTS_VERSION = str(PROTOCOL["results_version"])
 MICRO_PRETRAIN_SOURCE_VERSION = str(
     PROTOCOL.get("micro_pretrain_source_results_version", RESULTS_VERSION)
 )
+_micro_pretrain_source_stage = PROTOCOL.get("micro_pretrain_source_stage", None)
+MICRO_PRETRAIN_SOURCE_STAGE = (
+    None
+    if _micro_pretrain_source_stage is None
+    else str(_micro_pretrain_source_stage).lower()
+)
+if MICRO_PRETRAIN_SOURCE_STAGE not in {
+    None,
+    "smoke",
+    "diagnostic",
+    "pilot",
+    "formal",
+}:
+    raise ValueError(
+        "micro_pretrain_source_stage must be smoke, diagnostic, pilot, or formal"
+    )
 _micro_pretrain_source_seed = PROTOCOL.get("micro_pretrain_source_seed", None)
 MICRO_PRETRAIN_SOURCE_SEED = (
     None
     if _micro_pretrain_source_seed is None
     else int(_micro_pretrain_source_seed)
 )
+MICRO_PRETRAIN_SOURCE_METHOD = str(
+    PROTOCOL.get("micro_pretrain_source_method", "micro_pretrain")
+).strip()
+if MICRO_PRETRAIN_SOURCE_METHOD not in {"micro_pretrain", "joint_td3_sac"}:
+    raise ValueError(
+        "micro_pretrain_source_method must be micro_pretrain or joint_td3_sac"
+    )
 FREEZE_MICRO_IN_JOINT = bool(
     PROTOCOL.get("freeze_micro_in_joint", False)
 )
+INDEPENDENT_MICRO_PRETRAINING = bool(
+    PROTOCOL.get("independent_micro_pretraining", False)
+)
+MICRO_PRETRAIN_MACRO_POLICIES = {
+    str(method): str(policy).lower()
+    for method, policy in PROTOCOL.get(
+        "micro_pretrain_macro_policies",
+        {},
+    ).items()
+}
+if any(
+    policy not in {"zero", "fixed"}
+    for policy in MICRO_PRETRAIN_MACRO_POLICIES.values()
+):
+    raise ValueError(
+        "micro_pretrain_macro_policies values must be 'zero' or 'fixed'"
+    )
 FORMAL_SEEDS = [int(value) for value in PROTOCOL["formal_seeds"]]
 TRAINING_HORIZON = int(PROTOCOL["training_episodes"])
 MICRO_PRETRAIN_HORIZON = int(PROTOCOL["micro_pretrain_episodes"])
@@ -60,6 +100,31 @@ MICRO_PRETRAIN_CHECKPOINT = str(
 ).lower()
 if MICRO_PRETRAIN_CHECKPOINT not in {"best", "final"}:
     raise ValueError("micro_pretrain_checkpoint must be either 'best' or 'final'")
+MICRO_PRETRAIN_ACTOR_INIT_CHECKPOINT = str(
+    PROTOCOL.get("micro_pretrain_actor_init_checkpoint", "")
+).strip()
+MICRO_PRETRAIN_PREFILL_EPISODES = int(
+    PROTOCOL.get("micro_pretrain_prefill_episodes", 0)
+)
+MICRO_PRETRAIN_ACTOR_FREEZE_EPISODES = int(
+    PROTOCOL.get("micro_pretrain_actor_freeze_episodes", 0)
+)
+if (
+    MICRO_PRETRAIN_PREFILL_EPISODES < 0
+    or MICRO_PRETRAIN_ACTOR_FREEZE_EPISODES < MICRO_PRETRAIN_PREFILL_EPISODES
+):
+    raise ValueError(
+        "micro warm-start requires 0 <= prefill_episodes <= "
+        "actor_freeze_episodes"
+    )
+if (
+    MICRO_PRETRAIN_PREFILL_EPISODES > 0
+    or MICRO_PRETRAIN_ACTOR_FREEZE_EPISODES > 0
+) and not MICRO_PRETRAIN_ACTOR_INIT_CHECKPOINT:
+    raise ValueError(
+        "micro warm-start episodes require "
+        "micro_pretrain_actor_init_checkpoint"
+    )
 MAIN_LOAD = float(PROTOCOL["load_scale"])
 ZONE_LOADS_MBPS = [float(value) for value in PROTOCOL["zone_loads_mbps"]]
 LOAD_SWITCH_MODE = str(
@@ -158,6 +223,7 @@ ENERGY_OBJECTIVE_WEIGHT = float(
     PROTOCOL.get("energy_objective_weight", 0.3)
 )
 TD3_REPLAY_CAPACITY = int(PROTOCOL.get("td3_replay_capacity", 12000))
+TD3_BATCH_SIZE = int(PROTOCOL.get("td3_batch_size", 128))
 SAVE_MACRO_REPLAY = bool(PROTOCOL.get("save_macro_replay", False))
 TD3_WARMUP_STEPS = int(PROTOCOL.get("td3_warmup_steps", 300))
 TD3_UPDATES_PER_STEP = int(PROTOCOL.get("td3_updates_per_step", 1))
@@ -166,6 +232,37 @@ TD3_REPLAY_SEQUENCE_SPAN = int(
     PROTOCOL.get("td3_replay_sequence_span", 1)
 )
 TD3_POLICY_DELAY = int(PROTOCOL.get("td3_policy_delay", 2))
+TD3_ACTOR_LR = float(PROTOCOL.get("td3_actor_lr", 3e-5))
+TD3_CRITIC_LR = float(PROTOCOL.get("td3_critic_lr", 3e-4))
+TD3_ACTOR_EMA_DECAY = float(
+    PROTOCOL.get("td3_actor_ema_decay", 0.0)
+)
+MACRO_INIT_CHECKPOINT = str(
+    PROTOCOL.get("macro_init_checkpoint", "")
+).strip()
+MACRO_INIT_CHECKPOINTS = {
+    str(method): str(path).strip()
+    for method, path in PROTOCOL.get("macro_init_checkpoints", {}).items()
+    if str(path).strip()
+}
+_KNOWN_METHODS = {
+    "joint_td3_sac",
+    "joint_ppo_sac",
+    "cppo_sca",
+    "no_coop",
+    "centroid_sac",
+    "fixed_sac",
+}
+_unknown_macro_init_methods = set(MACRO_INIT_CHECKPOINTS) - _KNOWN_METHODS
+if _unknown_macro_init_methods:
+    raise ValueError(
+        "macro_init_checkpoints contains unknown methods: "
+        f"{sorted(_unknown_macro_init_methods)}"
+    )
+MACRO_INIT_CRITICS = bool(PROTOCOL.get("macro_init_critics", True))
+RESUME_MACRO_OPTIMIZER = bool(
+    PROTOCOL.get("resume_macro_optimizer", False)
+)
 TD3_ACTOR_WARMUP_UPDATES = int(
     PROTOCOL.get("td3_actor_warmup_updates", 0)
 )
@@ -222,6 +319,9 @@ JOINT_SAC_POLICY_DELAY = int(
 JOINT_SAC_ACTOR_WARMUP_UPDATES = int(
     PROTOCOL.get("joint_sac_actor_warmup_updates", 0)
 )
+JOINT_TRAIN_MICRO_DURING_MACRO_WARMUP = bool(
+    PROTOCOL.get("joint_train_micro_during_macro_warmup", False)
+)
 MICRO_PRETRAIN_SAC_ACTOR_LR = float(
     PROTOCOL.get("micro_pretrain_sac_actor_lr", 3e-4)
 )
@@ -275,6 +375,39 @@ MICRO_ACTION_ENCODING = str(
 MICRO_STICK_BREAKING_SCALE = float(
     PROTOCOL.get("micro_stick_breaking_scale", 4.0)
 )
+MICRO_PRIORITY_WEIGHT_RATIO = float(
+    PROTOCOL.get("micro_priority_weight_ratio", 10.0)
+)
+MICRO_SCA_RESIDUAL_SCALE = float(
+    PROTOCOL.get("micro_sca_residual_scale", 0.0)
+)
+MICRO_SCA_SUPPORT_THRESHOLD = float(
+    PROTOCOL.get("micro_sca_support_threshold", 1e-6)
+)
+MICRO_SCA_RESIDUAL_UPDATE_INTERVAL = int(
+    PROTOCOL.get("micro_sca_residual_update_interval", 1)
+)
+MICRO_SCA_RESIDUAL_MAX_ITER = int(
+    PROTOCOL.get("micro_sca_residual_max_iter", 3)
+)
+MICRO_SCA_RESIDUAL_TOL = float(
+    PROTOCOL.get("micro_sca_residual_tol", 1e-3)
+)
+MICRO_SCA_RESIDUAL_SOLVER = str(
+    PROTOCOL.get("micro_sca_residual_solver", "CLARABEL")
+)
+MICRO_SCA_RESIDUAL_PROXIMAL_WEIGHT = float(
+    PROTOCOL.get("micro_sca_residual_proximal_weight", 1e-3)
+)
+SAC_ZERO_MEAN_OUTPUT_INIT = bool(
+    PROTOCOL.get("sac_zero_mean_output_init", False)
+)
+if MICRO_SCA_RESIDUAL_SCALE < 0.0:
+    raise ValueError("micro_sca_residual_scale must be non-negative")
+if MICRO_SCA_RESIDUAL_SCALE > 0.0 and MICRO_ACTION_ENCODING != "priority_gated":
+    raise ValueError(
+        "SCA-guided residual SAC requires micro_action_encoding='priority_gated'"
+    )
 RESUME_MICRO_REPLAY = bool(PROTOCOL.get("resume_micro_replay", False))
 RESUME_MICRO_OPTIMIZER_IN_JOINT = bool(
     PROTOCOL.get("resume_micro_optimizer_in_joint", False)
@@ -307,7 +440,7 @@ def normalized_macro_distance(distance_m, action_mode=None):
     mode = MACRO_ACTION_MODE if action_mode is None else str(action_mode)
     scale_m = (
         MACRO_WAYPOINT_RADIUS_M
-        if mode in ("waypoint", "centroid_waypoint")
+        if mode in ("waypoint", "centroid_waypoint", "cooperation_waypoint")
         else MAX_DEPLOYMENT_DISTANCE_M
     )
     return float(distance_m) / scale_m
@@ -383,6 +516,28 @@ def stage_config(stage):
             "eval_episodes": 2,
             "trajectory_interval": 0,
             "micro_pretrain_episodes": 2,
+            "sac_batch_size": int(PROTOCOL.get("smoke_sac_batch_size", 256)),
+            "sac_memory_warmup": int(
+                PROTOCOL.get("smoke_sac_memory_warmup", 1000)
+            ),
+            "joint_sac_policy_delay": int(
+                PROTOCOL.get(
+                    "smoke_joint_sac_policy_delay",
+                    JOINT_SAC_POLICY_DELAY,
+                )
+            ),
+            "joint_sac_actor_warmup_updates": int(
+                PROTOCOL.get(
+                    "smoke_joint_sac_actor_warmup_updates",
+                    JOINT_SAC_ACTOR_WARMUP_UPDATES,
+                )
+            ),
+            "td3_warmup_steps": int(
+                PROTOCOL.get("smoke_td3_warmup_steps", TD3_WARMUP_STEPS)
+            ),
+            "td3_batch_size": int(
+                PROTOCOL.get("smoke_td3_batch_size", TD3_BATCH_SIZE)
+            ),
         },
         "diagnostic": {
             "episodes": 20,
@@ -406,8 +561,8 @@ def stage_config(stage):
             "episodes": TRAINING_HORIZON,
             "seeds": FORMAL_SEEDS,
             "macro_steps": MACRO_STEPS,
-            "eval_interval": 50,
-            "eval_episodes": 20,
+            "eval_interval": int(PROTOCOL.get("formal_eval_interval", 50)),
+            "eval_episodes": int(PROTOCOL.get("formal_eval_episodes", 20)),
             "trajectory_interval": 100,
             "micro_pretrain_episodes": MICRO_PRETRAIN_HORIZON,
         },
@@ -487,10 +642,27 @@ def common_args(config, device):
         "--micro_action_scale", "1",
         "--micro_action_encoding", MICRO_ACTION_ENCODING,
         "--micro_stick_breaking_scale", str(MICRO_STICK_BREAKING_SCALE),
+        "--micro_priority_weight_ratio", str(MICRO_PRIORITY_WEIGHT_RATIO),
+        "--micro_sca_residual_scale", str(MICRO_SCA_RESIDUAL_SCALE),
+        "--micro_sca_support_threshold", str(MICRO_SCA_SUPPORT_THRESHOLD),
+        "--micro_sca_residual_update_interval", str(
+            MICRO_SCA_RESIDUAL_UPDATE_INTERVAL
+        ),
+        "--micro_sca_residual_max_iter", str(MICRO_SCA_RESIDUAL_MAX_ITER),
+        "--micro_sca_residual_tol", str(MICRO_SCA_RESIDUAL_TOL),
+        "--micro_sca_residual_solver", MICRO_SCA_RESIDUAL_SOLVER,
+        "--micro_sca_residual_proximal_weight", str(
+            MICRO_SCA_RESIDUAL_PROXIMAL_WEIGHT
+        ),
+        "--sac_zero_mean_output_init", "1" if SAC_ZERO_MEAN_OUTPUT_INIT else "0",
         "--micro_reward_scale", str(MICRO_REWARD_SCALE),
         "--delay_objective_weight", str(DELAY_OBJECTIVE_WEIGHT),
         "--energy_objective_weight", str(ENERGY_OBJECTIVE_WEIGHT),
         "--sac_grad_clip_norm", str(SAC_GRAD_CLIP_NORM),
+        "--sac_batch_size", str(int(config.get("sac_batch_size", 256))),
+        "--sac_memory_warmup", str(
+            int(config.get("sac_memory_warmup", 1000))
+        ),
         "--micro_state_mode", "pressure",
         "--u2u_state_representation", U2U_STATE_REPRESENTATION,
         "--u2u_goal_representation", U2U_GOAL_REPRESENTATION,
@@ -520,7 +692,18 @@ def common_args(config, device):
     ]
 
 
-def micro_checkpoint_path(stage, seed):
+def micro_pretrain_method_name(target_method=None):
+    if INDEPENDENT_MICRO_PRETRAINING:
+        if not target_method:
+            raise ValueError(
+                "Independent micro pretraining requires a target method"
+            )
+        return f"micro_pretrain_{target_method}"
+    return MICRO_PRETRAIN_SOURCE_METHOD
+
+
+def micro_checkpoint_path(stage, seed, target_method=None):
+    source_stage = MICRO_PRETRAIN_SOURCE_STAGE or str(stage)
     source_seed = (
         int(seed)
         if MICRO_PRETRAIN_SOURCE_SEED is None
@@ -529,15 +712,16 @@ def micro_checkpoint_path(stage, seed):
     return os.path.join(
         "results",
         MICRO_PRETRAIN_SOURCE_VERSION,
-        stage,
+        source_stage,
         f"seed{source_seed}",
-        "micro_pretrain",
+        micro_pretrain_method_name(target_method),
         "checkpoints",
         f"{MICRO_PRETRAIN_CHECKPOINT}.pt",
     )
 
 
-def micro_replay_path(stage, seed):
+def micro_replay_path(stage, seed, target_method=None):
+    source_stage = MICRO_PRETRAIN_SOURCE_STAGE or str(stage)
     source_seed = (
         int(seed)
         if MICRO_PRETRAIN_SOURCE_SEED is None
@@ -546,29 +730,48 @@ def micro_replay_path(stage, seed):
     return os.path.join(
         "results",
         MICRO_PRETRAIN_SOURCE_VERSION,
-        stage,
+        source_stage,
         f"seed{source_seed}",
-        "micro_pretrain",
+        micro_pretrain_method_name(target_method),
         "checkpoints",
         "micro_replay.pt",
     )
 
 
-def build_micro_pretrain(stage, seed, config, device):
+def macro_checkpoint_path(method, stage, seed):
+    template = MACRO_INIT_CHECKPOINTS.get(str(method), "")
+    if not template and str(method) == "joint_td3_sac":
+        template = MACRO_INIT_CHECKPOINT
+    return template.format(stage=stage, seed=int(seed)) if template else ""
+
+
+def build_micro_pretrain(stage, seed, config, device, target_method=None):
     setup = dict(config)
     setup["episodes"] = int(config["micro_pretrain_episodes"])
-    setup["eval_interval"] = min(20, max(setup["episodes"], 1))
-    subdir = f"{RESULTS_VERSION}/{stage}/seed{seed}/micro_pretrain"
-    args = [item.format(seed=seed) for item in common_args(setup, device)]
-    args += [
-        "--micro_solver", "sac",
-        "--freeze_macro",
-        "--frozen_macro_policy", str(
+    setup["eval_interval"] = int(PROTOCOL.get(
+        "micro_pretrain_eval_interval",
+        min(20, max(setup["episodes"], 1)),
+    ))
+    setup["eval_episodes"] = int(PROTOCOL.get(
+        "micro_pretrain_eval_episodes",
+        setup["eval_episodes"],
+    ))
+    artifact_method = micro_pretrain_method_name(target_method)
+    subdir = f"{RESULTS_VERSION}/{stage}/seed{seed}/{artifact_method}"
+    frozen_policy = MICRO_PRETRAIN_MACRO_POLICIES.get(
+        str(target_method),
+        str(
             config.get(
                 "micro_pretrain_macro_policy",
                 MICRO_PRETRAIN_MACRO_POLICY,
             )
         ),
+    )
+    args = [item.format(seed=seed) for item in common_args(setup, device)]
+    args += [
+        "--micro_solver", "sac",
+        "--freeze_macro",
+        "--frozen_macro_policy", frozen_policy,
         "--ppo_zero_inflated_actions", "0",
         "--ppo_initial_log_std", str(ppo_log_std_for_distance(2.0)),
         "--macro_shaping_initial", "0",
@@ -584,9 +787,22 @@ def build_micro_pretrain(stage, seed, config, device):
         "--sac_initial_alpha", str(MICRO_PRETRAIN_SAC_INITIAL_ALPHA),
         "--results_subdir", subdir,
     ]
+    if MICRO_PRETRAIN_ACTOR_INIT_CHECKPOINT:
+        args += [
+            "--micro_actor_ckpt",
+            MICRO_PRETRAIN_ACTOR_INIT_CHECKPOINT.format(
+                stage=stage,
+                seed=seed,
+            ),
+            "--sac_prefill_episodes",
+            str(MICRO_PRETRAIN_PREFILL_EPISODES),
+            "--sac_actor_freeze_episodes",
+            str(MICRO_PRETRAIN_ACTOR_FREEZE_EPISODES),
+        ]
     return {
-        "name": f"micro_pretrain_s{seed}",
-        "method": "micro_pretrain",
+        "name": f"{artifact_method}_s{seed}",
+        "method": artifact_method,
+        "target_method": target_method,
         "seed": int(seed),
         "script": os.path.join(SCRIPT_DIR, "train_centralized_macro.py"),
         "args": args,
@@ -597,6 +813,7 @@ def build_micro_pretrain(stage, seed, config, device):
 def method_specs():
     td3_common = [
         "--td3_replay_capacity", str(TD3_REPLAY_CAPACITY),
+        "--td3_batch_size", str(TD3_BATCH_SIZE),
         "--save_macro_replay", str(int(SAVE_MACRO_REPLAY)),
         "--td3_warmup_steps", str(TD3_WARMUP_STEPS),
         "--td3_updates_per_step", str(TD3_UPDATES_PER_STEP),
@@ -616,8 +833,9 @@ def method_specs():
         str(normalized_macro_distance(TD3_EXPLORATION_FINAL_M)),
         "--td3_policy_noise", str(TD3_POLICY_NOISE),
         "--td3_noise_clip", str(TD3_NOISE_CLIP),
-        "--td3_actor_lr", "3e-5",
-        "--td3_critic_lr", "3e-4",
+        "--td3_actor_lr", str(TD3_ACTOR_LR),
+        "--td3_critic_lr", str(TD3_CRITIC_LR),
+        "--td3_actor_ema_decay", str(TD3_ACTOR_EMA_DECAY),
         "--td3_gamma", "0.99",
         "--td3_reward_scale", str(TD3_REWARD_SCALE),
         "--macro_power_violation_penalty_weight",
@@ -672,18 +890,44 @@ def method_specs():
             "script": "train_centralized_macro.py",
             "args": [
                 "--micro_solver", "sca",
+                "--micro_sca_residual_scale", "0",
                 "--sca_update_interval", "1",
                 "--sca_max_iter", "3",
                 "--sca_tol", "1e-3",
                 "--sca_proximal_weight", "1e-3",
+                "--sca_delay_weight", str(DELAY_OBJECTIVE_WEIGHT),
+                "--sca_energy_weight", str(ENERGY_OBJECTIVE_WEIGHT),
             ] + ppo_common,
             "uses_micro_checkpoint": False,
         },
         {
             "method": "no_coop",
             "script": "train_centralized_td3.py",
-            "args": ["--micro_solver", "local"] + td3_common,
+            "args": [
+                "--micro_solver", "local",
+                "--micro_sca_residual_scale", "0",
+            ] + td3_common,
             "uses_micro_checkpoint": False,
+        },
+        {
+            "method": "centroid_sac",
+            "script": "train_centralized_macro.py",
+            "args": [
+                "--micro_solver", "sac",
+                "--freeze_macro",
+                "--frozen_macro_policy", "zero",
+            ] + ppo_common,
+            "uses_micro_checkpoint": True,
+        },
+        {
+            "method": "fixed_sac",
+            "script": "train_centralized_macro.py",
+            "args": [
+                "--micro_solver", "sac",
+                "--freeze_macro",
+                "--frozen_macro_policy", "fixed",
+            ] + ppo_common,
+            "uses_micro_checkpoint": True,
         },
     ]
 
@@ -695,20 +939,53 @@ def build_experiments(stage, seeds, config, device):
         for spec in method_specs():
             subdir = f"{RESULTS_VERSION}/{stage}/seed{seed}/{spec['method']}"
             method_args = list(spec["args"])
+            if spec["method"] in {"joint_td3_sac", "no_coop"}:
+                td3_overrides = {
+                    "--td3_warmup_steps": int(config.get(
+                        "td3_warmup_steps",
+                        TD3_WARMUP_STEPS,
+                    )),
+                    "--td3_batch_size": int(config.get(
+                        "td3_batch_size",
+                        TD3_BATCH_SIZE,
+                    )),
+                }
+                for flag, value in td3_overrides.items():
+                    flag_index = method_args.index(flag)
+                    method_args[flag_index + 1] = str(value)
             if spec["uses_micro_checkpoint"]:
                 method_args += [
-                    "--micro_ckpt", micro_checkpoint_path(stage, seed),
+                    "--micro_ckpt", micro_checkpoint_path(
+                        stage,
+                        seed,
+                        spec["method"],
+                    ),
                     "--sac_actor_lr", str(JOINT_SAC_ACTOR_LR),
                     "--sac_critic_lr", str(JOINT_SAC_CRITIC_LR),
                     "--sac_alpha_lr", str(JOINT_SAC_ALPHA_LR),
                     "--sac_initial_alpha", str(JOINT_SAC_INITIAL_ALPHA),
-                    "--sac_policy_delay", str(JOINT_SAC_POLICY_DELAY),
+                    "--sac_policy_delay", str(int(config.get(
+                        "joint_sac_policy_delay",
+                        JOINT_SAC_POLICY_DELAY,
+                    ))),
                     "--sac_actor_warmup_updates",
-                    str(JOINT_SAC_ACTOR_WARMUP_UPDATES),
+                    str(int(config.get(
+                        "joint_sac_actor_warmup_updates",
+                        JOINT_SAC_ACTOR_WARMUP_UPDATES,
+                    ))),
                 ]
+                if (
+                    JOINT_TRAIN_MICRO_DURING_MACRO_WARMUP
+                    and spec["method"] == "joint_td3_sac"
+                ):
+                    method_args += ["--train_micro_during_macro_warmup", "1"]
                 if RESUME_MICRO_REPLAY:
                     method_args += [
-                        "--micro_replay", micro_replay_path(stage, seed),
+                        "--micro_replay", micro_replay_path(
+                            stage,
+                            seed,
+                            spec["method"],
+                        ),
                     ]
                 method_args += [
                     "--resume_micro_optimizer",
@@ -716,6 +993,21 @@ def build_experiments(stage, seeds, config, device):
                 ]
                 if FREEZE_MICRO_IN_JOINT:
                     method_args += ["--freeze_micro"]
+            macro_checkpoint = macro_checkpoint_path(
+                spec["method"], stage, seed
+            )
+            if macro_checkpoint:
+                if spec["method"] in {"joint_td3_sac", "no_coop"}:
+                    method_args += [
+                        "--macro_init_ckpt",
+                        macro_checkpoint,
+                        "--macro_init_critics",
+                        "1" if MACRO_INIT_CRITICS else "0",
+                        "--resume_macro_optimizer",
+                        "1" if RESUME_MACRO_OPTIMIZER else "0",
+                    ]
+                else:
+                    method_args += ["--macro_ckpt", macro_checkpoint]
             experiments.append(
                 {
                     "name": f"{spec['method']}_s{seed}",
@@ -793,6 +1085,8 @@ def main():
             "joint_ppo_sac",
             "cppo_sca",
             "no_coop",
+            "centroid_sac",
+            "fixed_sac",
         ],
         default="",
     )
@@ -842,25 +1136,65 @@ def main():
         experiments = [exp for exp in experiments if exp["method"] == args.method]
 
     setup_experiments = []
-    if args.setup_only or any(
-        exp["method"] in {"joint_td3_sac", "joint_ppo_sac"}
+    setup_targets = sorted({
+        exp["method"]
         for exp in experiments
-    ):
+        if exp["method"] in {
+            "joint_td3_sac",
+            "joint_ppo_sac",
+            "centroid_sac",
+            "fixed_sac",
+        }
+    })
+    if args.setup_only and not setup_targets:
+        setup_targets = [
+            "joint_td3_sac",
+            "joint_ppo_sac",
+            "centroid_sac",
+            "fixed_sac",
+        ]
+    if setup_targets:
         for seed in seeds:
-            checkpoint = os.path.join(PROJECT_ROOT, micro_checkpoint_path(args.stage, seed))
-            replay = os.path.join(PROJECT_ROOT, micro_replay_path(args.stage, seed))
-            setup_ready = os.path.isfile(checkpoint) and (
-                not RESUME_MICRO_REPLAY or os.path.isfile(replay)
+            artifact_targets = (
+                setup_targets
+                if INDEPENDENT_MICRO_PRETRAINING
+                else [None]
             )
-            if args.setup_only or not setup_ready:
-                if MICRO_PRETRAIN_SOURCE_VERSION != RESULTS_VERSION:
-                    raise FileNotFoundError(
-                        "Configured external micro pretraining artifacts do "
-                        f"not both exist: checkpoint={checkpoint}, replay={replay}"
-                    )
-                setup_experiments.append(
-                    build_micro_pretrain(args.stage, seed, config, args.device)
+            for target_method in artifact_targets:
+                checkpoint = os.path.join(
+                    PROJECT_ROOT,
+                    micro_checkpoint_path(
+                        args.stage,
+                        seed,
+                        target_method,
+                    ),
                 )
+                replay = os.path.join(
+                    PROJECT_ROOT,
+                    micro_replay_path(
+                        args.stage,
+                        seed,
+                        target_method,
+                    ),
+                )
+                setup_ready = os.path.isfile(checkpoint) and (
+                    not RESUME_MICRO_REPLAY or os.path.isfile(replay)
+                )
+                if args.setup_only or not setup_ready:
+                    if MICRO_PRETRAIN_SOURCE_VERSION != RESULTS_VERSION:
+                        raise FileNotFoundError(
+                            "Configured external micro pretraining artifacts do "
+                            f"not both exist: checkpoint={checkpoint}, replay={replay}"
+                        )
+                    setup_experiments.append(
+                        build_micro_pretrain(
+                            args.stage,
+                            seed,
+                            config,
+                            args.device,
+                            target_method=target_method,
+                        )
+                    )
     if args.setup_only:
         experiments = []
 

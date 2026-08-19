@@ -39,6 +39,67 @@ def centered_stick_breaking_to_simplex(values, logit_scale=4.0):
     return output
 
 
+def priority_gated_to_simplex(
+    values,
+    priority_local_biases,
+    logit_scale=4.0,
+):
+    """Map priority-aware latent actions to routing simplices.
+
+    The first latent variable of each source row is an explicit local-service
+    gate. Remaining variables distribute the offloaded share among peers via
+    centered stick breaking. ``priority_local_biases`` encodes only the prior
+    operating point; every gate remains controllable by the learned action.
+    """
+    array = np.asarray(values, dtype=np.float64)
+    if array.ndim != 3 or array.shape[0] <= 0 or array.shape[1] <= 1:
+        raise ValueError(
+            "values must have shape (priorities, sources, sources - 1)"
+        )
+    priorities, sources, width = array.shape
+    if width != sources - 1:
+        raise ValueError(
+            "The final latent width must equal the number of peers."
+        )
+    if np.any(~np.isfinite(array)):
+        raise ValueError("values must be finite.")
+    biases = np.asarray(priority_local_biases, dtype=np.float64).reshape(-1)
+    if biases.size != priorities or np.any(~np.isfinite(biases)):
+        raise ValueError("priority_local_biases must contain one finite value per priority.")
+    scale = float(logit_scale)
+    if not np.isfinite(scale) or scale <= 0.0:
+        raise ValueError("logit_scale must be finite and positive.")
+
+    gate_logits = np.clip(
+        biases[:, None] + scale * array[..., 0],
+        -40.0,
+        40.0,
+    )
+    local_fraction = 1.0 / (1.0 + np.exp(-gate_logits))
+    remote_count = sources - 1
+    if remote_count == 1:
+        remote_distribution = np.ones(
+            (priorities, sources, 1),
+            dtype=np.float64,
+        )
+    else:
+        remote_distribution = centered_stick_breaking_to_simplex(
+            array[..., 1:],
+            logit_scale=scale,
+        )
+
+    output = np.zeros((priorities, sources, sources), dtype=np.float64)
+    for source in range(sources):
+        peers = [destination for destination in range(sources) if destination != source]
+        output[:, source, source] = local_fraction[:, source]
+        output[:, source, peers] = (
+            (1.0 - local_fraction[:, source, None])
+            * remote_distribution[:, source, :]
+        )
+    output /= np.sum(output, axis=-1, keepdims=True)
+    return output
+
+
 def project_rows_to_simplex(values):
     """Euclidean projection of the final axis onto the probability simplex."""
     array = np.asarray(values, dtype=np.float64)

@@ -29,7 +29,7 @@ from hrl_uav.agents.sac_agent import Actor as SACActor
 import hrl_uav.agents.sac_agent as sac_agent_mod
 from hrl_uav.load_switching import build_load_switch_schedule
 from run_load_switch_gate import run_gate_episode, weighted_node_queue_scores
-from search_position_oracle import target_centroid_waypoint_action
+from search_position_oracle import target_centroid_relative_action
 from train_centralized_macro import configure_macro_objective, sac_micro_policy
 
 
@@ -290,11 +290,7 @@ class V34MacroPolicy:
             targets,
             uav_coords,
         )
-        return target_centroid_waypoint_action(
-            targets,
-            centroids,
-            env.macro_waypoint_radius_m,
-        )
+        return target_centroid_relative_action(env, targets, centroids)
 
     def metadata(self) -> dict:
         return {
@@ -322,6 +318,107 @@ def queue_metrics(trace: dict, macro_period_s: float) -> dict:
         "terminal_queue_mbits": float(queue_total[-1]),
         "tail_queue_slope_mbps": tail_slope,
         "peak_queue_mbits": float(np.max(queue_total)),
+    }
+
+
+def soft_objective_metrics(trace: dict, micro_reward_scale: float) -> dict:
+    """Recover the normalized soft objective from evaluation rewards."""
+    records = list(trace.get("macro_records", ()))
+    if not records:
+        return {"soft_objective_j": float("nan")}
+    scale = max(float(micro_reward_scale), 1e-12)
+    rewards = np.asarray(
+        [float(record["average_micro_reward"]) for record in records],
+        dtype=np.float64,
+    )
+    return {"soft_objective_j": float(-np.mean(rewards) / scale)}
+
+
+def cooperative_motion_metrics(
+    trace: dict,
+    macro_period_s: float,
+    target_tolerance_m: float,
+) -> dict:
+    """Measure whether the supporting UAV reaches its commanded residual."""
+    records = list(trace.get("macro_records", ()))
+    segments: list[list[bool]] = []
+    current_key = None
+    current_hits: list[bool] = []
+    target_errors: list[float] = []
+
+    def close_segment() -> None:
+        nonlocal current_hits
+        if current_hits:
+            segments.append(current_hits)
+        current_hits = []
+
+    for record in records:
+        support = int(record.get("support_uav", -1))
+        residual = np.asarray(
+            record.get("residual_command_m", np.zeros((3, 2))),
+            dtype=np.float64,
+        )
+        if support < 0 or residual.ndim != 2 or support >= residual.shape[0]:
+            close_segment()
+            current_key = None
+            continue
+        command = residual[support]
+        if float(np.linalg.norm(command)) <= 1e-9:
+            close_segment()
+            current_key = None
+            continue
+
+        key = (
+            int(record.get("phase_index", -1)),
+            int(record.get("heavy_uav", -1)),
+            support,
+        )
+        if key != current_key:
+            close_segment()
+            current_key = key
+
+        actual_residual = (
+            np.asarray(record["uav_after_m"], dtype=np.float64)[support]
+            - np.asarray(record["centroids_after_m"], dtype=np.float64)[support]
+        )
+        error = float(np.linalg.norm(actual_residual - command))
+        target_errors.append(error)
+        current_hits.append(error <= float(target_tolerance_m))
+    close_segment()
+
+    if not target_errors:
+        return {
+            "target_occupancy_fraction": 0.0,
+            "target_reach_segment_fraction": 0.0,
+            "target_arrival_time_reached_s": 0.0,
+            "target_arrival_time_capped_s": 0.0,
+            "target_error_mean_m": 0.0,
+        }
+
+    reached_times = []
+    capped_times = []
+    reached_segments = 0
+    for hits in segments:
+        first_hit = next((index for index, hit in enumerate(hits) if hit), None)
+        if first_hit is None:
+            capped_times.append(len(hits) * float(macro_period_s))
+            continue
+        reached_segments += 1
+        arrival = (first_hit + 1) * float(macro_period_s)
+        reached_times.append(arrival)
+        capped_times.append(arrival)
+
+    all_hits = [hit for hits in segments for hit in hits]
+    return {
+        "target_occupancy_fraction": float(np.mean(all_hits)),
+        "target_reach_segment_fraction": float(
+            reached_segments / max(len(segments), 1)
+        ),
+        "target_arrival_time_reached_s": float(
+            np.mean(reached_times) if reached_times else 0.0
+        ),
+        "target_arrival_time_capped_s": float(np.mean(capped_times)),
+        "target_error_mean_m": float(np.mean(target_errors)),
     }
 
 
@@ -660,6 +757,7 @@ def write_csv(path: Path, rows: list[dict]) -> None:
 
 
 def save_trace(path: Path, trace: dict, base_env, include_users: bool) -> dict:
+    records = list(trace.get("macro_records", ()))
     payload = {
         "uav_trajectory_m": trace["uav_trajectory_m"],
         "centroid_trajectory_m": trace["centroid_trajectory_m"],
@@ -670,6 +768,23 @@ def save_trace(path: Path, trace: dict, base_env, include_users: bool) -> dict:
         "phase_flow_mbits": trace["phase_flow_mbits"],
         "total_flow_mbits": trace["total_flow_mbits"],
     }
+    if records:
+        payload.update(
+            {
+                "macro_heavy_uav": np.asarray(
+                    [record["heavy_uav"] for record in records], dtype=np.int64
+                ),
+                "macro_support_uav": np.asarray(
+                    [record["support_uav"] for record in records], dtype=np.int64
+                ),
+                "macro_switch_flag": np.asarray(
+                    [record["switch_flag"] for record in records], dtype=np.int64
+                ),
+                "macro_residual_command_m": np.stack(
+                    [record["residual_command_m"] for record in records], axis=0
+                ),
+            }
+        )
     if include_users:
         payload.update(
             {
@@ -726,6 +841,12 @@ def make_report(
                 "tail_queue_slope_mbps",
                 "average_power_w",
                 "coop_ratio",
+                "soft_objective_j",
+                "target_occupancy_fraction",
+                "target_reach_segment_fraction",
+                "target_arrival_time_reached_s",
+                "target_arrival_time_capped_s",
+                "target_error_mean_m",
             )
         }
         for policy in POLICIES
@@ -876,6 +997,19 @@ def main() -> None:
                 macro_metadata_provider=macro_policy.metadata,
             )
             result.update(queue_metrics(trace, macro_period_s))
+            result.update(
+                soft_objective_metrics(
+                    trace,
+                    float(getattr(checkpoint_args, "micro_reward_scale", 1.0)),
+                )
+            )
+            result.update(
+                cooperative_motion_metrics(
+                    trace,
+                    macro_period_s,
+                    float(args.movement_trigger_m),
+                )
+            )
             rows.append(result)
             traces_by_policy[policy_name].append(trace)
             seed_hashes[policy_name] = result["external_trace_hash"]

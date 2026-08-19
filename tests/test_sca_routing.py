@@ -102,6 +102,51 @@ class RoutingOnlySCATest(unittest.TestCase):
         self.assertEqual(getattr(env, "_sca_solve_count", 0), 1)
         self.assertGreater(getattr(env, "_sca_total_solve_seconds", 0.0), 0.0)
 
+    def test_sca_can_reactivate_a_route_from_a_simplex_boundary(self):
+        num_uavs = 3
+        local_action = np.full((2 * num_uavs, num_uavs), -1.0)
+        for priority_offset in (0, num_uavs):
+            rows = np.arange(num_uavs) + priority_offset
+            local_action[rows, np.arange(num_uavs)] = 1.0
+
+        _, info = optimize_routing_logits_SCA(
+            expected_load_mbits=np.asarray(
+                [[8.0, 2.0, 1.0], [12.0, 3.0, 2.0]],
+                dtype=np.float64,
+            ),
+            queue_high_mbits=np.asarray([100.0, 0.0, 0.0]),
+            queue_low_mbits=np.asarray([100.0, 0.0, 0.0]),
+            service_capacity_mbits=np.full(num_uavs, 5.0),
+            nominal_u2u_rate_mbps=np.asarray(
+                [
+                    [0.0, 20.0, 20.0],
+                    [20.0, 0.0, 20.0],
+                    [20.0, 20.0, 0.0],
+                ],
+                dtype=np.float64,
+            ),
+            f_max_hz=np.full(num_uavs, 10e9),
+            kappa=1e-28,
+            micro_dt=0.5,
+            tx_power=1.0,
+            diagonal_bias=0.0,
+            action_scale=1.0,
+            delay_weight_high=10.0,
+            delay_weight_low=1.0,
+            omega_D=0.9,
+            omega_E=0.1,
+            delay_norm=10.0,
+            energy_norm=14.0,
+            action_init=local_action.reshape(-1),
+            max_iter=5,
+            proximal_weight=1e-4,
+        )
+
+        rho = np.asarray(info["rho"]).reshape(2, num_uavs, num_uavs)
+        self.assertGreater(float(np.sum(rho[:, 0, 1:])), 0.05)
+        objective = np.asarray(info["objective_history"], dtype=np.float64)
+        self.assertLess(objective[-1], objective[0])
+
 
 if __name__ == "__main__":
     unittest.main()

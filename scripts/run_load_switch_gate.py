@@ -387,6 +387,7 @@ def run_gate_episode(
     load_switch_schedule=None,
     macro_policy=None,
     macro_metadata_provider=None,
+    record_macro_states=False,
 ):
     base_env = env.env
     if load_switch_schedule is None:
@@ -441,6 +442,7 @@ def run_gate_episode(
     total_u2g_active_time_s = 0.0
     total_u2u_active_time_s = 0.0
     total_flow = np.zeros((base_env.N, base_env.N), dtype=np.float64)
+    coop_flow = np.zeros((base_env.N, base_env.N), dtype=np.float64)
     phase_flow = np.zeros(
         (len(phase_loads), base_env.N, base_env.N),
         dtype=np.float64,
@@ -450,6 +452,16 @@ def run_gate_episode(
     transition_numerator_s = 0.0
     transition_denominator = 0.0
     micro_decision_count = 0
+    proxy_step_count = 0
+    cost_delay_sum = 0.0
+    cost_delay_raw_sum = 0.0
+    cost_energy_sum = 0.0
+    cost_energy_raw_sum = 0.0
+    overflow_cost_sum = 0.0
+    drift_cost_sum = 0.0
+    objective_cost_sum = 0.0
+    delay_clip_count = 0
+    energy_clip_count = 0
     macro_records = []
     uav_trajectory = [np.asarray(base_env.uav_coords, dtype=np.float64).copy()]
     centroid_trajectory = [
@@ -588,6 +600,30 @@ def run_gate_episode(
             done = bool(frame["done"])
             for raw_state, info in zip(frame["raw_states"], frame["infos"]):
                 total_service_energy_j += float(info.get("total_energy", 0.0))
+                delay_norm = max(float(getattr(env, "J_delay_norm", 10.0)), 1e-12)
+                energy_norm = max(float(getattr(env, "J_energy_norm", 14.0)), 1e-12)
+                delay_raw = float(
+                    info.get("task_holding_cost_weighted", 0.0)
+                ) / delay_norm
+                energy_raw = float(
+                    info.get("controllable_energy_step_j", 0.0)
+                ) / energy_norm
+                delay_clipped = float(info.get("cost_delay", 0.0))
+                energy_clipped = float(info.get("cost_energy", 0.0))
+                proxy_step_count += 1
+                cost_delay_sum += delay_clipped
+                cost_delay_raw_sum += delay_raw
+                cost_energy_sum += energy_clipped
+                cost_energy_raw_sum += energy_raw
+                overflow_cost_sum += float(info.get("overflow_cost", 0.0))
+                drift_cost_sum += float(info.get("drift_cost", 0.0))
+                objective_cost_sum += float(info.get("J_step", 0.0))
+                delay_clip_count += int(
+                    not np.isclose(delay_clipped, delay_raw, atol=1e-12, rtol=1e-12)
+                )
+                energy_clip_count += int(
+                    not np.isclose(energy_clipped, energy_raw, atol=1e-12, rtol=1e-12)
+                )
                 cpu_step_energy = np.asarray(
                     info.get("energy_comp_per_uav", np.zeros(base_env.N)),
                     dtype=np.float64,
@@ -613,6 +649,10 @@ def run_gate_episode(
                     ),
                     dtype=np.float64,
                 )
+                coop_flow = np.asarray(
+                    info.get("coop_flow_mbits", coop_flow),
+                    dtype=np.float64,
+                ).copy()
                 u2g_time = float(
                     np.sum(
                         np.asarray(
@@ -725,8 +765,7 @@ def run_gate_episode(
         macro_communication_energy_per_uav_j = (
             macro_uplink_energy_per_uav_j + macro_u2u_energy_per_uav_j
         )
-        macro_records.append(
-            {
+        macro_record = {
                 "seed": int(seed),
                 "policy": policy_name,
                 "macro_index": int(macro_index),
@@ -791,7 +830,11 @@ def run_gate_episode(
                 "td3_replay_reward": float(td3_replay_reward),
                 "global_state_dim": int(np.asarray(global_state).size),
             }
-        )
+        if record_macro_states:
+            macro_record["global_state"] = np.asarray(
+                global_state, dtype=np.float32
+            ).reshape(-1).copy()
+        macro_records.append(macro_record)
         uav_trajectory.append(uav_after)
         centroid_trajectory.append(centroids_after)
         trajectory_phases.append(phase_index)
@@ -830,12 +873,14 @@ def run_gate_episode(
     component_energy_j = float(np.sum(component_energy_per_uav_j))
     closure_residual_j = float(total_energy_j - component_energy_j)
     cross_flow = float(total_flow.sum() - np.trace(total_flow))
-    flow_sum = float(total_flow.sum())
+    coop_cross_flow = float(coop_flow.sum() - np.trace(coop_flow))
+    coop_flow_sum = float(coop_flow.sum())
     transition_delay_ms = (
         1000.0 * transition_numerator_s / transition_denominator
         if transition_denominator > 0.0
         else float("nan")
     )
+    proxy_denominator = max(float(proxy_step_count), 1.0)
     result = {
         "seed": int(seed),
         "policy": policy_name,
@@ -880,12 +925,23 @@ def run_gate_episode(
         ),
         "u2g_active_time_s": float(total_u2g_active_time_s),
         "u2u_active_time_s": float(total_u2u_active_time_s),
-        "coop_ratio": float(cross_flow / max(flow_sum, 1e-12)),
+        "coop_ratio": float(coop_cross_flow / max(coop_flow_sum, 1e-12)),
+        "coop_flow_total_mbits": coop_flow_sum,
         "cross_flow_mbits": cross_flow,
         "task_arrived_count": int(task_stats.get("task_arrived_count", 0)),
         "task_completed_count": int(task_stats.get("task_completed_count", 0)),
         "external_trace_hash": external_hasher.hexdigest(),
         "micro_decision_count": int(micro_decision_count),
+        "proxy_step_count": int(proxy_step_count),
+        "cost_delay_mean": float(cost_delay_sum / proxy_denominator),
+        "cost_delay_raw_mean": float(cost_delay_raw_sum / proxy_denominator),
+        "cost_energy_mean": float(cost_energy_sum / proxy_denominator),
+        "cost_energy_raw_mean": float(cost_energy_raw_sum / proxy_denominator),
+        "overflow_cost_mean": float(overflow_cost_sum / proxy_denominator),
+        "drift_cost_mean": float(drift_cost_sum / proxy_denominator),
+        "objective_cost_mean": float(objective_cost_sum / proxy_denominator),
+        "delay_clip_fraction": float(delay_clip_count / proxy_denominator),
+        "energy_clip_fraction": float(energy_clip_count / proxy_denominator),
         "elapsed_s": float(time.perf_counter() - started_at),
     }
     for uav_index in range(base_env.N):
@@ -963,6 +1019,7 @@ RAW_FIELDNAMES = (
     "u2g_active_time_s",
     "u2u_active_time_s",
     "coop_ratio",
+    "coop_flow_total_mbits",
     "cross_flow_mbits",
     "task_arrived_count",
     "task_completed_count",

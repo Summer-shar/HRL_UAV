@@ -4,6 +4,7 @@ from gymnasium import spaces
 
 from .env import UAV_MEC_Env
 from .routing import centered_stick_breaking_to_simplex
+from .routing import priority_gated_to_simplex
 from .routing import project_rows_to_simplex
 
 
@@ -23,6 +24,35 @@ def normalized_power_residual(energy_ratio):
     if values.ndim == 0:
         return float(residual)
     return residual
+
+
+def cooperation_aligned_basis(centroids, uav_coords, offered_loads):
+    """Return an orthonormal action basis aligned with the active load roles.
+
+    Non-heavy UAVs point their first axis toward the current heavy UAV. The
+    heavy UAV points toward the lightest UAV. The second axis is perpendicular,
+    so the transform preserves the complete two-dimensional action space.
+    """
+    centroids = np.asarray(centroids, dtype=np.float64)
+    uav_coords = np.asarray(uav_coords, dtype=np.float64)
+    offered_loads = np.asarray(offered_loads, dtype=np.float64).reshape(-1)
+    if centroids.shape != uav_coords.shape or centroids.ndim != 2:
+        raise ValueError("centroids and uav_coords must have matching (N, 2) shapes")
+    if offered_loads.size != centroids.shape[0]:
+        raise ValueError("offered_loads must contain one value per UAV")
+
+    heavy = int(np.argmax(offered_loads))
+    light = int(np.argmin(offered_loads))
+    partners = np.full(centroids.shape[0], heavy, dtype=np.int64)
+    partners[heavy] = light
+    parallel = uav_coords[partners] - centroids
+    norms = np.linalg.norm(parallel, axis=1, keepdims=True)
+    fallback = np.zeros_like(parallel)
+    fallback[:, 0] = 1.0
+    parallel = np.where(norms > 1e-8, parallel / np.maximum(norms, 1e-8), fallback)
+    perpendicular = np.stack((-parallel[:, 1], parallel[:, 0]), axis=1)
+    basis = np.stack((parallel, perpendicular), axis=2)
+    return basis.astype(np.float32), partners
 
 
 class HRL_Wrapper(gym.Env):
@@ -54,6 +84,7 @@ class HRL_Wrapper(gym.Env):
         micro_action_scale=1.0,
         micro_action_encoding="projected_full",
         micro_stick_breaking_scale=4.0,
+        micro_priority_weight_ratio=10.0,
         micro_reward_scale=10.0,
         micro_state_mode="pressure",
         u2u_state_representation="nominal_rate",
@@ -173,10 +204,11 @@ class HRL_Wrapper(gym.Env):
         if self.micro_action_encoding not in (
             "projected_full",
             "stick_breaking",
+            "priority_gated",
         ):
             raise ValueError(
-                "micro_action_encoding must be 'projected_full' or "
-                "'stick_breaking'."
+                "micro_action_encoding must be 'projected_full', "
+                "'stick_breaking', or 'priority_gated'."
             )
         self.micro_stick_breaking_scale = float(
             micro_stick_breaking_scale
@@ -187,6 +219,16 @@ class HRL_Wrapper(gym.Env):
         ):
             raise ValueError(
                 "micro_stick_breaking_scale must be finite and positive."
+            )
+        self.micro_priority_weight_ratio = float(
+            micro_priority_weight_ratio
+        )
+        if (
+            not np.isfinite(self.micro_priority_weight_ratio)
+            or self.micro_priority_weight_ratio <= 0.0
+        ):
+            raise ValueError(
+                "micro_priority_weight_ratio must be finite and positive."
             )
         self.micro_holding_weight = 1.0
         self.micro_queue_weight = 0.0
@@ -373,10 +415,11 @@ class HRL_Wrapper(gym.Env):
             "delta",
             "waypoint",
             "centroid_waypoint",
+            "cooperation_waypoint",
         ):
             raise ValueError(
                 "macro_action_mode must be 'polar', 'delta', 'waypoint', "
-                "or 'centroid_waypoint'."
+                "'centroid_waypoint', or 'cooperation_waypoint'."
             )
         self.macro_waypoint_radius_m = float(macro_waypoint_radius_m)
         self.macro_waypoint_tolerance_m = float(macro_waypoint_tolerance_m)
@@ -418,7 +461,10 @@ class HRL_Wrapper(gym.Env):
 
         micro_action_dim = (
             2 * self.N * (self.N - 1)
-            if self.micro_action_encoding == "stick_breaking"
+            if self.micro_action_encoding in (
+                "stick_breaking",
+                "priority_gated",
+            )
             else 2 * self.N * self.N
         )
         self.micro_action_space = spaces.Box(
@@ -1526,6 +1572,23 @@ class HRL_Wrapper(gym.Env):
                 raw_state_before["weighted_centroids"],
                 dtype=np.float32,
             )
+            cooperation_basis = None
+            cooperation_partners = None
+            if self.macro_action_mode == "cooperation_waypoint":
+                offered_loads = np.asarray(
+                    self.env.zone_expected_offered_load_mbps,
+                    dtype=np.float32,
+                )
+                cooperation_basis, cooperation_partners = cooperation_aligned_basis(
+                    centroids,
+                    raw_state_before["uav_coords"],
+                    offered_loads,
+                )
+                bounded_action = np.einsum(
+                    "nij,nj->ni",
+                    cooperation_basis,
+                    bounded_action,
+                ).astype(np.float32)
             waypoint_targets = np.clip(
                 centroids + bounded_action * self.macro_waypoint_radius_m,
                 0.0,
@@ -1678,6 +1741,9 @@ class HRL_Wrapper(gym.Env):
             mac_info["macro_waypoint_remaining_m"] = (
                 waypoint_remaining[:, 0].copy()
             )
+        if self.macro_action_mode == "cooperation_waypoint":
+            mac_info["cooperation_action_basis"] = cooperation_basis.copy()
+            mac_info["cooperation_action_partners"] = cooperation_partners.copy()
 
         return self.get_macro_state(), h_flying_penalty, mac_info
 
@@ -1905,6 +1971,26 @@ class HRL_Wrapper(gym.Env):
                         axis=-1,
                         keepdims=True,
                     )
+            elif (
+                self.micro_action_encoding == "priority_gated"
+                and flat_action.size == latent_action_dim
+            ):
+                latent_action = np.clip(
+                    flat_action.reshape(2, self.N, self.N - 1),
+                    -1.0,
+                    1.0,
+                )
+                split_ratios = priority_gated_to_simplex(
+                    latent_action,
+                    priority_local_biases=np.asarray(
+                        [
+                            np.log(self.micro_priority_weight_ratio),
+                            0.0,
+                        ],
+                        dtype=np.float64,
+                    ),
+                    logit_scale=self.micro_stick_breaking_scale,
+                )
             elif flat_action.size == full_action_dim:
                 action_matrix = (
                     flat_action.reshape(2, self.N, self.N)
@@ -1921,7 +2007,7 @@ class HRL_Wrapper(gym.Env):
             else:
                 raise ValueError(
                     f"Micro action has {flat_action.size} elements; expected "
-                    f"{latent_action_dim} for stick_breaking or "
+                    f"{latent_action_dim} for a latent routing encoding or "
                     f"{full_action_dim} for a full routing matrix."
                 )
             split_ratios_high = split_ratios[0]

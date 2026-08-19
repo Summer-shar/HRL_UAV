@@ -5,6 +5,7 @@ import numpy as np
 from hrl_uav.env import UAV_MEC_Env
 from hrl_uav.hrl_wrappers import HRL_Wrapper
 from hrl_uav.routing import centered_stick_breaking_to_simplex
+from hrl_uav.routing import priority_gated_to_simplex
 from hrl_uav.routing import project_rows_to_simplex
 
 
@@ -257,6 +258,48 @@ class TcomCommunicationModelTest(unittest.TestCase):
             np.sum(projected, axis=1),
             np.ones(3),
             atol=1e-12,
+        )
+
+    def test_priority_gated_routing_uses_weight_derived_local_prior(self):
+        latent = np.zeros((2, 3, 2), dtype=np.float64)
+        routed = priority_gated_to_simplex(
+            latent,
+            priority_local_biases=[np.log(10.0), 0.0],
+            logit_scale=4.0,
+        )
+        np.testing.assert_allclose(
+            np.sum(routed, axis=-1),
+            np.ones((2, 3)),
+            atol=1e-12,
+        )
+        np.testing.assert_allclose(
+            np.diagonal(routed[0]),
+            np.full(3, 10.0 / 11.0),
+            atol=1e-12,
+        )
+        np.testing.assert_allclose(
+            np.diagonal(routed[1]),
+            np.full(3, 0.5),
+            atol=1e-12,
+        )
+        self.assertTrue(np.all(routed >= 0.0))
+
+    def test_priority_gated_routing_remains_actor_controllable(self):
+        latent = np.zeros((2, 3, 2), dtype=np.float64)
+        latent[0, :, 0] = -1.0
+        offload = priority_gated_to_simplex(
+            latent,
+            priority_local_biases=[np.log(10.0), 0.0],
+            logit_scale=4.0,
+        )
+        latent[0, :, 0] = 1.0
+        local = priority_gated_to_simplex(
+            latent,
+            priority_local_biases=[np.log(10.0), 0.0],
+            logit_scale=4.0,
+        )
+        self.assertTrue(
+            np.all(np.diagonal(offload[0]) < np.diagonal(local[0]))
         )
 
     def test_joint_flight_respects_five_meter_separation(self):

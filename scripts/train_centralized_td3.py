@@ -46,15 +46,18 @@ from train_centralized_macro import SAC_RECENT_WINDOW
 from train_centralized_macro import SAC_GAMMA
 from train_centralized_macro import configure_macro_objective
 from train_centralized_macro import compose_smdp_boundary_transition
+from train_centralized_macro import compose_support_preserving_sca_residual
 from train_centralized_macro import checkpoint_rank
 from train_centralized_macro import configure_sac_learning_rates
 from train_centralized_macro import load_checkpoint_energy_dual
 from train_centralized_macro import load_sac_replay
+from train_centralized_macro import optimizer_update_count
 from train_centralized_macro import MACRO_REWARD_DIAGNOSTIC_SOURCES
 from train_centralized_macro import MICRO_REWARD_DIAGNOSTIC_SOURCES
 from train_centralized_macro import project_unit_disk_np
 from train_centralized_macro import initialize_reward_diagnostics
 from train_centralized_macro import initialize_micro_reward_diagnostics
+from train_centralized_macro import initialize_sac_residual_actor
 from train_centralized_macro import record_micro_reward_diagnostics
 from train_centralized_macro import record_reward_diagnostics
 from train_centralized_macro import power_constraint_target_w
@@ -1222,6 +1225,26 @@ def parse_args():
         help="Checkpoint used to initialize the lower SAC policy",
     )
     parser.add_argument(
+        "--macro_init_ckpt",
+        type=str,
+        default="",
+        help="Checkpoint used to warm-start the macro TD3 networks",
+    )
+    parser.add_argument(
+        "--macro_init_critics",
+        type=int,
+        choices=[0, 1],
+        default=1,
+        help="Also warm-start the macro delay and energy Critics",
+    )
+    parser.add_argument(
+        "--resume_macro_optimizer",
+        type=int,
+        choices=[0, 1],
+        default=0,
+        help="Restore macro optimizer states instead of resetting momentum",
+    )
+    parser.add_argument(
         "--micro_replay",
         type=str,
         default="",
@@ -1247,6 +1270,15 @@ def parse_args():
         choices=[0, 1],
         default=1,
         help="Restore lower SAC optimizer and entropy states",
+    )
+    parser.add_argument(
+        "--train_micro_during_macro_warmup",
+        type=int,
+        choices=[0, 1],
+        default=0,
+        help=(
+            "Keep lower SAC trainable while the macro replay buffer is warming up"
+        ),
     )
     parser.add_argument("--td3_hidden_dim", type=int, default=256)
     parser.add_argument("--td3_actor_lr", type=float, default=3e-4)
@@ -1613,16 +1645,25 @@ def td3_exploration_scope(macro_action_mode, persistence="auto"):
     if persistence != "auto":
         raise ValueError(f"Unsupported exploration persistence: {persistence}")
     mode = str(macro_action_mode).strip().lower()
-    if mode in ("waypoint", "centroid_waypoint"):
+    if mode in ("waypoint", "centroid_waypoint", "cooperation_waypoint"):
         return "episode"
     if mode == "delta":
         return "macro_step"
     raise ValueError(f"Unsupported macro action mode: {macro_action_mode}")
 
 
-def joint_sac_training_enabled(use_sac, freeze_micro, macro_warmup):
-    """Fine-tune SAC only after the macro replay warm-up is complete."""
-    return bool(use_sac and not freeze_micro and not macro_warmup)
+def joint_sac_training_enabled(
+    use_sac,
+    freeze_micro,
+    macro_warmup,
+    train_during_macro_warmup=False,
+):
+    """Keep legacy staged behavior unless synchronous training is requested."""
+    return bool(
+        use_sac
+        and not freeze_micro
+        and (train_during_macro_warmup or not macro_warmup)
+    )
 
 
 def macro_power_violation_penalty(energy_ratio, weight):
@@ -1733,9 +1774,70 @@ def load_micro_checkpoint(
                 "sac_entropy_optimizer",
             ),
         )
+        restored_optimizer_keys = []
         for optimizer, key in optimizer_states:
             if optimizer is not None and key in checkpoint:
                 optimizer.load_state_dict(checkpoint[key])
+                restored_optimizer_keys.append(key)
+        if restored_optimizer_keys:
+            print(
+                "[INFO] Restored lower SAC optimizer states -> "
+                + ", ".join(restored_optimizer_keys)
+            )
+    return resolved
+
+
+def load_macro_checkpoint(
+    path,
+    agent,
+    load_critics=True,
+    load_optimizers=False,
+):
+    resolved = resolve_project_path(path)
+    if not resolved or not os.path.isfile(resolved):
+        raise FileNotFoundError(f"Macro checkpoint not found: {resolved}")
+    checkpoint = torch_load_checkpoint(resolved)
+    actor_state = checkpoint.get("macro_actor_raw", checkpoint.get("macro_actor"))
+    if actor_state is None:
+        raise KeyError("Macro checkpoint is missing macro_actor")
+
+    agent.actor.load_state_dict(actor_state)
+    agent.actor_target.load_state_dict(actor_state)
+    if agent.actor_ema is not None:
+        agent.actor_ema.load_state_dict(actor_state)
+
+    if load_critics:
+        delay_state = checkpoint.get(
+            "macro_delay_critic",
+            checkpoint.get("macro_critic"),
+        )
+        energy_state = checkpoint.get("macro_energy_critic")
+        if delay_state is None or energy_state is None:
+            raise KeyError("Macro checkpoint is missing Critic weights")
+        agent.critic.load_state_dict(delay_state)
+        agent.critic_target.load_state_dict(delay_state)
+        agent.energy_critic.load_state_dict(energy_state)
+        agent.energy_critic_target.load_state_dict(energy_state)
+
+    if load_optimizers:
+        optimizer_states = (
+            (agent.actor_optimizer, "macro_actor_optimizer"),
+            (
+                agent.critic_optimizer,
+                "macro_delay_critic_optimizer",
+            ),
+            (
+                agent.energy_critic_optimizer,
+                "macro_energy_critic_optimizer",
+            ),
+        )
+        for optimizer, key in optimizer_states:
+            if key in checkpoint:
+                optimizer.load_state_dict(checkpoint[key])
+
+    # A warm start is a new training protocol. Resetting this counter makes
+    # actor_warmup_updates apply to the new replay distribution.
+    agent.update_count = 0
     return resolved
 
 
@@ -1864,7 +1966,7 @@ def render_td3_checkpoint_trajectory(
         )
         micro_actor.action_net.load_state_dict(checkpoint["sac_actor"])
         micro_actor.action_net.eval()
-        micro_policy = sac_micro_policy(micro_actor)
+        micro_policy = sac_micro_policy(micro_actor, checkpoint_args)
     else:
         micro_policy = lambda policy_env, _eval_mode: np.zeros(
             policy_env.micro_action_space.shape[0],
@@ -1947,6 +2049,8 @@ def main():
     sac_state_dim = int(env.sac_obs_dim)
     sac_action_dim = int(env.micro_action_space.shape[0])
     sac_actor = SAC_Actor(sac_state_dim, sac_action_dim) if use_sac else None
+    if use_sac:
+        initialize_sac_residual_actor(sac_actor, args)
     sac_critic = SAC_Critic(sac_state_dim, sac_action_dim) if use_sac else None
     sac_entropy = (
         SAC_Entropy(
@@ -2043,6 +2147,19 @@ def main():
         args,
         device,
     )
+    if args.macro_init_ckpt:
+        loaded_macro_path = load_macro_checkpoint(
+            args.macro_init_ckpt,
+            agent,
+            load_critics=bool(args.macro_init_critics),
+            load_optimizers=bool(args.resume_macro_optimizer),
+        )
+        print(
+            "[INFO] Warm-started macro TD3 "
+            f"(critics={bool(args.macro_init_critics)}, "
+            f"optimizers={bool(args.resume_macro_optimizer)}) "
+            f"-> {loaded_macro_path}"
+        )
     replay_buffer = MacroReplayBuffer(
         global_state_dim,
         macro_action_dim,
@@ -2053,7 +2170,7 @@ def main():
         ),
     )
     eval_micro_policy = (
-        sac_micro_policy(sac_actor)
+        sac_micro_policy(sac_actor, args)
         if use_sac
         else lambda policy_env, _eval_mode: np.zeros(
             policy_env.micro_action_space.shape[0],
@@ -2067,8 +2184,12 @@ def main():
     dual_power_history = deque(maxlen=int(args.td3_dual_power_window))
     total_macro_steps = 0
     sac_trainable_micro_steps = 0
-    sac_critic_update_count = 0
-    sac_actor_update_count = 0
+    sac_critic_update_count = (
+        optimizer_update_count(sac_critic.optimizer) if use_sac else 0
+    )
+    sac_actor_update_count = (
+        optimizer_update_count(sac_actor.optimizer) if use_sac else 0
+    )
     ckpt_dir = results_dirs["ckpt_dir"]
     os.makedirs(ckpt_dir, exist_ok=True)
     train_csv = os.path.join(results_dirs["results_dir"], "train_td3.csv")
@@ -2376,13 +2497,22 @@ def main():
                 frozen_deterministic = (
                     args.freeze_micro and not args.frozen_micro_stochastic
                 )
-                micro_action = (
+                policy_action = (
                     sac_actor.choose_action(
                         sac_obs,
                         deterministic=frozen_deterministic,
                     )
                     if use_sac
                     else np.zeros(sac_action_dim, dtype=np.float32)
+                )
+                micro_action = (
+                    compose_support_preserving_sca_residual(
+                        env,
+                        policy_action,
+                        args,
+                    )
+                    if use_sac
+                    else policy_action
                 )
                 frame = env.step_resource_frame(micro_action)
                 ep_micro_reward += float(frame["reward_sum"])
@@ -2411,6 +2541,7 @@ def main():
                     use_sac,
                     args.freeze_micro,
                     warmup_episode,
+                    bool(args.train_micro_during_macro_warmup),
                 )
                 is_last_service_frame = (
                     service_frame_index == env.env.service_resource_frames - 1
@@ -2421,7 +2552,7 @@ def main():
                         pending_sac_transition = {
                             "state": sac_obs.copy(),
                             "action": np.asarray(
-                                micro_action,
+                                policy_action,
                                 dtype=np.float32,
                             ).copy(),
                             "frame": frame,
@@ -2437,7 +2568,7 @@ def main():
                         store_sac_replay_transition(
                             sac_memory,
                             sac_obs,
-                            micro_action,
+                            policy_action,
                             frame[reward_key],
                             next_service_state,
                             args.objective_mode,
@@ -2450,7 +2581,7 @@ def main():
 
                 if (
                     should_train_sac
-                    and sac_memory.memory_counter > SAC_MEMORY_WARMUP
+                    and sac_memory.memory_counter > int(args.sac_memory_warmup)
                     and sac_trainable_micro_steps % args.sac_update_freq == 0
                 ):
                     next_sac_critic_update_count = (

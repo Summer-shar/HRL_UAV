@@ -21,6 +21,7 @@ from compare_common import resolve_project_path
 from compare_common import torch_load_checkpoint
 from hrl_uav.agents.sac_agent import Actor as SACActor
 import hrl_uav.agents.sac_agent as sac_agent_mod
+from hrl_uav.hrl_wrappers import cooperation_aligned_basis
 from train_centralized_macro import configure_macro_objective
 from train_centralized_macro import project_unit_disk_np
 from train_centralized_macro import sac_micro_policy
@@ -128,6 +129,27 @@ def target_centroid_waypoint_action(
         (targets - centroid_array) / max(float(waypoint_radius_m), 1e-8)
     )
     return project_unit_disk_np(normalized_action.astype(np.float32))
+
+
+def target_centroid_relative_action(env, targets, centroids):
+    """Encode a world-frame centroid residual for the configured action mode."""
+    world_action = (
+        np.asarray(targets, dtype=np.float64)
+        - np.asarray(centroids, dtype=np.float64)
+    ) / max(float(env.macro_waypoint_radius_m), 1e-8)
+    if env.macro_action_mode == "cooperation_waypoint":
+        base_env = getattr(env, "env", env)
+        basis, _ = cooperation_aligned_basis(
+            centroids,
+            base_env.get_raw_state()["uav_coords"],
+            base_env.zone_expected_offered_load_mbps,
+        )
+        world_action = np.einsum(
+            "nij,ni->nj",
+            basis,
+            world_action,
+        )
+    return project_unit_disk_np(world_action.astype(np.float32))
 
 
 def uplink_reference_objective_and_gradient(
@@ -442,11 +464,12 @@ def make_uplink_reference_policy(
                 env.macro_waypoint_radius_m,
             )
         raw_state = base_env.get_raw_state()
-        if env.macro_action_mode == "centroid_waypoint":
-            return target_centroid_waypoint_action(
-                targets,
-                raw_state["weighted_centroids"],
-                env.macro_waypoint_radius_m,
+        if env.macro_action_mode in (
+            "centroid_waypoint",
+            "cooperation_waypoint",
+        ):
+            return target_centroid_relative_action(
+                env, targets, raw_state["weighted_centroids"]
             )
         return target_delta_action(
             raw_state["uav_coords"],
@@ -624,11 +647,12 @@ def make_target_policy(target_positions):
                 env.macro_waypoint_radius_m,
             )
         raw_state = env.env.get_raw_state()
-        if env.macro_action_mode == "centroid_waypoint":
-            return target_centroid_waypoint_action(
-                targets,
-                raw_state["weighted_centroids"],
-                env.macro_waypoint_radius_m,
+        if env.macro_action_mode in (
+            "centroid_waypoint",
+            "cooperation_waypoint",
+        ):
+            return target_centroid_relative_action(
+                env, targets, raw_state["weighted_centroids"]
             )
         return target_delta_action(
             raw_state["uav_coords"],
@@ -705,11 +729,12 @@ def make_centroid_offset_policy(
                 env.macro_waypoint_origins,
                 env.macro_waypoint_radius_m,
             )
-        if env.macro_action_mode == "centroid_waypoint":
-            return target_centroid_waypoint_action(
-                targets,
-                raw_state["weighted_centroids"],
-                env.macro_waypoint_radius_m,
+        if env.macro_action_mode in (
+            "centroid_waypoint",
+            "cooperation_waypoint",
+        ):
+            return target_centroid_relative_action(
+                env, targets, raw_state["weighted_centroids"]
             )
         return target_delta_action(
             raw_state["uav_coords"],
@@ -742,11 +767,12 @@ def make_capacity_ordered_policy(
                 env.macro_waypoint_origins,
                 env.macro_waypoint_radius_m,
             )
-        if env.macro_action_mode == "centroid_waypoint":
-            return target_centroid_waypoint_action(
-                targets,
-                raw_state["weighted_centroids"],
-                env.macro_waypoint_radius_m,
+        if env.macro_action_mode in (
+            "centroid_waypoint",
+            "cooperation_waypoint",
+        ):
+            return target_centroid_relative_action(
+                env, targets, raw_state["weighted_centroids"]
             )
         return target_delta_action(
             raw_state["uav_coords"],
@@ -775,11 +801,12 @@ def make_uav1_centroid_override_policy(learned_policy):
                 env.macro_waypoint_origins,
                 env.macro_waypoint_radius_m,
             )
-        elif env.macro_action_mode == "centroid_waypoint":
-            centroid_action = target_centroid_waypoint_action(
-                centroid_targets,
-                centroid_targets,
-                env.macro_waypoint_radius_m,
+        elif env.macro_action_mode in (
+            "centroid_waypoint",
+            "cooperation_waypoint",
+        ):
+            centroid_action = target_centroid_relative_action(
+                env, centroid_targets, centroid_targets
             )
         else:
             centroid_action = target_delta_action(

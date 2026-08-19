@@ -45,7 +45,10 @@ def _build_zone_priority_task_bits(env) -> np.ndarray:
     )
     high = np.zeros(base_env.N, dtype=np.float64)
     low = np.zeros(base_env.N, dtype=np.float64)
-    associations = base_env.get_nearest_uav_associations()
+    # The environment uses fixed region-to-UAV ownership for U2G uploads.
+    # Keep the SCA surrogate on that same task-source definition even while
+    # the exploratory macro policy moves UAVs across Voronoi boundaries.
+    associations = np.asarray(base_env.user_allocations, dtype=np.int64)
     for source_uav in range(base_env.N):
         mask = associations == source_uav
         high[source_uav] = float(np.sum(high_per_user[mask]))
@@ -300,14 +303,15 @@ def _routing_surrogate_value_and_gradient(
     )
     grad_action = np.zeros_like(action)
     for row_idx in range(2 * num_uavs):
-        probability = rho[row_idx]
         row_gradient = grad_rho[row_idx]
-        support = probability > 1e-10
-        if np.any(support):
-            support_mean = float(np.mean(row_gradient[support]))
-            grad_action[row_idx, support] = float(action_scale) * (
-                row_gradient[support] - support_mean
-            )
+        # Use the full simplex tangent direction. Restricting this update to
+        # the current positive support makes a zeroed route absorbing: after
+        # a load switch, an overloaded UAV can never reactivate an offloaded
+        # link. Backtracking below still accepts only true surrogate descent.
+        row_mean = float(np.mean(row_gradient))
+        grad_action[row_idx] = float(action_scale) * (
+            row_gradient - row_mean
+        )
     grad_action += (
         2.0 * float(proximal_weight) * (action - anchor_action)
     )
@@ -383,6 +387,29 @@ def optimize_routing_logits_SCA(
                 2 * num_uavs,
                 num_uavs,
             ),
+            -1.0,
+            1.0,
+        )
+        # Canonicalize the previous route inside the simplex before using it
+        # as a warm start. A boundary route represented by saturated logits
+        # has a flat projection neighbourhood and cannot reactivate a zeroed
+        # link. The tiny interior floor preserves the route while restoring a
+        # valid descent direction for every destination.
+        warm_rho = _routing_simplex(
+            action,
+            num_uavs,
+            diagonal_bias,
+            action_scale,
+        )
+        interior_floor = 1e-4
+        warm_rho = np.maximum(warm_rho, interior_floor)
+        warm_rho /= np.sum(warm_rho, axis=1, keepdims=True)
+        bias = np.tile(
+            np.eye(num_uavs, dtype=np.float64),
+            (2, 1),
+        ) * float(diagonal_bias)
+        action = np.clip(
+            (warm_rho - bias) / max(float(action_scale), 1e-8),
             -1.0,
             1.0,
         )

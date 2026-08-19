@@ -385,7 +385,7 @@ def add_common_args(
     )
     parser.add_argument(
         "--micro_action_encoding",
-        choices=["projected_full", "stick_breaking"],
+        choices=["projected_full", "stick_breaking", "priority_gated"],
         default="projected_full",
         help="Continuous encoding used for the learned routing action",
     )
@@ -394,6 +394,67 @@ def add_common_args(
         type=float,
         default=4.0,
         help="Logit scale for the centered stick-breaking route encoding",
+    )
+    parser.add_argument(
+        "--micro_priority_weight_ratio",
+        type=float,
+        default=10.0,
+        help=(
+            "High-to-low delay weight ratio used only as the local-gate "
+            "prior in priority_gated routing"
+        ),
+    )
+    parser.add_argument(
+        "--micro_sca_residual_scale",
+        type=float,
+        default=0.0,
+        help=(
+            "Non-negative log-ratio scale for an SAC residual restricted to "
+            "the active-link support selected by SCA; zero disables it"
+        ),
+    )
+    parser.add_argument(
+        "--micro_sca_support_threshold",
+        type=float,
+        default=1e-6,
+        help="SCA routing share above which a link belongs to the residual support",
+    )
+    parser.add_argument(
+        "--micro_sca_residual_update_interval",
+        type=int,
+        default=1,
+        help="Resource frames between SCA support updates for residual SAC",
+    )
+    parser.add_argument(
+        "--micro_sca_residual_max_iter",
+        type=int,
+        default=3,
+        help="SCA approximation steps used to construct the residual support",
+    )
+    parser.add_argument(
+        "--micro_sca_residual_tol",
+        type=float,
+        default=1e-3,
+        help="SCA convergence tolerance used by residual SAC",
+    )
+    parser.add_argument(
+        "--micro_sca_residual_solver",
+        type=str,
+        default="CLARABEL",
+        help="Convex solver used to construct the residual support",
+    )
+    parser.add_argument(
+        "--micro_sca_residual_proximal_weight",
+        type=float,
+        default=1e-3,
+        help="SCA proximal weight used to construct the residual support",
+    )
+    parser.add_argument(
+        "--sac_zero_mean_output_init",
+        type=int,
+        choices=[0, 1],
+        default=0,
+        help="Initialize the SAC deterministic residual action at zero",
     )
     parser.add_argument(
         "--micro_reward_scale",
@@ -618,7 +679,13 @@ def add_common_args(
     parser.add_argument(
         "--macro_action_mode",
         type=str,
-        choices=["polar", "delta", "waypoint", "centroid_waypoint"],
+        choices=[
+            "polar",
+            "delta",
+            "waypoint",
+            "centroid_waypoint",
+            "cooperation_waypoint",
+        ],
         default="polar",
         help="Macro action interpretation in HRL_Wrapper",
     )
@@ -681,6 +748,12 @@ def add_common_args(
         "--sac_batch_size",
         type=int,
         default=256,
+        help=argparse.SUPPRESS,
+    )
+    parser.add_argument(
+        "--sac_memory_warmup",
+        type=int,
+        default=1000,
         help=argparse.SUPPRESS,
     )
     parser.add_argument(
@@ -915,6 +988,9 @@ def make_env_from_args(
         ),
         micro_stick_breaking_scale=float(
             getattr(args, "micro_stick_breaking_scale", 4.0)
+        ),
+        micro_priority_weight_ratio=float(
+            getattr(args, "micro_priority_weight_ratio", 10.0)
         ),
         micro_reward_scale=float(getattr(args, "micro_reward_scale", 10.0)),
         delay_objective_weight=float(
@@ -1210,6 +1286,33 @@ def save_scenario_metadata(
         "micro_action_scale": float(getattr(args, "micro_action_scale", 1.0)),
         "micro_stick_breaking_scale": float(
             getattr(args, "micro_stick_breaking_scale", 4.0)
+        ),
+        "micro_priority_weight_ratio": float(
+            getattr(args, "micro_priority_weight_ratio", 10.0)
+        ),
+        "micro_sca_residual_scale": float(
+            getattr(args, "micro_sca_residual_scale", 0.0)
+        ),
+        "micro_sca_support_threshold": float(
+            getattr(args, "micro_sca_support_threshold", 1e-6)
+        ),
+        "micro_sca_residual_update_interval": int(
+            getattr(args, "micro_sca_residual_update_interval", 1)
+        ),
+        "micro_sca_residual_max_iter": int(
+            getattr(args, "micro_sca_residual_max_iter", 3)
+        ),
+        "micro_sca_residual_tol": float(
+            getattr(args, "micro_sca_residual_tol", 1e-3)
+        ),
+        "micro_sca_residual_solver": str(
+            getattr(args, "micro_sca_residual_solver", "CLARABEL")
+        ),
+        "micro_sca_residual_proximal_weight": float(
+            getattr(args, "micro_sca_residual_proximal_weight", 1e-3)
+        ),
+        "sac_zero_mean_output_init": int(
+            getattr(args, "sac_zero_mean_output_init", 0)
         ),
         "micro_reward_scale": float(
             getattr(args, "micro_reward_scale", 10.0)

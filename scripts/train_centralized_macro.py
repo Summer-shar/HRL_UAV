@@ -1,5 +1,6 @@
 import argparse
 import csv
+import hashlib
 import json
 import os
 import shutil
@@ -37,8 +38,11 @@ from hrl_uav.agents.sac_agent import Actor as SAC_Actor
 from hrl_uav.agents.sac_agent import Critic as SAC_Critic
 from hrl_uav.agents.sac_agent import Entroy as SAC_Entropy
 from hrl_uav.agents.sac_agent import Memory as SAC_Memory
+from hrl_uav.hrl_wrappers import cooperation_aligned_basis
 from hrl_uav.hrl_wrappers import normalized_power_residual
 from hrl_uav.load_switching import apply_load_switch_phase
+from hrl_uav.routing import priority_gated_to_simplex
+from hrl_uav.routing import project_rows_to_simplex
 import hrl_uav.agents.ppo_agent as ppo_agent_mod
 import hrl_uav.agents.sac_agent as sac_agent_mod
 
@@ -141,6 +145,9 @@ TRAIN_LOG_FIELDS = [
     "sac_alpha",
     "sac_critic_updates_total",
     "sac_actor_updates_total",
+    "sac_warmstart_phase",
+    "sac_prefill_active",
+    "sac_actor_episode_frozen",
     "service_resource_decisions",
     "smdp_boundary_transitions",
     "smdp_boundary_duration_s",
@@ -270,12 +277,13 @@ def parse_args():
     add_common_args(parser, default_results_subdir="central_macro")
     parser.add_argument(
         "--frozen_macro_policy",
-        choices=["actor", "zero"],
+        choices=["actor", "zero", "fixed"],
         default="actor",
         help=(
             "Macro action source while --freeze_macro is active: preserve the "
-            "historical deterministic actor behavior or force zero residual "
-            "actions for centroid tracking"
+            "historical deterministic actor behavior, force zero residual "
+            "actions for centroid tracking, or hold the episode's initial "
+            "UAV positions"
         ),
     )
     parser.add_argument(
@@ -511,6 +519,33 @@ def parse_args():
         help="Checkpoint used to initialize the lower SAC policy",
     )
     parser.add_argument(
+        "--micro_actor_ckpt",
+        type=str,
+        default="",
+        help=(
+            "Checkpoint used to initialize only the lower SAC actor; critics, "
+            "entropy temperature, replay, and optimizers remain fresh"
+        ),
+    )
+    parser.add_argument(
+        "--sac_prefill_episodes",
+        type=int,
+        default=0,
+        help=(
+            "Initial episodes that collect fresh replay with the initialized "
+            "SAC actor but perform no gradient updates"
+        ),
+    )
+    parser.add_argument(
+        "--sac_actor_freeze_episodes",
+        type=int,
+        default=0,
+        help=(
+            "Initial episodes during which SAC actor and entropy updates are "
+            "disabled; critic updates start after replay prefill"
+        ),
+    )
+    parser.add_argument(
         "--micro_replay",
         type=str,
         default="",
@@ -578,6 +613,22 @@ def parse_args():
         args.macro_comm_weight = 0.0
     if args.freeze_micro and not args.micro_ckpt:
         parser.error("--freeze_micro requires --micro_ckpt")
+    if args.micro_actor_ckpt and args.micro_ckpt:
+        parser.error("--micro_actor_ckpt and --micro_ckpt are mutually exclusive")
+    if args.micro_actor_ckpt and args.micro_solver != "sac":
+        parser.error("--micro_actor_ckpt is only valid with --micro_solver sac")
+    if args.sac_prefill_episodes < 0 or args.sac_actor_freeze_episodes < 0:
+        parser.error("SAC warm-start episode counts must be non-negative")
+    if args.sac_actor_freeze_episodes < args.sac_prefill_episodes:
+        parser.error(
+            "--sac_actor_freeze_episodes must be >= --sac_prefill_episodes"
+        )
+    if (
+        args.sac_prefill_episodes > 0 or args.sac_actor_freeze_episodes > 0
+    ) and not args.micro_actor_ckpt:
+        parser.error(
+            "SAC replay prefill/calibration requires --micro_actor_ckpt"
+        )
     if args.micro_replay and args.micro_solver != "sac":
         parser.error("--micro_replay is only valid with --micro_solver sac")
     if args.freeze_macro and (
@@ -585,7 +636,9 @@ def parse_args():
     ):
         parser.error("--freeze_macro is incompatible with advisor imitation")
     if not args.freeze_macro and args.frozen_macro_policy != "actor":
-        parser.error("--frozen_macro_policy zero requires --freeze_macro")
+        parser.error(
+            "--frozen_macro_policy zero/fixed requires --freeze_macro"
+        )
     if args.macro_propulsion_energy_norm <= 0.0:
         parser.error("--macro_propulsion_energy_norm must be positive")
     if args.checkpoint_epsilon_relative < 0.0:
@@ -948,10 +1001,101 @@ def load_micro_checkpoint(
                 "sac_entropy_optimizer",
             ),
         )
+        restored_optimizer_keys = []
         for optimizer, key in optimizer_states:
             if optimizer is not None and key in checkpoint:
                 optimizer.load_state_dict(checkpoint[key])
+                restored_optimizer_keys.append(key)
+        if restored_optimizer_keys:
+            print(
+                "[INFO] Restored lower SAC optimizer states -> "
+                + ", ".join(restored_optimizer_keys)
+            )
     return resolved
+
+
+def optimizer_update_count(optimizer):
+    """Recover the completed Adam update count from a restored optimizer."""
+    steps = []
+    for state in optimizer.state.values():
+        step = state.get("step", 0)
+        if torch.is_tensor(step):
+            step = step.detach().cpu().item()
+        steps.append(int(step))
+    return max(steps, default=0)
+
+
+def load_micro_actor_checkpoint(path, sac_actor):
+    resolved = path if os.path.isabs(path) else os.path.join(PROJECT_ROOT, path)
+    if not os.path.isfile(resolved):
+        raise FileNotFoundError(f"Micro actor checkpoint not found: {resolved}")
+    checkpoint = torch_load_checkpoint(resolved)
+    if "sac_actor" not in checkpoint:
+        raise KeyError("Micro actor checkpoint is missing key: sac_actor")
+    sac_actor.action_net.load_state_dict(checkpoint["sac_actor"])
+    return resolved
+
+
+def state_dict_sha256(state_dict):
+    digest = hashlib.sha256()
+    for name, value in sorted(state_dict.items()):
+        tensor = torch.as_tensor(value).detach().cpu().contiguous()
+        digest.update(name.encode("utf-8"))
+        digest.update(str(tensor.dtype).encode("ascii"))
+        digest.update(str(tuple(tensor.shape)).encode("ascii"))
+        digest.update(tensor.numpy().tobytes())
+    return digest.hexdigest()
+
+
+def write_micro_actor_only_initialization_audit(
+    results_dir,
+    source_path,
+    sac_actor,
+    sac_critic,
+    sac_entropy,
+    args,
+):
+    source = torch_load_checkpoint(source_path)
+    source_actor_hash = state_dict_sha256(source["sac_actor"])
+    actor_hash = state_dict_sha256(sac_actor.action_net.state_dict())
+    source_critic_hash = state_dict_sha256(source["sac_critic"])
+    critic_hash = state_dict_sha256(sac_critic.critic_v.state_dict())
+    payload = {
+        "mode": "actor_only_warmstart",
+        "source_checkpoint": os.path.abspath(source_path),
+        "source_actor_sha256": source_actor_hash,
+        "initialized_actor_sha256": actor_hash,
+        "actor_matches_source": actor_hash == source_actor_hash,
+        "source_critic_sha256": source_critic_hash,
+        "fresh_critic_sha256": critic_hash,
+        "critic_matches_source": critic_hash == source_critic_hash,
+        "fresh_target_critic_sha256": state_dict_sha256(
+            sac_critic.target_critic_v.state_dict()
+        ),
+        "fresh_alpha": float(sac_entropy.alpha.detach().cpu().item()),
+        "actor_optimizer_state_entries": len(sac_actor.optimizer.state),
+        "critic_optimizer_state_entries": len(sac_critic.optimizer.state),
+        "entropy_optimizer_state_entries": len(sac_entropy.optimizer.state),
+        "prefill_episodes": int(args.sac_prefill_episodes),
+        "actor_freeze_episodes": int(args.sac_actor_freeze_episodes),
+        "replay_loaded": bool(args.micro_replay),
+    }
+    if not payload["actor_matches_source"]:
+        raise RuntimeError("Actor-only warm start failed to reproduce source actor")
+    if payload["critic_matches_source"]:
+        raise RuntimeError("Actor-only warm start unexpectedly restored source critic")
+    path = os.path.join(results_dir, "micro_warmstart_initialization.json")
+    with open(path, "w", encoding="utf-8") as audit_file:
+        json.dump(payload, audit_file, ensure_ascii=False, indent=2)
+    return path
+
+
+def micro_warmstart_phase(args, episode):
+    if int(episode) < int(args.sac_prefill_episodes):
+        return "prefill"
+    if int(episode) < int(args.sac_actor_freeze_episodes):
+        return "critic_calibration"
+    return "finetune"
 
 
 def load_checkpoint_energy_dual(path, fallback=0.0, num_uavs=None):
@@ -1198,12 +1342,47 @@ def zero_macro_policy(env, _local_obs_batch, _eval_mode):
     return np.zeros((env.N, 2), dtype=np.float32)
 
 
+def fixed_macro_action(env):
+    """Encode the action that holds each UAV at its episode start position."""
+    base_env = getattr(env, "env", env)
+    raw_state = base_env.get_raw_state()
+    centroids = np.asarray(
+        raw_state["weighted_centroids"],
+        dtype=np.float64,
+    )
+    targets = np.asarray(
+        base_env.uav_initial_positions,
+        dtype=np.float64,
+    )
+    world_action = (
+        (targets - centroids)
+        / max(float(env.macro_waypoint_radius_m), 1e-8)
+    )
+    if str(env.macro_action_mode) == "cooperation_waypoint":
+        basis, _ = cooperation_aligned_basis(
+            centroids,
+            raw_state["uav_coords"],
+            base_env.zone_expected_offered_load_mbps,
+        )
+        world_action = np.einsum(
+            "nij,ni->nj",
+            basis,
+            world_action,
+        )
+    return project_unit_disk_np(world_action)
+
+
+def fixed_macro_policy(env, _local_obs_batch, _eval_mode):
+    return fixed_macro_action(env)
+
+
 def evaluation_macro_policy(args, actor):
-    if (
-        bool(getattr(args, "freeze_macro", False))
-        and str(getattr(args, "frozen_macro_policy", "actor")) == "zero"
-    ):
-        return zero_macro_policy
+    if bool(getattr(args, "freeze_macro", False)):
+        frozen_policy = str(getattr(args, "frozen_macro_policy", "actor"))
+        if frozen_policy == "zero":
+            return zero_macro_policy
+        if frozen_policy == "fixed":
+            return fixed_macro_policy
     return centralized_macro_policy(actor, deterministic=True)
 
 
@@ -1220,11 +1399,116 @@ def configure_ppo_hover_policy(actor, args, initialize_hover=False):
     return actor
 
 
-def sac_micro_policy(actor):
+def initialize_sac_residual_actor(actor, args):
+    if not bool(int(getattr(args, "sac_zero_mean_output_init", 0))):
+        return actor
+    with torch.no_grad():
+        actor.action_net.out.weight.zero_()
+        actor.action_net.out.bias.zero_()
+    return actor
+
+
+def _priority_gated_matrix(env, latent_action):
+    if str(env.micro_action_encoding) != "priority_gated":
+        raise ValueError(
+            "SCA-guided residual SAC requires micro_action_encoding=priority_gated."
+        )
+    latent = np.asarray(latent_action, dtype=np.float64).reshape(
+        2,
+        env.N,
+        env.N - 1,
+    )
+    return priority_gated_to_simplex(
+        np.clip(latent, -1.0, 1.0),
+        priority_local_biases=np.asarray(
+            [np.log(float(env.micro_priority_weight_ratio)), 0.0],
+            dtype=np.float64,
+        ),
+        logit_scale=float(env.micro_stick_breaking_scale),
+    )
+
+
+def _sca_support_matrix(env, args, sca_policy_fn):
+    if abs(float(env.micro_diag_bias)) > 1e-12 or not np.isclose(
+        float(env.micro_action_scale),
+        1.0,
+    ):
+        raise ValueError(
+            "SCA-guided residual SAC requires micro_diag_bias=0 and "
+            "micro_action_scale=1 so the executed simplex is unambiguous."
+        )
+    env.sca_update_interval = int(
+        getattr(args, "micro_sca_residual_update_interval", 1)
+    )
+    env.sca_max_iter = int(getattr(args, "micro_sca_residual_max_iter", 3))
+    env.sca_tol = float(getattr(args, "micro_sca_residual_tol", 1e-3))
+    env.sca_solver = str(
+        getattr(args, "micro_sca_residual_solver", "CLARABEL")
+    )
+    env.sca_delay_weight = float(getattr(args, "delay_objective_weight", 0.7))
+    env.sca_energy_weight = float(getattr(args, "energy_objective_weight", 0.3))
+    env.sca_proximal_weight = float(
+        getattr(args, "micro_sca_residual_proximal_weight", 1e-3)
+    )
+    raw = np.asarray(sca_policy_fn(env, deterministic=True), dtype=np.float64)
+    return project_rows_to_simplex(raw.reshape(2, env.N, env.N))
+
+
+def compose_support_preserving_sca_residual(
+    env,
+    policy_action,
+    args,
+    sca_policy_fn=None,
+):
+    """Map a learned latent residual onto the sparse support chosen by SCA."""
+    scale = float(getattr(args, "micro_sca_residual_scale", 0.0))
+    if scale <= 0.0:
+        return np.asarray(policy_action, dtype=np.float32).reshape(-1)
+    if sca_policy_fn is None:
+        from compare_sca import solve_sca_micro_action
+
+        sca_policy_fn = solve_sca_micro_action
+    threshold = float(getattr(args, "micro_sca_support_threshold", 1e-6))
+    if threshold < 0.0 or not np.isfinite(threshold):
+        raise ValueError("micro_sca_support_threshold must be finite and non-negative.")
+
+    baseline = _sca_support_matrix(env, args, sca_policy_fn)
+    learned = _priority_gated_matrix(env, policy_action)
+    prior = _priority_gated_matrix(
+        env,
+        np.zeros(2 * env.N * (env.N - 1), dtype=np.float32),
+    )
+    support = baseline > threshold
+    missing_rows = ~np.any(support, axis=-1)
+    if np.any(missing_rows):
+        best = np.argmax(baseline, axis=-1)
+        for priority, source in np.argwhere(missing_rows):
+            support[priority, source, best[priority, source]] = True
+
+    logits = np.full_like(baseline, -np.inf, dtype=np.float64)
+    logits[support] = np.log(np.maximum(baseline[support], 1e-12)) + scale * (
+        np.log(np.maximum(learned[support], 1e-12))
+        - np.log(np.maximum(prior[support], 1e-12))
+    )
+    row_max = np.max(logits, axis=-1, keepdims=True)
+    output = np.where(support, np.exp(logits - row_max), 0.0)
+    output /= np.maximum(np.sum(output, axis=-1, keepdims=True), 1e-12)
+    return output.reshape(-1).astype(np.float32)
+
+
+def sac_micro_policy(actor, args=None, sca_policy_fn=None):
     def _policy(env, eval_mode):
-        return actor.choose_action(
+        policy_action = actor.choose_action(
             env.get_sac_state(),
             deterministic=bool(eval_mode),
+        )
+        if args is None:
+            return policy_action
+        return compose_support_preserving_sca_residual(
+            env,
+            policy_action,
+            args,
+            sca_policy_fn=sca_policy_fn,
         )
 
     return _policy
@@ -1748,7 +2032,9 @@ def main():
     use_sca = args.micro_solver == "sca"
     use_local = args.micro_solver == "local"
     sca_policy_fn = None
-    if use_sca:
+    if use_sca or (
+        use_sac and float(getattr(args, "micro_sca_residual_scale", 0.0)) > 0.0
+    ):
         from compare_sca import solve_sca_micro_action
 
         sca_policy_fn = solve_sca_micro_action
@@ -1821,6 +2107,8 @@ def main():
     sac_action_dim = env.micro_action_space.shape[0]
     sac_state_dim = env.sac_obs_dim if use_sac else None
     sac_actor = SAC_Actor(sac_state_dim, sac_action_dim) if use_sac else None
+    if use_sac:
+        initialize_sac_residual_actor(sac_actor, args)
     sac_critic = SAC_Critic(sac_state_dim, sac_action_dim) if use_sac else None
     sac_entropy = (
         SAC_Entropy(
@@ -1879,6 +2167,29 @@ def main():
                 "[INFO] Inherited energy dual -> "
                 f"{np.asarray(inherited_dual)}"
             )
+    if use_sac and args.micro_actor_ckpt:
+        loaded_actor_path = load_micro_actor_checkpoint(
+            args.micro_actor_ckpt,
+            sac_actor,
+        )
+        audit_path = write_micro_actor_only_initialization_audit(
+            results_dirs["results_dir"],
+            loaded_actor_path,
+            sac_actor,
+            sac_critic,
+            sac_entropy,
+            args,
+        )
+        print(f"[INFO] Loaded lower SAC actor only -> {loaded_actor_path}")
+        print(
+            "[INFO] Fresh critic/entropy/replay audit -> "
+            f"{audit_path}"
+        )
+        print(
+            "[INFO] SAC warm-start schedule: "
+            f"prefill={args.sac_prefill_episodes} episodes, "
+            f"actor_frozen={args.sac_actor_freeze_episodes} episodes"
+        )
     if use_sac and args.micro_replay:
         replay_path, replay_count = load_sac_replay(
             args.micro_replay,
@@ -1902,7 +2213,7 @@ def main():
         mode = "stochastic" if args.frozen_micro_stochastic else "deterministic"
         print(f"[INFO] Lower SAC frozen; training actions are {mode}")
     eval_micro_policy = (
-        sac_micro_policy(sac_actor)
+        sac_micro_policy(sac_actor, args, sca_policy_fn=sca_policy_fn)
         if use_sac
         else (
             sca_micro_policy(sca_policy_fn, args)
@@ -1947,6 +2258,11 @@ def main():
                 "[INFO] Macro PPO frozen; zero residual centroid tracking is "
                 "used and only the micro layer is trained"
             )
+        elif args.frozen_macro_policy == "fixed":
+            print(
+                "[INFO] Macro PPO frozen; UAVs hold their episode start "
+                "positions and only the micro layer is trained"
+            )
         else:
             print(
                 "[INFO] Macro PPO frozen; deterministic actor actions are used "
@@ -1967,8 +2283,12 @@ def main():
     ppo_advisor_actions = []
     ppo_advisor_weights = []
     sac_trainable_micro_steps = 0
-    sac_critic_update_count = 0
-    sac_actor_update_count = 0
+    sac_critic_update_count = (
+        optimizer_update_count(sac_critic.optimizer) if use_sac else 0
+    )
+    sac_actor_update_count = (
+        optimizer_update_count(sac_actor.optimizer) if use_sac else 0
+    )
 
     best_eval_rank = None
     eval_checkpoint_records = []
@@ -1992,6 +2312,18 @@ def main():
 
     for episode in range(args.episodes):
         episode_started = time.perf_counter()
+        sac_warmstart_phase = micro_warmstart_phase(args, episode)
+        sac_prefill_active = sac_warmstart_phase == "prefill"
+        sac_actor_episode_frozen = sac_warmstart_phase != "finetune"
+        if args.micro_actor_ckpt and episode in {
+            0,
+            int(args.sac_prefill_episodes),
+            int(args.sac_actor_freeze_episodes),
+        }:
+            print(
+                "[INFO] SAC warm-start phase -> "
+                f"episode={episode + 1}, phase={sac_warmstart_phase}"
+            )
         actor_lr = ppo_actor_lr_for_episode(args, episode)
         scheduled_log_std = ppo_log_std_for_episode(args, episode)
         set_ppo_log_std(macro_actor, scheduled_log_std)
@@ -2114,6 +2446,9 @@ def main():
             if args.freeze_macro and args.frozen_macro_policy == "zero":
                 action_flat = np.zeros((env.N * 2,), dtype=np.float32)
                 logprob = np.zeros((1,), dtype=np.float32)
+            elif args.freeze_macro and args.frozen_macro_policy == "fixed":
+                action_flat = fixed_macro_action(env).reshape(-1)
+                logprob = np.zeros((1,), dtype=np.float32)
             elif args.freeze_macro or args.macro_deterministic:
                 action_flat = macro_actor.choose_action_deterministic(global_state)
                 logprob = np.zeros((1,), dtype=np.float32)
@@ -2223,9 +2558,15 @@ def main():
                         args.freeze_micro
                         and not args.frozen_micro_stochastic
                     )
-                    micro_action = sac_actor.choose_action(
+                    policy_action = sac_actor.choose_action(
                         sac_obs,
                         deterministic=frozen_deterministic,
+                    )
+                    micro_action = compose_support_preserving_sca_residual(
+                        env,
+                        policy_action,
+                        args,
+                        sca_policy_fn=sca_policy_fn,
                     )
                 elif use_sca:
                     micro_action = eval_micro_policy(env, False)
@@ -2265,7 +2606,7 @@ def main():
                         pending_sac_transition = {
                             "state": sac_obs.copy(),
                             "action": np.asarray(
-                                micro_action,
+                                policy_action,
                                 dtype=np.float32,
                             ).copy(),
                             "frame": frame,
@@ -2281,7 +2622,7 @@ def main():
                         store_sac_replay_transition(
                             sac_memory,
                             sac_obs,
-                            micro_action,
+                            policy_action,
                             frame[reward_key],
                             next_service_state,
                             args.objective_mode,
@@ -2294,7 +2635,8 @@ def main():
 
                 if (
                     should_train_sac
-                    and sac_memory.memory_counter > SAC_MEMORY_WARMUP
+                    and not sac_prefill_active
+                    and sac_memory.memory_counter > int(args.sac_memory_warmup)
                     and sac_trainable_micro_steps % args.sac_update_freq == 0
                 ):
                     next_sac_critic_update_count = (
@@ -2302,7 +2644,8 @@ def main():
                         + max(int(args.sac_gradient_steps), 1)
                     )
                     sac_actor_ready = (
-                        next_sac_critic_update_count
+                        not sac_actor_episode_frozen
+                        and next_sac_critic_update_count
                         > int(args.sac_actor_warmup_updates)
                     )
                     sac_actor_due = (
@@ -2872,6 +3215,11 @@ def main():
                 ),
                 "sac_critic_updates_total": sac_critic_update_count,
                 "sac_actor_updates_total": sac_actor_update_count,
+                "sac_warmstart_phase": sac_warmstart_phase,
+                "sac_prefill_active": int(sac_prefill_active),
+                "sac_actor_episode_frozen": int(
+                    sac_actor_episode_frozen
+                ),
                 "service_resource_decisions": ep_service_resource_decisions,
                 "smdp_boundary_transitions": ep_smdp_boundary_transitions,
                 "smdp_boundary_duration_s": (

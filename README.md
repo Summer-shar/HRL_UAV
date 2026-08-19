@@ -1,5 +1,8 @@
 # Joint HRL for Multi-UAV MEC
 
+> 当前研究状态、已完成实验、有效结论和下一步执行边界见
+> [`CURRENT_STATUS.md`](CURRENT_STATUS.md)。该文件是当前项目口径的唯一总览。
+
 This directory is the clean experiment workspace for the two-timescale
 hierarchical controller:
 

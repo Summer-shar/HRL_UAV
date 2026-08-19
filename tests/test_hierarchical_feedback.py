@@ -10,7 +10,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from hrl_uav.hrl_wrappers import HRL_Wrapper
+from hrl_uav.hrl_wrappers import HRL_Wrapper, cooperation_aligned_basis
 from scripts.compare_common import build_micro_step_metrics
 from scripts.train_centralized_macro import sample_training_start_positions
 
@@ -137,6 +137,47 @@ class HierarchicalFeedbackTest(unittest.TestCase):
         run_macro_slot(env, np.zeros((env.N, 2), dtype=np.float32))
 
         np.testing.assert_allclose(env.env.uav_coords, expected, atol=1e-5)
+
+    def test_cooperation_waypoint_zero_action_tracks_current_centroid(self):
+        env = make_env(
+            pause_service=True,
+            macro_action_mode="cooperation_waypoint",
+        )
+        env.reset(seed=125)
+        raw_state = env.env.get_raw_state()
+        start = np.asarray(raw_state["uav_coords"], dtype=np.float64)
+        centroids = np.asarray(
+            raw_state["weighted_centroids"], dtype=np.float64
+        )
+        displacement = centroids - start
+        distance = np.linalg.norm(displacement, axis=1, keepdims=True)
+        expected = start + displacement / np.maximum(distance, 1e-12) * np.minimum(
+            distance, env.max_macro_displacement
+        )
+
+        run_macro_slot(env, np.zeros((env.N, 2), dtype=np.float32))
+
+        np.testing.assert_allclose(env.env.uav_coords, expected, atol=1e-5)
+
+    def test_cooperation_basis_points_light_uavs_toward_heavy_uav(self):
+        centroids = np.asarray(
+            [[0.0, 0.0], [10.0, 0.0], [0.0, 10.0]], dtype=np.float64
+        )
+        basis, partners = cooperation_aligned_basis(
+            centroids,
+            centroids,
+            [12.5, 5.5, 3.5],
+        )
+
+        np.testing.assert_array_equal(partners, [2, 0, 0])
+        np.testing.assert_allclose(basis[1, :, 0], [-1.0, 0.0], atol=1e-7)
+        np.testing.assert_allclose(basis[2, :, 0], [0.0, -1.0], atol=1e-7)
+        for uav_basis in basis:
+            np.testing.assert_allclose(
+                uav_basis.T @ uav_basis,
+                np.eye(2),
+                atol=1e-7,
+            )
 
     def test_strict_macro_reward_is_exact_micro_mean(self):
         env = make_env()

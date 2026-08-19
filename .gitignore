@@ -4,3 +4,9 @@ __pycache__/
 .ruff_cache/
 results/*
 !results/.gitkeep
+
+# Raw task-level exports are retained locally.  They exceed GitHub's 100 MB
+# single-file limit; reproducible summaries and figures remain versioned.
+result_archive/v44_physical_causal_chain/per_task_stage_components.csv
+result_archive/v47_seed1_causal_chain/per_task_stage_components.csv
+result_archive/**/*.pt
