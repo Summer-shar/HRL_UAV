@@ -1,0 +1,82 @@
+{
+  "status": "FAIL",
+  "selection_rule": "maximum search-set mean paired delay gain; exact ties choose the smaller offset",
+  "offset_candidates_m": [
+    60.0,
+    90.0,
+    120.0
+  ],
+  "search_seeds": "3000-3004",
+  "validation_seeds": "4000-4019",
+  "selected_offset_m": 60.0,
+  "search": [
+    {
+      "split": "search",
+      "offset_m": 60.0,
+      "delay_gain_ms": 4.789855711283576,
+      "delay_delta_ci_low_ms": -9.620813503885202,
+      "delay_delta_ci_high_ms": 0.04110208131804871,
+      "power_delta_w": 22.40121161162608,
+      "soft_j_delta": 0.010966266157085514,
+      "target_occupancy_fraction": 0.5533333333333335,
+      "target_reach_segment_fraction": 0.9,
+      "arrival_time_reached_s": 33.0,
+      "arrival_time_capped_s": 31.833333333333332,
+      "target_error_mean_m": 14.019576905278125,
+      "gate_pass": false
+    },
+    {
+      "split": "search",
+      "offset_m": 90.0,
+      "delay_gain_ms": 4.050989279443525,
+      "delay_delta_ci_low_ms": -9.927145865064144,
+      "delay_delta_ci_high_ms": 1.8251673061770957,
+      "power_delta_w": 32.37574041085156,
+      "soft_j_delta": 0.01893752984256114,
+      "target_occupancy_fraction": 0.45999999999999996,
+      "target_reach_segment_fraction": 0.85,
+      "arrival_time_reached_s": 50.0,
+      "arrival_time_capped_s": 45.5,
+      "target_error_mean_m": 23.980206303357757,
+      "gate_pass": false
+    },
+    {
+      "split": "search",
+      "offset_m": 120.0,
+      "delay_gain_ms": 2.698088648173848,
+      "delay_delta_ci_low_ms": -9.641317823157728,
+      "delay_delta_ci_high_ms": 4.245140526810031,
+      "power_delta_w": 41.93155427243232,
+      "soft_j_delta": 0.02717551134294305,
+      "target_occupancy_fraction": 0.3133333333333333,
+      "target_reach_segment_fraction": 0.85,
+      "arrival_time_reached_s": 64.0,
+      "arrival_time_capped_s": 57.16666666666667,
+      "target_error_mean_m": 39.532476721857805,
+      "gate_pass": false
+    }
+  ],
+  "validation": {
+    "split": "validation",
+    "offset_m": 60.0,
+    "delay_gain_ms": 3.636978300550851,
+    "delay_delta_ci_low_ms": -5.1234545794413116,
+    "delay_delta_ci_high_ms": -2.1505020216603903,
+    "power_delta_w": 18.205585179447553,
+    "soft_j_delta": 0.00922023989253029,
+    "target_occupancy_fraction": 0.5733333333333333,
+    "target_reach_segment_fraction": 0.95,
+    "arrival_time_reached_s": 32.666666666666664,
+    "arrival_time_capped_s": 32.08333333333333,
+    "target_error_mean_m": 12.822191836545546,
+    "gate_pass": false
+  },
+  "checks": {
+    "validation_delay_gain_gt_5ms": false,
+    "validation_delay_ci_excludes_zero": true,
+    "validation_queue_noninferior": true
+  },
+  "power_role": "soft_objective_component_and_descriptive_ledger_no_hard_gate",
+  "config": "C:\\Users\\PC\\Desktop\\HRL_UAV\\configs\\tcom_v35_reference_like_mobility.json",
+  "micro_checkpoint": "C:\\Users\\PC\\Desktop\\HRL_UAV\\results\\tcom_v33_soft_energy_random_mobility\\formal\\seed1\\micro_pretrain\\checkpoints\\final.pt"
+}

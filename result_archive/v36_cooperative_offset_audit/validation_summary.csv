@@ -1,0 +1,2 @@
+﻿split,offset_m,delay_gain_ms,delay_delta_ci_low_ms,delay_delta_ci_high_ms,power_delta_w,soft_j_delta,target_occupancy_fraction,target_reach_segment_fraction,arrival_time_reached_s,arrival_time_capped_s,target_error_mean_m,gate_pass
+validation,60.0,3.636978300550851,-5.1234545794413116,-2.1505020216603903,18.205585179447553,0.00922023989253029,0.5733333333333333,0.95,32.666666666666664,32.08333333333333,12.822191836545546,False
