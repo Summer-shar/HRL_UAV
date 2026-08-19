@@ -1,0 +1,12 @@
+{
+  "eval_seed": 8000,
+  "signatures": {
+    "joint_td3_sac": "a69c3baedcb505127837e8c5c1506bcb0686052170348803a67459c3cee77e0b",
+    "joint_ppo_sac": "287a24859ca4332f652c17dfbc93daf288f64327eb34589ba006e9a6c438b3b5",
+    "cppo_sca": "13754ab62e3a3d83bb265d2cfe675b7535262bad89ff5435b6a8c5af82f146d8",
+    "no_coop": "96916958819dca4c8d57f52485e59c6bc6ca958e161101ce6d3b0f41455a91e6",
+    "centroid_sac": "4d5385c7a41cee36766955decb3f3baf0408fbea3b156e5a65cb1e8a4e91db88",
+    "fixed_sac": "3d2880a649141d6e2f6cb5ac400c2cc198f9a2dc8a63cd85927e17761cabe481"
+  },
+  "duplicates": []
+}
