@@ -1,56 +1,33 @@
 # Joint HRL for Multi-UAV MEC
 
-> 当前研究状态、已完成实验、有效结论和下一步执行边界见
-> [`CURRENT_STATUS.md`](CURRENT_STATUS.md)。该文件是当前项目口径的唯一总览。
+本仓库研究多 UAV 协作边缘计算中的双时间尺度控制：宏观层控制 UAV waypoint 残差，
+微观层控制双优先级任务的本地处理与 U2U 转发。
 
-This directory is the clean experiment workspace for the two-timescale
-hierarchical controller:
+## 当前口径
 
-- the macro TD3 policy selects the joint displacement of three UAVs;
-- the micro SAC policy selects forwarding ratios every resource frame;
-- SAC is first warm-started with a fixed macro hover policy;
-- SAC and TD3 then continue learning in the same joint-training run;
-- realized micro-frame costs are aggregated into each macro transition.
+- [项目当前状态](CURRENT_STATUS.md)：环境、算法、历史实验和下一步边界。
+- [当前结果完整分析](CURRENT_RESULT_ANALYSIS.md)：逐层效果、收敛判断和现有图片审查。
+- 当前正式筛选配置：`configs/tcom_v49_support_residual_synchronous.json`。
+- 当前协议：`docs/v49_support_residual_synchronous_protocol.md`。
 
-The active experiment parameters are defined only in
-`configs/main_experiment.json`.
+当前 episode 为 300 s，共 30 个宏观周期；每周期包含 1 s 部署和 18 个 0.5 s 资源帧。
+用户采用 RPGM 群组移动，U2U 的 3 MHz 总带宽按活跃链路动态分配。每架 UAV 的 CPU
+上限为 10 GHz，采用高优先级优先的 `priority_demand` 规则。
 
-The current protocol uses 20 macro periods per episode. A
-`user_zone_radius_m` value of `0` disables the artificial circular zone
-boundary; users remain inside the 1000 m by 1000 m map through boundary
-reflection.
+## 当前算法
 
-## Commands
+- 上层候选：集中式 TD3 或 PPO，输出三架 UAV 相对动态业务质心的联合残差 waypoint；
+- 下层候选：SCA 先构造稀疏可行支撑集，SAC 在支撑集内学习小幅路由残差；
+- 训练协议：每种方法独立初始化，下层预训练 200 轮，随后同步训练 800 轮；
+- 当前功率口径：时延优先软目标中的能耗代价和描述性功率账本，无 280 W 聚合投影，
+  无 840 W 硬预算或动态对偶。
 
-Run the minimal smoke test:
+## 结果位置
 
-```powershell
-D:\Anaconda3\envs\pytorch-gpu\python.exe scripts\run_experiment.py `
-  --stage smoke --method joint_td3_sac
-```
+- 六方法独立训练：`result_archive/v49_independent_synchronous_seed1/`
+- 上下层控制变量审计：`result_archive/v49_macro_value_audit_seed1/`
+- 保守微观门控审计：`result_archive/v50_conservative_micro_gate_audit/`
 
-Run the seed-1 pilot after smoke succeeds:
-
-```powershell
-D:\Anaconda3\envs\pytorch-gpu\python.exe scripts\run_experiment.py `
-  --stage pilot --method joint_td3_sac --seed 1
-```
-
-Plot raw training returns and moving averages:
-
-```powershell
-D:\Anaconda3\envs\pytorch-gpu\python.exe scripts\plot_convergence.py `
-  --stage smoke --seed 1
-```
-
-## Results
-
-Every run is stored under:
-
-```text
-results/joint_hrl_v2/<stage>/seed<seed>/<method>/
-```
-
-The micro pretraining and joint training phases have separate CSV files and
-checkpoints. Old experiment outputs are intentionally not mixed into this
-workspace.
+`results/` 中的大型 checkpoint、replay 和逐任务日志默认不提交；配置、协议、汇总 CSV、
+报告与图片保存在 Git 中。当前正式结果只有一个训练种子，20 个环境种子仅用于该模型内部
+的共同随机数配对评估。
