@@ -202,9 +202,12 @@ def load_ppo_policy(checkpoint_path: Path, requested_device: str):
 
     micro_solver = str(checkpoint.get("micro_solver", args.micro_solver)).lower()
     if micro_solver == "sac":
+        micro_action_dim = int(probe_env.micro_action_space.shape[0]) + int(
+            bool(getattr(args, "micro_autonomous_residual_gate", 0))
+        )
         micro_actor = SACActor(
             int(probe_env.sac_obs_dim),
-            int(probe_env.micro_action_space.shape[0]),
+            micro_action_dim,
         )
         micro_actor.action_net.load_state_dict(checkpoint["sac_actor"])
         micro_actor.action_net.eval()
@@ -288,6 +291,10 @@ def evaluate_one(policy: dict, seed: int, *, record_trajectory: bool = False):
         "pressure_imbalance": float(metrics["pressure_imbalance"]),
         "u2g_distance_m": float(metrics["u2g"]),
         "micro_decision_mean_ms": float(metrics["micro_decision_mean_ms"]),
+        "residual_gate_mean": float(metrics.get("residual_gate_mean", 1.0)),
+        "residual_gate_std": float(metrics.get("residual_gate_std", 0.0)),
+        "residual_gate_q10": float(metrics.get("residual_gate_q10", 1.0)),
+        "residual_gate_q90": float(metrics.get("residual_gate_q90", 1.0)),
     }
     if record_trajectory:
         base = getattr(env, "env", env)

@@ -1,0 +1,1056 @@
+{
+  "scope": "Read-only macro-policy replay with the final complete-method micro policy frozen; no network updates.",
+  "evaluation_seeds": [
+    8300
+  ],
+  "method_summaries": {
+    "dynamic_centroid": {
+      "task_delay_weighted_ms": {
+        "mean": 772.9183293429121,
+        "ci95_low": 772.9183293429121,
+        "ci95_high": 772.9183293429121,
+        "std": 0.0,
+        "n": 1
+      },
+      "task_delay_high_ms": {
+        "mean": 522.6517341040477,
+        "ci95_low": 522.6517341040477,
+        "ci95_high": 522.6517341040477,
+        "std": 0.0,
+        "n": 1
+      },
+      "task_delay_low_ms": {
+        "mean": 1899.1383514875663,
+        "ci95_low": 1899.1383514875663,
+        "ci95_high": 1899.1383514875663,
+        "std": 0.0,
+        "n": 1
+      },
+      "transition_window_delay_weighted_ms": {
+        "mean": 713.052889139842,
+        "ci95_low": 713.052889139842,
+        "ci95_high": 713.052889139842,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_queue_mbits": {
+        "mean": 8.986642389250003,
+        "ci95_low": 8.986642389250003,
+        "ci95_high": 8.986642389250003,
+        "std": 0.0,
+        "n": 1
+      },
+      "terminal_queue_mbits": {
+        "mean": 13.781683352418163,
+        "ci95_low": 13.781683352418163,
+        "ci95_high": 13.781683352418163,
+        "std": 0.0,
+        "n": 1
+      },
+      "tail_queue_slope_mbps": {
+        "mean": 0.07700403083296344,
+        "ci95_low": 0.07700403083296344,
+        "ci95_high": 0.07700403083296344,
+        "std": 0.0,
+        "n": 1
+      },
+      "peak_queue_mbits": {
+        "mean": 23.459107201036268,
+        "ci95_low": 23.459107201036268,
+        "ci95_high": 23.459107201036268,
+        "std": 0.0,
+        "n": 1
+      },
+      "task_completion_rate": {
+        "mean": 0.9968704593718565,
+        "ci95_low": 0.9968704593718565,
+        "ci95_high": 0.9968704593718565,
+        "std": 0.0,
+        "n": 1
+      },
+      "soft_objective_j": {
+        "mean": 0.855176472710696,
+        "ci95_low": 0.855176472710696,
+        "ci95_high": 0.855176472710696,
+        "std": 0.0,
+        "n": 1
+      },
+      "average_power_w": {
+        "mean": 823.8533961083956,
+        "ci95_low": 823.8533961083956,
+        "ci95_high": 823.8533961083956,
+        "std": 0.0,
+        "n": 1
+      },
+      "coop_ratio": {
+        "mean": 0.5329806123407429,
+        "ci95_low": 0.5329806123407429,
+        "ci95_high": 0.5329806123407429,
+        "std": 0.0,
+        "n": 1
+      },
+      "cross_flow_mbits": {
+        "mean": 3960.2898347927226,
+        "ci95_low": 3960.2898347927226,
+        "ci95_high": 3960.2898347927226,
+        "std": 0.0,
+        "n": 1
+      },
+      "u2u_active_time_s": {
+        "mean": 470.155314662474,
+        "ci95_low": 470.155314662474,
+        "ci95_high": 470.155314662474,
+        "std": 0.0,
+        "n": 1
+      },
+      "cross_payload_efficiency_mbps": {
+        "mean": 8.423365027014164,
+        "ci95_low": 8.423365027014164,
+        "ci95_high": 8.423365027014164,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_support_heavy_distance_m": {
+        "mean": 368.2163273479034,
+        "ci95_low": 368.2163273479034,
+        "ci95_high": 368.2163273479034,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_support_heavy_nominal_rate_mbps": {
+        "mean": 3.120632341312886,
+        "ci95_low": 3.120632341312886,
+        "ci95_high": 3.120632341312886,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_all_uav_centroid_residual_m": {
+        "mean": 4.629278357994759,
+        "ci95_low": 4.629278357994759,
+        "ci95_high": 4.629278357994759,
+        "std": 0.0,
+        "n": 1
+      },
+      "heavy_to_support_flow_mbits": {
+        "mean": 2166.6772695940267,
+        "ci95_low": 2166.6772695940267,
+        "ci95_high": 2166.6772695940267,
+        "std": 0.0,
+        "n": 1
+      },
+      "support_motion_alignment_mean": {
+        "mean": -0.35863321918318225,
+        "ci95_low": -0.35863321918318225,
+        "ci95_high": -0.35863321918318225,
+        "std": 0.0,
+        "n": 1
+      },
+      "support_toward_fraction": {
+        "mean": 0.3448275862068966,
+        "ci95_low": 0.3448275862068966,
+        "ci95_high": 0.3448275862068966,
+        "std": 0.0,
+        "n": 1
+      },
+      "residual_gate_mean": {
+        "mean": 0.7010569422057381,
+        "ci95_low": 0.7010569422057381,
+        "ci95_high": 0.7010569422057381,
+        "std": 0.0,
+        "n": 1
+      }
+    },
+    "causal_support_20m": {
+      "task_delay_weighted_ms": {
+        "mean": 747.0438764957906,
+        "ci95_low": 747.0438764957906,
+        "ci95_high": 747.0438764957906,
+        "std": 0.0,
+        "n": 1
+      },
+      "task_delay_high_ms": {
+        "mean": 522.5433526011574,
+        "ci95_low": 522.5433526011574,
+        "ci95_high": 522.5433526011574,
+        "std": 0.0,
+        "n": 1
+      },
+      "task_delay_low_ms": {
+        "mean": 1755.0202757502025,
+        "ci95_low": 1755.0202757502025,
+        "ci95_high": 1755.0202757502025,
+        "std": 0.0,
+        "n": 1
+      },
+      "transition_window_delay_weighted_ms": {
+        "mean": 704.5916447120771,
+        "ci95_low": 704.5916447120771,
+        "ci95_high": 704.5916447120771,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_queue_mbits": {
+        "mean": 7.858930251276479,
+        "ci95_low": 7.858930251276479,
+        "ci95_high": 7.858930251276479,
+        "std": 0.0,
+        "n": 1
+      },
+      "terminal_queue_mbits": {
+        "mean": 8.219450916992058,
+        "ci95_low": 8.219450916992058,
+        "ci95_high": 8.219450916992058,
+        "std": 0.0,
+        "n": 1
+      },
+      "tail_queue_slope_mbps": {
+        "mean": 0.02446179585605686,
+        "ci95_low": 0.02446179585605686,
+        "ci95_high": 0.02446179585605686,
+        "std": 0.0,
+        "n": 1
+      },
+      "peak_queue_mbits": {
+        "mean": 21.716659876962076,
+        "ci95_low": 21.716659876962076,
+        "ci95_high": 21.716659876962076,
+        "std": 0.0,
+        "n": 1
+      },
+      "task_completion_rate": {
+        "mean": 0.9984352296859282,
+        "ci95_low": 0.9984352296859282,
+        "ci95_high": 0.9984352296859282,
+        "std": 0.0,
+        "n": 1
+      },
+      "soft_objective_j": {
+        "mean": 0.8312811101603015,
+        "ci95_low": 0.8312811101603015,
+        "ci95_high": 0.8312811101603015,
+        "std": 0.0,
+        "n": 1
+      },
+      "average_power_w": {
+        "mean": 827.603488472047,
+        "ci95_low": 827.603488472047,
+        "ci95_high": 827.603488472047,
+        "std": 0.0,
+        "n": 1
+      },
+      "coop_ratio": {
+        "mean": 0.5331859968564061,
+        "ci95_low": 0.5331859968564061,
+        "ci95_high": 0.5331859968564061,
+        "std": 0.0,
+        "n": 1
+      },
+      "cross_flow_mbits": {
+        "mean": 3965.745128356179,
+        "ci95_low": 3965.745128356179,
+        "ci95_high": 3965.745128356179,
+        "std": 0.0,
+        "n": 1
+      },
+      "u2u_active_time_s": {
+        "mean": 465.5846988424656,
+        "ci95_low": 465.5846988424656,
+        "ci95_high": 465.5846988424656,
+        "std": 0.0,
+        "n": 1
+      },
+      "cross_payload_efficiency_mbps": {
+        "mean": 8.517773754626806,
+        "ci95_low": 8.517773754626806,
+        "ci95_high": 8.517773754626806,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_support_heavy_distance_m": {
+        "mean": 348.2171422306115,
+        "ci95_low": 348.2171422306115,
+        "ci95_high": 348.2171422306115,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_support_heavy_nominal_rate_mbps": {
+        "mean": 3.2011658155714295,
+        "ci95_low": 3.2011658155714295,
+        "ci95_high": 3.2011658155714295,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_all_uav_centroid_residual_m": {
+        "mean": 10.387964162478784,
+        "ci95_low": 10.387964162478784,
+        "ci95_high": 10.387964162478784,
+        "std": 0.0,
+        "n": 1
+      },
+      "heavy_to_support_flow_mbits": {
+        "mean": 2173.6143875118214,
+        "ci95_low": 2173.6143875118214,
+        "ci95_high": 2173.6143875118214,
+        "std": 0.0,
+        "n": 1
+      },
+      "support_motion_alignment_mean": {
+        "mean": -0.16274143691306245,
+        "ci95_low": -0.16274143691306245,
+        "ci95_high": -0.16274143691306245,
+        "std": 0.0,
+        "n": 1
+      },
+      "support_toward_fraction": {
+        "mean": 0.4482758620689655,
+        "ci95_low": 0.4482758620689655,
+        "ci95_high": 0.4482758620689655,
+        "std": 0.0,
+        "n": 1
+      },
+      "residual_gate_mean": {
+        "mean": 0.7013495041402402,
+        "ci95_low": 0.7013495041402402,
+        "ci95_high": 0.7013495041402402,
+        "std": 0.0,
+        "n": 1
+      }
+    },
+    "learned_macro": {
+      "task_delay_weighted_ms": {
+        "mean": 761.5548266997628,
+        "ci95_low": 761.5548266997628,
+        "ci95_high": 761.5548266997628,
+        "std": 0.0,
+        "n": 1
+      },
+      "task_delay_high_ms": {
+        "mean": 523.4104046242786,
+        "ci95_low": 523.4104046242786,
+        "ci95_high": 523.4104046242786,
+        "std": 0.0,
+        "n": 1
+      },
+      "task_delay_low_ms": {
+        "mean": 1831.1374330683173,
+        "ci95_low": 1831.1374330683173,
+        "ci95_high": 1831.1374330683173,
+        "std": 0.0,
+        "n": 1
+      },
+      "transition_window_delay_weighted_ms": {
+        "mean": 706.9082352941143,
+        "ci95_low": 706.9082352941143,
+        "ci95_high": 706.9082352941143,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_queue_mbits": {
+        "mean": 8.397741711629317,
+        "ci95_low": 8.397741711629317,
+        "ci95_high": 8.397741711629317,
+        "std": 0.0,
+        "n": 1
+      },
+      "terminal_queue_mbits": {
+        "mean": 8.82687974359571,
+        "ci95_low": 8.82687974359571,
+        "ci95_high": 8.82687974359571,
+        "std": 0.0,
+        "n": 1
+      },
+      "tail_queue_slope_mbps": {
+        "mean": 0.049039936117061096,
+        "ci95_low": 0.049039936117061096,
+        "ci95_high": 0.049039936117061096,
+        "std": 0.0,
+        "n": 1
+      },
+      "peak_queue_mbits": {
+        "mean": 22.552036723276494,
+        "ci95_low": 22.552036723276494,
+        "ci95_high": 22.552036723276494,
+        "std": 0.0,
+        "n": 1
+      },
+      "task_completion_rate": {
+        "mean": 0.9982116910696323,
+        "ci95_low": 0.9982116910696323,
+        "ci95_high": 0.9982116910696323,
+        "std": 0.0,
+        "n": 1
+      },
+      "soft_objective_j": {
+        "mean": 0.8437165127609774,
+        "ci95_low": 0.8437165127609774,
+        "ci95_high": 0.8437165127609774,
+        "std": 0.0,
+        "n": 1
+      },
+      "average_power_w": {
+        "mean": 824.3574522283269,
+        "ci95_low": 824.3574522283269,
+        "ci95_high": 824.3574522283269,
+        "std": 0.0,
+        "n": 1
+      },
+      "coop_ratio": {
+        "mean": 0.5329326792583584,
+        "ci95_low": 0.5329326792583584,
+        "ci95_high": 0.5329326792583584,
+        "std": 0.0,
+        "n": 1
+      },
+      "cross_flow_mbits": {
+        "mean": 3964.17769445688,
+        "ci95_low": 3964.17769445688,
+        "ci95_high": 3964.17769445688,
+        "std": 0.0,
+        "n": 1
+      },
+      "u2u_active_time_s": {
+        "mean": 466.1895125864296,
+        "ci95_low": 466.1895125864296,
+        "ci95_high": 466.1895125864296,
+        "std": 0.0,
+        "n": 1
+      },
+      "cross_payload_efficiency_mbps": {
+        "mean": 8.503360945345028,
+        "ci95_low": 8.503360945345028,
+        "ci95_high": 8.503360945345028,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_support_heavy_distance_m": {
+        "mean": 362.38600003001386,
+        "ci95_low": 362.38600003001386,
+        "ci95_high": 362.38600003001386,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_support_heavy_nominal_rate_mbps": {
+        "mean": 3.1437657313100913,
+        "ci95_low": 3.1437657313100913,
+        "ci95_high": 3.1437657313100913,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_all_uav_centroid_residual_m": {
+        "mean": 6.718283763224803,
+        "ci95_low": 6.718283763224803,
+        "ci95_high": 6.718283763224803,
+        "std": 0.0,
+        "n": 1
+      },
+      "heavy_to_support_flow_mbits": {
+        "mean": 2170.9208296466745,
+        "ci95_low": 2170.9208296466745,
+        "ci95_high": 2170.9208296466745,
+        "std": 0.0,
+        "n": 1
+      },
+      "support_motion_alignment_mean": {
+        "mean": -0.3368378769318835,
+        "ci95_low": -0.3368378769318835,
+        "ci95_high": -0.3368378769318835,
+        "std": 0.0,
+        "n": 1
+      },
+      "support_toward_fraction": {
+        "mean": 0.3103448275862069,
+        "ci95_low": 0.3103448275862069,
+        "ci95_high": 0.3103448275862069,
+        "std": 0.0,
+        "n": 1
+      },
+      "residual_gate_mean": {
+        "mean": 0.7005047990768044,
+        "ci95_low": 0.7005047990768044,
+        "ci95_high": 0.7005047990768044,
+        "std": 0.0,
+        "n": 1
+      }
+    }
+  },
+  "learned_minus_centroid": {
+    "task_delay_weighted_ms": {
+      "mean": -11.363502643149332,
+      "ci95_low": -11.363502643149332,
+      "ci95_high": -11.363502643149332,
+      "std": 0.0,
+      "n": 1,
+      "left": "learned_macro",
+      "right": "dynamic_centroid",
+      "field": "task_delay_weighted_ms",
+      "per_seed": {
+        "8300": -11.363502643149332
+      }
+    },
+    "task_delay_high_ms": {
+      "mean": 0.7586705202309076,
+      "ci95_low": 0.7586705202309076,
+      "ci95_high": 0.7586705202309076,
+      "std": 0.0,
+      "n": 1,
+      "left": "learned_macro",
+      "right": "dynamic_centroid",
+      "field": "task_delay_high_ms",
+      "per_seed": {
+        "8300": 0.7586705202309076
+      }
+    },
+    "task_delay_low_ms": {
+      "mean": -68.00091841924905,
+      "ci95_low": -68.00091841924905,
+      "ci95_high": -68.00091841924905,
+      "std": 0.0,
+      "n": 1,
+      "left": "learned_macro",
+      "right": "dynamic_centroid",
+      "field": "task_delay_low_ms",
+      "per_seed": {
+        "8300": -68.00091841924905
+      }
+    },
+    "transition_window_delay_weighted_ms": {
+      "mean": -6.144653845727703,
+      "ci95_low": -6.144653845727703,
+      "ci95_high": -6.144653845727703,
+      "std": 0.0,
+      "n": 1,
+      "left": "learned_macro",
+      "right": "dynamic_centroid",
+      "field": "transition_window_delay_weighted_ms",
+      "per_seed": {
+        "8300": -6.144653845727703
+      }
+    },
+    "mean_queue_mbits": {
+      "mean": -0.5889006776206855,
+      "ci95_low": -0.5889006776206855,
+      "ci95_high": -0.5889006776206855,
+      "std": 0.0,
+      "n": 1,
+      "left": "learned_macro",
+      "right": "dynamic_centroid",
+      "field": "mean_queue_mbits",
+      "per_seed": {
+        "8300": -0.5889006776206855
+      }
+    },
+    "terminal_queue_mbits": {
+      "mean": -4.954803608822454,
+      "ci95_low": -4.954803608822454,
+      "ci95_high": -4.954803608822454,
+      "std": 0.0,
+      "n": 1,
+      "left": "learned_macro",
+      "right": "dynamic_centroid",
+      "field": "terminal_queue_mbits",
+      "per_seed": {
+        "8300": -4.954803608822454
+      }
+    },
+    "tail_queue_slope_mbps": {
+      "mean": -0.02796409471590234,
+      "ci95_low": -0.02796409471590234,
+      "ci95_high": -0.02796409471590234,
+      "std": 0.0,
+      "n": 1,
+      "left": "learned_macro",
+      "right": "dynamic_centroid",
+      "field": "tail_queue_slope_mbps",
+      "per_seed": {
+        "8300": -0.02796409471590234
+      }
+    },
+    "peak_queue_mbits": {
+      "mean": -0.907070477759774,
+      "ci95_low": -0.907070477759774,
+      "ci95_high": -0.907070477759774,
+      "std": 0.0,
+      "n": 1,
+      "left": "learned_macro",
+      "right": "dynamic_centroid",
+      "field": "peak_queue_mbits",
+      "per_seed": {
+        "8300": -0.907070477759774
+      }
+    },
+    "task_completion_rate": {
+      "mean": 0.0013412316977757799,
+      "ci95_low": 0.0013412316977757799,
+      "ci95_high": 0.0013412316977757799,
+      "std": 0.0,
+      "n": 1,
+      "left": "learned_macro",
+      "right": "dynamic_centroid",
+      "field": "task_completion_rate",
+      "per_seed": {
+        "8300": 0.0013412316977757799
+      }
+    },
+    "soft_objective_j": {
+      "mean": -0.011459959949718601,
+      "ci95_low": -0.011459959949718601,
+      "ci95_high": -0.011459959949718601,
+      "std": 0.0,
+      "n": 1,
+      "left": "learned_macro",
+      "right": "dynamic_centroid",
+      "field": "soft_objective_j",
+      "per_seed": {
+        "8300": -0.011459959949718601
+      }
+    },
+    "average_power_w": {
+      "mean": 0.5040561199313061,
+      "ci95_low": 0.5040561199313061,
+      "ci95_high": 0.5040561199313061,
+      "std": 0.0,
+      "n": 1,
+      "left": "learned_macro",
+      "right": "dynamic_centroid",
+      "field": "average_power_w",
+      "per_seed": {
+        "8300": 0.5040561199313061
+      }
+    },
+    "coop_ratio": {
+      "mean": -4.7933082384488124e-05,
+      "ci95_low": -4.7933082384488124e-05,
+      "ci95_high": -4.7933082384488124e-05,
+      "std": 0.0,
+      "n": 1,
+      "left": "learned_macro",
+      "right": "dynamic_centroid",
+      "field": "coop_ratio",
+      "per_seed": {
+        "8300": -4.7933082384488124e-05
+      }
+    },
+    "cross_flow_mbits": {
+      "mean": 3.8878596641575314,
+      "ci95_low": 3.8878596641575314,
+      "ci95_high": 3.8878596641575314,
+      "std": 0.0,
+      "n": 1,
+      "left": "learned_macro",
+      "right": "dynamic_centroid",
+      "field": "cross_flow_mbits",
+      "per_seed": {
+        "8300": 3.8878596641575314
+      }
+    },
+    "u2u_active_time_s": {
+      "mean": -3.9658020760443833,
+      "ci95_low": -3.9658020760443833,
+      "ci95_high": -3.9658020760443833,
+      "std": 0.0,
+      "n": 1,
+      "left": "learned_macro",
+      "right": "dynamic_centroid",
+      "field": "u2u_active_time_s",
+      "per_seed": {
+        "8300": -3.9658020760443833
+      }
+    },
+    "cross_payload_efficiency_mbps": {
+      "mean": 0.07999591833086406,
+      "ci95_low": 0.07999591833086406,
+      "ci95_high": 0.07999591833086406,
+      "std": 0.0,
+      "n": 1,
+      "left": "learned_macro",
+      "right": "dynamic_centroid",
+      "field": "cross_payload_efficiency_mbps",
+      "per_seed": {
+        "8300": 0.07999591833086406
+      }
+    },
+    "mean_support_heavy_distance_m": {
+      "mean": -5.830327317889555,
+      "ci95_low": -5.830327317889555,
+      "ci95_high": -5.830327317889555,
+      "std": 0.0,
+      "n": 1,
+      "left": "learned_macro",
+      "right": "dynamic_centroid",
+      "field": "mean_support_heavy_distance_m",
+      "per_seed": {
+        "8300": -5.830327317889555
+      }
+    },
+    "mean_support_heavy_nominal_rate_mbps": {
+      "mean": 0.023133389997205267,
+      "ci95_low": 0.023133389997205267,
+      "ci95_high": 0.023133389997205267,
+      "std": 0.0,
+      "n": 1,
+      "left": "learned_macro",
+      "right": "dynamic_centroid",
+      "field": "mean_support_heavy_nominal_rate_mbps",
+      "per_seed": {
+        "8300": 0.023133389997205267
+      }
+    },
+    "mean_all_uav_centroid_residual_m": {
+      "mean": 2.0890054052300435,
+      "ci95_low": 2.0890054052300435,
+      "ci95_high": 2.0890054052300435,
+      "std": 0.0,
+      "n": 1,
+      "left": "learned_macro",
+      "right": "dynamic_centroid",
+      "field": "mean_all_uav_centroid_residual_m",
+      "per_seed": {
+        "8300": 2.0890054052300435
+      }
+    },
+    "heavy_to_support_flow_mbits": {
+      "mean": 4.243560052647808,
+      "ci95_low": 4.243560052647808,
+      "ci95_high": 4.243560052647808,
+      "std": 0.0,
+      "n": 1,
+      "left": "learned_macro",
+      "right": "dynamic_centroid",
+      "field": "heavy_to_support_flow_mbits",
+      "per_seed": {
+        "8300": 4.243560052647808
+      }
+    },
+    "support_motion_alignment_mean": {
+      "mean": 0.021795342251298755,
+      "ci95_low": 0.021795342251298755,
+      "ci95_high": 0.021795342251298755,
+      "std": 0.0,
+      "n": 1,
+      "left": "learned_macro",
+      "right": "dynamic_centroid",
+      "field": "support_motion_alignment_mean",
+      "per_seed": {
+        "8300": 0.021795342251298755
+      }
+    },
+    "support_toward_fraction": {
+      "mean": -0.03448275862068967,
+      "ci95_low": -0.03448275862068967,
+      "ci95_high": -0.03448275862068967,
+      "std": 0.0,
+      "n": 1,
+      "left": "learned_macro",
+      "right": "dynamic_centroid",
+      "field": "support_toward_fraction",
+      "per_seed": {
+        "8300": -0.03448275862068967
+      }
+    },
+    "residual_gate_mean": {
+      "mean": -0.000552143128933702,
+      "ci95_low": -0.000552143128933702,
+      "ci95_high": -0.000552143128933702,
+      "std": 0.0,
+      "n": 1,
+      "left": "learned_macro",
+      "right": "dynamic_centroid",
+      "field": "residual_gate_mean",
+      "per_seed": {
+        "8300": -0.000552143128933702
+      }
+    }
+  },
+  "support20_minus_centroid": {
+    "task_delay_weighted_ms": {
+      "mean": -25.87445284712146,
+      "ci95_low": -25.87445284712146,
+      "ci95_high": -25.87445284712146,
+      "std": 0.0,
+      "n": 1,
+      "left": "causal_support_20m",
+      "right": "dynamic_centroid",
+      "field": "task_delay_weighted_ms",
+      "per_seed": {
+        "8300": -25.87445284712146
+      }
+    },
+    "task_delay_high_ms": {
+      "mean": -0.10838150289032455,
+      "ci95_low": -0.10838150289032455,
+      "ci95_high": -0.10838150289032455,
+      "std": 0.0,
+      "n": 1,
+      "left": "causal_support_20m",
+      "right": "dynamic_centroid",
+      "field": "task_delay_high_ms",
+      "per_seed": {
+        "8300": -0.10838150289032455
+      }
+    },
+    "task_delay_low_ms": {
+      "mean": -144.11807573736382,
+      "ci95_low": -144.11807573736382,
+      "ci95_high": -144.11807573736382,
+      "std": 0.0,
+      "n": 1,
+      "left": "causal_support_20m",
+      "right": "dynamic_centroid",
+      "field": "task_delay_low_ms",
+      "per_seed": {
+        "8300": -144.11807573736382
+      }
+    },
+    "transition_window_delay_weighted_ms": {
+      "mean": -8.461244427764882,
+      "ci95_low": -8.461244427764882,
+      "ci95_high": -8.461244427764882,
+      "std": 0.0,
+      "n": 1,
+      "left": "causal_support_20m",
+      "right": "dynamic_centroid",
+      "field": "transition_window_delay_weighted_ms",
+      "per_seed": {
+        "8300": -8.461244427764882
+      }
+    },
+    "mean_queue_mbits": {
+      "mean": -1.127712137973524,
+      "ci95_low": -1.127712137973524,
+      "ci95_high": -1.127712137973524,
+      "std": 0.0,
+      "n": 1,
+      "left": "causal_support_20m",
+      "right": "dynamic_centroid",
+      "field": "mean_queue_mbits",
+      "per_seed": {
+        "8300": -1.127712137973524
+      }
+    },
+    "terminal_queue_mbits": {
+      "mean": -5.562232435426106,
+      "ci95_low": -5.562232435426106,
+      "ci95_high": -5.562232435426106,
+      "std": 0.0,
+      "n": 1,
+      "left": "causal_support_20m",
+      "right": "dynamic_centroid",
+      "field": "terminal_queue_mbits",
+      "per_seed": {
+        "8300": -5.562232435426106
+      }
+    },
+    "tail_queue_slope_mbps": {
+      "mean": -0.05254223497690658,
+      "ci95_low": -0.05254223497690658,
+      "ci95_high": -0.05254223497690658,
+      "std": 0.0,
+      "n": 1,
+      "left": "causal_support_20m",
+      "right": "dynamic_centroid",
+      "field": "tail_queue_slope_mbps",
+      "per_seed": {
+        "8300": -0.05254223497690658
+      }
+    },
+    "peak_queue_mbits": {
+      "mean": -1.7424473240741918,
+      "ci95_low": -1.7424473240741918,
+      "ci95_high": -1.7424473240741918,
+      "std": 0.0,
+      "n": 1,
+      "left": "causal_support_20m",
+      "right": "dynamic_centroid",
+      "field": "peak_queue_mbits",
+      "per_seed": {
+        "8300": -1.7424473240741918
+      }
+    },
+    "task_completion_rate": {
+      "mean": 0.0015647703140717617,
+      "ci95_low": 0.0015647703140717617,
+      "ci95_high": 0.0015647703140717617,
+      "std": 0.0,
+      "n": 1,
+      "left": "causal_support_20m",
+      "right": "dynamic_centroid",
+      "field": "task_completion_rate",
+      "per_seed": {
+        "8300": 0.0015647703140717617
+      }
+    },
+    "soft_objective_j": {
+      "mean": -0.023895362550394483,
+      "ci95_low": -0.023895362550394483,
+      "ci95_high": -0.023895362550394483,
+      "std": 0.0,
+      "n": 1,
+      "left": "causal_support_20m",
+      "right": "dynamic_centroid",
+      "field": "soft_objective_j",
+      "per_seed": {
+        "8300": -0.023895362550394483
+      }
+    },
+    "average_power_w": {
+      "mean": 3.750092363651447,
+      "ci95_low": 3.750092363651447,
+      "ci95_high": 3.750092363651447,
+      "std": 0.0,
+      "n": 1,
+      "left": "causal_support_20m",
+      "right": "dynamic_centroid",
+      "field": "average_power_w",
+      "per_seed": {
+        "8300": 3.750092363651447
+      }
+    },
+    "coop_ratio": {
+      "mean": 0.00020538451566320948,
+      "ci95_low": 0.00020538451566320948,
+      "ci95_high": 0.00020538451566320948,
+      "std": 0.0,
+      "n": 1,
+      "left": "causal_support_20m",
+      "right": "dynamic_centroid",
+      "field": "coop_ratio",
+      "per_seed": {
+        "8300": 0.00020538451566320948
+      }
+    },
+    "cross_flow_mbits": {
+      "mean": 5.455293563456507,
+      "ci95_low": 5.455293563456507,
+      "ci95_high": 5.455293563456507,
+      "std": 0.0,
+      "n": 1,
+      "left": "causal_support_20m",
+      "right": "dynamic_centroid",
+      "field": "cross_flow_mbits",
+      "per_seed": {
+        "8300": 5.455293563456507
+      }
+    },
+    "u2u_active_time_s": {
+      "mean": -4.570615820008356,
+      "ci95_low": -4.570615820008356,
+      "ci95_high": -4.570615820008356,
+      "std": 0.0,
+      "n": 1,
+      "left": "causal_support_20m",
+      "right": "dynamic_centroid",
+      "field": "u2u_active_time_s",
+      "per_seed": {
+        "8300": -4.570615820008356
+      }
+    },
+    "cross_payload_efficiency_mbps": {
+      "mean": 0.09440872761264174,
+      "ci95_low": 0.09440872761264174,
+      "ci95_high": 0.09440872761264174,
+      "std": 0.0,
+      "n": 1,
+      "left": "causal_support_20m",
+      "right": "dynamic_centroid",
+      "field": "cross_payload_efficiency_mbps",
+      "per_seed": {
+        "8300": 0.09440872761264174
+      }
+    },
+    "mean_support_heavy_distance_m": {
+      "mean": -19.999185117291916,
+      "ci95_low": -19.999185117291916,
+      "ci95_high": -19.999185117291916,
+      "std": 0.0,
+      "n": 1,
+      "left": "causal_support_20m",
+      "right": "dynamic_centroid",
+      "field": "mean_support_heavy_distance_m",
+      "per_seed": {
+        "8300": -19.999185117291916
+      }
+    },
+    "mean_support_heavy_nominal_rate_mbps": {
+      "mean": 0.08053347425854351,
+      "ci95_low": 0.08053347425854351,
+      "ci95_high": 0.08053347425854351,
+      "std": 0.0,
+      "n": 1,
+      "left": "causal_support_20m",
+      "right": "dynamic_centroid",
+      "field": "mean_support_heavy_nominal_rate_mbps",
+      "per_seed": {
+        "8300": 0.08053347425854351
+      }
+    },
+    "mean_all_uav_centroid_residual_m": {
+      "mean": 5.758685804484025,
+      "ci95_low": 5.758685804484025,
+      "ci95_high": 5.758685804484025,
+      "std": 0.0,
+      "n": 1,
+      "left": "causal_support_20m",
+      "right": "dynamic_centroid",
+      "field": "mean_all_uav_centroid_residual_m",
+      "per_seed": {
+        "8300": 5.758685804484025
+      }
+    },
+    "heavy_to_support_flow_mbits": {
+      "mean": 6.937117917794694,
+      "ci95_low": 6.937117917794694,
+      "ci95_high": 6.937117917794694,
+      "std": 0.0,
+      "n": 1,
+      "left": "causal_support_20m",
+      "right": "dynamic_centroid",
+      "field": "heavy_to_support_flow_mbits",
+      "per_seed": {
+        "8300": 6.937117917794694
+      }
+    },
+    "support_motion_alignment_mean": {
+      "mean": 0.1958917822701198,
+      "ci95_low": 0.1958917822701198,
+      "ci95_high": 0.1958917822701198,
+      "std": 0.0,
+      "n": 1,
+      "left": "causal_support_20m",
+      "right": "dynamic_centroid",
+      "field": "support_motion_alignment_mean",
+      "per_seed": {
+        "8300": 0.1958917822701198
+      }
+    },
+    "support_toward_fraction": {
+      "mean": 0.10344827586206895,
+      "ci95_low": 0.10344827586206895,
+      "ci95_high": 0.10344827586206895,
+      "std": 0.0,
+      "n": 1,
+      "left": "causal_support_20m",
+      "right": "dynamic_centroid",
+      "field": "support_toward_fraction",
+      "per_seed": {
+        "8300": 0.10344827586206895
+      }
+    },
+    "residual_gate_mean": {
+      "mean": 0.0002925619345021113,
+      "ci95_low": 0.0002925619345021113,
+      "ci95_high": 0.0002925619345021113,
+      "std": 0.0,
+      "n": 1,
+      "left": "causal_support_20m",
+      "right": "dynamic_centroid",
+      "field": "residual_gate_mean",
+      "per_seed": {
+        "8300": 0.0002925619345021113
+      }
+    }
+  },
+  "crn": {
+    "all_methods_match_within_seed": true,
+    "mismatches": {}
+  }
+}

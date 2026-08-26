@@ -414,6 +414,17 @@ def add_common_args(
         ),
     )
     parser.add_argument(
+        "--micro_autonomous_residual_gate",
+        type=int,
+        choices=[0, 1],
+        default=0,
+        help=(
+            "Prepend a tanh SAC gate latent to the residual action. The "
+            "environment applies g=(z_g+1)/2 to the remaining residual "
+            "coordinates before the SCA support mapping."
+        ),
+    )
+    parser.add_argument(
         "--micro_sca_support_threshold",
         type=float,
         default=1e-6,
@@ -1293,6 +1304,9 @@ def save_scenario_metadata(
         "micro_sca_residual_scale": float(
             getattr(args, "micro_sca_residual_scale", 0.0)
         ),
+        "micro_autonomous_residual_gate": int(
+            getattr(args, "micro_autonomous_residual_gate", 0)
+        ),
         "micro_sca_support_threshold": float(
             getattr(args, "micro_sca_support_threshold", 1e-6)
         ),
@@ -1863,6 +1877,10 @@ class EvaluationHistory:
     micro_decision_seconds: List[float] = field(default_factory=list)
     micro_decision_mean_ms: List[float] = field(default_factory=list)
     micro_decision_p95_ms: List[float] = field(default_factory=list)
+    residual_gate_mean: List[float] = field(default_factory=list)
+    residual_gate_std: List[float] = field(default_factory=list)
+    residual_gate_q10: List[float] = field(default_factory=list)
+    residual_gate_q90: List[float] = field(default_factory=list)
     u2g: List[float] = field(default_factory=list)
     cpu_util: List[float] = field(default_factory=list)
     cpu_saturation: List[float] = field(default_factory=list)
@@ -2041,6 +2059,18 @@ class EvaluationHistory:
         self.micro_decision_p95_ms.append(
             float(metrics.get("micro_decision_p95_ms", 0.0))
         )
+        self.residual_gate_mean.append(
+            float(metrics.get("residual_gate_mean", 1.0))
+        )
+        self.residual_gate_std.append(
+            float(metrics.get("residual_gate_std", 0.0))
+        )
+        self.residual_gate_q10.append(
+            float(metrics.get("residual_gate_q10", 1.0))
+        )
+        self.residual_gate_q90.append(
+            float(metrics.get("residual_gate_q90", 1.0))
+        )
         self.u2g.append(float(metrics["u2g"]))
         self.cpu_util.append(float(metrics["cpu_util"]))
         self.cpu_saturation.append(float(metrics.get("cpu_saturation", 0.0)))
@@ -2169,6 +2199,10 @@ class EvaluationHistory:
                     "micro_decision_seconds",
                     "micro_decision_mean_ms",
                     "micro_decision_p95_ms",
+                    "residual_gate_mean",
+                    "residual_gate_std",
+                    "residual_gate_q10",
+                    "residual_gate_q90",
                     "u2g",
                     "cpu_util",
                     "cpu_saturation",
@@ -2260,6 +2294,10 @@ class EvaluationHistory:
                         self.micro_decision_seconds[idx],
                         self.micro_decision_mean_ms[idx],
                         self.micro_decision_p95_ms[idx],
+                        self.residual_gate_mean[idx],
+                        self.residual_gate_std[idx],
+                        self.residual_gate_q10[idx],
+                        self.residual_gate_q90[idx],
                         self.u2g[idx],
                         self.cpu_util[idx],
                         self.cpu_saturation[idx],
@@ -2322,6 +2360,18 @@ class EvaluationHistory:
             "compute_service_controller_mbits": np.asarray(self.compute_service_controller_mbits, dtype=np.float32),
             "compute_service_vision_mbits": np.asarray(self.compute_service_vision_mbits, dtype=np.float32),
             "service_energy_per_micro_step_j": np.asarray(self.energy, dtype=np.float32),
+            "residual_gate_mean": np.asarray(
+                self.residual_gate_mean, dtype=np.float32
+            ),
+            "residual_gate_std": np.asarray(
+                self.residual_gate_std, dtype=np.float32
+            ),
+            "residual_gate_q10": np.asarray(
+                self.residual_gate_q10, dtype=np.float32
+            ),
+            "residual_gate_q90": np.asarray(
+                self.residual_gate_q90, dtype=np.float32
+            ),
             "average_power_w": np.asarray(self.average_power_w, dtype=np.float32),
             "average_power_std_w": np.asarray(
                 self.average_power_std_w, dtype=np.float32
@@ -3166,6 +3216,9 @@ def evaluate_policy(
     micro_policy: MicroPolicy,
     on_episode_start: Optional[EpisodeStartHook] = None,
 ) -> Dict[str, float]:
+    gate_values = getattr(micro_policy, "residual_gate_values", None)
+    if gate_values is not None:
+        gate_values.clear()
     expected_micro_steps = int(eval_env.env.micro_steps_per_macro)
     if (
         bool(int(getattr(args, "strict_hierarchy_validation", 0)))
@@ -3818,6 +3871,20 @@ def evaluate_policy(
         + energy_u2u_episode
         + energy_compute_episode
     )
+    residual_gate_values = np.asarray(
+        getattr(micro_policy, "residual_gate_values", []),
+        dtype=np.float64,
+    )
+    if residual_gate_values.size:
+        residual_gate_mean = float(np.mean(residual_gate_values))
+        residual_gate_std = float(np.std(residual_gate_values))
+        residual_gate_q10 = float(np.quantile(residual_gate_values, 0.10))
+        residual_gate_q90 = float(np.quantile(residual_gate_values, 0.90))
+    else:
+        residual_gate_mean = 1.0
+        residual_gate_std = 0.0
+        residual_gate_q10 = 1.0
+        residual_gate_q90 = 1.0
 
     return {
         "score": float(np.mean(eval_scores)),
@@ -3880,6 +3947,10 @@ def evaluate_policy(
             if micro_decision_durations_s
             else 0.0
         ),
+        "residual_gate_mean": residual_gate_mean,
+        "residual_gate_std": residual_gate_std,
+        "residual_gate_q10": residual_gate_q10,
+        "residual_gate_q90": residual_gate_q90,
         "u2g": float(np.mean(eval_u2g)),
         "cpu_util": float(np.mean(eval_cpu_util)),
         "cpu_saturation": float(np.mean(eval_cpu_saturation)),

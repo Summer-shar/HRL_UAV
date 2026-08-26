@@ -1,0 +1,3347 @@
+{
+  "scope": "One training seed; final checkpoints; paired evaluation seeds. This is the frozen seed-1 screen, not a multi-training-seed claim.",
+  "results_version": "tcom_v52_ultra_imbalance_hrl",
+  "training_seed": 1,
+  "evaluation_seeds": [
+    8300
+  ],
+  "checkpoint_rule": "final only",
+  "checkpoints": {
+    "joint_ppo_gated_sac": {
+      "path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\results\\tcom_v52_ultra_imbalance_hrl\\formal\\seed1\\joint_ppo_gated_sac\\checkpoints\\final.pt",
+      "sha256": "790ba0a1accc3a2880d8337a58e18dcea50f3e417527e5a41c13005ffc928d4c"
+    },
+    "cppo_sca": {
+      "path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\results\\tcom_v52_ultra_imbalance_hrl\\formal\\seed1\\cppo_sca\\checkpoints\\final.pt",
+      "sha256": "830fb4edab0bc6f2c1c6d3b984700a8d690816d81562613e15ce418f57daf955"
+    },
+    "joint_ppo_sac": {
+      "path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\results\\tcom_v52_ultra_imbalance_hrl\\formal\\seed1\\joint_ppo_sac\\checkpoints\\final.pt",
+      "sha256": "eba79e8355e1b348b4a5b0073973da98b9cfb709d62b8fc8ae25e5ae6664f083"
+    },
+    "centroid_gated_sac": {
+      "path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\results\\tcom_v52_ultra_imbalance_hrl\\formal\\seed1\\centroid_gated_sac\\checkpoints\\final.pt",
+      "sha256": "d61350944bfbf3f4fa3911e87dcb0edde3fcc69e857cad8c84284ecdeefe0e7d"
+    },
+    "centroid_sac": {
+      "path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\results\\tcom_v52_ultra_imbalance_hrl\\formal\\seed1\\centroid_sac\\checkpoints\\final.pt",
+      "sha256": "315741132891895fd05d3f535b475985278793d17fe2e0a3045f77ccb1964490"
+    },
+    "fixed_sac": {
+      "path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\results\\tcom_v52_ultra_imbalance_hrl\\formal\\seed1\\fixed_sac\\checkpoints\\final.pt",
+      "sha256": "dd2941d6d60200b522c8fd5070849598bcbca2e26fe2d14c6383e339c102e811"
+    },
+    "joint_td3_sac": {
+      "path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\results\\tcom_v52_ultra_imbalance_hrl\\formal\\seed1\\joint_td3_sac\\checkpoints\\final.pt",
+      "sha256": "57c1c8d833b82fac2cd0ef73ebd5ac5496da0ec17e75b78366ede6d3ad9f3c1c"
+    },
+    "no_coop": {
+      "path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\results\\tcom_v52_ultra_imbalance_hrl\\formal\\seed1\\no_coop\\checkpoints\\final.pt",
+      "sha256": "b73eea9ba3a967ef6e66139161e267d447b72bd7c8751332233aa5d0cc1e20c1"
+    }
+  },
+  "scenario_signature": {
+    "num_agents": 3,
+    "num_users": 39,
+    "macro_steps": 30,
+    "micro_steps": 100,
+    "zone_loads": "18.5,2.0,1.0",
+    "load_switch_mode": "cyclic_random",
+    "load_switch_phases": "18.5,2.0,1.0;1.0,18.5,2.0;2.0,1.0,18.5",
+    "load_switch_dwell_min": 8,
+    "load_switch_dwell_max": 12,
+    "load_scale": 1.15,
+    "cpu_ghz": 10.0,
+    "cpu_alloc_mode": "priority_demand",
+    "objective_mode": "weighted",
+    "delay_objective_weight": 0.9,
+    "energy_objective_weight": 0.1,
+    "macro_action_mode": "cooperation_waypoint",
+    "macro_waypoint_radius_m": 60.0,
+    "gm_heading_mode": "reference_point_group",
+    "rpgm_group_speed_mps": 0.25,
+    "rpgm_local_velocity_std_mps": 0.32
+  },
+  "method_summaries": {
+    "joint_ppo_gated_sac": {
+      "task_delay_weighted_ms": {
+        "mean": 761.5548266997628,
+        "ci95_low": 761.5548266997628,
+        "ci95_high": 761.5548266997628,
+        "std": 0.0,
+        "n": 1
+      },
+      "task_delay_high_ms": {
+        "mean": 523.4104046242786,
+        "ci95_low": 523.4104046242786,
+        "ci95_high": 523.4104046242786,
+        "std": 0.0,
+        "n": 1
+      },
+      "task_delay_low_ms": {
+        "mean": 1831.1374330683173,
+        "ci95_low": 1831.1374330683173,
+        "ci95_high": 1831.1374330683173,
+        "std": 0.0,
+        "n": 1
+      },
+      "transition_window_delay_weighted_ms": {
+        "mean": 706.9082352941143,
+        "ci95_low": 706.9082352941143,
+        "ci95_high": 706.9082352941143,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_queue_mbits": {
+        "mean": 8.397741711629317,
+        "ci95_low": 8.397741711629317,
+        "ci95_high": 8.397741711629317,
+        "std": 0.0,
+        "n": 1
+      },
+      "terminal_queue_mbits": {
+        "mean": 8.82687974359571,
+        "ci95_low": 8.82687974359571,
+        "ci95_high": 8.82687974359571,
+        "std": 0.0,
+        "n": 1
+      },
+      "tail_queue_slope_mbps": {
+        "mean": 0.049039936117061096,
+        "ci95_low": 0.049039936117061096,
+        "ci95_high": 0.049039936117061096,
+        "std": 0.0,
+        "n": 1
+      },
+      "peak_queue_mbits": {
+        "mean": 22.552036723276494,
+        "ci95_low": 22.552036723276494,
+        "ci95_high": 22.552036723276494,
+        "std": 0.0,
+        "n": 1
+      },
+      "task_completion_rate": {
+        "mean": 0.9982116910696323,
+        "ci95_low": 0.9982116910696323,
+        "ci95_high": 0.9982116910696323,
+        "std": 0.0,
+        "n": 1
+      },
+      "soft_objective_j": {
+        "mean": 0.8437165127609774,
+        "ci95_low": 0.8437165127609774,
+        "ci95_high": 0.8437165127609774,
+        "std": 0.0,
+        "n": 1
+      },
+      "average_power_w": {
+        "mean": 824.3574522283269,
+        "ci95_low": 824.3574522283269,
+        "ci95_high": 824.3574522283269,
+        "std": 0.0,
+        "n": 1
+      },
+      "coop_ratio": {
+        "mean": 0.5329326792583584,
+        "ci95_low": 0.5329326792583584,
+        "ci95_high": 0.5329326792583584,
+        "std": 0.0,
+        "n": 1
+      },
+      "cross_flow_mbits": {
+        "mean": 3964.17769445688,
+        "ci95_low": 3964.17769445688,
+        "ci95_high": 3964.17769445688,
+        "std": 0.0,
+        "n": 1
+      },
+      "u2u_active_time_s": {
+        "mean": 466.1895125864296,
+        "ci95_low": 466.1895125864296,
+        "ci95_high": 466.1895125864296,
+        "std": 0.0,
+        "n": 1
+      },
+      "cross_payload_efficiency_mbps": {
+        "mean": 8.503360945345028,
+        "ci95_low": 8.503360945345028,
+        "ci95_high": 8.503360945345028,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_support_heavy_distance_m": {
+        "mean": 362.38600003001386,
+        "ci95_low": 362.38600003001386,
+        "ci95_high": 362.38600003001386,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_support_heavy_nominal_rate_mbps": {
+        "mean": 3.1437657313100913,
+        "ci95_low": 3.1437657313100913,
+        "ci95_high": 3.1437657313100913,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_all_uav_centroid_residual_m": {
+        "mean": 6.718283763224803,
+        "ci95_low": 6.718283763224803,
+        "ci95_high": 6.718283763224803,
+        "std": 0.0,
+        "n": 1
+      },
+      "heavy_to_support_flow_mbits": {
+        "mean": 2170.9208296466745,
+        "ci95_low": 2170.9208296466745,
+        "ci95_high": 2170.9208296466745,
+        "std": 0.0,
+        "n": 1
+      },
+      "support_motion_alignment_mean": {
+        "mean": -0.3368378769318835,
+        "ci95_low": -0.3368378769318835,
+        "ci95_high": -0.3368378769318835,
+        "std": 0.0,
+        "n": 1
+      },
+      "support_toward_fraction": {
+        "mean": 0.3103448275862069,
+        "ci95_low": 0.3103448275862069,
+        "ci95_high": 0.3103448275862069,
+        "std": 0.0,
+        "n": 1
+      },
+      "residual_gate_mean": {
+        "mean": 0.7005047990768044,
+        "ci95_low": 0.7005047990768044,
+        "ci95_high": 0.7005047990768044,
+        "std": 0.0,
+        "n": 1
+      }
+    },
+    "cppo_sca": {
+      "task_delay_weighted_ms": {
+        "mean": 713.3981328291208,
+        "ci95_low": 713.3981328291208,
+        "ci95_high": 713.3981328291208,
+        "std": 0.0,
+        "n": 1
+      },
+      "task_delay_high_ms": {
+        "mean": 522.8684971098285,
+        "ci95_low": 522.8684971098285,
+        "ci95_high": 522.8684971098285,
+        "std": 0.0,
+        "n": 1
+      },
+      "task_delay_low_ms": {
+        "mean": 1568.433852140083,
+        "ci95_low": 1568.433852140083,
+        "ci95_high": 1568.433852140083,
+        "std": 0.0,
+        "n": 1
+      },
+      "transition_window_delay_weighted_ms": {
+        "mean": 684.4822721715389,
+        "ci95_low": 684.4822721715389,
+        "ci95_high": 684.4822721715389,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_queue_mbits": {
+        "mean": 6.5031285887969075,
+        "ci95_low": 6.5031285887969075,
+        "ci95_high": 6.5031285887969075,
+        "std": 0.0,
+        "n": 1
+      },
+      "terminal_queue_mbits": {
+        "mean": 7.666510325575293,
+        "ci95_low": 7.666510325575293,
+        "ci95_high": 7.666510325575293,
+        "std": 0.0,
+        "n": 1
+      },
+      "tail_queue_slope_mbps": {
+        "mean": 0.01949287585857681,
+        "ci95_low": 0.01949287585857681,
+        "ci95_high": 0.01949287585857681,
+        "std": 0.0,
+        "n": 1
+      },
+      "peak_queue_mbits": {
+        "mean": 19.10722427502172,
+        "ci95_low": 19.10722427502172,
+        "ci95_high": 19.10722427502172,
+        "std": 0.0,
+        "n": 1
+      },
+      "task_completion_rate": {
+        "mean": 0.9987705376103722,
+        "ci95_low": 0.9987705376103722,
+        "ci95_high": 0.9987705376103722,
+        "std": 0.0,
+        "n": 1
+      },
+      "soft_objective_j": {
+        "mean": 0.7947775015804482,
+        "ci95_low": 0.7947775015804482,
+        "ci95_high": 0.7947775015804482,
+        "std": 0.0,
+        "n": 1
+      },
+      "average_power_w": {
+        "mean": 824.3532367874768,
+        "ci95_low": 824.3532367874768,
+        "ci95_high": 824.3532367874768,
+        "std": 0.0,
+        "n": 1
+      },
+      "coop_ratio": {
+        "mean": 0.5370963128127679,
+        "ci95_low": 0.5370963128127679,
+        "ci95_high": 0.5370963128127679,
+        "std": 0.0,
+        "n": 1
+      },
+      "cross_flow_mbits": {
+        "mean": 3995.0105173203297,
+        "ci95_low": 3995.0105173203297,
+        "ci95_high": 3995.0105173203297,
+        "std": 0.0,
+        "n": 1
+      },
+      "u2u_active_time_s": {
+        "mean": 463.3392139513767,
+        "ci95_low": 463.3392139513767,
+        "ci95_high": 463.3392139513767,
+        "std": 0.0,
+        "n": 1
+      },
+      "cross_payload_efficiency_mbps": {
+        "mean": 8.622215424528196,
+        "ci95_low": 8.622215424528196,
+        "ci95_high": 8.622215424528196,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_support_heavy_distance_m": {
+        "mean": 365.77523167784796,
+        "ci95_low": 365.77523167784796,
+        "ci95_high": 365.77523167784796,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_support_heavy_nominal_rate_mbps": {
+        "mean": 3.1300705145569885,
+        "ci95_low": 3.1300705145569885,
+        "ci95_high": 3.1300705145569885,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_all_uav_centroid_residual_m": {
+        "mean": 5.632955772233864,
+        "ci95_low": 5.632955772233864,
+        "ci95_high": 5.632955772233864,
+        "std": 0.0,
+        "n": 1
+      },
+      "heavy_to_support_flow_mbits": {
+        "mean": 2156.0018320466525,
+        "ci95_low": 2156.0018320466525,
+        "ci95_high": 2156.0018320466525,
+        "std": 0.0,
+        "n": 1
+      },
+      "support_motion_alignment_mean": {
+        "mean": -0.35484990462471055,
+        "ci95_low": -0.35484990462471055,
+        "ci95_high": -0.35484990462471055,
+        "std": 0.0,
+        "n": 1
+      },
+      "support_toward_fraction": {
+        "mean": 0.3448275862068966,
+        "ci95_low": 0.3448275862068966,
+        "ci95_high": 0.3448275862068966,
+        "std": 0.0,
+        "n": 1
+      },
+      "residual_gate_mean": {
+        "mean": 0.0,
+        "ci95_low": 0.0,
+        "ci95_high": 0.0,
+        "std": 0.0,
+        "n": 1
+      }
+    },
+    "joint_ppo_sac": {
+      "task_delay_weighted_ms": {
+        "mean": 806.7332998196198,
+        "ci95_low": 806.7332998196198,
+        "ci95_high": 806.7332998196198,
+        "std": 0.0,
+        "n": 1
+      },
+      "task_delay_high_ms": {
+        "mean": 523.2297687861281,
+        "ci95_low": 523.2297687861281,
+        "ci95_high": 523.2297687861281,
+        "std": 0.0,
+        "n": 1
+      },
+      "task_delay_low_ms": {
+        "mean": 2085.432621802192,
+        "ci95_low": 2085.432621802192,
+        "ci95_high": 2085.432621802192,
+        "std": 0.0,
+        "n": 1
+      },
+      "transition_window_delay_weighted_ms": {
+        "mean": 734.1431261770219,
+        "ci95_low": 734.1431261770219,
+        "ci95_high": 734.1431261770219,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_queue_mbits": {
+        "mean": 10.303727213020535,
+        "ci95_low": 10.303727213020535,
+        "ci95_high": 10.303727213020535,
+        "std": 0.0,
+        "n": 1
+      },
+      "terminal_queue_mbits": {
+        "mean": 18.54029922018902,
+        "ci95_low": 18.54029922018902,
+        "ci95_high": 18.54029922018902,
+        "std": 0.0,
+        "n": 1
+      },
+      "tail_queue_slope_mbps": {
+        "mean": 0.1375460645171197,
+        "ci95_low": 0.1375460645171197,
+        "ci95_high": 0.1375460645171197,
+        "std": 0.0,
+        "n": 1
+      },
+      "peak_queue_mbits": {
+        "mean": 27.56264787164891,
+        "ci95_low": 27.56264787164891,
+        "ci95_high": 27.56264787164891,
+        "std": 0.0,
+        "n": 1
+      },
+      "task_completion_rate": {
+        "mean": 0.9953056890577847,
+        "ci95_low": 0.9953056890577847,
+        "ci95_high": 0.9953056890577847,
+        "std": 0.0,
+        "n": 1
+      },
+      "soft_objective_j": {
+        "mean": 0.8906008595275954,
+        "ci95_low": 0.8906008595275954,
+        "ci95_high": 0.8906008595275954,
+        "std": 0.0,
+        "n": 1
+      },
+      "average_power_w": {
+        "mean": 824.1143374213359,
+        "ci95_low": 824.1143374213359,
+        "ci95_high": 824.1143374213359,
+        "std": 0.0,
+        "n": 1
+      },
+      "coop_ratio": {
+        "mean": 0.5318546182342307,
+        "ci95_low": 0.5318546182342307,
+        "ci95_high": 0.5318546182342307,
+        "std": 0.0,
+        "n": 1
+      },
+      "cross_flow_mbits": {
+        "mean": 3948.490562879788,
+        "ci95_low": 3948.490562879788,
+        "ci95_high": 3948.490562879788,
+        "std": 0.0,
+        "n": 1
+      },
+      "u2u_active_time_s": {
+        "mean": 461.6002193476123,
+        "ci95_low": 461.6002193476123,
+        "ci95_high": 461.6002193476123,
+        "std": 0.0,
+        "n": 1
+      },
+      "cross_payload_efficiency_mbps": {
+        "mean": 8.553918298523035,
+        "ci95_low": 8.553918298523035,
+        "ci95_high": 8.553918298523035,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_support_heavy_distance_m": {
+        "mean": 359.9074491706093,
+        "ci95_low": 359.9074491706093,
+        "ci95_high": 359.9074491706093,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_support_heavy_nominal_rate_mbps": {
+        "mean": 3.153263472922646,
+        "ci95_low": 3.153263472922646,
+        "ci95_high": 3.153263472922646,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_all_uav_centroid_residual_m": {
+        "mean": 7.730558319716152,
+        "ci95_low": 7.730558319716152,
+        "ci95_high": 7.730558319716152,
+        "std": 0.0,
+        "n": 1
+      },
+      "heavy_to_support_flow_mbits": {
+        "mean": 2190.983514302749,
+        "ci95_low": 2190.983514302749,
+        "ci95_high": 2190.983514302749,
+        "std": 0.0,
+        "n": 1
+      },
+      "support_motion_alignment_mean": {
+        "mean": -0.3306041522521815,
+        "ci95_low": -0.3306041522521815,
+        "ci95_high": -0.3306041522521815,
+        "std": 0.0,
+        "n": 1
+      },
+      "support_toward_fraction": {
+        "mean": 0.3103448275862069,
+        "ci95_low": 0.3103448275862069,
+        "ci95_high": 0.3103448275862069,
+        "std": 0.0,
+        "n": 1
+      },
+      "residual_gate_mean": {
+        "mean": 1.0,
+        "ci95_low": 1.0,
+        "ci95_high": 1.0,
+        "std": 0.0,
+        "n": 1
+      }
+    },
+    "centroid_gated_sac": {
+      "task_delay_weighted_ms": {
+        "mean": 774.3430581419427,
+        "ci95_low": 774.3430581419427,
+        "ci95_high": 774.3430581419427,
+        "std": 0.0,
+        "n": 1
+      },
+      "task_delay_high_ms": {
+        "mean": 522.1098265895967,
+        "ci95_low": 522.1098265895967,
+        "ci95_high": 522.1098265895967,
+        "std": 0.0,
+        "n": 1
+      },
+      "task_delay_low_ms": {
+        "mean": 1909.4131035604016,
+        "ci95_low": 1909.4131035604016,
+        "ci95_high": 1909.4131035604016,
+        "std": 0.0,
+        "n": 1
+      },
+      "transition_window_delay_weighted_ms": {
+        "mean": 716.8987579977379,
+        "ci95_low": 716.8987579977379,
+        "ci95_high": 716.8987579977379,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_queue_mbits": {
+        "mean": 9.105635770187359,
+        "ci95_low": 9.105635770187359,
+        "ci95_high": 9.105635770187359,
+        "std": 0.0,
+        "n": 1
+      },
+      "terminal_queue_mbits": {
+        "mean": 13.472657004158197,
+        "ci95_low": 13.472657004158197,
+        "ci95_high": 13.472657004158197,
+        "std": 0.0,
+        "n": 1
+      },
+      "tail_queue_slope_mbps": {
+        "mean": 0.10233887469868376,
+        "ci95_low": 0.10233887469868376,
+        "ci95_high": 0.10233887469868376,
+        "std": 0.0,
+        "n": 1
+      },
+      "peak_queue_mbits": {
+        "mean": 23.860590463250926,
+        "ci95_low": 23.860590463250926,
+        "ci95_high": 23.860590463250926,
+        "std": 0.0,
+        "n": 1
+      },
+      "task_completion_rate": {
+        "mean": 0.9968704593718565,
+        "ci95_low": 0.9968704593718565,
+        "ci95_high": 0.9968704593718565,
+        "std": 0.0,
+        "n": 1
+      },
+      "soft_objective_j": {
+        "mean": 0.8566191929687041,
+        "ci95_low": 0.8566191929687041,
+        "ci95_high": 0.8566191929687041,
+        "std": 0.0,
+        "n": 1
+      },
+      "average_power_w": {
+        "mean": 823.8488044696072,
+        "ci95_low": 823.8488044696072,
+        "ci95_high": 823.8488044696072,
+        "std": 0.0,
+        "n": 1
+      },
+      "coop_ratio": {
+        "mean": 0.5319827549924784,
+        "ci95_low": 0.5319827549924784,
+        "ci95_high": 0.5319827549924784,
+        "std": 0.0,
+        "n": 1
+      },
+      "cross_flow_mbits": {
+        "mean": 3951.647911486162,
+        "ci95_low": 3951.647911486162,
+        "ci95_high": 3951.647911486162,
+        "std": 0.0,
+        "n": 1
+      },
+      "u2u_active_time_s": {
+        "mean": 470.12858152910775,
+        "ci95_low": 470.12858152910775,
+        "ci95_high": 470.12858152910775,
+        "std": 0.0,
+        "n": 1
+      },
+      "cross_payload_efficiency_mbps": {
+        "mean": 8.4054619666673,
+        "ci95_low": 8.4054619666673,
+        "ci95_high": 8.4054619666673,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_support_heavy_distance_m": {
+        "mean": 368.2163273479034,
+        "ci95_low": 368.2163273479034,
+        "ci95_high": 368.2163273479034,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_support_heavy_nominal_rate_mbps": {
+        "mean": 3.120632341312886,
+        "ci95_low": 3.120632341312886,
+        "ci95_high": 3.120632341312886,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_all_uav_centroid_residual_m": {
+        "mean": 4.629278357994759,
+        "ci95_low": 4.629278357994759,
+        "ci95_high": 4.629278357994759,
+        "std": 0.0,
+        "n": 1
+      },
+      "heavy_to_support_flow_mbits": {
+        "mean": 2161.4402126005234,
+        "ci95_low": 2161.4402126005234,
+        "ci95_high": 2161.4402126005234,
+        "std": 0.0,
+        "n": 1
+      },
+      "support_motion_alignment_mean": {
+        "mean": -0.35863321918318225,
+        "ci95_low": -0.35863321918318225,
+        "ci95_high": -0.35863321918318225,
+        "std": 0.0,
+        "n": 1
+      },
+      "support_toward_fraction": {
+        "mean": 0.3448275862068966,
+        "ci95_low": 0.3448275862068966,
+        "ci95_high": 0.3448275862068966,
+        "std": 0.0,
+        "n": 1
+      },
+      "residual_gate_mean": {
+        "mean": 0.6216649435253607,
+        "ci95_low": 0.6216649435253607,
+        "ci95_high": 0.6216649435253607,
+        "std": 0.0,
+        "n": 1
+      }
+    },
+    "centroid_sac": {
+      "task_delay_weighted_ms": {
+        "mean": 802.8298539239486,
+        "ci95_low": 802.8298539239486,
+        "ci95_high": 802.8298539239486,
+        "std": 0.0,
+        "n": 1
+      },
+      "task_delay_high_ms": {
+        "mean": 522.7962427745675,
+        "ci95_low": 522.7962427745675,
+        "ci95_high": 522.7962427745675,
+        "std": 0.0,
+        "n": 1
+      },
+      "task_delay_low_ms": {
+        "mean": 2065.6728576083515,
+        "ci95_low": 2065.6728576083515,
+        "ci95_high": 2065.6728576083515,
+        "std": 0.0,
+        "n": 1
+      },
+      "transition_window_delay_weighted_ms": {
+        "mean": 724.8917748917726,
+        "ci95_low": 724.8917748917726,
+        "ci95_high": 724.8917748917726,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_queue_mbits": {
+        "mean": 10.218483453816976,
+        "ci95_low": 10.218483453816976,
+        "ci95_high": 10.218483453816976,
+        "std": 0.0,
+        "n": 1
+      },
+      "terminal_queue_mbits": {
+        "mean": 18.274646060448223,
+        "ci95_low": 18.274646060448223,
+        "ci95_high": 18.274646060448223,
+        "std": 0.0,
+        "n": 1
+      },
+      "tail_queue_slope_mbps": {
+        "mean": 0.1384360584938931,
+        "ci95_low": 0.1384360584938931,
+        "ci95_high": 0.1384360584938931,
+        "std": 0.0,
+        "n": 1
+      },
+      "peak_queue_mbits": {
+        "mean": 28.36677128981164,
+        "ci95_low": 28.36677128981164,
+        "ci95_high": 28.36677128981164,
+        "std": 0.0,
+        "n": 1
+      },
+      "task_completion_rate": {
+        "mean": 0.9954174583659328,
+        "ci95_low": 0.9954174583659328,
+        "ci95_high": 0.9954174583659328,
+        "std": 0.0,
+        "n": 1
+      },
+      "soft_objective_j": {
+        "mean": 0.8862961086778536,
+        "ci95_low": 0.8862961086778536,
+        "ci95_high": 0.8862961086778536,
+        "std": 0.0,
+        "n": 1
+      },
+      "average_power_w": {
+        "mean": 823.7702864624163,
+        "ci95_low": 823.7702864624163,
+        "ci95_high": 823.7702864624163,
+        "std": 0.0,
+        "n": 1
+      },
+      "coop_ratio": {
+        "mean": 0.529841511988803,
+        "ci95_low": 0.529841511988803,
+        "ci95_high": 0.529841511988803,
+        "std": 0.0,
+        "n": 1
+      },
+      "cross_flow_mbits": {
+        "mean": 3932.9182229712965,
+        "ci95_low": 3932.9182229712965,
+        "ci95_high": 3932.9182229712965,
+        "std": 0.0,
+        "n": 1
+      },
+      "u2u_active_time_s": {
+        "mean": 465.58825251594595,
+        "ci95_low": 465.58825251594595,
+        "ci95_high": 465.58825251594595,
+        "std": 0.0,
+        "n": 1
+      },
+      "cross_payload_efficiency_mbps": {
+        "mean": 8.447202440608395,
+        "ci95_low": 8.447202440608395,
+        "ci95_high": 8.447202440608395,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_support_heavy_distance_m": {
+        "mean": 368.2163273479034,
+        "ci95_low": 368.2163273479034,
+        "ci95_high": 368.2163273479034,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_support_heavy_nominal_rate_mbps": {
+        "mean": 3.120632341312886,
+        "ci95_low": 3.120632341312886,
+        "ci95_high": 3.120632341312886,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_all_uav_centroid_residual_m": {
+        "mean": 4.629278357994759,
+        "ci95_low": 4.629278357994759,
+        "ci95_high": 4.629278357994759,
+        "std": 0.0,
+        "n": 1
+      },
+      "heavy_to_support_flow_mbits": {
+        "mean": 2181.970109063037,
+        "ci95_low": 2181.970109063037,
+        "ci95_high": 2181.970109063037,
+        "std": 0.0,
+        "n": 1
+      },
+      "support_motion_alignment_mean": {
+        "mean": -0.35863321918318225,
+        "ci95_low": -0.35863321918318225,
+        "ci95_high": -0.35863321918318225,
+        "std": 0.0,
+        "n": 1
+      },
+      "support_toward_fraction": {
+        "mean": 0.3448275862068966,
+        "ci95_low": 0.3448275862068966,
+        "ci95_high": 0.3448275862068966,
+        "std": 0.0,
+        "n": 1
+      },
+      "residual_gate_mean": {
+        "mean": 1.0,
+        "ci95_low": 1.0,
+        "ci95_high": 1.0,
+        "std": 0.0,
+        "n": 1
+      }
+    },
+    "fixed_sac": {
+      "task_delay_weighted_ms": {
+        "mean": 753.740250531793,
+        "ci95_low": 753.740250531793,
+        "ci95_high": 753.740250531793,
+        "std": 0.0,
+        "n": 1
+      },
+      "task_delay_high_ms": {
+        "mean": 534.7182080924881,
+        "ci95_low": 534.7182080924881,
+        "ci95_high": 534.7182080924881,
+        "std": 0.0,
+        "n": 1
+      },
+      "task_delay_low_ms": {
+        "mean": 1736.6407263294514,
+        "ci95_low": 1736.6407263294514,
+        "ci95_high": 1736.6407263294514,
+        "std": 0.0,
+        "n": 1
+      },
+      "transition_window_delay_weighted_ms": {
+        "mean": 691.1363849985908,
+        "ci95_low": 691.1363849985908,
+        "ci95_high": 691.1363849985908,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_queue_mbits": {
+        "mean": 7.583629399347643,
+        "ci95_low": 7.583629399347643,
+        "ci95_high": 7.583629399347643,
+        "std": 0.0,
+        "n": 1
+      },
+      "terminal_queue_mbits": {
+        "mean": 8.82401578583747,
+        "ci95_low": 8.82401578583747,
+        "ci95_high": 8.82401578583747,
+        "std": 0.0,
+        "n": 1
+      },
+      "tail_queue_slope_mbps": {
+        "mean": 0.017345727847907198,
+        "ci95_low": 0.017345727847907198,
+        "ci95_high": 0.017345727847907198,
+        "std": 0.0,
+        "n": 1
+      },
+      "peak_queue_mbits": {
+        "mean": 27.371656484645513,
+        "ci95_low": 27.371656484645513,
+        "ci95_high": 27.371656484645513,
+        "std": 0.0,
+        "n": 1
+      },
+      "task_completion_rate": {
+        "mean": 0.9987705376103722,
+        "ci95_low": 0.9987705376103722,
+        "ci95_high": 0.9987705376103722,
+        "std": 0.0,
+        "n": 1
+      },
+      "soft_objective_j": {
+        "mean": 0.8332506537673587,
+        "ci95_low": 0.8332506537673587,
+        "ci95_high": 0.8332506537673587,
+        "std": 0.0,
+        "n": 1
+      },
+      "average_power_w": {
+        "mean": 820.8436502865343,
+        "ci95_low": 820.8436502865343,
+        "ci95_high": 820.8436502865343,
+        "std": 0.0,
+        "n": 1
+      },
+      "coop_ratio": {
+        "mean": 0.5307760860737226,
+        "ci95_low": 0.5307760860737226,
+        "ci95_high": 0.5307760860737226,
+        "std": 0.0,
+        "n": 1
+      },
+      "cross_flow_mbits": {
+        "mean": 3948.663683499083,
+        "ci95_low": 3948.663683499083,
+        "ci95_high": 3948.663683499083,
+        "std": 0.0,
+        "n": 1
+      },
+      "u2u_active_time_s": {
+        "mean": 448.7029959713299,
+        "ci95_low": 448.7029959713299,
+        "ci95_high": 448.7029959713299,
+        "std": 0.0,
+        "n": 1
+      },
+      "cross_payload_efficiency_mbps": {
+        "mean": 8.800172316548082,
+        "ci95_low": 8.800172316548082,
+        "ci95_high": 8.800172316548082,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_support_heavy_distance_m": {
+        "mean": 322.9822433634234,
+        "ci95_low": 322.9822433634234,
+        "ci95_high": 322.9822433634234,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_support_heavy_nominal_rate_mbps": {
+        "mean": 3.301129753513703,
+        "ci95_low": 3.301129753513703,
+        "ci95_high": 3.301129753513703,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_all_uav_centroid_residual_m": {
+        "mean": 29.57761939080037,
+        "ci95_low": 29.57761939080037,
+        "ci95_high": 29.57761939080037,
+        "std": 0.0,
+        "n": 1
+      },
+      "heavy_to_support_flow_mbits": {
+        "mean": 2210.605209583628,
+        "ci95_low": 2210.605209583628,
+        "ci95_high": 2210.605209583628,
+        "std": 0.0,
+        "n": 1
+      },
+      "support_motion_alignment_mean": {
+        "mean": -0.9968695452247026,
+        "ci95_low": -0.9968695452247026,
+        "ci95_high": -0.9968695452247026,
+        "std": 0.0,
+        "n": 1
+      },
+      "support_toward_fraction": {
+        "mean": 0.0,
+        "ci95_low": 0.0,
+        "ci95_high": 0.0,
+        "std": 0.0,
+        "n": 1
+      },
+      "residual_gate_mean": {
+        "mean": 1.0,
+        "ci95_low": 1.0,
+        "ci95_high": 1.0,
+        "std": 0.0,
+        "n": 1
+      }
+    },
+    "joint_td3_sac": {
+      "task_delay_weighted_ms": {
+        "mean": 770.2889558588927,
+        "ci95_low": 770.2889558588927,
+        "ci95_high": 770.2889558588927,
+        "std": 0.0,
+        "n": 1
+      },
+      "task_delay_high_ms": {
+        "mean": 530.0578034682102,
+        "ci95_low": 530.0578034682102,
+        "ci95_high": 530.0578034682102,
+        "std": 0.0,
+        "n": 1
+      },
+      "task_delay_low_ms": {
+        "mean": 1848.7187804086964,
+        "ci95_low": 1848.7187804086964,
+        "ci95_high": 1848.7187804086964,
+        "std": 0.0,
+        "n": 1
+      },
+      "transition_window_delay_weighted_ms": {
+        "mean": 736.7227918351956,
+        "ci95_low": 736.7227918351956,
+        "ci95_high": 736.7227918351956,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_queue_mbits": {
+        "mean": 8.439163824579019,
+        "ci95_low": 8.439163824579019,
+        "ci95_high": 8.439163824579019,
+        "std": 0.0,
+        "n": 1
+      },
+      "terminal_queue_mbits": {
+        "mean": 7.786552924097861,
+        "ci95_low": 7.786552924097861,
+        "ci95_high": 7.786552924097861,
+        "std": 0.0,
+        "n": 1
+      },
+      "tail_queue_slope_mbps": {
+        "mean": 0.0031162780825722946,
+        "ci95_low": 0.0031162780825722946,
+        "ci95_high": 0.0031162780825722946,
+        "std": 0.0,
+        "n": 1
+      },
+      "peak_queue_mbits": {
+        "mean": 22.31089991502325,
+        "ci95_low": 22.31089991502325,
+        "ci95_high": 22.31089991502325,
+        "std": 0.0,
+        "n": 1
+      },
+      "task_completion_rate": {
+        "mean": 0.9985469989940762,
+        "ci95_low": 0.9985469989940762,
+        "ci95_high": 0.9985469989940762,
+        "std": 0.0,
+        "n": 1
+      },
+      "soft_objective_j": {
+        "mean": 0.8802341838316748,
+        "ci95_low": 0.8802341838316748,
+        "ci95_high": 0.8802341838316748,
+        "std": 0.0,
+        "n": 1
+      },
+      "average_power_w": {
+        "mean": 863.1089904075544,
+        "ci95_low": 863.1089904075544,
+        "ci95_high": 863.1089904075544,
+        "std": 0.0,
+        "n": 1
+      },
+      "coop_ratio": {
+        "mean": 0.5313364383474501,
+        "ci95_low": 0.5313364383474501,
+        "ci95_high": 0.5313364383474501,
+        "std": 0.0,
+        "n": 1
+      },
+      "cross_flow_mbits": {
+        "mean": 3951.8917442113147,
+        "ci95_low": 3951.8917442113147,
+        "ci95_high": 3951.8917442113147,
+        "std": 0.0,
+        "n": 1
+      },
+      "u2u_active_time_s": {
+        "mean": 461.32959442318366,
+        "ci95_low": 461.32959442318366,
+        "ci95_high": 461.32959442318366,
+        "std": 0.0,
+        "n": 1
+      },
+      "cross_payload_efficiency_mbps": {
+        "mean": 8.566308756221247,
+        "ci95_low": 8.566308756221247,
+        "ci95_high": 8.566308756221247,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_support_heavy_distance_m": {
+        "mean": 342.3998908721813,
+        "ci95_low": 342.3998908721813,
+        "ci95_high": 342.3998908721813,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_support_heavy_nominal_rate_mbps": {
+        "mean": 3.22724798246147,
+        "ci95_low": 3.22724798246147,
+        "ci95_high": 3.22724798246147,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_all_uav_centroid_residual_m": {
+        "mean": 35.06238779982126,
+        "ci95_low": 35.06238779982126,
+        "ci95_high": 35.06238779982126,
+        "std": 0.0,
+        "n": 1
+      },
+      "heavy_to_support_flow_mbits": {
+        "mean": 2198.1236561512,
+        "ci95_low": 2198.1236561512,
+        "ci95_high": 2198.1236561512,
+        "std": 0.0,
+        "n": 1
+      },
+      "support_motion_alignment_mean": {
+        "mean": 0.03477296625206766,
+        "ci95_low": 0.03477296625206766,
+        "ci95_high": 0.03477296625206766,
+        "std": 0.0,
+        "n": 1
+      },
+      "support_toward_fraction": {
+        "mean": 0.5172413793103449,
+        "ci95_low": 0.5172413793103449,
+        "ci95_high": 0.5172413793103449,
+        "std": 0.0,
+        "n": 1
+      },
+      "residual_gate_mean": {
+        "mean": 1.0,
+        "ci95_low": 1.0,
+        "ci95_high": 1.0,
+        "std": 0.0,
+        "n": 1
+      }
+    },
+    "no_coop": {
+      "task_delay_weighted_ms": {
+        "mean": 8941.431473667793,
+        "ci95_low": 8941.431473667793,
+        "ci95_high": 8941.431473667793,
+        "std": 0.0,
+        "n": 1
+      },
+      "task_delay_high_ms": {
+        "mean": 502.1668472372704,
+        "ci95_low": 502.1668472372704,
+        "ci95_high": 502.1668472372704,
+        "std": 0.0,
+        "n": 1
+      },
+      "task_delay_low_ms": {
+        "mean": 63223.25203252056,
+        "ci95_low": 63223.25203252056,
+        "ci95_high": 63223.25203252056,
+        "std": 0.0,
+        "n": 1
+      },
+      "transition_window_delay_weighted_ms": {
+        "mean": 10216.00656877902,
+        "ci95_low": 10216.00656877902,
+        "ci95_high": 10216.00656877902,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_queue_mbits": {
+        "mean": 1195.3015697088933,
+        "ci95_low": 1195.3015697088933,
+        "ci95_high": 1195.3015697088933,
+        "std": 0.0,
+        "n": 1
+      },
+      "terminal_queue_mbits": {
+        "mean": 1854.5999197661877,
+        "ci95_low": 1854.5999197661877,
+        "ci95_high": 1854.5999197661877,
+        "std": 0.0,
+        "n": 1
+      },
+      "tail_queue_slope_mbps": {
+        "mean": 3.862908929559319,
+        "ci95_low": 3.862908929559319,
+        "ci95_high": 3.862908929559319,
+        "std": 0.0,
+        "n": 1
+      },
+      "peak_queue_mbits": {
+        "mean": 1854.5999197661877,
+        "ci95_low": 1854.5999197661877,
+        "ci95_high": 1854.5999197661877,
+        "std": 0.0,
+        "n": 1
+      },
+      "task_completion_rate": {
+        "mean": 0.7906560858388286,
+        "ci95_low": 0.7906560858388286,
+        "ci95_high": 0.7906560858388286,
+        "std": 0.0,
+        "n": 1
+      },
+      "soft_objective_j": {
+        "mean": 7.171713051766395,
+        "ci95_low": 7.171713051766395,
+        "ci95_high": 7.171713051766395,
+        "std": 0.0,
+        "n": 1
+      },
+      "average_power_w": {
+        "mean": 801.9136909895774,
+        "ci95_low": 801.9136909895774,
+        "ci95_high": 801.9136909895774,
+        "std": 0.0,
+        "n": 1
+      },
+      "coop_ratio": {
+        "mean": 0.0,
+        "ci95_low": 0.0,
+        "ci95_high": 0.0,
+        "std": 0.0,
+        "n": 1
+      },
+      "cross_flow_mbits": {
+        "mean": 0.0,
+        "ci95_low": 0.0,
+        "ci95_high": 0.0,
+        "std": 0.0,
+        "n": 1
+      },
+      "u2u_active_time_s": {
+        "mean": 0.0,
+        "ci95_low": 0.0,
+        "ci95_high": 0.0,
+        "std": 0.0,
+        "n": 1
+      },
+      "cross_payload_efficiency_mbps": {
+        "mean": 0.0,
+        "ci95_low": 0.0,
+        "ci95_high": 0.0,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_support_heavy_distance_m": {
+        "mean": 350.016219754719,
+        "ci95_low": 350.016219754719,
+        "ci95_high": 350.016219754719,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_support_heavy_nominal_rate_mbps": {
+        "mean": 3.204938345476914,
+        "ci95_low": 3.204938345476914,
+        "ci95_high": 3.204938345476914,
+        "std": 0.0,
+        "n": 1
+      },
+      "mean_all_uav_centroid_residual_m": {
+        "mean": 42.35660020883553,
+        "ci95_low": 42.35660020883553,
+        "ci95_high": 42.35660020883553,
+        "std": 0.0,
+        "n": 1
+      },
+      "heavy_to_support_flow_mbits": {
+        "mean": 0.0,
+        "ci95_low": 0.0,
+        "ci95_high": 0.0,
+        "std": 0.0,
+        "n": 1
+      },
+      "support_motion_alignment_mean": {
+        "mean": -0.24626100192940162,
+        "ci95_low": -0.24626100192940162,
+        "ci95_high": -0.24626100192940162,
+        "std": 0.0,
+        "n": 1
+      },
+      "support_toward_fraction": {
+        "mean": 0.3333333333333333,
+        "ci95_low": 0.3333333333333333,
+        "ci95_high": 0.3333333333333333,
+        "std": 0.0,
+        "n": 1
+      },
+      "residual_gate_mean": {
+        "mean": 1.0,
+        "ci95_low": 1.0,
+        "ci95_high": 1.0,
+        "std": 0.0,
+        "n": 1
+      }
+    }
+  },
+  "complete_minus_baseline": {
+    "cppo_sca": {
+      "task_delay_weighted_ms": {
+        "mean": 48.156693870642016,
+        "ci95_low": 48.156693870642016,
+        "ci95_high": 48.156693870642016,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "cppo_sca",
+        "field": "task_delay_weighted_ms",
+        "per_seed": {
+          "8300": 48.156693870642016
+        }
+      },
+      "task_delay_high_ms": {
+        "mean": 0.5419075144501448,
+        "ci95_low": 0.5419075144501448,
+        "ci95_high": 0.5419075144501448,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "cppo_sca",
+        "field": "task_delay_high_ms",
+        "per_seed": {
+          "8300": 0.5419075144501448
+        }
+      },
+      "task_delay_low_ms": {
+        "mean": 262.70358092823426,
+        "ci95_low": 262.70358092823426,
+        "ci95_high": 262.70358092823426,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "cppo_sca",
+        "field": "task_delay_low_ms",
+        "per_seed": {
+          "8300": 262.70358092823426
+        }
+      },
+      "transition_window_delay_weighted_ms": {
+        "mean": 22.425963122575467,
+        "ci95_low": 22.425963122575467,
+        "ci95_high": 22.425963122575467,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "cppo_sca",
+        "field": "transition_window_delay_weighted_ms",
+        "per_seed": {
+          "8300": 22.425963122575467
+        }
+      },
+      "mean_queue_mbits": {
+        "mean": 1.8946131228324097,
+        "ci95_low": 1.8946131228324097,
+        "ci95_high": 1.8946131228324097,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "cppo_sca",
+        "field": "mean_queue_mbits",
+        "per_seed": {
+          "8300": 1.8946131228324097
+        }
+      },
+      "terminal_queue_mbits": {
+        "mean": 1.1603694180204167,
+        "ci95_low": 1.1603694180204167,
+        "ci95_high": 1.1603694180204167,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "cppo_sca",
+        "field": "terminal_queue_mbits",
+        "per_seed": {
+          "8300": 1.1603694180204167
+        }
+      },
+      "tail_queue_slope_mbps": {
+        "mean": 0.029547060258484286,
+        "ci95_low": 0.029547060258484286,
+        "ci95_high": 0.029547060258484286,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "cppo_sca",
+        "field": "tail_queue_slope_mbps",
+        "per_seed": {
+          "8300": 0.029547060258484286
+        }
+      },
+      "peak_queue_mbits": {
+        "mean": 3.4448124482547726,
+        "ci95_low": 3.4448124482547726,
+        "ci95_high": 3.4448124482547726,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "cppo_sca",
+        "field": "peak_queue_mbits",
+        "per_seed": {
+          "8300": 3.4448124482547726
+        }
+      },
+      "task_completion_rate": {
+        "mean": -0.000558846540739899,
+        "ci95_low": -0.000558846540739899,
+        "ci95_high": -0.000558846540739899,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "cppo_sca",
+        "field": "task_completion_rate",
+        "per_seed": {
+          "8300": -0.000558846540739899
+        }
+      },
+      "soft_objective_j": {
+        "mean": 0.048939011180529124,
+        "ci95_low": 0.048939011180529124,
+        "ci95_high": 0.048939011180529124,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "cppo_sca",
+        "field": "soft_objective_j",
+        "per_seed": {
+          "8300": 0.048939011180529124
+        }
+      },
+      "average_power_w": {
+        "mean": 0.0042154408500891805,
+        "ci95_low": 0.0042154408500891805,
+        "ci95_high": 0.0042154408500891805,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "cppo_sca",
+        "field": "average_power_w",
+        "per_seed": {
+          "8300": 0.0042154408500891805
+        }
+      },
+      "coop_ratio": {
+        "mean": -0.004163633554409518,
+        "ci95_low": -0.004163633554409518,
+        "ci95_high": -0.004163633554409518,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "cppo_sca",
+        "field": "coop_ratio",
+        "per_seed": {
+          "8300": -0.004163633554409518
+        }
+      },
+      "cross_flow_mbits": {
+        "mean": -30.832822863449564,
+        "ci95_low": -30.832822863449564,
+        "ci95_high": -30.832822863449564,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "cppo_sca",
+        "field": "cross_flow_mbits",
+        "per_seed": {
+          "8300": -30.832822863449564
+        }
+      },
+      "u2u_active_time_s": {
+        "mean": 2.8502986350529227,
+        "ci95_low": 2.8502986350529227,
+        "ci95_high": 2.8502986350529227,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "cppo_sca",
+        "field": "u2u_active_time_s",
+        "per_seed": {
+          "8300": 2.8502986350529227
+        }
+      },
+      "cross_payload_efficiency_mbps": {
+        "mean": -0.1188544791831685,
+        "ci95_low": -0.1188544791831685,
+        "ci95_high": -0.1188544791831685,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "cppo_sca",
+        "field": "cross_payload_efficiency_mbps",
+        "per_seed": {
+          "8300": -0.1188544791831685
+        }
+      },
+      "mean_support_heavy_distance_m": {
+        "mean": -3.3892316478340945,
+        "ci95_low": -3.3892316478340945,
+        "ci95_high": -3.3892316478340945,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "cppo_sca",
+        "field": "mean_support_heavy_distance_m",
+        "per_seed": {
+          "8300": -3.3892316478340945
+        }
+      },
+      "mean_support_heavy_nominal_rate_mbps": {
+        "mean": 0.013695216753102812,
+        "ci95_low": 0.013695216753102812,
+        "ci95_high": 0.013695216753102812,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "cppo_sca",
+        "field": "mean_support_heavy_nominal_rate_mbps",
+        "per_seed": {
+          "8300": 0.013695216753102812
+        }
+      },
+      "mean_all_uav_centroid_residual_m": {
+        "mean": 1.0853279909909386,
+        "ci95_low": 1.0853279909909386,
+        "ci95_high": 1.0853279909909386,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "cppo_sca",
+        "field": "mean_all_uav_centroid_residual_m",
+        "per_seed": {
+          "8300": 1.0853279909909386
+        }
+      },
+      "heavy_to_support_flow_mbits": {
+        "mean": 14.918997600022067,
+        "ci95_low": 14.918997600022067,
+        "ci95_high": 14.918997600022067,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "cppo_sca",
+        "field": "heavy_to_support_flow_mbits",
+        "per_seed": {
+          "8300": 14.918997600022067
+        }
+      },
+      "support_motion_alignment_mean": {
+        "mean": 0.01801202769282706,
+        "ci95_low": 0.01801202769282706,
+        "ci95_high": 0.01801202769282706,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "cppo_sca",
+        "field": "support_motion_alignment_mean",
+        "per_seed": {
+          "8300": 0.01801202769282706
+        }
+      },
+      "support_toward_fraction": {
+        "mean": -0.03448275862068967,
+        "ci95_low": -0.03448275862068967,
+        "ci95_high": -0.03448275862068967,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "cppo_sca",
+        "field": "support_toward_fraction",
+        "per_seed": {
+          "8300": -0.03448275862068967
+        }
+      },
+      "residual_gate_mean": {
+        "mean": 0.7005047990768044,
+        "ci95_low": 0.7005047990768044,
+        "ci95_high": 0.7005047990768044,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "cppo_sca",
+        "field": "residual_gate_mean",
+        "per_seed": {
+          "8300": 0.7005047990768044
+        }
+      }
+    },
+    "joint_ppo_sac": {
+      "task_delay_weighted_ms": {
+        "mean": -45.17847311985702,
+        "ci95_low": -45.17847311985702,
+        "ci95_high": -45.17847311985702,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_ppo_sac",
+        "field": "task_delay_weighted_ms",
+        "per_seed": {
+          "8300": -45.17847311985702
+        }
+      },
+      "task_delay_high_ms": {
+        "mean": 0.18063583815046513,
+        "ci95_low": 0.18063583815046513,
+        "ci95_high": 0.18063583815046513,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_ppo_sac",
+        "field": "task_delay_high_ms",
+        "per_seed": {
+          "8300": 0.18063583815046513
+        }
+      },
+      "task_delay_low_ms": {
+        "mean": -254.29518873387474,
+        "ci95_low": -254.29518873387474,
+        "ci95_high": -254.29518873387474,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_ppo_sac",
+        "field": "task_delay_low_ms",
+        "per_seed": {
+          "8300": -254.29518873387474
+        }
+      },
+      "transition_window_delay_weighted_ms": {
+        "mean": -27.23489088290762,
+        "ci95_low": -27.23489088290762,
+        "ci95_high": -27.23489088290762,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_ppo_sac",
+        "field": "transition_window_delay_weighted_ms",
+        "per_seed": {
+          "8300": -27.23489088290762
+        }
+      },
+      "mean_queue_mbits": {
+        "mean": -1.9059855013912177,
+        "ci95_low": -1.9059855013912177,
+        "ci95_high": -1.9059855013912177,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_ppo_sac",
+        "field": "mean_queue_mbits",
+        "per_seed": {
+          "8300": -1.9059855013912177
+        }
+      },
+      "terminal_queue_mbits": {
+        "mean": -9.71341947659331,
+        "ci95_low": -9.71341947659331,
+        "ci95_high": -9.71341947659331,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_ppo_sac",
+        "field": "terminal_queue_mbits",
+        "per_seed": {
+          "8300": -9.71341947659331
+        }
+      },
+      "tail_queue_slope_mbps": {
+        "mean": -0.08850612840005861,
+        "ci95_low": -0.08850612840005861,
+        "ci95_high": -0.08850612840005861,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_ppo_sac",
+        "field": "tail_queue_slope_mbps",
+        "per_seed": {
+          "8300": -0.08850612840005861
+        }
+      },
+      "peak_queue_mbits": {
+        "mean": -5.010611148372416,
+        "ci95_low": -5.010611148372416,
+        "ci95_high": -5.010611148372416,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_ppo_sac",
+        "field": "peak_queue_mbits",
+        "per_seed": {
+          "8300": -5.010611148372416
+        }
+      },
+      "task_completion_rate": {
+        "mean": 0.0029060020118475416,
+        "ci95_low": 0.0029060020118475416,
+        "ci95_high": 0.0029060020118475416,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_ppo_sac",
+        "field": "task_completion_rate",
+        "per_seed": {
+          "8300": 0.0029060020118475416
+        }
+      },
+      "soft_objective_j": {
+        "mean": -0.04688434676661801,
+        "ci95_low": -0.04688434676661801,
+        "ci95_high": -0.04688434676661801,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_ppo_sac",
+        "field": "soft_objective_j",
+        "per_seed": {
+          "8300": -0.04688434676661801
+        }
+      },
+      "average_power_w": {
+        "mean": 0.2431148069910023,
+        "ci95_low": 0.2431148069910023,
+        "ci95_high": 0.2431148069910023,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_ppo_sac",
+        "field": "average_power_w",
+        "per_seed": {
+          "8300": 0.2431148069910023
+        }
+      },
+      "coop_ratio": {
+        "mean": 0.0010780610241276634,
+        "ci95_low": 0.0010780610241276634,
+        "ci95_high": 0.0010780610241276634,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_ppo_sac",
+        "field": "coop_ratio",
+        "per_seed": {
+          "8300": 0.0010780610241276634
+        }
+      },
+      "cross_flow_mbits": {
+        "mean": 15.68713157709226,
+        "ci95_low": 15.68713157709226,
+        "ci95_high": 15.68713157709226,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_ppo_sac",
+        "field": "cross_flow_mbits",
+        "per_seed": {
+          "8300": 15.68713157709226
+        }
+      },
+      "u2u_active_time_s": {
+        "mean": 4.589293238817277,
+        "ci95_low": 4.589293238817277,
+        "ci95_high": 4.589293238817277,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_ppo_sac",
+        "field": "u2u_active_time_s",
+        "per_seed": {
+          "8300": 4.589293238817277
+        }
+      },
+      "cross_payload_efficiency_mbps": {
+        "mean": -0.05055735317800725,
+        "ci95_low": -0.05055735317800725,
+        "ci95_high": -0.05055735317800725,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_ppo_sac",
+        "field": "cross_payload_efficiency_mbps",
+        "per_seed": {
+          "8300": -0.05055735317800725
+        }
+      },
+      "mean_support_heavy_distance_m": {
+        "mean": 2.4785508594045496,
+        "ci95_low": 2.4785508594045496,
+        "ci95_high": 2.4785508594045496,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_ppo_sac",
+        "field": "mean_support_heavy_distance_m",
+        "per_seed": {
+          "8300": 2.4785508594045496
+        }
+      },
+      "mean_support_heavy_nominal_rate_mbps": {
+        "mean": -0.009497741612554567,
+        "ci95_low": -0.009497741612554567,
+        "ci95_high": -0.009497741612554567,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_ppo_sac",
+        "field": "mean_support_heavy_nominal_rate_mbps",
+        "per_seed": {
+          "8300": -0.009497741612554567
+        }
+      },
+      "mean_all_uav_centroid_residual_m": {
+        "mean": -1.0122745564913487,
+        "ci95_low": -1.0122745564913487,
+        "ci95_high": -1.0122745564913487,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_ppo_sac",
+        "field": "mean_all_uav_centroid_residual_m",
+        "per_seed": {
+          "8300": -1.0122745564913487
+        }
+      },
+      "heavy_to_support_flow_mbits": {
+        "mean": -20.062684656074453,
+        "ci95_low": -20.062684656074453,
+        "ci95_high": -20.062684656074453,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_ppo_sac",
+        "field": "heavy_to_support_flow_mbits",
+        "per_seed": {
+          "8300": -20.062684656074453
+        }
+      },
+      "support_motion_alignment_mean": {
+        "mean": -0.006233724679702013,
+        "ci95_low": -0.006233724679702013,
+        "ci95_high": -0.006233724679702013,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_ppo_sac",
+        "field": "support_motion_alignment_mean",
+        "per_seed": {
+          "8300": -0.006233724679702013
+        }
+      },
+      "support_toward_fraction": {
+        "mean": 0.0,
+        "ci95_low": 0.0,
+        "ci95_high": 0.0,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_ppo_sac",
+        "field": "support_toward_fraction",
+        "per_seed": {
+          "8300": 0.0
+        }
+      },
+      "residual_gate_mean": {
+        "mean": -0.2994952009231956,
+        "ci95_low": -0.2994952009231956,
+        "ci95_high": -0.2994952009231956,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_ppo_sac",
+        "field": "residual_gate_mean",
+        "per_seed": {
+          "8300": -0.2994952009231956
+        }
+      }
+    },
+    "centroid_gated_sac": {
+      "task_delay_weighted_ms": {
+        "mean": -12.78823144217995,
+        "ci95_low": -12.78823144217995,
+        "ci95_high": -12.78823144217995,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_gated_sac",
+        "field": "task_delay_weighted_ms",
+        "per_seed": {
+          "8300": -12.78823144217995
+        }
+      },
+      "task_delay_high_ms": {
+        "mean": 1.300578034681962,
+        "ci95_low": 1.300578034681962,
+        "ci95_high": 1.300578034681962,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_gated_sac",
+        "field": "task_delay_high_ms",
+        "per_seed": {
+          "8300": 1.300578034681962
+        }
+      },
+      "task_delay_low_ms": {
+        "mean": -78.27567049208437,
+        "ci95_low": -78.27567049208437,
+        "ci95_high": -78.27567049208437,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_gated_sac",
+        "field": "task_delay_low_ms",
+        "per_seed": {
+          "8300": -78.27567049208437
+        }
+      },
+      "transition_window_delay_weighted_ms": {
+        "mean": -9.990522703623583,
+        "ci95_low": -9.990522703623583,
+        "ci95_high": -9.990522703623583,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_gated_sac",
+        "field": "transition_window_delay_weighted_ms",
+        "per_seed": {
+          "8300": -9.990522703623583
+        }
+      },
+      "mean_queue_mbits": {
+        "mean": -0.7078940585580416,
+        "ci95_low": -0.7078940585580416,
+        "ci95_high": -0.7078940585580416,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_gated_sac",
+        "field": "mean_queue_mbits",
+        "per_seed": {
+          "8300": -0.7078940585580416
+        }
+      },
+      "terminal_queue_mbits": {
+        "mean": -4.645777260562488,
+        "ci95_low": -4.645777260562488,
+        "ci95_high": -4.645777260562488,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_gated_sac",
+        "field": "terminal_queue_mbits",
+        "per_seed": {
+          "8300": -4.645777260562488
+        }
+      },
+      "tail_queue_slope_mbps": {
+        "mean": -0.053298938581622664,
+        "ci95_low": -0.053298938581622664,
+        "ci95_high": -0.053298938581622664,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_gated_sac",
+        "field": "tail_queue_slope_mbps",
+        "per_seed": {
+          "8300": -0.053298938581622664
+        }
+      },
+      "peak_queue_mbits": {
+        "mean": -1.3085537399744318,
+        "ci95_low": -1.3085537399744318,
+        "ci95_high": -1.3085537399744318,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_gated_sac",
+        "field": "peak_queue_mbits",
+        "per_seed": {
+          "8300": -1.3085537399744318
+        }
+      },
+      "task_completion_rate": {
+        "mean": 0.0013412316977757799,
+        "ci95_low": 0.0013412316977757799,
+        "ci95_high": 0.0013412316977757799,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_gated_sac",
+        "field": "task_completion_rate",
+        "per_seed": {
+          "8300": 0.0013412316977757799
+        }
+      },
+      "soft_objective_j": {
+        "mean": -0.01290268020772678,
+        "ci95_low": -0.01290268020772678,
+        "ci95_high": -0.01290268020772678,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_gated_sac",
+        "field": "soft_objective_j",
+        "per_seed": {
+          "8300": -0.01290268020772678
+        }
+      },
+      "average_power_w": {
+        "mean": 0.5086477587196896,
+        "ci95_low": 0.5086477587196896,
+        "ci95_high": 0.5086477587196896,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_gated_sac",
+        "field": "average_power_w",
+        "per_seed": {
+          "8300": 0.5086477587196896
+        }
+      },
+      "coop_ratio": {
+        "mean": 0.0009499242658800311,
+        "ci95_low": 0.0009499242658800311,
+        "ci95_high": 0.0009499242658800311,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_gated_sac",
+        "field": "coop_ratio",
+        "per_seed": {
+          "8300": 0.0009499242658800311
+        }
+      },
+      "cross_flow_mbits": {
+        "mean": 12.529782970718315,
+        "ci95_low": 12.529782970718315,
+        "ci95_high": 12.529782970718315,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_gated_sac",
+        "field": "cross_flow_mbits",
+        "per_seed": {
+          "8300": 12.529782970718315
+        }
+      },
+      "u2u_active_time_s": {
+        "mean": -3.9390689426781478,
+        "ci95_low": -3.9390689426781478,
+        "ci95_high": -3.9390689426781478,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_gated_sac",
+        "field": "u2u_active_time_s",
+        "per_seed": {
+          "8300": -3.9390689426781478
+        }
+      },
+      "cross_payload_efficiency_mbps": {
+        "mean": 0.09789897867772801,
+        "ci95_low": 0.09789897867772801,
+        "ci95_high": 0.09789897867772801,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_gated_sac",
+        "field": "cross_payload_efficiency_mbps",
+        "per_seed": {
+          "8300": 0.09789897867772801
+        }
+      },
+      "mean_support_heavy_distance_m": {
+        "mean": -5.830327317889555,
+        "ci95_low": -5.830327317889555,
+        "ci95_high": -5.830327317889555,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_gated_sac",
+        "field": "mean_support_heavy_distance_m",
+        "per_seed": {
+          "8300": -5.830327317889555
+        }
+      },
+      "mean_support_heavy_nominal_rate_mbps": {
+        "mean": 0.023133389997205267,
+        "ci95_low": 0.023133389997205267,
+        "ci95_high": 0.023133389997205267,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_gated_sac",
+        "field": "mean_support_heavy_nominal_rate_mbps",
+        "per_seed": {
+          "8300": 0.023133389997205267
+        }
+      },
+      "mean_all_uav_centroid_residual_m": {
+        "mean": 2.0890054052300435,
+        "ci95_low": 2.0890054052300435,
+        "ci95_high": 2.0890054052300435,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_gated_sac",
+        "field": "mean_all_uav_centroid_residual_m",
+        "per_seed": {
+          "8300": 2.0890054052300435
+        }
+      },
+      "heavy_to_support_flow_mbits": {
+        "mean": 9.48061704615111,
+        "ci95_low": 9.48061704615111,
+        "ci95_high": 9.48061704615111,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_gated_sac",
+        "field": "heavy_to_support_flow_mbits",
+        "per_seed": {
+          "8300": 9.48061704615111
+        }
+      },
+      "support_motion_alignment_mean": {
+        "mean": 0.021795342251298755,
+        "ci95_low": 0.021795342251298755,
+        "ci95_high": 0.021795342251298755,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_gated_sac",
+        "field": "support_motion_alignment_mean",
+        "per_seed": {
+          "8300": 0.021795342251298755
+        }
+      },
+      "support_toward_fraction": {
+        "mean": -0.03448275862068967,
+        "ci95_low": -0.03448275862068967,
+        "ci95_high": -0.03448275862068967,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_gated_sac",
+        "field": "support_toward_fraction",
+        "per_seed": {
+          "8300": -0.03448275862068967
+        }
+      },
+      "residual_gate_mean": {
+        "mean": 0.07883985555144368,
+        "ci95_low": 0.07883985555144368,
+        "ci95_high": 0.07883985555144368,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_gated_sac",
+        "field": "residual_gate_mean",
+        "per_seed": {
+          "8300": 0.07883985555144368
+        }
+      }
+    },
+    "centroid_sac": {
+      "task_delay_weighted_ms": {
+        "mean": -41.275027224185806,
+        "ci95_low": -41.275027224185806,
+        "ci95_high": -41.275027224185806,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_sac",
+        "field": "task_delay_weighted_ms",
+        "per_seed": {
+          "8300": -41.275027224185806
+        }
+      },
+      "task_delay_high_ms": {
+        "mean": 0.6141618497110812,
+        "ci95_low": 0.6141618497110812,
+        "ci95_high": 0.6141618497110812,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_sac",
+        "field": "task_delay_high_ms",
+        "per_seed": {
+          "8300": 0.6141618497110812
+        }
+      },
+      "task_delay_low_ms": {
+        "mean": -234.53542454003423,
+        "ci95_low": -234.53542454003423,
+        "ci95_high": -234.53542454003423,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_sac",
+        "field": "task_delay_low_ms",
+        "per_seed": {
+          "8300": -234.53542454003423
+        }
+      },
+      "transition_window_delay_weighted_ms": {
+        "mean": -17.98353959765825,
+        "ci95_low": -17.98353959765825,
+        "ci95_high": -17.98353959765825,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_sac",
+        "field": "transition_window_delay_weighted_ms",
+        "per_seed": {
+          "8300": -17.98353959765825
+        }
+      },
+      "mean_queue_mbits": {
+        "mean": -1.8207417421876588,
+        "ci95_low": -1.8207417421876588,
+        "ci95_high": -1.8207417421876588,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_sac",
+        "field": "mean_queue_mbits",
+        "per_seed": {
+          "8300": -1.8207417421876588
+        }
+      },
+      "terminal_queue_mbits": {
+        "mean": -9.447766316852514,
+        "ci95_low": -9.447766316852514,
+        "ci95_high": -9.447766316852514,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_sac",
+        "field": "terminal_queue_mbits",
+        "per_seed": {
+          "8300": -9.447766316852514
+        }
+      },
+      "tail_queue_slope_mbps": {
+        "mean": -0.089396122376832,
+        "ci95_low": -0.089396122376832,
+        "ci95_high": -0.089396122376832,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_sac",
+        "field": "tail_queue_slope_mbps",
+        "per_seed": {
+          "8300": -0.089396122376832
+        }
+      },
+      "peak_queue_mbits": {
+        "mean": -5.814734566535147,
+        "ci95_low": -5.814734566535147,
+        "ci95_high": -5.814734566535147,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_sac",
+        "field": "peak_queue_mbits",
+        "per_seed": {
+          "8300": -5.814734566535147
+        }
+      },
+      "task_completion_rate": {
+        "mean": 0.002794232703699495,
+        "ci95_low": 0.002794232703699495,
+        "ci95_high": 0.002794232703699495,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_sac",
+        "field": "task_completion_rate",
+        "per_seed": {
+          "8300": 0.002794232703699495
+        }
+      },
+      "soft_objective_j": {
+        "mean": -0.04257959591687621,
+        "ci95_low": -0.04257959591687621,
+        "ci95_high": -0.04257959591687621,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_sac",
+        "field": "soft_objective_j",
+        "per_seed": {
+          "8300": -0.04257959591687621
+        }
+      },
+      "average_power_w": {
+        "mean": 0.5871657659106404,
+        "ci95_low": 0.5871657659106404,
+        "ci95_high": 0.5871657659106404,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_sac",
+        "field": "average_power_w",
+        "per_seed": {
+          "8300": 0.5871657659106404
+        }
+      },
+      "coop_ratio": {
+        "mean": 0.003091167269555384,
+        "ci95_low": 0.003091167269555384,
+        "ci95_high": 0.003091167269555384,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_sac",
+        "field": "coop_ratio",
+        "per_seed": {
+          "8300": 0.003091167269555384
+        }
+      },
+      "cross_flow_mbits": {
+        "mean": 31.259471485583617,
+        "ci95_low": 31.259471485583617,
+        "ci95_high": 31.259471485583617,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_sac",
+        "field": "cross_flow_mbits",
+        "per_seed": {
+          "8300": 31.259471485583617
+        }
+      },
+      "u2u_active_time_s": {
+        "mean": 0.6012600704836473,
+        "ci95_low": 0.6012600704836473,
+        "ci95_high": 0.6012600704836473,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_sac",
+        "field": "u2u_active_time_s",
+        "per_seed": {
+          "8300": 0.6012600704836473
+        }
+      },
+      "cross_payload_efficiency_mbps": {
+        "mean": 0.056158504736632864,
+        "ci95_low": 0.056158504736632864,
+        "ci95_high": 0.056158504736632864,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_sac",
+        "field": "cross_payload_efficiency_mbps",
+        "per_seed": {
+          "8300": 0.056158504736632864
+        }
+      },
+      "mean_support_heavy_distance_m": {
+        "mean": -5.830327317889555,
+        "ci95_low": -5.830327317889555,
+        "ci95_high": -5.830327317889555,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_sac",
+        "field": "mean_support_heavy_distance_m",
+        "per_seed": {
+          "8300": -5.830327317889555
+        }
+      },
+      "mean_support_heavy_nominal_rate_mbps": {
+        "mean": 0.023133389997205267,
+        "ci95_low": 0.023133389997205267,
+        "ci95_high": 0.023133389997205267,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_sac",
+        "field": "mean_support_heavy_nominal_rate_mbps",
+        "per_seed": {
+          "8300": 0.023133389997205267
+        }
+      },
+      "mean_all_uav_centroid_residual_m": {
+        "mean": 2.0890054052300435,
+        "ci95_low": 2.0890054052300435,
+        "ci95_high": 2.0890054052300435,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_sac",
+        "field": "mean_all_uav_centroid_residual_m",
+        "per_seed": {
+          "8300": 2.0890054052300435
+        }
+      },
+      "heavy_to_support_flow_mbits": {
+        "mean": -11.049279416362424,
+        "ci95_low": -11.049279416362424,
+        "ci95_high": -11.049279416362424,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_sac",
+        "field": "heavy_to_support_flow_mbits",
+        "per_seed": {
+          "8300": -11.049279416362424
+        }
+      },
+      "support_motion_alignment_mean": {
+        "mean": 0.021795342251298755,
+        "ci95_low": 0.021795342251298755,
+        "ci95_high": 0.021795342251298755,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_sac",
+        "field": "support_motion_alignment_mean",
+        "per_seed": {
+          "8300": 0.021795342251298755
+        }
+      },
+      "support_toward_fraction": {
+        "mean": -0.03448275862068967,
+        "ci95_low": -0.03448275862068967,
+        "ci95_high": -0.03448275862068967,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_sac",
+        "field": "support_toward_fraction",
+        "per_seed": {
+          "8300": -0.03448275862068967
+        }
+      },
+      "residual_gate_mean": {
+        "mean": -0.2994952009231956,
+        "ci95_low": -0.2994952009231956,
+        "ci95_high": -0.2994952009231956,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "centroid_sac",
+        "field": "residual_gate_mean",
+        "per_seed": {
+          "8300": -0.2994952009231956
+        }
+      }
+    },
+    "fixed_sac": {
+      "task_delay_weighted_ms": {
+        "mean": 7.81457616796979,
+        "ci95_low": 7.81457616796979,
+        "ci95_high": 7.81457616796979,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "fixed_sac",
+        "field": "task_delay_weighted_ms",
+        "per_seed": {
+          "8300": 7.81457616796979
+        }
+      },
+      "task_delay_high_ms": {
+        "mean": -11.3078034682095,
+        "ci95_low": -11.3078034682095,
+        "ci95_high": -11.3078034682095,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "fixed_sac",
+        "field": "task_delay_high_ms",
+        "per_seed": {
+          "8300": -11.3078034682095
+        }
+      },
+      "task_delay_low_ms": {
+        "mean": 94.4967067388659,
+        "ci95_low": 94.4967067388659,
+        "ci95_high": 94.4967067388659,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "fixed_sac",
+        "field": "task_delay_low_ms",
+        "per_seed": {
+          "8300": 94.4967067388659
+        }
+      },
+      "transition_window_delay_weighted_ms": {
+        "mean": 15.771850295523564,
+        "ci95_low": 15.771850295523564,
+        "ci95_high": 15.771850295523564,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "fixed_sac",
+        "field": "transition_window_delay_weighted_ms",
+        "per_seed": {
+          "8300": 15.771850295523564
+        }
+      },
+      "mean_queue_mbits": {
+        "mean": 0.814112312281674,
+        "ci95_low": 0.814112312281674,
+        "ci95_high": 0.814112312281674,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "fixed_sac",
+        "field": "mean_queue_mbits",
+        "per_seed": {
+          "8300": 0.814112312281674
+        }
+      },
+      "terminal_queue_mbits": {
+        "mean": 0.0028639577582385556,
+        "ci95_low": 0.0028639577582385556,
+        "ci95_high": 0.0028639577582385556,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "fixed_sac",
+        "field": "terminal_queue_mbits",
+        "per_seed": {
+          "8300": 0.0028639577582385556
+        }
+      },
+      "tail_queue_slope_mbps": {
+        "mean": 0.031694208269153895,
+        "ci95_low": 0.031694208269153895,
+        "ci95_high": 0.031694208269153895,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "fixed_sac",
+        "field": "tail_queue_slope_mbps",
+        "per_seed": {
+          "8300": 0.031694208269153895
+        }
+      },
+      "peak_queue_mbits": {
+        "mean": -4.819619761369019,
+        "ci95_low": -4.819619761369019,
+        "ci95_high": -4.819619761369019,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "fixed_sac",
+        "field": "peak_queue_mbits",
+        "per_seed": {
+          "8300": -4.819619761369019
+        }
+      },
+      "task_completion_rate": {
+        "mean": -0.000558846540739899,
+        "ci95_low": -0.000558846540739899,
+        "ci95_high": -0.000558846540739899,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "fixed_sac",
+        "field": "task_completion_rate",
+        "per_seed": {
+          "8300": -0.000558846540739899
+        }
+      },
+      "soft_objective_j": {
+        "mean": 0.010465858993618626,
+        "ci95_low": 0.010465858993618626,
+        "ci95_high": 0.010465858993618626,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "fixed_sac",
+        "field": "soft_objective_j",
+        "per_seed": {
+          "8300": 0.010465858993618626
+        }
+      },
+      "average_power_w": {
+        "mean": 3.5138019417926216,
+        "ci95_low": 3.5138019417926216,
+        "ci95_high": 3.5138019417926216,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "fixed_sac",
+        "field": "average_power_w",
+        "per_seed": {
+          "8300": 3.5138019417926216
+        }
+      },
+      "coop_ratio": {
+        "mean": 0.002156593184635791,
+        "ci95_low": 0.002156593184635791,
+        "ci95_high": 0.002156593184635791,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "fixed_sac",
+        "field": "coop_ratio",
+        "per_seed": {
+          "8300": 0.002156593184635791
+        }
+      },
+      "cross_flow_mbits": {
+        "mean": 15.514010957796927,
+        "ci95_low": 15.514010957796927,
+        "ci95_high": 15.514010957796927,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "fixed_sac",
+        "field": "cross_flow_mbits",
+        "per_seed": {
+          "8300": 15.514010957796927
+        }
+      },
+      "u2u_active_time_s": {
+        "mean": 17.486516615099674,
+        "ci95_low": 17.486516615099674,
+        "ci95_high": 17.486516615099674,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "fixed_sac",
+        "field": "u2u_active_time_s",
+        "per_seed": {
+          "8300": 17.486516615099674
+        }
+      },
+      "cross_payload_efficiency_mbps": {
+        "mean": -0.296811371203054,
+        "ci95_low": -0.296811371203054,
+        "ci95_high": -0.296811371203054,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "fixed_sac",
+        "field": "cross_payload_efficiency_mbps",
+        "per_seed": {
+          "8300": -0.296811371203054
+        }
+      },
+      "mean_support_heavy_distance_m": {
+        "mean": 39.40375666659048,
+        "ci95_low": 39.40375666659048,
+        "ci95_high": 39.40375666659048,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "fixed_sac",
+        "field": "mean_support_heavy_distance_m",
+        "per_seed": {
+          "8300": 39.40375666659048
+        }
+      },
+      "mean_support_heavy_nominal_rate_mbps": {
+        "mean": -0.15736402220361168,
+        "ci95_low": -0.15736402220361168,
+        "ci95_high": -0.15736402220361168,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "fixed_sac",
+        "field": "mean_support_heavy_nominal_rate_mbps",
+        "per_seed": {
+          "8300": -0.15736402220361168
+        }
+      },
+      "mean_all_uav_centroid_residual_m": {
+        "mean": -22.859335627575565,
+        "ci95_low": -22.859335627575565,
+        "ci95_high": -22.859335627575565,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "fixed_sac",
+        "field": "mean_all_uav_centroid_residual_m",
+        "per_seed": {
+          "8300": -22.859335627575565
+        }
+      },
+      "heavy_to_support_flow_mbits": {
+        "mean": -39.68437993695352,
+        "ci95_low": -39.68437993695352,
+        "ci95_high": -39.68437993695352,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "fixed_sac",
+        "field": "heavy_to_support_flow_mbits",
+        "per_seed": {
+          "8300": -39.68437993695352
+        }
+      },
+      "support_motion_alignment_mean": {
+        "mean": 0.6600316682928191,
+        "ci95_low": 0.6600316682928191,
+        "ci95_high": 0.6600316682928191,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "fixed_sac",
+        "field": "support_motion_alignment_mean",
+        "per_seed": {
+          "8300": 0.6600316682928191
+        }
+      },
+      "support_toward_fraction": {
+        "mean": 0.3103448275862069,
+        "ci95_low": 0.3103448275862069,
+        "ci95_high": 0.3103448275862069,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "fixed_sac",
+        "field": "support_toward_fraction",
+        "per_seed": {
+          "8300": 0.3103448275862069
+        }
+      },
+      "residual_gate_mean": {
+        "mean": -0.2994952009231956,
+        "ci95_low": -0.2994952009231956,
+        "ci95_high": -0.2994952009231956,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "fixed_sac",
+        "field": "residual_gate_mean",
+        "per_seed": {
+          "8300": -0.2994952009231956
+        }
+      }
+    },
+    "joint_td3_sac": {
+      "task_delay_weighted_ms": {
+        "mean": -8.734129159129907,
+        "ci95_low": -8.734129159129907,
+        "ci95_high": -8.734129159129907,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_td3_sac",
+        "field": "task_delay_weighted_ms",
+        "per_seed": {
+          "8300": -8.734129159129907
+        }
+      },
+      "task_delay_high_ms": {
+        "mean": -6.647398843931569,
+        "ci95_low": -6.647398843931569,
+        "ci95_high": -6.647398843931569,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_td3_sac",
+        "field": "task_delay_high_ms",
+        "per_seed": {
+          "8300": -6.647398843931569
+        }
+      },
+      "task_delay_low_ms": {
+        "mean": -17.581347340379125,
+        "ci95_low": -17.581347340379125,
+        "ci95_high": -17.581347340379125,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_td3_sac",
+        "field": "task_delay_low_ms",
+        "per_seed": {
+          "8300": -17.581347340379125
+        }
+      },
+      "transition_window_delay_weighted_ms": {
+        "mean": -29.814556541081288,
+        "ci95_low": -29.814556541081288,
+        "ci95_high": -29.814556541081288,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_td3_sac",
+        "field": "transition_window_delay_weighted_ms",
+        "per_seed": {
+          "8300": -29.814556541081288
+        }
+      },
+      "mean_queue_mbits": {
+        "mean": -0.041422112949701884,
+        "ci95_low": -0.041422112949701884,
+        "ci95_high": -0.041422112949701884,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_td3_sac",
+        "field": "mean_queue_mbits",
+        "per_seed": {
+          "8300": -0.041422112949701884
+        }
+      },
+      "terminal_queue_mbits": {
+        "mean": 1.0403268194978486,
+        "ci95_low": 1.0403268194978486,
+        "ci95_high": 1.0403268194978486,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_td3_sac",
+        "field": "terminal_queue_mbits",
+        "per_seed": {
+          "8300": 1.0403268194978486
+        }
+      },
+      "tail_queue_slope_mbps": {
+        "mean": 0.0459236580344888,
+        "ci95_low": 0.0459236580344888,
+        "ci95_high": 0.0459236580344888,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_td3_sac",
+        "field": "tail_queue_slope_mbps",
+        "per_seed": {
+          "8300": 0.0459236580344888
+        }
+      },
+      "peak_queue_mbits": {
+        "mean": 0.2411368082532448,
+        "ci95_low": 0.2411368082532448,
+        "ci95_high": 0.2411368082532448,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_td3_sac",
+        "field": "peak_queue_mbits",
+        "per_seed": {
+          "8300": 0.2411368082532448
+        }
+      },
+      "task_completion_rate": {
+        "mean": -0.0003353079244439172,
+        "ci95_low": -0.0003353079244439172,
+        "ci95_high": -0.0003353079244439172,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_td3_sac",
+        "field": "task_completion_rate",
+        "per_seed": {
+          "8300": -0.0003353079244439172
+        }
+      },
+      "soft_objective_j": {
+        "mean": -0.03651767107069748,
+        "ci95_low": -0.03651767107069748,
+        "ci95_high": -0.03651767107069748,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_td3_sac",
+        "field": "soft_objective_j",
+        "per_seed": {
+          "8300": -0.03651767107069748
+        }
+      },
+      "average_power_w": {
+        "mean": -38.75153817922751,
+        "ci95_low": -38.75153817922751,
+        "ci95_high": -38.75153817922751,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_td3_sac",
+        "field": "average_power_w",
+        "per_seed": {
+          "8300": -38.75153817922751
+        }
+      },
+      "coop_ratio": {
+        "mean": 0.0015962409109082643,
+        "ci95_low": 0.0015962409109082643,
+        "ci95_high": 0.0015962409109082643,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_td3_sac",
+        "field": "coop_ratio",
+        "per_seed": {
+          "8300": 0.0015962409109082643
+        }
+      },
+      "cross_flow_mbits": {
+        "mean": 12.285950245565346,
+        "ci95_low": 12.285950245565346,
+        "ci95_high": 12.285950245565346,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_td3_sac",
+        "field": "cross_flow_mbits",
+        "per_seed": {
+          "8300": 12.285950245565346
+        }
+      },
+      "u2u_active_time_s": {
+        "mean": 4.859918163245936,
+        "ci95_low": 4.859918163245936,
+        "ci95_high": 4.859918163245936,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_td3_sac",
+        "field": "u2u_active_time_s",
+        "per_seed": {
+          "8300": 4.859918163245936
+        }
+      },
+      "cross_payload_efficiency_mbps": {
+        "mean": -0.06294781087621892,
+        "ci95_low": -0.06294781087621892,
+        "ci95_high": -0.06294781087621892,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_td3_sac",
+        "field": "cross_payload_efficiency_mbps",
+        "per_seed": {
+          "8300": -0.06294781087621892
+        }
+      },
+      "mean_support_heavy_distance_m": {
+        "mean": 19.986109157832573,
+        "ci95_low": 19.986109157832573,
+        "ci95_high": 19.986109157832573,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_td3_sac",
+        "field": "mean_support_heavy_distance_m",
+        "per_seed": {
+          "8300": 19.986109157832573
+        }
+      },
+      "mean_support_heavy_nominal_rate_mbps": {
+        "mean": -0.08348225115137886,
+        "ci95_low": -0.08348225115137886,
+        "ci95_high": -0.08348225115137886,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_td3_sac",
+        "field": "mean_support_heavy_nominal_rate_mbps",
+        "per_seed": {
+          "8300": -0.08348225115137886
+        }
+      },
+      "mean_all_uav_centroid_residual_m": {
+        "mean": -28.344104036596455,
+        "ci95_low": -28.344104036596455,
+        "ci95_high": -28.344104036596455,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_td3_sac",
+        "field": "mean_all_uav_centroid_residual_m",
+        "per_seed": {
+          "8300": -28.344104036596455
+        }
+      },
+      "heavy_to_support_flow_mbits": {
+        "mean": -27.202826504525547,
+        "ci95_low": -27.202826504525547,
+        "ci95_high": -27.202826504525547,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_td3_sac",
+        "field": "heavy_to_support_flow_mbits",
+        "per_seed": {
+          "8300": -27.202826504525547
+        }
+      },
+      "support_motion_alignment_mean": {
+        "mean": -0.37161084318395116,
+        "ci95_low": -0.37161084318395116,
+        "ci95_high": -0.37161084318395116,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_td3_sac",
+        "field": "support_motion_alignment_mean",
+        "per_seed": {
+          "8300": -0.37161084318395116
+        }
+      },
+      "support_toward_fraction": {
+        "mean": -0.20689655172413796,
+        "ci95_low": -0.20689655172413796,
+        "ci95_high": -0.20689655172413796,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_td3_sac",
+        "field": "support_toward_fraction",
+        "per_seed": {
+          "8300": -0.20689655172413796
+        }
+      },
+      "residual_gate_mean": {
+        "mean": -0.2994952009231956,
+        "ci95_low": -0.2994952009231956,
+        "ci95_high": -0.2994952009231956,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "joint_td3_sac",
+        "field": "residual_gate_mean",
+        "per_seed": {
+          "8300": -0.2994952009231956
+        }
+      }
+    },
+    "no_coop": {
+      "task_delay_weighted_ms": {
+        "mean": -8179.87664696803,
+        "ci95_low": -8179.87664696803,
+        "ci95_high": -8179.87664696803,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "no_coop",
+        "field": "task_delay_weighted_ms",
+        "per_seed": {
+          "8300": -8179.87664696803
+        }
+      },
+      "task_delay_high_ms": {
+        "mean": 21.243557387008195,
+        "ci95_low": 21.243557387008195,
+        "ci95_high": 21.243557387008195,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "no_coop",
+        "field": "task_delay_high_ms",
+        "per_seed": {
+          "8300": 21.243557387008195
+        }
+      },
+      "task_delay_low_ms": {
+        "mean": -61392.114599452245,
+        "ci95_low": -61392.114599452245,
+        "ci95_high": -61392.114599452245,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "no_coop",
+        "field": "task_delay_low_ms",
+        "per_seed": {
+          "8300": -61392.114599452245
+        }
+      },
+      "transition_window_delay_weighted_ms": {
+        "mean": -9509.098333484904,
+        "ci95_low": -9509.098333484904,
+        "ci95_high": -9509.098333484904,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "no_coop",
+        "field": "transition_window_delay_weighted_ms",
+        "per_seed": {
+          "8300": -9509.098333484904
+        }
+      },
+      "mean_queue_mbits": {
+        "mean": -1186.903827997264,
+        "ci95_low": -1186.903827997264,
+        "ci95_high": -1186.903827997264,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "no_coop",
+        "field": "mean_queue_mbits",
+        "per_seed": {
+          "8300": -1186.903827997264
+        }
+      },
+      "terminal_queue_mbits": {
+        "mean": -1845.7730400225919,
+        "ci95_low": -1845.7730400225919,
+        "ci95_high": -1845.7730400225919,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "no_coop",
+        "field": "terminal_queue_mbits",
+        "per_seed": {
+          "8300": -1845.7730400225919
+        }
+      },
+      "tail_queue_slope_mbps": {
+        "mean": -3.8138689934422576,
+        "ci95_low": -3.8138689934422576,
+        "ci95_high": -3.8138689934422576,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "no_coop",
+        "field": "tail_queue_slope_mbps",
+        "per_seed": {
+          "8300": -3.8138689934422576
+        }
+      },
+      "peak_queue_mbits": {
+        "mean": -1832.0478830429113,
+        "ci95_low": -1832.0478830429113,
+        "ci95_high": -1832.0478830429113,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "no_coop",
+        "field": "peak_queue_mbits",
+        "per_seed": {
+          "8300": -1832.0478830429113
+        }
+      },
+      "task_completion_rate": {
+        "mean": 0.20755560523080363,
+        "ci95_low": 0.20755560523080363,
+        "ci95_high": 0.20755560523080363,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "no_coop",
+        "field": "task_completion_rate",
+        "per_seed": {
+          "8300": 0.20755560523080363
+        }
+      },
+      "soft_objective_j": {
+        "mean": -6.327996539005418,
+        "ci95_low": -6.327996539005418,
+        "ci95_high": -6.327996539005418,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "no_coop",
+        "field": "soft_objective_j",
+        "per_seed": {
+          "8300": -6.327996539005418
+        }
+      },
+      "average_power_w": {
+        "mean": 22.443761238749516,
+        "ci95_low": 22.443761238749516,
+        "ci95_high": 22.443761238749516,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "no_coop",
+        "field": "average_power_w",
+        "per_seed": {
+          "8300": 22.443761238749516
+        }
+      },
+      "coop_ratio": {
+        "mean": 0.5329326792583584,
+        "ci95_low": 0.5329326792583584,
+        "ci95_high": 0.5329326792583584,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "no_coop",
+        "field": "coop_ratio",
+        "per_seed": {
+          "8300": 0.5329326792583584
+        }
+      },
+      "cross_flow_mbits": {
+        "mean": 3964.17769445688,
+        "ci95_low": 3964.17769445688,
+        "ci95_high": 3964.17769445688,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "no_coop",
+        "field": "cross_flow_mbits",
+        "per_seed": {
+          "8300": 3964.17769445688
+        }
+      },
+      "u2u_active_time_s": {
+        "mean": 466.1895125864296,
+        "ci95_low": 466.1895125864296,
+        "ci95_high": 466.1895125864296,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "no_coop",
+        "field": "u2u_active_time_s",
+        "per_seed": {
+          "8300": 466.1895125864296
+        }
+      },
+      "cross_payload_efficiency_mbps": {
+        "mean": 8.503360945345028,
+        "ci95_low": 8.503360945345028,
+        "ci95_high": 8.503360945345028,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "no_coop",
+        "field": "cross_payload_efficiency_mbps",
+        "per_seed": {
+          "8300": 8.503360945345028
+        }
+      },
+      "mean_support_heavy_distance_m": {
+        "mean": 12.369780275294886,
+        "ci95_low": 12.369780275294886,
+        "ci95_high": 12.369780275294886,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "no_coop",
+        "field": "mean_support_heavy_distance_m",
+        "per_seed": {
+          "8300": 12.369780275294886
+        }
+      },
+      "mean_support_heavy_nominal_rate_mbps": {
+        "mean": -0.061172614166822736,
+        "ci95_low": -0.061172614166822736,
+        "ci95_high": -0.061172614166822736,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "no_coop",
+        "field": "mean_support_heavy_nominal_rate_mbps",
+        "per_seed": {
+          "8300": -0.061172614166822736
+        }
+      },
+      "mean_all_uav_centroid_residual_m": {
+        "mean": -35.63831644561073,
+        "ci95_low": -35.63831644561073,
+        "ci95_high": -35.63831644561073,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "no_coop",
+        "field": "mean_all_uav_centroid_residual_m",
+        "per_seed": {
+          "8300": -35.63831644561073
+        }
+      },
+      "heavy_to_support_flow_mbits": {
+        "mean": 2170.9208296466745,
+        "ci95_low": 2170.9208296466745,
+        "ci95_high": 2170.9208296466745,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "no_coop",
+        "field": "heavy_to_support_flow_mbits",
+        "per_seed": {
+          "8300": 2170.9208296466745
+        }
+      },
+      "support_motion_alignment_mean": {
+        "mean": -0.09057687500248188,
+        "ci95_low": -0.09057687500248188,
+        "ci95_high": -0.09057687500248188,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "no_coop",
+        "field": "support_motion_alignment_mean",
+        "per_seed": {
+          "8300": -0.09057687500248188
+        }
+      },
+      "support_toward_fraction": {
+        "mean": -0.02298850574712641,
+        "ci95_low": -0.02298850574712641,
+        "ci95_high": -0.02298850574712641,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "no_coop",
+        "field": "support_toward_fraction",
+        "per_seed": {
+          "8300": -0.02298850574712641
+        }
+      },
+      "residual_gate_mean": {
+        "mean": -0.2994952009231956,
+        "ci95_low": -0.2994952009231956,
+        "ci95_high": -0.2994952009231956,
+        "std": 0.0,
+        "n": 1,
+        "left": "joint_ppo_gated_sac",
+        "right": "no_coop",
+        "field": "residual_gate_mean",
+        "per_seed": {
+          "8300": -0.2994952009231956
+        }
+      }
+    }
+  },
+  "delay_ranking": [
+    "cppo_sca",
+    "fixed_sac",
+    "joint_ppo_gated_sac",
+    "joint_td3_sac",
+    "centroid_gated_sac",
+    "centroid_sac",
+    "joint_ppo_sac",
+    "no_coop"
+  ],
+  "crn": {
+    "all_methods_match_within_seed": true,
+    "mismatches": {}
+  }
+}

@@ -143,6 +143,10 @@ TRAIN_LOG_FIELDS = [
     "sac_actor_grad_norm",
     "sac_critic_grad_norm",
     "sac_alpha",
+    "sac_residual_gate_mean",
+    "sac_residual_gate_std",
+    "sac_residual_gate_q10",
+    "sac_residual_gate_q90",
     "sac_critic_updates_total",
     "sac_actor_updates_total",
     "sac_warmstart_phase",
@@ -1428,6 +1432,48 @@ def _priority_gated_matrix(env, latent_action):
     )
 
 
+def split_autonomous_residual_action(
+    policy_action,
+    residual_dim,
+    enabled=False,
+):
+    """Map the SAC latent action to the residual consumed by the environment.
+
+    The SAC policy and Critic operate on ``[z_g, u]`` when the gate is
+    enabled. Both coordinates are ordinary tanh-squashed SAC actions. The
+    environment sees only ``((z_g + 1) / 2) * u``.
+    """
+    action = np.asarray(policy_action, dtype=np.float32).reshape(-1)
+    residual_dim = int(residual_dim)
+    if residual_dim <= 0:
+        raise ValueError("residual_dim must be positive")
+    if not bool(enabled):
+        if action.size != residual_dim:
+            raise ValueError(
+                f"Expected {residual_dim} residual actions, got {action.size}."
+            )
+        return {
+            "gate_latent": 1.0,
+            "gate": 1.0,
+            "direction": action.copy(),
+            "effective": action.copy(),
+        }
+    if action.size != residual_dim + 1:
+        raise ValueError(
+            "Autonomous residual gating expects one gate latent plus "
+            f"{residual_dim} residual actions, got {action.size}."
+        )
+    gate_latent = float(np.clip(action[0], -1.0, 1.0))
+    gate = 0.5 * (gate_latent + 1.0)
+    direction = np.clip(action[1:], -1.0, 1.0).astype(np.float32)
+    return {
+        "gate_latent": gate_latent,
+        "gate": float(gate),
+        "direction": direction,
+        "effective": (float(gate) * direction).astype(np.float32),
+    }
+
+
 def _sca_support_matrix(env, args, sca_policy_fn):
     if abs(float(env.micro_diag_bias)) > 1e-12 or not np.isclose(
         float(env.micro_action_scale),
@@ -1462,8 +1508,16 @@ def compose_support_preserving_sca_residual(
 ):
     """Map a learned latent residual onto the sparse support chosen by SCA."""
     scale = float(getattr(args, "micro_sca_residual_scale", 0.0))
+    residual_dim = 2 * env.N * (env.N - 1)
+    components = split_autonomous_residual_action(
+        policy_action,
+        residual_dim,
+        enabled=bool(
+            int(getattr(args, "micro_autonomous_residual_gate", 0))
+        ),
+    )
     if scale <= 0.0:
-        return np.asarray(policy_action, dtype=np.float32).reshape(-1)
+        return components["effective"]
     if sca_policy_fn is None:
         from compare_sca import solve_sca_micro_action
 
@@ -1473,7 +1527,7 @@ def compose_support_preserving_sca_residual(
         raise ValueError("micro_sca_support_threshold must be finite and non-negative.")
 
     baseline = _sca_support_matrix(env, args, sca_policy_fn)
-    learned = _priority_gated_matrix(env, policy_action)
+    learned = _priority_gated_matrix(env, components["effective"])
     prior = _priority_gated_matrix(
         env,
         np.zeros(2 * env.N * (env.N - 1), dtype=np.float32),
@@ -1504,6 +1558,15 @@ def sac_micro_policy(actor, args=None, sca_policy_fn=None):
         )
         if args is None:
             return policy_action
+        components = split_autonomous_residual_action(
+            policy_action,
+            env.micro_action_space.shape[0],
+            enabled=bool(
+                int(getattr(args, "micro_autonomous_residual_gate", 0))
+            ),
+        )
+        if bool(int(getattr(args, "micro_autonomous_residual_gate", 0))):
+            _policy.residual_gate_values.append(components["gate"])
         return compose_support_preserving_sca_residual(
             env,
             policy_action,
@@ -1511,6 +1574,7 @@ def sac_micro_policy(actor, args=None, sca_policy_fn=None):
             sca_policy_fn=sca_policy_fn,
         )
 
+    _policy.residual_gate_values = []
     return _policy
 
 
@@ -2031,6 +2095,18 @@ def main():
     use_sac = args.micro_solver == "sac"
     use_sca = args.micro_solver == "sca"
     use_local = args.micro_solver == "local"
+    autonomous_residual_gate = bool(
+        int(getattr(args, "micro_autonomous_residual_gate", 0))
+    )
+    if autonomous_residual_gate and not use_sac:
+        raise ValueError(
+            "micro_autonomous_residual_gate requires micro_solver='sac'."
+        )
+    if autonomous_residual_gate and float(args.micro_sca_residual_scale) <= 0.0:
+        raise ValueError(
+            "micro_autonomous_residual_gate requires a positive "
+            "micro_sca_residual_scale."
+        )
     sca_policy_fn = None
     if use_sca or (
         use_sac and float(getattr(args, "micro_sca_residual_scale", 0.0)) > 0.0
@@ -2104,7 +2180,8 @@ def main():
         }[args.micro_solver],
     )
 
-    sac_action_dim = env.micro_action_space.shape[0]
+    base_micro_action_dim = int(env.micro_action_space.shape[0])
+    sac_action_dim = base_micro_action_dim + int(autonomous_residual_gate)
     sac_state_dim = env.sac_obs_dim if use_sac else None
     sac_actor = SAC_Actor(sac_state_dim, sac_action_dim) if use_sac else None
     if use_sac:
@@ -2423,6 +2500,7 @@ def main():
         ep_sac_critic_losses = []
         ep_sac_actor_grad_norms = []
         ep_sac_critic_grad_norms = []
+        ep_residual_gate_values = []
 
         bc_weight = advisor_weight_for_episode(args, episode)
 
@@ -2500,7 +2578,10 @@ def main():
                 )
 
             deployment_frames = []
-            zero_micro_action = np.zeros(sac_action_dim, dtype=np.float32)
+            zero_micro_action = np.zeros(
+                base_micro_action_dim,
+                dtype=np.float32,
+            )
             for _ in range(env.env.deployment_resource_frames):
                 frame = env.step_resource_frame(zero_micro_action)
                 deployment_frames.append(frame)
@@ -2562,6 +2643,15 @@ def main():
                         sac_obs,
                         deterministic=frozen_deterministic,
                     )
+                    residual_components = split_autonomous_residual_action(
+                        policy_action,
+                        base_micro_action_dim,
+                        enabled=autonomous_residual_gate,
+                    )
+                    if autonomous_residual_gate:
+                        ep_residual_gate_values.append(
+                            residual_components["gate"]
+                        )
                     micro_action = compose_support_preserving_sca_residual(
                         env,
                         policy_action,
@@ -3211,6 +3301,26 @@ def main():
                 "sac_alpha": (
                     float(sac_entropy.alpha.detach().cpu().item())
                     if sac_entropy is not None
+                    else ""
+                ),
+                "sac_residual_gate_mean": (
+                    float(np.mean(ep_residual_gate_values))
+                    if ep_residual_gate_values
+                    else ""
+                ),
+                "sac_residual_gate_std": (
+                    float(np.std(ep_residual_gate_values))
+                    if ep_residual_gate_values
+                    else ""
+                ),
+                "sac_residual_gate_q10": (
+                    float(np.quantile(ep_residual_gate_values, 0.10))
+                    if ep_residual_gate_values
+                    else ""
+                ),
+                "sac_residual_gate_q90": (
+                    float(np.quantile(ep_residual_gate_values, 0.90))
+                    if ep_residual_gate_values
                     else ""
                 ),
                 "sac_critic_updates_total": sac_critic_update_count,

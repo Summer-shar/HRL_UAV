@@ -248,9 +248,11 @@ MACRO_INIT_CHECKPOINTS = {
 _KNOWN_METHODS = {
     "joint_td3_sac",
     "joint_ppo_sac",
+    "joint_ppo_gated_sac",
     "cppo_sca",
     "no_coop",
     "centroid_sac",
+    "centroid_gated_sac",
     "fixed_sac",
 }
 _unknown_macro_init_methods = set(MACRO_INIT_CHECKPOINTS) - _KNOWN_METHODS
@@ -399,6 +401,17 @@ MICRO_SCA_RESIDUAL_SOLVER = str(
 MICRO_SCA_RESIDUAL_PROXIMAL_WEIGHT = float(
     PROTOCOL.get("micro_sca_residual_proximal_weight", 1e-3)
 )
+ENABLE_AUTONOMOUS_RESIDUAL_GATE_METHODS = bool(
+    PROTOCOL.get("enable_autonomous_residual_gate_methods", False)
+)
+ENABLED_METHODS = tuple(
+    str(method) for method in PROTOCOL.get("enabled_methods", [])
+)
+if set(ENABLED_METHODS) - _KNOWN_METHODS:
+    raise ValueError(
+        "enabled_methods contains unknown methods: "
+        f"{sorted(set(ENABLED_METHODS) - _KNOWN_METHODS)}"
+    )
 SAC_ZERO_MEAN_OUTPUT_INIT = bool(
     PROTOCOL.get("sac_zero_mean_output_init", False)
 )
@@ -787,6 +800,11 @@ def build_micro_pretrain(stage, seed, config, device, target_method=None):
         "--sac_initial_alpha", str(MICRO_PRETRAIN_SAC_INITIAL_ALPHA),
         "--results_subdir", subdir,
     ]
+    if target_method in {
+        "joint_ppo_gated_sac",
+        "centroid_gated_sac",
+    }:
+        args += ["--micro_autonomous_residual_gate", "1"]
     if MICRO_PRETRAIN_ACTOR_INIT_CHECKPOINT:
         args += [
             "--micro_actor_ckpt",
@@ -872,7 +890,7 @@ def method_specs():
         "--advisor_weight", "0",
         "--advisor_final_weight", "0",
     ]
-    return [
+    specs = [
         {
             "method": "joint_td3_sac",
             "script": "train_centralized_td3.py",
@@ -930,6 +948,34 @@ def method_specs():
             "uses_micro_checkpoint": True,
         },
     ]
+    if ENABLE_AUTONOMOUS_RESIDUAL_GATE_METHODS:
+        specs.extend(
+            [
+                {
+                    "method": "joint_ppo_gated_sac",
+                    "script": "train_centralized_macro.py",
+                    "args": [
+                        "--micro_solver", "sac",
+                        "--micro_autonomous_residual_gate", "1",
+                    ] + ppo_common,
+                    "uses_micro_checkpoint": True,
+                },
+                {
+                    "method": "centroid_gated_sac",
+                    "script": "train_centralized_macro.py",
+                    "args": [
+                        "--micro_solver", "sac",
+                        "--micro_autonomous_residual_gate", "1",
+                        "--freeze_macro",
+                        "--frozen_macro_policy", "zero",
+                    ] + ppo_common,
+                    "uses_micro_checkpoint": True,
+                },
+            ]
+        )
+    if ENABLED_METHODS:
+        specs = [spec for spec in specs if spec["method"] in ENABLED_METHODS]
+    return specs
 
 
 def build_experiments(stage, seeds, config, device):
@@ -1083,9 +1129,11 @@ def main():
         choices=[
             "joint_td3_sac",
             "joint_ppo_sac",
+            "joint_ppo_gated_sac",
             "cppo_sca",
             "no_coop",
             "centroid_sac",
+            "centroid_gated_sac",
             "fixed_sac",
         ],
         default="",
@@ -1142,7 +1190,9 @@ def main():
         if exp["method"] in {
             "joint_td3_sac",
             "joint_ppo_sac",
+            "joint_ppo_gated_sac",
             "centroid_sac",
+            "centroid_gated_sac",
             "fixed_sac",
         }
     })
@@ -1153,6 +1203,11 @@ def main():
             "centroid_sac",
             "fixed_sac",
         ]
+        if ENABLE_AUTONOMOUS_RESIDUAL_GATE_METHODS:
+            setup_targets += [
+                "joint_ppo_gated_sac",
+                "centroid_gated_sac",
+            ]
     if setup_targets:
         for seed in seeds:
             artifact_targets = (
