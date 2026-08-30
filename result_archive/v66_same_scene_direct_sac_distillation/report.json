@@ -1,0 +1,128 @@
+{
+  "status": "offline_initialization_only",
+  "source_checkpoint": "C:\\Users\\PC\\Desktop\\HRL_UAV\\results\\tcom_v65_clone_finetune_micro_gate\\formal\\seed1\\micro_pretrain_joint_ppo_direct_sac\\checkpoints\\final.pt",
+  "state_dim": 60,
+  "action_dim": 18,
+  "train_samples": 8100,
+  "test_samples": 10800,
+  "test_action_error": {
+    "mse": 0.0006099934689700603,
+    "mae": 0.013527237810194492,
+    "max_abs": 0.41326969861984253
+  },
+  "teacher_train": {
+    "delay_ms": 621.6081315548029,
+    "completion_rate": 0.9983173066431492,
+    "queue_mbits": 12.361757012964912,
+    "coop_ratio": 0.24685388559499813
+  },
+  "clone_dagger_before_refit": {
+    "delay_ms": 644.1179296269452,
+    "completion_rate": 0.9980743176909487,
+    "queue_mbits": 12.714215270521388,
+    "coop_ratio": 0.24719487332297363
+  },
+  "teacher_test": {
+    "delay_ms": 626.3519643702376,
+    "completion_rate": 0.9982503346688979,
+    "queue_mbits": 12.668389239066734,
+    "coop_ratio": 0.24479448641073956
+  },
+  "clone_test": {
+    "delay_ms": 636.6589905241533,
+    "completion_rate": 0.9981949021558025,
+    "queue_mbits": 12.670128481020074,
+    "coop_ratio": 0.2452786923322408
+  },
+  "history": [
+    {
+      "update": 1,
+      "mse": 0.0788234993815422
+    },
+    {
+      "update": 250,
+      "mse": 0.0022576008923351765
+    },
+    {
+      "update": 500,
+      "mse": 0.0009114471031352878
+    },
+    {
+      "update": 750,
+      "mse": 0.0007796288700774312
+    },
+    {
+      "update": 1000,
+      "mse": 0.0007437149179168046
+    },
+    {
+      "update": 1250,
+      "mse": 0.0005588936619460583
+    },
+    {
+      "update": 1500,
+      "mse": 0.0005375026375986636
+    },
+    {
+      "update": 1750,
+      "mse": 0.0006647210684604943
+    },
+    {
+      "update": 2000,
+      "mse": 0.0004156521172262728
+    },
+    {
+      "update": 2250,
+      "mse": 0.0004594652564264834
+    },
+    {
+      "update": 2500,
+      "mse": 0.0005511504132300615
+    },
+    {
+      "update": 2750,
+      "mse": 0.00045373770990408957
+    },
+    {
+      "update": 3000,
+      "mse": 0.0005419644294306636
+    },
+    {
+      "update": 1,
+      "mse": 0.0006338441744446754
+    },
+    {
+      "update": 250,
+      "mse": 0.0005615248228423297
+    },
+    {
+      "update": 500,
+      "mse": 0.00045360138756223023
+    },
+    {
+      "update": 750,
+      "mse": 0.0005038627423346043
+    },
+    {
+      "update": 1000,
+      "mse": 0.0004916276084259152
+    },
+    {
+      "update": 1250,
+      "mse": 0.0005333918379619718
+    },
+    {
+      "update": 1500,
+      "mse": 0.0005313980509527028
+    },
+    {
+      "update": 1750,
+      "mse": 0.0004408725362736732
+    },
+    {
+      "update": 2000,
+      "mse": 0.00043480575550347567
+    }
+  ],
+  "deployment_uses_sca": false
+}

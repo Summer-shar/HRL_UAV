@@ -70,6 +70,7 @@ def evaluate_detailed(policy: dict, seed: int, *, trajectory: bool = False):
         "task_delay_weighted_ms": float(metrics["task_delay_weighted_ms"]),
         "task_delay_high_ms": float(metrics["task_delay_high_ms"]),
         "task_delay_low_ms": float(metrics["task_delay_low_ms"]),
+        "task_completion_rate": float(metrics["task_completion_rate"]),
         "queue_total_mbits": float(metrics["q_high"] + metrics["q_low"]),
         "queue_high_mbits": float(metrics["q_high"]),
         "queue_low_mbits": float(metrics["q_low"]),
