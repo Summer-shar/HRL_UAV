@@ -91,6 +91,8 @@ class HRL_Wrapper(gym.Env):
         u2u_goal_representation="match_observation",
         u2u_contention_aware_pressure=None,
         u2u_prev_active_state=False,
+        micro_expected_load_state=False,
+        u2u_active_link_mask_state=False,
         cpu_alloc_mode="priority_kkt",
         kkt_v=1.0,
         cpu_energy_prices=None,
@@ -334,6 +336,10 @@ class HRL_Wrapper(gym.Env):
                 u2u_contention_aware_pressure
             )
         self.u2u_prev_active_state = bool(u2u_prev_active_state)
+        self.micro_expected_load_state = bool(micro_expected_load_state)
+        self.u2u_active_link_mask_state = bool(
+            u2u_active_link_mask_state
+        )
         self.u2u_total_directed_links = self.N * max(self.N - 1, 0)
         anchor_eta = self.env.compute_u2u_spectral_efficiency(
             self.env.anchor_points
@@ -508,6 +514,10 @@ class HRL_Wrapper(gym.Env):
         #   3N^2: Q_tx(高/低) + norm_u2u_rate
         #   N^2 : [HIERARCHY] 宏观派生的建议卸载分布 goal G
         self.sac_obs_dim = (4 * self.N) + (4 * self.N * self.N)
+        if self.micro_expected_load_state:
+            self.sac_obs_dim += 2 * self.N
+        if self.u2u_active_link_mask_state:
+            self.sac_obs_dim += self.u2u_total_directed_links
         if self.u2u_prev_active_state:
             self.sac_obs_dim += 1
         if self.power_constraint_scope == "per_uav":
@@ -1777,6 +1787,63 @@ class HRL_Wrapper(gym.Env):
         goal = attractiveness / attractiveness.sum(axis=1, keepdims=True)
         return goal.astype(np.float32)
 
+    def _expected_priority_load_pressure(self):
+        """Return causal high/low offered load normalized by CPU service.
+
+        The model-based SCA baseline uses the same per-user Poisson rates and
+        task sizes. Exposing them to direct SAC removes an information
+        asymmetry without exposing future arrivals.
+        """
+        base_env = self.env
+        associations = np.asarray(
+            base_env.user_allocations,
+            dtype=np.int64,
+        )
+        horizon_s = float(base_env.resource_frame_dt)
+        high_per_user = (
+            np.asarray(base_env.user_lambda_high, dtype=np.float64)
+            * np.asarray(
+                base_env.user_task_size_high_mbits,
+                dtype=np.float64,
+            )
+            * horizon_s
+        )
+        low_per_user = (
+            np.asarray(base_env.user_lambda_low, dtype=np.float64)
+            * np.asarray(
+                base_env.user_task_size_low_mbits,
+                dtype=np.float64,
+            )
+            * horizon_s
+        )
+        expected = np.zeros((2, self.N), dtype=np.float64)
+        for source_uav in range(self.N):
+            mask = associations == source_uav
+            expected[0, source_uav] = float(np.sum(high_per_user[mask]))
+            expected[1, source_uav] = float(np.sum(low_per_user[mask]))
+
+        service_capacity_mbits = (
+            np.asarray(base_env.F_max_array, dtype=np.float64)
+            * horizon_s
+            / max(float(base_env.C) * 1e6, 1e-12)
+        )
+        pressure_clip = 10.0
+        normalized = expected / np.maximum(
+            service_capacity_mbits[None, :] * pressure_clip,
+            1e-8,
+        )
+        return np.clip(normalized, 0.0, 1.0).astype(np.float32).reshape(-1)
+
+    def _current_u2u_active_link_mask(self, raw_state):
+        """Return the causal directed-link activity mask without diagonals."""
+        queued = (
+            np.asarray(raw_state["Q_tx_high"], dtype=np.float64)
+            + np.asarray(raw_state["Q_tx_low"], dtype=np.float64)
+        )
+        active = queued > 1e-12
+        off_diagonal = ~np.eye(self.N, dtype=bool)
+        return active[off_diagonal].astype(np.float32)
+
     def get_sac_state(self, raw_state=None):
         """
         [REWARD SHAPING]
@@ -1895,6 +1962,12 @@ class HRL_Wrapper(gym.Env):
             norm_u2u_rate,
             goal_matrix,
         ]
+        if self.micro_expected_load_state:
+            state_parts.append(self._expected_priority_load_pressure())
+        if self.u2u_active_link_mask_state:
+            state_parts.append(
+                self._current_u2u_active_link_mask(raw_state)
+            )
         if self.u2u_prev_active_state:
             state_parts.append(
                 np.asarray(

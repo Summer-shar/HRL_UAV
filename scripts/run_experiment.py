@@ -61,9 +61,15 @@ MICRO_PRETRAIN_SOURCE_SEED = (
 MICRO_PRETRAIN_SOURCE_METHOD = str(
     PROTOCOL.get("micro_pretrain_source_method", "micro_pretrain")
 ).strip()
-if MICRO_PRETRAIN_SOURCE_METHOD not in {"micro_pretrain", "joint_td3_sac"}:
+if MICRO_PRETRAIN_SOURCE_METHOD not in {
+    "micro_pretrain",
+    "joint_td3_sac",
+    "joint_ppo_sac",
+    "joint_ppo_direct_sac",
+}:
     raise ValueError(
-        "micro_pretrain_source_method must be micro_pretrain or joint_td3_sac"
+        "micro_pretrain_source_method must identify a supported SAC "
+        "checkpoint-producing method"
     )
 FREEZE_MICRO_IN_JOINT = bool(
     PROTOCOL.get("freeze_micro_in_joint", False)
@@ -245,15 +251,24 @@ MACRO_INIT_CHECKPOINTS = {
     for method, path in PROTOCOL.get("macro_init_checkpoints", {}).items()
     if str(path).strip()
 }
+_DIRECT_SAC_METHODS = {
+    "joint_ppo_direct_sac",
+    "centroid_direct_sac",
+    "fixed_direct_sac",
+}
 _KNOWN_METHODS = {
     "joint_td3_sac",
     "joint_ppo_sac",
+    "joint_ppo_direct_sac",
     "joint_ppo_gated_sac",
     "cppo_sca",
+    "ppo_xu2024_sca",
     "no_coop",
     "centroid_sac",
+    "centroid_direct_sac",
     "centroid_gated_sac",
     "fixed_sac",
+    "fixed_direct_sac",
 }
 _unknown_macro_init_methods = set(MACRO_INIT_CHECKPOINTS) - _KNOWN_METHODS
 if _unknown_macro_init_methods:
@@ -336,6 +351,12 @@ MICRO_PRETRAIN_SAC_ALPHA_LR = float(
 MICRO_PRETRAIN_SAC_INITIAL_ALPHA = float(
     PROTOCOL.get("micro_pretrain_sac_initial_alpha", 1.0)
 )
+MICRO_PRETRAIN_SAC_POLICY_DELAY = int(
+    PROTOCOL.get("micro_pretrain_sac_policy_delay", 1)
+)
+MICRO_PRETRAIN_SAC_ACTOR_WARMUP_UPDATES = int(
+    PROTOCOL.get("micro_pretrain_sac_actor_warmup_updates", 0)
+)
 MICRO_REWARD_SCALE = float(PROTOCOL.get("micro_reward_scale", 10.0))
 U2U_STATE_REPRESENTATION = str(
     PROTOCOL.get("u2u_state_representation", "nominal_rate")
@@ -357,6 +378,17 @@ U2U_CONTENTION_AWARE_PRESSURE = (
 U2U_PREV_ACTIVE_STATE = bool(
     PROTOCOL.get("u2u_prev_active_state", False)
 )
+MICRO_EXPECTED_LOAD_STATE = bool(
+    PROTOCOL.get("micro_expected_load_state", False)
+)
+U2U_ACTIVE_LINK_MASK_STATE = bool(
+    PROTOCOL.get("u2u_active_link_mask_state", False)
+)
+MICRO_POLICY_MODE = str(
+    PROTOCOL.get("micro_policy_mode", "legacy_auto")
+).lower()
+if MICRO_POLICY_MODE not in {"legacy_auto", "direct", "sca_residual"}:
+    raise ValueError("Unsupported micro_policy_mode")
 
 if LOAD_SWITCH_MODE not in {"off", "cyclic_random"}:
     raise ValueError("Unsupported load_switch_mode")
@@ -377,6 +409,7 @@ MICRO_ACTION_ENCODING = str(
 MICRO_STICK_BREAKING_SCALE = float(
     PROTOCOL.get("micro_stick_breaking_scale", 4.0)
 )
+MICRO_DIAG_BIAS = float(PROTOCOL.get("micro_diag_bias", 0.0))
 MICRO_PRIORITY_WEIGHT_RATIO = float(
     PROTOCOL.get("micro_priority_weight_ratio", 10.0)
 )
@@ -401,6 +434,11 @@ MICRO_SCA_RESIDUAL_SOLVER = str(
 MICRO_SCA_RESIDUAL_PROXIMAL_WEIGHT = float(
     PROTOCOL.get("micro_sca_residual_proximal_weight", 1e-3)
 )
+SCA_LOAD_SOURCE = str(
+    PROTOCOL.get("sca_load_source", "expected_model")
+).strip().lower()
+if SCA_LOAD_SOURCE not in {"current_arrivals", "expected_model"}:
+    raise ValueError("Unsupported sca_load_source")
 ENABLE_AUTONOMOUS_RESIDUAL_GATE_METHODS = bool(
     PROTOCOL.get("enable_autonomous_residual_gate_methods", False)
 )
@@ -415,8 +453,17 @@ if set(ENABLED_METHODS) - _KNOWN_METHODS:
 SAC_ZERO_MEAN_OUTPUT_INIT = bool(
     PROTOCOL.get("sac_zero_mean_output_init", False)
 )
+SAC_INITIAL_LOG_STD = PROTOCOL.get("sac_initial_log_std", None)
 if MICRO_SCA_RESIDUAL_SCALE < 0.0:
     raise ValueError("micro_sca_residual_scale must be non-negative")
+if MICRO_POLICY_MODE == "direct" and MICRO_SCA_RESIDUAL_SCALE != 0.0:
+    raise ValueError(
+        "micro_policy_mode=direct requires micro_sca_residual_scale=0"
+    )
+if MICRO_POLICY_MODE == "sca_residual" and MICRO_SCA_RESIDUAL_SCALE <= 0.0:
+    raise ValueError(
+        "micro_policy_mode=sca_residual requires a positive residual scale"
+    )
 if MICRO_SCA_RESIDUAL_SCALE > 0.0 and MICRO_ACTION_ENCODING != "priority_gated":
     raise ValueError(
         "SCA-guided residual SAC requires micro_action_encoding='priority_gated'"
@@ -600,7 +647,7 @@ def common_args(config, device):
             "--energy_lagrange_multipliers", duals,
             "--energy_dual_initial", "0",
         ]
-    return [
+    common_args = [
         "--episodes", str(config["episodes"]),
         "--macro_steps", str(config["macro_steps"]),
         "--micro_steps", str(int(round(MACRO_PERIOD_S / INTEGRATION_STEP_S))),
@@ -651,7 +698,7 @@ def common_args(config, device):
         "--cpu_ghz", str(CPU_GHZ),
         "--cpu_alloc_mode", CPU_ALLOC_MODE,
         "--cpu_power_cap_w", "0",
-        "--micro_diag_bias", "0",
+        "--micro_diag_bias", str(MICRO_DIAG_BIAS),
         "--micro_action_scale", "1",
         "--micro_action_encoding", MICRO_ACTION_ENCODING,
         "--micro_stick_breaking_scale", str(MICRO_STICK_BREAKING_SCALE),
@@ -667,6 +714,7 @@ def common_args(config, device):
         "--micro_sca_residual_proximal_weight", str(
             MICRO_SCA_RESIDUAL_PROXIMAL_WEIGHT
         ),
+        "--sca_load_source", SCA_LOAD_SOURCE,
         "--sac_zero_mean_output_init", "1" if SAC_ZERO_MEAN_OUTPUT_INIT else "0",
         "--micro_reward_scale", str(MICRO_REWARD_SCALE),
         "--delay_objective_weight", str(DELAY_OBJECTIVE_WEIGHT),
@@ -681,6 +729,11 @@ def common_args(config, device):
         "--u2u_goal_representation", U2U_GOAL_REPRESENTATION,
         "--u2u_contention_aware_pressure", str(U2U_CONTENTION_AWARE_PRESSURE),
         "--u2u_prev_active_state", "1" if U2U_PREV_ACTIVE_STATE else "0",
+        "--micro_expected_load_state",
+        "1" if MICRO_EXPECTED_LOAD_STATE else "0",
+        "--u2u_active_link_mask_state",
+        "1" if U2U_ACTIVE_LINK_MASK_STATE else "0",
+        "--micro_policy_mode", MICRO_POLICY_MODE,
         "--objective_mode", OBJECTIVE_MODE,
     ] + constraint_args + [
         "--energy_dual_lr", str(ENERGY_DUAL_LR),
@@ -703,6 +756,11 @@ def common_args(config, device):
         "--seed", "{seed}",
         "--device", str(device),
     ]
+    if SAC_INITIAL_LOG_STD is not None:
+        common_args.extend(
+            ["--sac_initial_log_std", str(float(SAC_INITIAL_LOG_STD))]
+        )
+    return common_args
 
 
 def micro_pretrain_method_name(target_method=None):
@@ -798,6 +856,9 @@ def build_micro_pretrain(stage, seed, config, device, target_method=None):
         "--sac_critic_lr", str(MICRO_PRETRAIN_SAC_CRITIC_LR),
         "--sac_alpha_lr", str(MICRO_PRETRAIN_SAC_ALPHA_LR),
         "--sac_initial_alpha", str(MICRO_PRETRAIN_SAC_INITIAL_ALPHA),
+        "--sac_policy_delay", str(MICRO_PRETRAIN_SAC_POLICY_DELAY),
+        "--sac_actor_warmup_updates",
+        str(MICRO_PRETRAIN_SAC_ACTOR_WARMUP_UPDATES),
         "--results_subdir", subdir,
     ]
     if target_method in {
@@ -805,6 +866,11 @@ def build_micro_pretrain(stage, seed, config, device, target_method=None):
         "centroid_gated_sac",
     }:
         args += ["--micro_autonomous_residual_gate", "1"]
+    if target_method in _DIRECT_SAC_METHODS:
+        args += [
+            "--micro_policy_mode", "direct",
+            "--micro_sca_residual_scale", "0",
+        ]
     if MICRO_PRETRAIN_ACTOR_INIT_CHECKPOINT:
         args += [
             "--micro_actor_ckpt",
@@ -919,6 +985,48 @@ def method_specs():
             "uses_micro_checkpoint": False,
         },
         {
+            "method": "ppo_xu2024_sca",
+            "script": "train_centralized_macro.py",
+            "args": [
+                "--micro_solver", "xu_sca",
+                "--micro_sca_residual_scale", "0",
+                "--sca_solver", "CLARABEL",
+                "--sca_delay_weight", str(DELAY_OBJECTIVE_WEIGHT),
+                "--sca_energy_weight", str(ENERGY_OBJECTIVE_WEIGHT),
+                "--xu_sca_max_iter",
+                str(int(PROTOCOL.get("xu_sca_max_iter", 10))),
+                "--xu_sca_tol",
+                str(float(PROTOCOL.get("xu_sca_tol", 0.01))),
+                "--xu_sca_proximal_rho",
+                str(float(PROTOCOL.get("xu_sca_proximal_rho", 1e-3))),
+                "--xu_sca_proximal_cpu",
+                str(float(PROTOCOL.get("xu_sca_proximal_cpu", 1e-3))),
+                "--xu_sca_warm_start",
+                str(int(bool(PROTOCOL.get("xu_sca_warm_start", False)))),
+                "--xu_sca_task_aggregation",
+                str(PROTOCOL.get(
+                    "xu_sca_task_aggregation",
+                    "source_priority",
+                )),
+                "--xu_sca_enforce_frame_deadline",
+                str(int(bool(PROTOCOL.get(
+                    "xu_sca_enforce_frame_deadline",
+                    False,
+                )))),
+                "--xu_sca_use_priority_delay_weights",
+                str(int(bool(PROTOCOL.get(
+                    "xu_sca_use_priority_delay_weights",
+                    True,
+                )))),
+                "--xu_sca_queue_aware",
+                str(int(bool(PROTOCOL.get(
+                    "xu_sca_queue_aware",
+                    False,
+                )))),
+            ] + ppo_common,
+            "uses_micro_checkpoint": False,
+        },
+        {
             "method": "no_coop",
             "script": "train_centralized_td3.py",
             "args": [
@@ -948,6 +1056,45 @@ def method_specs():
             "uses_micro_checkpoint": True,
         },
     ]
+    if set(ENABLED_METHODS) & _DIRECT_SAC_METHODS:
+        specs.extend(
+            [
+                {
+                    "method": "joint_ppo_direct_sac",
+                    "script": "train_centralized_macro.py",
+                    "args": [
+                        "--micro_solver", "sac",
+                        "--micro_policy_mode", "direct",
+                        "--micro_sca_residual_scale", "0",
+                    ] + ppo_common,
+                    "uses_micro_checkpoint": True,
+                },
+                {
+                    "method": "centroid_direct_sac",
+                    "script": "train_centralized_macro.py",
+                    "args": [
+                        "--micro_solver", "sac",
+                        "--micro_policy_mode", "direct",
+                        "--micro_sca_residual_scale", "0",
+                        "--freeze_macro",
+                        "--frozen_macro_policy", "zero",
+                    ] + ppo_common,
+                    "uses_micro_checkpoint": True,
+                },
+                {
+                    "method": "fixed_direct_sac",
+                    "script": "train_centralized_macro.py",
+                    "args": [
+                        "--micro_solver", "sac",
+                        "--micro_policy_mode", "direct",
+                        "--micro_sca_residual_scale", "0",
+                        "--freeze_macro",
+                        "--frozen_macro_policy", "fixed",
+                    ] + ppo_common,
+                    "uses_micro_checkpoint": True,
+                },
+            ]
+        )
     if ENABLE_AUTONOMOUS_RESIDUAL_GATE_METHODS:
         specs.extend(
             [
@@ -1129,12 +1276,16 @@ def main():
         choices=[
             "joint_td3_sac",
             "joint_ppo_sac",
+            "joint_ppo_direct_sac",
             "joint_ppo_gated_sac",
             "cppo_sca",
+            "ppo_xu2024_sca",
             "no_coop",
             "centroid_sac",
+            "centroid_direct_sac",
             "centroid_gated_sac",
             "fixed_sac",
+            "fixed_direct_sac",
         ],
         default="",
     )
@@ -1190,18 +1341,24 @@ def main():
         if exp["method"] in {
             "joint_td3_sac",
             "joint_ppo_sac",
+            "joint_ppo_direct_sac",
             "joint_ppo_gated_sac",
             "centroid_sac",
+            "centroid_direct_sac",
             "centroid_gated_sac",
             "fixed_sac",
+            "fixed_direct_sac",
         }
     })
     if args.setup_only and not setup_targets:
         setup_targets = [
             "joint_td3_sac",
             "joint_ppo_sac",
+            "joint_ppo_direct_sac",
             "centroid_sac",
+            "centroid_direct_sac",
             "fixed_sac",
+            "fixed_direct_sac",
         ]
         if ENABLE_AUTONOMOUS_RESIDUAL_GATE_METHODS:
             setup_targets += [

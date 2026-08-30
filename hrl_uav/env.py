@@ -323,6 +323,8 @@ class UAV_MEC_Env:
         self.last_cpu_power_uncapped_w = 0.0
         self.last_cpu_power_allocated_w = 0.0
         self.last_cpu_power_cap_active = False
+        self._external_cpu_frequency_override = None
+        self._external_cpu_override_steps_remaining = 0
         self.load_scale = float(load_scale)
         self.zone_target_load_mbps = self._normalize_zone_loads(zone_loads)
         self.valid_cpu_alloc_modes = {
@@ -1673,6 +1675,8 @@ class UAV_MEC_Env:
         self.last_u2u_link_bandwidth_matrix_hz = (
             self.u2u_link_bandwidth_matrix_hz.copy()
         )
+        self._external_cpu_frequency_override = None
+        self._external_cpu_override_steps_remaining = 0
         self.current_arrival_active_users = np.zeros(self.N)
         self.A_t_high = np.zeros(self.N)
         self.A_t_low = np.zeros(self.N)
@@ -2256,6 +2260,59 @@ class UAV_MEC_Env:
             raise ValueError("CPU energy prices must be finite and non-negative.")
         self.cpu_energy_prices = values.copy()
 
+    def set_external_cpu_frequencies(
+        self,
+        f_high_hz,
+        f_low_hz,
+        duration_steps=None,
+    ):
+        """Install a finite-duration CPU allocation from a reference solver.
+
+        Learned policies do not call this method.  It exists so a baseline
+        that jointly optimizes routing and CPU allocation can be executed
+        without pretending that the environment's deterministic CPU rule is
+        the CPU variable in the reference paper.
+        """
+
+        f_high = np.asarray(f_high_hz, dtype=np.float64).reshape(-1)
+        f_low = np.asarray(f_low_hz, dtype=np.float64).reshape(-1)
+        if f_high.shape != (self.N,) or f_low.shape != (self.N,):
+            raise ValueError(
+                "External CPU frequencies must each have shape "
+                f"({self.N},)."
+            )
+        if (
+            not np.all(np.isfinite(f_high))
+            or not np.all(np.isfinite(f_low))
+            or np.any(f_high < 0.0)
+            or np.any(f_low < 0.0)
+        ):
+            raise ValueError(
+                "External CPU frequencies must be finite and non-negative."
+            )
+        total = f_high + f_low
+        scale = np.minimum(
+            1.0,
+            np.divide(
+                self.F_max_array,
+                np.maximum(total, 1e-12),
+            ),
+        )
+        self._external_cpu_frequency_override = (
+            f_high * scale,
+            f_low * scale,
+        )
+        if duration_steps is None:
+            duration_steps = self.resource_frame_steps
+        self._external_cpu_override_steps_remaining = max(
+            int(duration_steps),
+            1,
+        )
+
+    def clear_external_cpu_frequencies(self):
+        self._external_cpu_frequency_override = None
+        self._external_cpu_override_steps_remaining = 0
+
     def _priced_maxweight_frequency_pair(
         self,
         q_high,
@@ -2373,6 +2430,26 @@ class UAV_MEC_Env:
         f_high = np.zeros(self.N, dtype=np.float64)
         f_low = np.zeros(self.N, dtype=np.float64)
         energy_model = "total_cubic"
+
+        if (
+            self._external_cpu_frequency_override is not None
+            and self._external_cpu_override_steps_remaining > 0
+        ):
+            f_high, f_low = (
+                np.asarray(values, dtype=np.float64).copy()
+                for values in self._external_cpu_frequency_override
+            )
+            self._external_cpu_override_steps_remaining -= 1
+            if self._external_cpu_override_steps_remaining <= 0:
+                self._external_cpu_frequency_override = None
+            f_total = f_high + f_low
+            cpu_power = float(
+                self.kappa * np.sum(np.power(f_total, 3.0))
+            )
+            self.last_cpu_power_uncapped_w = cpu_power
+            self.last_cpu_power_allocated_w = cpu_power
+            self.last_cpu_power_cap_active = False
+            return f_high, f_low, f_total, energy_model
 
         if self.cpu_alloc_mode == "priced_maxweight":
             for i in range(self.N):

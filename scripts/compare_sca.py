@@ -30,9 +30,40 @@ def parse_args():
     return parser.parse_args()
 
 
-def _build_zone_priority_task_bits(env) -> np.ndarray:
-    """Return one high- and one low-priority virtual task per source zone."""
+def _build_zone_priority_task_bits(
+    env,
+    raw_state=None,
+    load_source=None,
+) -> np.ndarray:
+    """Return causal high/low offered load per source zone in bits.
+
+    ``current_arrivals`` uses the same realized frame arrivals exposed to the
+    micro policy. ``expected_model`` preserves the historical implementation
+    for archived-result reproduction only.
+    """
     base_env = env.env
+    source = str(
+        load_source
+        if load_source is not None
+        else getattr(env, "sca_load_source", "expected_model")
+    ).strip().lower()
+    if source == "current_arrivals":
+        if raw_state is None:
+            raw_state = base_env.get_raw_state()
+        high = np.asarray(raw_state["A_t_high"], dtype=np.float64)
+        low = np.asarray(raw_state["A_t_low"], dtype=np.float64)
+        if high.shape != (base_env.N,) or low.shape != (base_env.N,):
+            raise ValueError(
+                "Current-arrival SCA input must have one high/low value per "
+                f"UAV, got {high.shape} and {low.shape}."
+            )
+        return np.concatenate([high, low], axis=0) * 1e6
+    if source != "expected_model":
+        raise ValueError(
+            "sca_load_source must be 'current_arrivals' or "
+            "'expected_model'."
+        )
+
     high_per_user = (
         base_env.user_lambda_high
         * base_env.user_task_size_high_mbits
@@ -590,7 +621,7 @@ def solve_sca_micro_action(env, deterministic=False):
         return np.asarray(env._sca_cached_action, dtype=np.float32).copy()
 
     raw_state = base_env.get_raw_state()
-    task_bits = _build_zone_priority_task_bits(env)
+    task_bits = _build_zone_priority_task_bits(env, raw_state=raw_state)
     num_uavs = base_env.N
     expected_load_mbits = task_bits.reshape(2, num_uavs) / 1e6
     nominal_u2u_rate_mbps = compute_u2u_rate_mbps(env, raw_state)

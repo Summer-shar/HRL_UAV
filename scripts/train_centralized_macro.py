@@ -299,9 +299,12 @@ def parse_args():
     )
     parser.add_argument(
         "--micro_solver",
-        choices=["sac", "sca", "local"],
+        choices=["sac", "sca", "xu_sca", "local"],
         default="sac",
-        help="Micro layer: learned SAC, model-based SCA, or local-only routing",
+        help=(
+            "Micro layer: learned SAC, legacy route-only projected SCA, "
+            "Xu et al. 2024 joint routing/CPU SCA, or local-only routing"
+        ),
     )
     parser.add_argument(
         "--sac_actor_lr",
@@ -355,6 +358,39 @@ def parse_args():
         type=float,
         default=0.1,
         help="SCA trust-region weight around the previous feasible routing",
+    )
+    parser.add_argument("--xu_sca_max_iter", type=int, default=10)
+    parser.add_argument("--xu_sca_tol", type=float, default=0.01)
+    parser.add_argument("--xu_sca_proximal_rho", type=float, default=1e-3)
+    parser.add_argument("--xu_sca_proximal_cpu", type=float, default=1e-3)
+    parser.add_argument(
+        "--xu_sca_warm_start",
+        type=int,
+        choices=[0, 1],
+        default=0,
+    )
+    parser.add_argument(
+        "--xu_sca_task_aggregation",
+        choices=["per_task", "source_priority"],
+        default="source_priority",
+    )
+    parser.add_argument(
+        "--xu_sca_enforce_frame_deadline",
+        type=int,
+        choices=[0, 1],
+        default=0,
+    )
+    parser.add_argument(
+        "--xu_sca_use_priority_delay_weights",
+        type=int,
+        choices=[0, 1],
+        default=1,
+    )
+    parser.add_argument(
+        "--xu_sca_queue_aware",
+        type=int,
+        choices=[0, 1],
+        default=0,
     )
     parser.add_argument(
         "--ppo_update_episode_window",
@@ -1051,6 +1087,15 @@ def state_dict_sha256(state_dict):
     return digest.hexdigest()
 
 
+def state_dict_subset_sha256(state_dict, exclude_prefixes=()):
+    filtered = {
+        name: value
+        for name, value in state_dict.items()
+        if not any(name.startswith(prefix) for prefix in exclude_prefixes)
+    }
+    return state_dict_sha256(filtered)
+
+
 def write_micro_actor_only_initialization_audit(
     results_dir,
     source_path,
@@ -1060,19 +1105,61 @@ def write_micro_actor_only_initialization_audit(
     args,
 ):
     source = torch_load_checkpoint(source_path)
-    source_actor_hash = state_dict_sha256(source["sac_actor"])
-    actor_hash = state_dict_sha256(sac_actor.action_net.state_dict())
-    source_critic_hash = state_dict_sha256(source["sac_critic"])
+    source_actor_state = source["sac_actor"]
+    initialized_actor_state = sac_actor.action_net.state_dict()
+    source_actor_hash = state_dict_sha256(source_actor_state)
+    actor_hash = state_dict_sha256(initialized_actor_state)
+    source_mean_hash = state_dict_subset_sha256(
+        source_actor_state,
+        exclude_prefixes=("std_out.",),
+    )
+    initialized_mean_hash = state_dict_subset_sha256(
+        initialized_actor_state,
+        exclude_prefixes=("std_out.",),
+    )
+    configured_log_std = getattr(args, "sac_initial_log_std", None)
+    std_override_valid = False
+    if configured_log_std is not None:
+        std_weight = initialized_actor_state.get("std_out.weight")
+        std_bias = initialized_actor_state.get("std_out.bias")
+        if std_weight is not None and std_bias is not None:
+            expected_bias = torch.full_like(std_bias, float(configured_log_std))
+            std_override_valid = bool(
+                torch.count_nonzero(std_weight).item() == 0
+                and torch.equal(std_bias, expected_bias)
+            )
+    mean_actor_matches_source = initialized_mean_hash == source_mean_hash
+    actor_initialization_valid = bool(
+        actor_hash == source_actor_hash
+        or (mean_actor_matches_source and std_override_valid)
+    )
     critic_hash = state_dict_sha256(sac_critic.critic_v.state_dict())
+    source_has_critic = "sac_critic" in source
+    source_critic_hash = (
+        state_dict_sha256(source["sac_critic"])
+        if source_has_critic
+        else None
+    )
     payload = {
         "mode": "actor_only_warmstart",
         "source_checkpoint": os.path.abspath(source_path),
         "source_actor_sha256": source_actor_hash,
         "initialized_actor_sha256": actor_hash,
         "actor_matches_source": actor_hash == source_actor_hash,
+        "source_mean_policy_sha256": source_mean_hash,
+        "initialized_mean_policy_sha256": initialized_mean_hash,
+        "mean_policy_matches_source": mean_actor_matches_source,
+        "configured_log_std": (
+            None if configured_log_std is None else float(configured_log_std)
+        ),
+        "std_override_valid": std_override_valid,
+        "actor_initialization_valid": actor_initialization_valid,
+        "source_has_critic": source_has_critic,
         "source_critic_sha256": source_critic_hash,
         "fresh_critic_sha256": critic_hash,
-        "critic_matches_source": critic_hash == source_critic_hash,
+        "critic_matches_source": (
+            critic_hash == source_critic_hash if source_has_critic else None
+        ),
         "fresh_target_critic_sha256": state_dict_sha256(
             sac_critic.target_critic_v.state_dict()
         ),
@@ -1084,9 +1171,12 @@ def write_micro_actor_only_initialization_audit(
         "actor_freeze_episodes": int(args.sac_actor_freeze_episodes),
         "replay_loaded": bool(args.micro_replay),
     }
-    if not payload["actor_matches_source"]:
-        raise RuntimeError("Actor-only warm start failed to reproduce source actor")
-    if payload["critic_matches_source"]:
+    if not payload["actor_initialization_valid"]:
+        raise RuntimeError(
+            "Actor-only warm start changed the source mean policy or failed "
+            "the configured exploration-scale override"
+        )
+    if payload["critic_matches_source"] is True:
         raise RuntimeError("Actor-only warm start unexpectedly restored source critic")
     path = os.path.join(results_dir, "micro_warmstart_initialization.json")
     with open(path, "w", encoding="utf-8") as audit_file:
@@ -1404,12 +1494,61 @@ def configure_ppo_hover_policy(actor, args, initialize_hover=False):
 
 
 def initialize_sac_residual_actor(actor, args):
-    if not bool(int(getattr(args, "sac_zero_mean_output_init", 0))):
-        return actor
     with torch.no_grad():
-        actor.action_net.out.weight.zero_()
-        actor.action_net.out.bias.zero_()
+        if bool(int(getattr(args, "sac_zero_mean_output_init", 0))):
+            actor.action_net.out.weight.zero_()
+            actor.action_net.out.bias.zero_()
+    configure_sac_actor_log_std(
+        actor,
+        getattr(args, "sac_initial_log_std", None),
+    )
     return actor
+
+
+def configure_sac_actor_log_std(actor, log_std):
+    """Set a state-independent exploration scale without changing the mean."""
+    if log_std is None:
+        return actor
+    value = float(log_std)
+    if not np.isfinite(value):
+        raise ValueError("sac_initial_log_std must be finite")
+    with torch.no_grad():
+        actor.action_net.std_out.weight.zero_()
+        actor.action_net.std_out.bias.fill_(value)
+    return actor
+
+
+def validate_micro_policy_mode(args, use_sac):
+    """Reject ambiguous SAC ownership before any training starts."""
+    mode = str(getattr(args, "micro_policy_mode", "legacy_auto"))
+    if mode not in {"legacy_auto", "direct", "sca_residual"}:
+        raise ValueError(f"Unsupported micro_policy_mode={mode!r}")
+    if not bool(use_sac):
+        return mode
+
+    residual_scale = float(
+        getattr(args, "micro_sca_residual_scale", 0.0)
+    )
+    autonomous_gate = bool(
+        int(getattr(args, "micro_autonomous_residual_gate", 0))
+    )
+    if mode == "direct":
+        if residual_scale != 0.0:
+            raise ValueError(
+                "micro_policy_mode=direct requires "
+                "micro_sca_residual_scale=0 so SAC owns the full route."
+            )
+        if autonomous_gate:
+            raise ValueError(
+                "micro_policy_mode=direct is incompatible with the "
+                "SCA-residual autonomous gate."
+            )
+    elif mode == "sca_residual" and residual_scale <= 0.0:
+        raise ValueError(
+            "micro_policy_mode=sca_residual requires a positive "
+            "micro_sca_residual_scale."
+        )
+    return mode
 
 
 def _priority_gated_matrix(env, latent_action):
@@ -1496,6 +1635,9 @@ def _sca_support_matrix(env, args, sca_policy_fn):
     env.sca_proximal_weight = float(
         getattr(args, "micro_sca_residual_proximal_weight", 1e-3)
     )
+    env.sca_load_source = str(
+        getattr(args, "sca_load_source", "expected_model")
+    )
     raw = np.asarray(sca_policy_fn(env, deterministic=True), dtype=np.float64)
     return project_rows_to_simplex(raw.reshape(2, env.N, env.N))
 
@@ -1508,13 +1650,16 @@ def compose_support_preserving_sca_residual(
 ):
     """Map a learned latent residual onto the sparse support chosen by SCA."""
     scale = float(getattr(args, "micro_sca_residual_scale", 0.0))
+    autonomous_gate = bool(
+        int(getattr(args, "micro_autonomous_residual_gate", 0))
+    )
+    if scale <= 0.0 and not autonomous_gate:
+        return np.asarray(policy_action, dtype=np.float32).reshape(-1).copy()
     residual_dim = 2 * env.N * (env.N - 1)
     components = split_autonomous_residual_action(
         policy_action,
         residual_dim,
-        enabled=bool(
-            int(getattr(args, "micro_autonomous_residual_gate", 0))
-        ),
+        enabled=autonomous_gate,
     )
     if scale <= 0.0:
         return components["effective"]
@@ -1586,6 +1731,9 @@ def configure_sca_wrapper(env, args):
     env.sca_delay_weight = float(args.sca_delay_weight)
     env.sca_energy_weight = float(args.sca_energy_weight)
     env.sca_proximal_weight = float(args.sca_proximal_weight)
+    env.sca_load_source = str(
+        getattr(args, "sca_load_source", "expected_model")
+    )
 
 
 def sca_micro_policy(policy_fn, args):
@@ -2094,7 +2242,9 @@ def main():
     args = parse_args()
     use_sac = args.micro_solver == "sac"
     use_sca = args.micro_solver == "sca"
+    use_xu_sca = args.micro_solver == "xu_sca"
     use_local = args.micro_solver == "local"
+    micro_policy_mode = validate_micro_policy_mode(args, use_sac)
     autonomous_residual_gate = bool(
         int(getattr(args, "micro_autonomous_residual_gate", 0))
     )
@@ -2108,7 +2258,12 @@ def main():
             "micro_sca_residual_scale."
         )
     sca_policy_fn = None
-    if use_sca or (
+    if use_xu_sca:
+        from compare_xu2024_sca import configure_xu2024_wrapper
+        from compare_xu2024_sca import solve_xu2024_micro_action
+
+        sca_policy_fn = solve_xu2024_micro_action
+    elif use_sca or (
         use_sac and float(getattr(args, "micro_sca_residual_scale", 0.0)) > 0.0
     ):
         from compare_sca import solve_sca_micro_action
@@ -2125,6 +2280,8 @@ def main():
     print(f"[INFO] Training on {str(device).upper()}")
     print("[INFO] Macro policy: centralized dx/dy actor")
     print(f"[INFO] Micro solver: {args.micro_solver.upper()}")
+    if use_sac:
+        print(f"[INFO] Micro SAC ownership mode: {micro_policy_mode}")
     print(f"[INFO] Macro reward mode: {args.macro_reward_mode}")
     print(
         f"[INFO] Objective: {args.objective_mode} "
@@ -2169,6 +2326,9 @@ def main():
     if use_sca:
         configure_sca_wrapper(env, args)
         configure_sca_wrapper(eval_env, args)
+    if use_xu_sca:
+        configure_xu2024_wrapper(env, args)
+        configure_xu2024_wrapper(eval_env, args)
     results_dirs = prepare_results_dirs(args.results_subdir)
     save_scenario_metadata(
         results_dirs,
@@ -2176,6 +2336,7 @@ def main():
         {
             "sac": "CentralizedMacroSAC",
             "sca": "CentralizedMacroSCA",
+            "xu_sca": "CentralizedMacroXu2024SCA",
             "local": "CentralizedMacroNoCoop",
         }[args.micro_solver],
     )
@@ -2249,6 +2410,13 @@ def main():
             args.micro_actor_ckpt,
             sac_actor,
         )
+        # Actor-only curriculum checkpoints may carry an exploration scale
+        # calibrated for a different load regime. Keep the learned mean route,
+        # but honor the current run's explicitly configured exploration scale.
+        configure_sac_actor_log_std(
+            sac_actor,
+            getattr(args, "sac_initial_log_std", None),
+        )
         audit_path = write_micro_actor_only_initialization_audit(
             results_dirs["results_dir"],
             loaded_actor_path,
@@ -2289,17 +2457,34 @@ def main():
                 parameter.requires_grad_(False)
         mode = "stochastic" if args.frozen_micro_stochastic else "deterministic"
         print(f"[INFO] Lower SAC frozen; training actions are {mode}")
-    eval_micro_policy = (
-        sac_micro_policy(sac_actor, args, sca_policy_fn=sca_policy_fn)
-        if use_sac
-        else (
-            sca_micro_policy(sca_policy_fn, args)
-            if use_sca
-            else lambda policy_env, _eval_mode: np.zeros(
-                policy_env.micro_action_space.shape[0],
-                dtype=np.float32,
-            )
+    if use_sac:
+        eval_micro_policy = sac_micro_policy(
+            sac_actor,
+            args,
+            sca_policy_fn=sca_policy_fn,
         )
+    elif use_xu_sca:
+        def eval_micro_policy(policy_env, eval_mode):
+            configure_xu2024_wrapper(policy_env, args)
+            return sca_policy_fn(
+                policy_env,
+                deterministic=bool(eval_mode),
+            )
+    elif use_sca:
+        eval_micro_policy = sca_micro_policy(sca_policy_fn, args)
+    else:
+        eval_micro_policy = lambda policy_env, _eval_mode: np.zeros(
+            policy_env.micro_action_space.shape[0],
+            dtype=np.float32,
+        )
+
+    sca_count_attr = (
+        "_xu2024_solve_count" if use_xu_sca else "_sca_solve_count"
+    )
+    sca_seconds_attr = (
+        "_xu2024_total_solve_seconds"
+        if use_xu_sca
+        else "_sca_total_solve_seconds"
     )
 
     if int(args.micro_steps) != int(env.env.micro_steps_per_macro):
@@ -2375,6 +2560,7 @@ def main():
     eval_stem = {
         "sac": "eval_central_macro",
         "sca": "eval_central_sca",
+        "xu_sca": "eval_central_xu2024_sca",
         "local": "eval_central_no_coop",
     }[args.micro_solver]
     eval_csv = os.path.join(results_dirs["results_dir"], f"{eval_stem}.csv")
@@ -2411,9 +2597,9 @@ def main():
         configure_macro_objective(env, args, shaping_weight)
         for param_group in macro_actor.optimizer.param_groups:
             param_group["lr"] = actor_lr
-        sca_count_started = int(getattr(env, "_sca_solve_count", 0))
+        sca_count_started = int(getattr(env, sca_count_attr, 0))
         sca_seconds_started = float(
-            getattr(env, "_sca_total_solve_seconds", 0.0)
+            getattr(env, sca_seconds_attr, 0.0)
         )
         should_record = (
             args.trajectory_plot_interval > 0
@@ -2658,7 +2844,7 @@ def main():
                         args,
                         sca_policy_fn=sca_policy_fn,
                     )
-                elif use_sca:
+                elif use_sca or use_xu_sca:
                     micro_action = eval_micro_policy(env, False)
                 else:
                     micro_action = zero_micro_action
@@ -3374,19 +3560,19 @@ def main():
                 "sac_replay_size": (
                     sac_memory.memory_counter if sac_memory is not None else 0
                 ),
-                "sca_solve_count": int(getattr(env, "_sca_solve_count", 0))
+                "sca_solve_count": int(getattr(env, sca_count_attr, 0))
                 - sca_count_started,
                 "sca_solve_seconds": float(
-                    getattr(env, "_sca_total_solve_seconds", 0.0)
+                    getattr(env, sca_seconds_attr, 0.0)
                 )
                 - sca_seconds_started,
                 "sca_solve_mean_ms": 1000.0
                 * (
-                    float(getattr(env, "_sca_total_solve_seconds", 0.0))
+                    float(getattr(env, sca_seconds_attr, 0.0))
                     - sca_seconds_started
                 )
                 / max(
-                    int(getattr(env, "_sca_solve_count", 0))
+                    int(getattr(env, sca_count_attr, 0))
                     - sca_count_started,
                     1,
                 ),
@@ -3531,14 +3717,14 @@ def main():
     save_final_policy_trajectory(
         results_dirs, args, macro_actor, eval_micro_policy
     )
-    if use_sca:
-        train_sca_count = int(getattr(env, "_sca_solve_count", 0))
+    if use_sca or use_xu_sca:
+        train_sca_count = int(getattr(env, sca_count_attr, 0))
         train_sca_seconds = float(
-            getattr(env, "_sca_total_solve_seconds", 0.0)
+            getattr(env, sca_seconds_attr, 0.0)
         )
-        eval_sca_count = int(getattr(eval_env, "_sca_solve_count", 0))
+        eval_sca_count = int(getattr(eval_env, sca_count_attr, 0))
         eval_sca_seconds = float(
-            getattr(eval_env, "_sca_total_solve_seconds", 0.0)
+            getattr(eval_env, sca_seconds_attr, 0.0)
         )
         print(
             f"[SCA] train solves={train_sca_count} "
@@ -3548,6 +3734,22 @@ def main():
             f"seconds={eval_sca_seconds:.2f} "
             f"mean={1000.0 * eval_sca_seconds / max(eval_sca_count, 1):.2f}ms"
         )
+        if use_xu_sca:
+            train_iterations = int(
+                getattr(env, "_xu2024_total_iterations", 0)
+            )
+            eval_iterations = int(
+                getattr(eval_env, "_xu2024_total_iterations", 0)
+            )
+            print(
+                "[Xu-SCA] "
+                f"train mean iterations="
+                f"{train_iterations / max(train_sca_count, 1):.2f}, "
+                f"eval mean iterations="
+                f"{eval_iterations / max(eval_sca_count, 1):.2f}, "
+                f"cold fallbacks="
+                f"{int(getattr(env, '_xu2024_cold_start_fallbacks', 0)) + int(getattr(eval_env, '_xu2024_cold_start_fallbacks', 0))}"
+            )
     print(f"Saved evaluation CSV -> {eval_csv}")
     print(f"Saved per-episode training CSV -> {train_csv}")
     print("Training complete.")

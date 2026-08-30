@@ -3,3 +3,5 @@ matplotlib
 numpy
 scipy
 torch
+cvxpy>=1.4
+clarabel

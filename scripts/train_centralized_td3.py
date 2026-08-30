@@ -73,6 +73,7 @@ from train_centralized_macro import store_sac_replay_transition
 from train_centralized_macro import summarize_micro_reward_diagnostics
 from train_centralized_macro import summarize_reward_diagnostics
 from train_centralized_macro import update_sac
+from train_centralized_macro import validate_micro_policy_mode
 from train_centralized_macro import update_energy_dual
 
 
@@ -1989,6 +1990,7 @@ def main():
     args = parse_args()
     use_sac = args.micro_solver == "sac"
     use_local = args.micro_solver == "local"
+    micro_policy_mode = validate_micro_policy_mode(args, use_sac)
     requested_device = args.device
     if requested_device == "cuda" and not torch.cuda.is_available():
         print("[WARN] CUDA requested but unavailable; falling back to CPU")
@@ -2006,6 +2008,8 @@ def main():
         f"{args.macro_action_mode} action"
     )
     print(f"[INFO] Micro solver: {args.micro_solver.upper()}")
+    if use_sac:
+        print(f"[INFO] Micro SAC ownership mode: {micro_policy_mode}")
     print(
         "[INFO] TD3 exploration scope: "
         f"{td3_exploration_scope(args.macro_action_mode, args.td3_exploration_persistence)}"

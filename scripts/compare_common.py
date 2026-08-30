@@ -461,11 +461,30 @@ def add_common_args(
         help="SCA proximal weight used to construct the residual support",
     )
     parser.add_argument(
+        "--sca_load_source",
+        choices=["current_arrivals", "expected_model"],
+        default="expected_model",
+        help=(
+            "Load input used by QA-PSCA and its residual anchor. "
+            "current_arrivals is the fair causal mode; expected_model is "
+            "retained only to reproduce archived experiments."
+        ),
+    )
+    parser.add_argument(
         "--sac_zero_mean_output_init",
         type=int,
         choices=[0, 1],
         default=0,
         help="Initialize the SAC deterministic residual action at zero",
+    )
+    parser.add_argument(
+        "--sac_initial_log_std",
+        type=float,
+        default=None,
+        help=(
+            "Optional constant initial SAC log standard deviation. "
+            "The std head is initialized to this value when provided."
+        ),
     )
     parser.add_argument(
         "--micro_reward_scale",
@@ -517,6 +536,35 @@ def add_common_args(
         choices=[0, 1],
         default=0,
         help="Append the previous resource-frame active-link fraction",
+    )
+    parser.add_argument(
+        "--micro_expected_load_state",
+        type=int,
+        choices=[0, 1],
+        default=0,
+        help=(
+            "Append causal high/low expected offered load per source UAV to "
+            "the direct-SAC observation"
+        ),
+    )
+    parser.add_argument(
+        "--u2u_active_link_mask_state",
+        type=int,
+        choices=[0, 1],
+        default=0,
+        help=(
+            "Append the current directed U2U queue-activity mask to the "
+            "micro observation"
+        ),
+    )
+    parser.add_argument(
+        "--micro_policy_mode",
+        choices=["legacy_auto", "direct", "sca_residual"],
+        default="legacy_auto",
+        help=(
+            "Declare whether SAC owns the full routing action or only an "
+            "SCA-guided residual; legacy_auto preserves archived protocols"
+        ),
     )
     parser.add_argument(
         "--macro_comm_weight",
@@ -955,6 +1003,9 @@ def apply_env_config(env: HRL_Wrapper, args: argparse.Namespace) -> HRL_Wrapper:
     env.macro_action_deadzone = float(
         getattr(args, "macro_action_deadzone", env.macro_action_deadzone)
     )
+    env.sca_load_source = str(
+        getattr(args, "sca_load_source", "expected_model")
+    ).strip().lower()
     return env
 
 
@@ -1024,6 +1075,12 @@ def make_env_from_args(
         ),
         u2u_prev_active_state=bool(
             int(getattr(args, "u2u_prev_active_state", 0))
+        ),
+        micro_expected_load_state=bool(
+            int(getattr(args, "micro_expected_load_state", 0))
+        ),
+        u2u_active_link_mask_state=bool(
+            int(getattr(args, "u2u_active_link_mask_state", 0))
         ),
         cpu_alloc_mode=str(getattr(args, "cpu_alloc_mode", "priority_kkt")),
         kkt_v=float(getattr(args, "kkt_v", 1.0)),
@@ -1325,8 +1382,16 @@ def save_scenario_metadata(
         "micro_sca_residual_proximal_weight": float(
             getattr(args, "micro_sca_residual_proximal_weight", 1e-3)
         ),
+        "sca_load_source": str(
+            getattr(args, "sca_load_source", "expected_model")
+        ),
         "sac_zero_mean_output_init": int(
             getattr(args, "sac_zero_mean_output_init", 0)
+        ),
+        "sac_initial_log_std": (
+            None
+            if getattr(args, "sac_initial_log_std", None) is None
+            else float(args.sac_initial_log_std)
         ),
         "micro_reward_scale": float(
             getattr(args, "micro_reward_scale", 10.0)
@@ -1349,6 +1414,15 @@ def save_scenario_metadata(
         ),
         "u2u_prev_active_state": int(
             getattr(args, "u2u_prev_active_state", 0)
+        ),
+        "micro_expected_load_state": int(
+            getattr(args, "micro_expected_load_state", 0)
+        ),
+        "u2u_active_link_mask_state": int(
+            getattr(args, "u2u_active_link_mask_state", 0)
+        ),
+        "micro_policy_mode": str(
+            getattr(args, "micro_policy_mode", "legacy_auto")
         ),
         "micro_solver": getattr(args, "micro_solver", "sac"),
         "sac_actor_lr": float(getattr(args, "sac_actor_lr", 3e-4)),
@@ -1377,6 +1451,52 @@ def save_scenario_metadata(
         ),
         "sca_proximal_weight": float(
             getattr(args, "sca_proximal_weight", 0.0)
+        ),
+        "xu2024_sca_variant": (
+            "persistent_queue_two_priority_adapter"
+            if str(getattr(args, "micro_solver", "")) == "xu_sca"
+            else None
+        ),
+        "xu2024_sca_max_iter": int(
+            getattr(args, "xu_sca_max_iter", 0)
+        ),
+        "xu2024_sca_tol": float(
+            getattr(args, "xu_sca_tol", 0.0)
+        ),
+        "xu2024_sca_proximal_rho": float(
+            getattr(args, "xu_sca_proximal_rho", 0.0)
+        ),
+        "xu2024_sca_proximal_cpu": float(
+            getattr(args, "xu_sca_proximal_cpu", 0.0)
+        ),
+        "xu2024_sca_warm_start": int(
+            getattr(args, "xu_sca_warm_start", 0)
+        ),
+        "xu2024_sca_task_aggregation": str(
+            getattr(args, "xu_sca_task_aggregation", "source_priority")
+        ),
+        "xu2024_sca_frame_deadline_enforced": int(
+            getattr(args, "xu_sca_enforce_frame_deadline", 0)
+        ),
+        "xu2024_sca_priority_delay_weights": int(
+            getattr(args, "xu_sca_use_priority_delay_weights", 0)
+        ),
+        "xu2024_sca_queue_aware": int(
+            getattr(args, "xu_sca_queue_aware", 0)
+        ),
+        "xu2024_sca_association_adaptation": (
+            "fixed_environment_source_association"
+            if str(getattr(args, "micro_solver", "")) == "xu_sca"
+            else None
+        ),
+        "xu2024_sca_cpu_adaptation": (
+            (
+                "shared_priority_demand_for_persistent_queue"
+                if int(getattr(args, "xu_sca_queue_aware", 0))
+                else "per_task_solution_aggregated_to_high_low_frequency"
+            )
+            if str(getattr(args, "micro_solver", "")) == "xu_sca"
+            else None
         ),
         "macro_comm_weight": float(getattr(args, "macro_comm_weight", 2.0)),
         "macro_comm_flow_ema": float(
