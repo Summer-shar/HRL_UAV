@@ -146,7 +146,9 @@ class QueueMDP:
         capacity = self.env.F_max_array / (self.env.C * 1e6)
         # This includes already assigned in-flight work, not hypothetical future arrivals.
         assigned_work = q_loc + q_tx.sum(axis=1)
-        u2u_eta = self.env.compute_u2u_spectral_efficiency()
+        # PSD mode keeps fixed-reference quality here, not allocated service rates.
+        # Feature name, 9D flattening, and normalization remain unchanged.
+        u2u_eta = self.env.compute_u2u_reference_quality()
         u2g_rates = self.env.compute_u2g_rate_bps() / 1e6
         associations = raw["user_associations"]
         uplink = np.zeros(self.N)

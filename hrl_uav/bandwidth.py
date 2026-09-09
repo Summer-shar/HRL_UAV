@@ -84,6 +84,8 @@ class MeteredMDP(QueueMDP):
             "tx_service_mbit": tx, "tx_capacity_mbit": capacity,
             "compute_service_mbit": compute, "cpu_utilization_sum": cpu,
         })
+        if self.env.wireless_model == "psd_per_uav_budget":
+            self.readings[-1]["tx_energy_j"] = sum(info["energy_trans"] for info in service)
         assigned = self.env.coop_flow_mbits-before_flow
         computed = sum((info["compute_service_per_uav_mbits"] for info in compute_steps), np.zeros(self.N))
         transmitted = sum((info["tx_service_matrix_mbits"] for info in service), np.zeros((self.N,self.N)))
@@ -115,6 +117,13 @@ class MeteredMDP(QueueMDP):
                         "queue_mbit": float(after_transfer[source, destination]),
                         "balance_error": float(transfer_error[source, destination]),
                     })
+                    if self.env.wireless_model == "psd_per_uav_budget":
+                        for key, info_key in (("power_w_sum", "u2u_link_power_w"),
+                                              ("noise_w_sum", "u2u_link_noise_w"),
+                                              ("tx_time_s", "u2u_active_time_s"),
+                                              ("tx_energy_j", "u2u_link_energy_j")):
+                            self.link_readings[-1][key] = sum(
+                                float(info[info_key][source, destination]) for info in service)
         cpu_sum = sum((info["cpu_utilization_per_uav"] for info in compute_steps), np.zeros(self.N))
         low_cpu_sum = sum((info["cpu_low_utilization_per_uav"] for info in compute_steps), np.zeros(self.N))
         order = np.argsort(-self.env.zone_expected_offered_load_mbps)
@@ -141,6 +150,9 @@ class MeteredMDP(QueueMDP):
                 "compute_balance_error": float(compute_error[uav]),
                 "transfer_balance_error_max": float(np.abs(transfer_error[:,uav]).max()),
             })
+            if self.env.wireless_model == "psd_per_uav_budget":
+                self.uav_readings[-1]["tx_energy_j"] = sum(
+                    float(info["energy_trans_per_uav"][uav]) for info in service)
         return frame
 
 
@@ -160,6 +172,8 @@ def summarize_meter(rows, duration):
         cpu_utilization_service=sums["cpu_utilization_sum"]/compute_steps,
         allocated_tx_capacity_utilization=sums["tx_service_mbit"]/max(sums["tx_capacity_mbit"], 1e-12),
     )
+    if "tx_energy_j" in sums:
+        result.update(tx_energy_j=sums["tx_energy_j"], tx_power_w_wall=sums["tx_energy_j"]/duration)
     return result
 
 
@@ -206,6 +220,13 @@ def summarize_links(rows, duration, seed, mhz):
             "terminal_queue_mbit": selected[-1]["queue_mbit"],
             "allocated_capacity_utilization": sum(r["served_mbit"] for r in selected)/max(capacity, 1e-12),
         })
+        if "tx_energy_j" in selected[0]:
+            result[-1].update(
+                power_w_when_active=sum(r["power_w_sum"] for r in selected)/max(active, 1),
+                noise_w_when_active=sum(r["noise_w_sum"] for r in selected)/max(active, 1),
+                tx_time_s=sum(r["tx_time_s"] for r in selected),
+                tx_energy_j=sum(r["tx_energy_j"] for r in selected),
+            )
     return result
 
 

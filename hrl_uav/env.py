@@ -1,5 +1,6 @@
 from collections import deque
 from dataclasses import dataclass, field
+from numbers import Real
 
 import numpy as np
 
@@ -161,6 +162,11 @@ class UAV_MEC_Env:
         rpgm_local_restore_rate_s2=0.0002,
         rpgm_local_speed_cap_mps=0.45,
         compute_during_deployment=False,
+        wireless_model="legacy_fixed_noise",
+        noise_psd_w_per_hz=1.95e-19,
+        u2u_tx_budget_w=1.0,
+        u2u_reference_bandwidth_hz=512820.5128205128,
+        u2u_reference_power_w=1.0,
     ):
 
         # ================== 1. 系统物理设定与参数 ==================
@@ -229,6 +235,33 @@ class UAV_MEC_Env:
         # GT 上行 0.1 W、UAV 机间 1 W（论文功率非对称：机间链路更可靠）
         self.p_gt = float(p_gt_power)
         self.p_u2u = float(p_u2u_power)
+        if not isinstance(wireless_model, str) or wireless_model not in (
+                "legacy_fixed_noise", "psd_per_uav_budget"):
+            raise ValueError(f"Unknown wireless_model: {wireless_model!r}")
+        self.wireless_model = wireless_model
+        self.noise_psd_w_per_hz = self._positive_wireless_parameter(
+            "noise_psd_w_per_hz", noise_psd_w_per_hz)
+        self.u2u_tx_budget_w = self._positive_wireless_parameter(
+            "u2u_tx_budget_w", u2u_tx_budget_w)
+        self.u2u_reference_bandwidth_hz = self._positive_wireless_parameter(
+            "u2u_reference_bandwidth_hz", u2u_reference_bandwidth_hz)
+        self.u2u_reference_power_w = self._positive_wireless_parameter(
+            "u2u_reference_power_w", u2u_reference_power_w)
+        if self.wireless_model == "psd_per_uav_budget":
+            if u2u_link_bandwidth_matrix_mhz is not None:
+                raise ValueError(
+                    "psd_per_uav_budget does not support "
+                    "u2u_link_bandwidth_matrix_mhz; use equal active-link sharing.")
+            for name, value in (("uplink_bandwidth_mhz", uplink_bandwidth_mhz),
+                                ("u2u_bandwidth_mhz", u2u_bandwidth_mhz),
+                                ("p_gt_power", p_gt_power), ("beta_0", beta_0)):
+                self._positive_wireless_parameter(name, value)
+            for name, value in (("uplink bandwidth in Hz", self.B_gt_total),
+                                ("U2U bandwidth in Hz", self.B_u2u_total),
+                                ("reference noise power", self.noise_psd_w_per_hz * self.u2u_reference_bandwidth_hz),
+                                ("uplink noise power", self.noise_psd_w_per_hz * self.B_gt_total / self.M),
+                                ("U2U noise power", self.noise_psd_w_per_hz * self.B_u2u_total)):
+                self._positive_wireless_parameter(name, value)
         self.min_uav_separation_m = float(min_uav_separation_m)
         if self.min_uav_separation_m < 0.0:
             raise ValueError("min_uav_separation_m must be non-negative.")
@@ -241,6 +274,8 @@ class UAV_MEC_Env:
         self.last_u2u_link_bandwidth_matrix_hz = (
             self.u2u_link_bandwidth_matrix_hz.copy()
         )
+        if self.wireless_model == "psd_per_uav_budget":
+            self.last_u2u_link_bandwidth_matrix_hz.fill(0.0)
         self.communication_model_reference = (
             "Xu et al., IEEE TCOM 2024, DOI 10.1109/TCOMM.2024.3361536"
         )
@@ -536,6 +571,13 @@ class UAV_MEC_Env:
     def _current_time(self):
         return float(self.global_micro_step) * float(self.micro_dt)
 
+    @staticmethod
+    def _positive_wireless_parameter(name, value):
+        if (isinstance(value, (bool, np.bool_)) or not isinstance(value, Real)
+                or not np.isfinite(value) or value <= 0):
+            raise ValueError(f"{name} must be a finite positive numeric scalar.")
+        return float(value)
+
     def _normalize_u2u_link_bandwidth_matrix(self, matrix_mhz):
         if matrix_mhz is None:
             matrix_hz = np.zeros((self.N, self.N), dtype=np.float64)
@@ -614,8 +656,11 @@ class UAV_MEC_Env:
         distance_sq = np.sum(horizontal**2, axis=1) + float(self.H) ** 2
         channel_gain = self.beta_0 / np.maximum(distance_sq, 1e-12)
         bandwidth_per_gt = self.B_gt_total / max(self.M, 1)
+        noise = self.noise_power
+        if self.wireless_model == "psd_per_uav_budget":
+            noise = self.noise_psd_w_per_hz * bandwidth_per_gt
         return bandwidth_per_gt * np.log2(
-            1.0 + (self.p_gt * channel_gain) / self.noise_power
+            1.0 + (self.p_gt * channel_gain) / noise
         )
 
     def allocate_u2u_link_bandwidth_hz(self, active_link_mask=None):
@@ -640,6 +685,12 @@ class UAV_MEC_Env:
         return bandwidth_hz
 
     def compute_u2u_spectral_efficiency(self, uav_coords=None):
+        """Legacy spectral efficiency, or fixed-reference quality in PSD mode.
+
+        The latter is an observation feature, NOT actual service efficiency.
+        """
+        if self.wireless_model == "psd_per_uav_budget":
+            return self.compute_u2u_reference_quality(uav_coords)
         if uav_coords is None:
             return self._get_u2u_spectral_efficiency().copy()
         coords = np.asarray(uav_coords, dtype=np.float64)
@@ -656,12 +707,73 @@ class UAV_MEC_Env:
         np.fill_diagonal(spectral_efficiency, 0.0)
         return spectral_efficiency
 
+    def _u2u_channel_gain(self, uav_coords=None):
+        # Only geometry enters this quantity; no actual resource result is cached.
+        coords = np.asarray(self.uav_coords if uav_coords is None else uav_coords,
+                            dtype=np.float64)
+        if coords.shape != (self.N, 2) or not np.all(np.isfinite(coords)):
+            raise ValueError(f"uav_coords must be finite with shape ({self.N}, 2).")
+        dist_sq = np.sum((coords[:, None, :] - coords[None, :, :])**2, axis=-1)
+        np.fill_diagonal(dist_sq, np.inf)
+        gain = self.beta_0 / np.maximum(dist_sq, 1e-8 if uav_coords is None else 1e-12)
+        np.fill_diagonal(gain, 0.0)
+        return gain
+
+    def compute_u2u_reference_quality(self, uav_coords=None):
+        """Position-only 9D reference feature; preserve legacy API/normalization."""
+        if self.wireless_model == "legacy_fixed_noise":
+            return self.compute_u2u_spectral_efficiency(uav_coords)
+        return np.log2(1.0 + self.u2u_reference_power_w * self._u2u_channel_gain(uav_coords)
+                       / (self.noise_psd_w_per_hz * self.u2u_reference_bandwidth_hz))
+
+    def allocate_u2u_resources(self, active_link_mask, uav_coords=None):
+        """Candidate model: one immutable-for-this-step allocation, in SI units.
+
+        Service supplies the mask from existing high+low transfer backlog.
+        Callers doing hypothetical queries must supply their own active mask.
+        """
+        if self.wireless_model != "psd_per_uav_budget":
+            raise ValueError("allocate_u2u_resources requires psd_per_uav_budget.")
+        if not self.dynamic_u2u_bandwidth:
+            raise ValueError("psd_per_uav_budget does not support fixed link bandwidths.")
+        self._positive_wireless_parameter("B_u2u_total", self.B_u2u_total)
+        active = np.asarray(active_link_mask, dtype=bool)
+        if active.shape != (self.N, self.N):
+            raise ValueError(f"active_link_mask must have shape ({self.N}, {self.N}).")
+        active = active.copy()
+        np.fill_diagonal(active, False)
+        bandwidth = self.allocate_u2u_link_bandwidth_hz(active)
+        outgoing = active.sum(axis=1)
+        power = np.divide(self.u2u_tx_budget_w * active, outgoing[:, None],
+                          out=np.zeros_like(bandwidth), where=outgoing[:, None] > 0)
+        noise = self.noise_psd_w_per_hz * bandwidth
+        gain = self._u2u_channel_gain(uav_coords)
+        if not np.all(np.isfinite(noise)) or np.any(noise[active] <= 0):
+            raise ValueError("Wireless parameters produce invalid noise power.")
+        try:
+            with np.errstate(over="raise", divide="raise", invalid="raise"):
+                snr = np.divide(power * gain, noise, out=np.zeros_like(noise), where=active)
+                rate = bandwidth * np.log2(1.0 + snr)
+        except FloatingPointError as error:
+            raise ValueError("Wireless parameters produce non-finite U2U rates.") from error
+        if not np.all(np.isfinite(rate)):
+            raise ValueError("Wireless parameters produce invalid noise or rates.")
+        return {"u2u_link_bandwidth_hz": bandwidth, "u2u_link_power_w": power,
+                "u2u_link_noise_w": noise, "u2u_rate_bps": rate}
+
     def compute_u2u_rate_bps(
         self,
         uav_coords=None,
         active_link_mask=None,
         return_bandwidth=False,
     ):
+        if self.wireless_model == "psd_per_uav_budget":
+            # No-mask queries retain the all-directed-links query convention.
+            mask = ~np.eye(self.N, dtype=bool) if active_link_mask is None else active_link_mask
+            resources = self.allocate_u2u_resources(mask, uav_coords)
+            if return_bandwidth:
+                return resources["u2u_rate_bps"], resources["u2u_link_bandwidth_hz"]
+            return resources["u2u_rate_bps"]
         spectral_efficiency = self.compute_u2u_spectral_efficiency(
             uav_coords=uav_coords
         )
@@ -1684,6 +1796,8 @@ class UAV_MEC_Env:
         self.last_u2u_link_bandwidth_matrix_hz = (
             self.u2u_link_bandwidth_matrix_hz.copy()
         )
+        if self.wireless_model == "psd_per_uav_budget":
+            self.last_u2u_link_bandwidth_matrix_hz.fill(0.0)
         self._external_cpu_frequency_override = None
         self._external_cpu_override_steps_remaining = 0
         self.current_arrival_active_users = np.zeros(self.N)
@@ -2191,6 +2305,15 @@ class UAV_MEC_Env:
             for name, amount in {**by_priority, **by_type}.items():
                 info[f'compute_service_{name}_mbits'] = amount
                 info[f'compute_service_{name}_cycles'] = amount * 1e6 * self.C
+        if self.wireless_model == "psd_per_uav_budget":
+            # Query helpers do not imply service while deployment pauses radio.
+            for name in ("u2u_link_bandwidth_hz", "u2u_link_power_w", "u2u_link_noise_w",
+                         "u2u_rate_bps", "u2u_active_time_s", "u2u_link_energy_j",
+                         "tx_service_matrix_mbits"):
+                info[name] = np.zeros((self.N, self.N), dtype=np.float64)
+            info["wireless_model"] = self.wireless_model
+            info["u2u_quality_semantics"] = "fixed_reference_not_actual_efficiency"
+            self.last_u2u_link_bandwidth_matrix_hz.fill(0.0)
         info.update(self.get_task_delay_stats())
         return info
 
@@ -2636,6 +2759,8 @@ class UAV_MEC_Env:
         return f_high, f_low
 
     def _get_u2u_spectral_efficiency(self):
+        if self.wireless_model == "psd_per_uav_budget":
+            return self.compute_u2u_reference_quality()
         if (
             self._u2u_spectral_cache_coords is None
             or not np.array_equal(self.uav_coords, self._u2u_spectral_cache_coords)
@@ -2727,10 +2852,15 @@ class UAV_MEC_Env:
             + np.asarray(self.Q_tx_low, dtype=np.float64)
         ) > 1e-12
         np.fill_diagonal(tx_demand_mask, False)
-        rate_bps, u2u_link_bandwidth_hz = self.compute_u2u_rate_bps(
-            active_link_mask=tx_demand_mask,
-            return_bandwidth=True,
-        )
+        if self.wireless_model == "psd_per_uav_budget":
+            resources = self.allocate_u2u_resources(tx_demand_mask)
+            rate_bps = resources["u2u_rate_bps"]
+            u2u_link_bandwidth_hz = resources["u2u_link_bandwidth_hz"]
+        else:
+            rate_bps, u2u_link_bandwidth_hz = self.compute_u2u_rate_bps(
+                active_link_mask=tx_demand_mask,
+                return_bandwidth=True,
+            )
         self.last_u2u_link_bandwidth_matrix_hz = (
             u2u_link_bandwidth_hz.copy()
         )
@@ -2769,12 +2899,20 @@ class UAV_MEC_Env:
             actual_trans_total * 1e6,
             rate_bps,
             out=np.zeros_like(actual_trans_total, dtype=np.float64),
-            where=rate_bps > 1e-12,
+            where=rate_bps > (0.0 if self.wireless_model == "psd_per_uav_budget" else 1e-12),
         )
-        energy_trans_per_uav = np.sum(
-            u2u_active_time_s * self.p_u2u,
-            axis=1,
-        ).astype(np.float32)
+        if self.wireless_model == "psd_per_uav_budget":
+            if (np.any((actual_trans_total > 0) & (rate_bps <= 0))
+                    or np.any(u2u_active_time_s > self.micro_dt + 1e-9)
+                    or np.any(u2u_active_time_s < 0)):
+                raise AssertionError("U2U service exceeds the allocated physical-step capacity.")
+            link_energy = resources["u2u_link_power_w"] * u2u_active_time_s
+            energy_trans_per_uav = link_energy.sum(axis=1)
+        else:
+            energy_trans_per_uav = np.sum(
+                u2u_active_time_s * self.p_u2u,
+                axis=1,
+            ).astype(np.float32)
         total_E_trans = float(np.sum(energy_trans_per_uav))
         uav_battery_energy_per_uav = (
             energy_comp_per_uav + energy_trans_per_uav
@@ -2932,6 +3070,12 @@ class UAV_MEC_Env:
             'Q_loc_total': np.sum(self.Q_loc_high) + np.sum(self.Q_loc_low),
             'Q_tx_total': np.sum(self.Q_tx_high) + np.sum(self.Q_tx_low)
         }
+        if self.wireless_model == "psd_per_uav_budget":
+            info.update({"wireless_model": self.wireless_model,
+                         "u2u_quality_semantics": "fixed_reference_not_actual_efficiency",
+                         "u2u_link_power_w": resources["u2u_link_power_w"].copy(),
+                         "u2u_link_noise_w": resources["u2u_link_noise_w"].copy(),
+                         "u2u_link_energy_j": link_energy.copy()})
         for task_type in self.device_type_names:
             info[f'compute_service_{task_type}_mbits'] = (
                 compute_service_type_mbits.get(task_type, 0.0)
