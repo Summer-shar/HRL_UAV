@@ -5,6 +5,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from ..routing import project_rows_to_simplex_tensor
+
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -46,23 +48,32 @@ class ActorNet(nn.Module):
 
 
 class CriticNet(nn.Module):
-    def __init__(self, input_dim, output_dim):
+    def __init__(self, input_dim, output_dim, route_width=0, quantiles=1):
         super(CriticNet, self).__init__()
+        if type(quantiles) is not int or quantiles < 1:
+            raise ValueError("quantiles must be a positive integer")
+        self.route_width = int(route_width)
+        if self.route_width and output_dim % self.route_width:
+            raise ValueError("Routing critic input must contain complete simplex rows")
         self.in_to_y1 = nn.Linear(input_dim + output_dim, 256)
         self.in_to_y1.weight.data.normal_(0, 0.1)
         self.y1_to_y2 = nn.Linear(256, 256)
         self.y1_to_y2.weight.data.normal_(0, 0.1)
-        self.out = nn.Linear(256, 1)
+        self.out = nn.Linear(256, quantiles)
         self.out.weight.data.normal_(0, 0.1)
 
         self.q2_in_to_y1 = nn.Linear(input_dim + output_dim, 256)
         self.q2_in_to_y1.weight.data.normal_(0, 0.1)
         self.q2_y1_to_y2 = nn.Linear(256, 256)
         self.q2_y1_to_y2.weight.data.normal_(0, 0.1)
-        self.q2_out = nn.Linear(256, 1)
+        self.q2_out = nn.Linear(256, quantiles)
         self.q2_out.weight.data.normal_(0, 0.1)
 
     def forward(self, s, a):
+        if self.route_width:
+            # All raw scores with the same executed routing share a Q value.
+            # Autograd propagates through the projection to the original actor.
+            a = project_rows_to_simplex_tensor(a.reshape(-1, self.route_width)).reshape_as(a)
         inputstate = torch.cat((s, a), dim=1)
 
         q1 = self.in_to_y1(inputstate)
@@ -172,6 +183,8 @@ class Memory():
         ) % self.capacity
         state = {
             "transitions": self.mem[indices, :].copy(),
+            "memory_counter": int(self.memory_counter),
+            "capacity": int(self.capacity),
             "transition_width": int(self.mem.shape[1]),
             "recent_window": int(self.recent_window),
             "recent_ratio": float(self.recent_ratio),
@@ -180,7 +193,7 @@ class Memory():
             state["rng_state"] = self.rng.bit_generator.state
         return state
 
-    def load_state_dict(self, state):
+    def load_state_dict(self, state, *, memory_counter=None):
         if not isinstance(state, dict) or "transitions" not in state:
             raise ValueError("Replay state must contain transitions.")
         transitions = np.asarray(state["transitions"], dtype=np.float32)
@@ -193,8 +206,22 @@ class Memory():
             )
         retained = transitions[-self.capacity :]
         self.mem.fill(0.0)
-        self.mem[: retained.shape[0], :] = retained
-        self.memory_counter = int(retained.shape[0])
+        if memory_counter is None:
+            self.mem[: retained.shape[0], :] = retained
+            self.memory_counter = int(retained.shape[0])
+        else:
+            # Exact same-capacity continuation needs the original ring layout,
+            # not just the retained transitions in chronological order.
+            counter = int(memory_counter)
+            if (counter < 0 or len(transitions) != min(counter, self.capacity)
+                    or state.get("capacity", self.capacity) != self.capacity):
+                raise ValueError("Replay counter/capacity does not match retained transitions")
+            if (state["recent_window"] != self.recent_window
+                    or state["recent_ratio"] != self.recent_ratio):
+                raise ValueError("Replay sampling settings changed during continuation")
+            indices = np.arange(counter - len(retained), counter, dtype=np.int64) % self.capacity
+            self.mem[indices, :] = retained
+            self.memory_counter = counter
         if (
             isinstance(self.rng, np.random.Generator)
             and "rng_state" in state
@@ -295,9 +322,9 @@ class Entroy():
 
 
 class Critic():
-    def __init__(self, state_dim, action_dim):
-        self.critic_v = CriticNet(state_dim, action_dim).to(device)
-        self.target_critic_v = CriticNet(state_dim, action_dim).to(device)
+    def __init__(self, state_dim, action_dim, route_width=0):
+        self.critic_v = CriticNet(state_dim, action_dim, route_width).to(device)
+        self.target_critic_v = CriticNet(state_dim, action_dim, route_width).to(device)
         self.target_critic_v.load_state_dict(self.critic_v.state_dict())
         self.optimizer = torch.optim.Adam(
             self.critic_v.parameters(),

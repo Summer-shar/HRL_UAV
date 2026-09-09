@@ -1,0 +1,172 @@
+{
+  "schema": "direct_hrl_mdp_2",
+  "observation": {
+    "layout": "split_v1",
+    "routing_ready": false
+  },
+  "environment": {
+    "num_uavs": 3,
+    "num_users": 39,
+    "traffic_profile": "normal",
+    "traffic_scale": 0.5,
+    "load_scale": 1.15,
+    "zone_loads": [
+      12.5,
+      5.5,
+      3.5
+    ],
+    "arrival_dt": 0.5,
+    "resource_frame_dt": 0.5,
+    "deployment_dt": 1,
+    "deployment_transient_energy_mode": "kinetic_lower_bound",
+    "uplink_bandwidth_mhz": 20,
+    "u2u_bandwidth_mhz": 6,
+    "cpu_alloc_mode": "priority_demand",
+    "cpu_power_cap_w": 0,
+    "pause_service_during_flight": true,
+    "arrivals_during_deployment": true,
+    "users_static": false,
+    "user_zone_radius": 0,
+    "gm_mean_speed_mps": 0.5,
+    "gm_mean_heading_rad": 0,
+    "gm_heading_mode": "reference_point_group",
+    "gm_speed_memory": 0.5,
+    "gm_heading_memory": 0.8,
+    "gm_speed_noise_std": 0.1,
+    "gm_heading_noise_std": 0.15,
+    "rpgm_group_speed_mps": 0.25,
+    "rpgm_group_speed_memory": 0.65,
+    "rpgm_group_speed_noise_std": 0.04,
+    "rpgm_group_turn_std_rad_sqrt_s": 0.2,
+    "rpgm_local_velocity_memory": 0.9,
+    "rpgm_local_velocity_std_mps": 0.32,
+    "rpgm_local_restore_rate_s2": 0.0002,
+    "rpgm_local_speed_cap_mps": 0.6,
+    "min_uav_separation_m": 5
+  },
+  "cpu_ghz": 10,
+  "phase_loads": [
+    [
+      12.5,
+      5.5,
+      3.5
+    ],
+    [
+      3.5,
+      12.5,
+      5.5
+    ],
+    [
+      5.5,
+      3.5,
+      12.5
+    ]
+  ],
+  "phase_dwell": [
+    8,
+    12
+  ],
+  "waypoint_radius_m": 60,
+  "max_displacement_m": 20,
+  "reward": {
+    "delay_weight": 0.9,
+    "energy_weight": 0.1,
+    "holding_norm_task_s": 10,
+    "energy_norm_j": 14
+  },
+  "training": {
+    "seed": 1,
+    "pretrain_windows": 800,
+    "joint_windows": 60,
+    "window_macros": 30,
+    "stream_windows": 3,
+    "gamma_per_resource_frame": 0.99,
+    "gae_lambda": 0.95,
+    "batch_size": 128,
+    "replay_capacity": 100000,
+    "critic_action_representation": "executed_route",
+    "replay_warmup": 1000,
+    "sac_update_frames": 20,
+    "sac_policy_delay": 2,
+    "sac_actor_warmup_updates": 100,
+    "initial_alpha": 0.05,
+    "initial_sac_log_std": -2,
+    "pretrain_lr": [
+      0.00003,
+      0.0003,
+      0.00003
+    ],
+    "joint_lr": [
+      0.00003,
+      0.0001,
+      0.00001
+    ],
+    "grad_clip": 1,
+    "tau": 0.01,
+    "ppo_update_macros": 300,
+    "ppo_epochs": 10,
+    "ppo_actor_lr": 0.0003,
+    "ppo_critic_lr": 0.001,
+    "ppo_clip": 0.2,
+    "ppo_target_kl": 0.03,
+    "ppo_initial_std": 0.3333333333333333,
+    "ppo_final_std": 0.03333333333333333
+  },
+  "validation_seeds": [
+    33000,
+    33001
+  ],
+  "test_seeds": [
+    33500,
+    33501,
+    33502
+  ],
+  "test_macros": 90,
+  "qualification": {
+    "validation_every_windows": 6,
+    "validation_macros": 90,
+    "validation_seeds": [
+      33000,
+      33001
+    ],
+    "test_seeds": [
+      33500,
+      33501,
+      33502
+    ],
+    "training_scene_seed_base": 61000,
+    "tail_checkpoints": 3,
+    "max_relative_delay_regression": 0.05,
+    "max_relative_cost_regression": 0.05,
+    "max_relative_validation_range": 0.05,
+    "min_completion_rate": 0.995,
+    "max_queue_excess_mbit": 10,
+    "max_late_queue_slope_mbit_s": 0.01,
+    "max_stage_seconds": 3600
+  },
+  "sac_reference": {
+    "windows": 30,
+    "update_frames": 1,
+    "policy_delay": 1,
+    "actor_warmup_updates": 0,
+    "learning_rates": [
+      0.0003,
+      0.0003,
+      0.0003
+    ],
+    "uniform_warmup": true,
+    "training_scene_seed_base": 51000,
+    "validation_every_windows": 6,
+    "validation_seeds": [
+      31500,
+      31501
+    ],
+    "test_seeds": [
+      32500,
+      32501,
+      32502
+    ],
+    "test_macros": 90,
+    "max_training_seconds_per_arm": 1500
+  }
+}

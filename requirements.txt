@@ -1,7 +1,6 @@
-gymnasium
 matplotlib
 numpy
 scipy
 torch
-cvxpy>=1.4
-clarabel
+gymnasium==0.29.1
+stable-baselines3==2.7.0

@@ -86,6 +86,28 @@ class SACReplayResumeTest(unittest.TestCase):
                 {"transitions": np.zeros((3, 5), dtype=np.float32)}
             )
 
+    def test_continuation_preserves_ring_counter_and_next_sample(self):
+        source = Memory(5, 4, recent_window=5, recent_ratio=0.0,
+                        rng=np.random.default_rng(7))
+        for value in range(13):
+            source.mem[source.memory_counter % source.capacity] = value
+            source.memory_counter += 1
+        state = source.state_dict()
+        restored = Memory(5, 4, recent_window=5, recent_ratio=0.0,
+                          rng=np.random.default_rng(999))
+        restored.load_state_dict(state, memory_counter=state["memory_counter"])
+        self.assertEqual(restored.memory_counter, 13)
+        np.testing.assert_array_equal(restored.mem, source.mem)
+        np.testing.assert_array_equal(restored.sample(30), source.sample(30))
+        restored.mem[restored.memory_counter % 5] = 20
+        source.mem[source.memory_counter % 5] = 20
+        np.testing.assert_array_equal(restored.mem, source.mem)
+
+    def test_continuation_rejects_inconsistent_counter(self):
+        source = Memory(5, 4, recent_window=5, recent_ratio=0.0)
+        with self.assertRaisesRegex(ValueError, "counter/capacity"):
+            source.load_state_dict(source.state_dict(), memory_counter=100)
+
 
 if __name__ == "__main__":
     unittest.main()
