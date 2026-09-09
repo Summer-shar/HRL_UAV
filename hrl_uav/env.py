@@ -160,6 +160,7 @@ class UAV_MEC_Env:
         rpgm_local_velocity_std_mps=0.18,
         rpgm_local_restore_rate_s2=0.0002,
         rpgm_local_speed_cap_mps=0.45,
+        compute_during_deployment=False,
     ):
 
         # ================== 1. 系统物理设定与参数 ==================
@@ -256,6 +257,14 @@ class UAV_MEC_Env:
         # The long-term queueing protocol can instead keep exogenous arrivals
         # active while U2G/U2U/CPU service remains paused.
         self.pause_service_during_flight = bool(pause_service_during_flight)
+        if not isinstance(compute_during_deployment, (bool, np.bool_)):
+            raise ValueError("compute_during_deployment must be a boolean.")
+        self.compute_during_deployment = bool(compute_during_deployment)
+        if self.compute_during_deployment and not self.pause_service_during_flight:
+            raise ValueError(
+                "compute_during_deployment requires pause_service_during_flight=True "
+                "so deployment communication remains paused."
+            )
         self.arrivals_during_deployment = bool(arrivals_during_deployment)
         self.arrival_interval_steps = max(
             self.resource_frame_steps,
@@ -2070,7 +2079,7 @@ class UAV_MEC_Env:
         self.A_t_high = np.zeros(self.N)
         self.A_t_low = np.zeros(self.N)
 
-    def _build_paused_service_info(self, flight_phase, arrival_event=None):
+    def _build_paused_service_info(self, flight_phase, arrival_event=None, compute_step=None):
         zeros_n = np.zeros(self.N, dtype=np.float32)
         arrival_event = arrival_event or {}
         arrival_high = np.asarray(
@@ -2150,6 +2159,38 @@ class UAV_MEC_Env:
             'Q_loc_total': np.sum(self.Q_loc_high) + np.sum(self.Q_loc_low),
             'Q_tx_total': np.sum(self.Q_tx_high) + np.sum(self.Q_tx_low),
         }
+        if compute_step is not None:
+            (f_high, f_low, f_total, energy_model, served_high, served_low,
+             energy, by_priority, by_type) = compute_step
+            # service_paused retains its communication/decision-pause meaning.
+            info.update({
+                'compute_service_paused': False,
+                'total_energy': float(np.sum(energy)),
+                'energy_comp': float(np.sum(energy)),
+                'energy_comp_per_uav': energy.copy(),
+                'energy_total_per_uav': energy.copy(),
+                'uav_battery_energy_per_uav': energy.copy(),
+                'uav_battery_service_energy': float(np.sum(energy)),
+                'cpu_utilization_mean': np.mean(f_total / np.maximum(self.F_max_array, 1e-8)),
+                'cpu_utilization_per_uav': (f_total / np.maximum(self.F_max_array, 1e-8)).copy(),
+                'cpu_high_utilization_per_uav': (f_high / np.maximum(self.F_max_array, 1e-8)).copy(),
+                'cpu_low_utilization_per_uav': (f_low / np.maximum(self.F_max_array, 1e-8)).copy(),
+                'cpu_saturation_ratio': float(np.mean(f_total >= 0.999 * np.maximum(self.F_max_array, 1e-8))),
+                'cpu_energy_model': energy_model,
+                'cpu_power_per_uav': (self.kappa * np.power(f_total, 3.0)).copy(),
+                'f_high_per_uav': f_high.copy(),
+                'f_low_per_uav': f_low.copy(),
+                'f_total_per_uav': f_total.copy(),
+                'cpu_power_uncapped_w': float(self.last_cpu_power_uncapped_w),
+                'cpu_power_allocated_w': float(self.last_cpu_power_allocated_w),
+                'cpu_power_cap_active': bool(self.last_cpu_power_cap_active),
+                'compute_service_per_uav_mbits': (served_high + served_low).copy(),
+                'tx_service_matrix_mbits': np.zeros((self.N, self.N)),
+                'uplink_service_mbits_per_user': np.zeros(self.M),
+            })
+            for name, amount in {**by_priority, **by_type}.items():
+                info[f'compute_service_{name}_mbits'] = amount
+                info[f'compute_service_{name}_cycles'] = amount * 1e6 * self.C
         info.update(self.get_task_delay_stats())
         return info
 
@@ -2185,10 +2226,12 @@ class UAV_MEC_Env:
         if self.arrivals_during_deployment:
             self._integrate_user_positions()
 
+        compute_step = self._serve_compute_step() if self.compute_during_deployment else None
         self.macro_service_pause_steps_remaining -= 1
         paused_info = self._build_paused_service_info(
             flight_phase,
             arrival_event=arrival_event,
+            compute_step=compute_step,
         )
         self.global_micro_step += 1
 
@@ -2614,6 +2657,26 @@ class UAV_MEC_Env:
 
         return self._u2u_spectral_cache_result
 
+    def _serve_compute_step(self):
+        """Serve already-admitted compute chunks with the existing CPU rules."""
+        f_high, f_low, f_total, energy_model = self._allocate_cpu_frequencies()
+        by_priority = {"high": 0.0, "low": 0.0}
+        by_type = {name: 0.0 for name in self.device_type_names}
+        served_high = self._serve_compute_task_queues(
+            (f_high * self.micro_dt) / (self.C * 1e6), "high",
+            service_by_priority=by_priority, service_by_type=by_type,
+        )
+        served_low = self._serve_compute_task_queues(
+            (f_low * self.micro_dt) / (self.C * 1e6), "low",
+            service_by_priority=by_priority, service_by_type=by_type,
+        )
+        if energy_model == "separable_cubic":
+            energy = self.kappa * (f_high**3 + f_low**3) * self.micro_dt
+        else:
+            energy = self.kappa * f_total**3 * self.micro_dt
+        return (f_high, f_low, f_total, energy_model, served_high, served_low,
+                energy, by_priority, by_type)
+
     def micro_step(self, split_ratios_high, split_ratios_low):
         """
         Discrete arrivals + explicit upload completion events + fluid UAV-side queues.
@@ -2654,37 +2717,9 @@ class UAV_MEC_Env:
             split_ratios_low,
         )
 
-        f_high_array, f_low_array, f_opt_array, cpu_energy_model = (
-            self._allocate_cpu_frequencies()
-        )
-        mu_high_mbits = (f_high_array * self.micro_dt) / (self.C * 1e6)
-        mu_low_mbits = (f_low_array * self.micro_dt) / (self.C * 1e6)
-        compute_service_priority_mbits = {"high": 0.0, "low": 0.0}
-        compute_service_type_mbits = {
-            name: 0.0 for name in self.device_type_names
-        }
-
-        actual_exe_high = self._serve_compute_task_queues(
-            mu_high_mbits,
-            "high",
-            service_by_priority=compute_service_priority_mbits,
-            service_by_type=compute_service_type_mbits,
-        )
-        actual_exe_low = self._serve_compute_task_queues(
-            mu_low_mbits,
-            "low",
-            service_by_priority=compute_service_priority_mbits,
-            service_by_type=compute_service_type_mbits,
-        )
-
-        if cpu_energy_model == "separable_cubic":
-            energy_comp_per_uav = (
-                self.kappa
-                * (f_high_array**3 + f_low_array**3)
-                * self.micro_dt
-            )
-        else:
-            energy_comp_per_uav = self.kappa * (f_opt_array**3) * self.micro_dt
+        (f_high_array, f_low_array, f_opt_array, cpu_energy_model,
+         actual_exe_high, actual_exe_low, energy_comp_per_uav,
+         compute_service_priority_mbits, compute_service_type_mbits) = self._serve_compute_step()
         total_E_comp = np.sum(energy_comp_per_uav)
 
         tx_demand_mask = (

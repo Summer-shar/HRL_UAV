@@ -54,6 +54,8 @@ class MeteredMDP(QueueMDP):
         before_flow = self.env.coop_flow_mbits.copy()
         frame = super().step_frame(action, gamma_frame)
         service = [info for info in frame["infos"] if not info["service_paused"]]
+        compute_steps = [info for info in frame["infos"]
+                         if not info.get("compute_service_paused", info["service_paused"])]
         dt = self.env.micro_dt
         active_count = bandwidth_sum = rate_sum = tx = capacity = compute = cpu = 0.0
         for info in service:
@@ -64,6 +66,7 @@ class MeteredMDP(QueueMDP):
             rate_sum += float(info["u2u_rate_bps"].sum()) / 1e6
             tx += float(info["tx_service_matrix_mbits"].sum())
             capacity += float(info["u2u_rate_bps"].sum()) * dt / 1e6
+        for info in compute_steps:
             compute += float(info["compute_service_per_uav_mbits"].sum())
             cpu += float(info["cpu_utilization_mean"])
         _, _, upload, _ = self.task_aggregates()
@@ -74,14 +77,15 @@ class MeteredMDP(QueueMDP):
             "queue_upload_mbit": float(upload.sum()),
             "queue_compute_low_mbit": float(self.env.Q_loc_low.sum()),
             "queue_transfer_low_mbit": float(self.env.Q_tx_low.sum()),
-            "service_steps": len(service), "active_link_steps": active_count,
+            "service_steps": len(service), "compute_steps": len(compute_steps),
+            "active_link_steps": active_count,
             "active_link_bandwidth_mhz_sum": bandwidth_sum,
             "active_link_rate_mbps_sum": rate_sum,
             "tx_service_mbit": tx, "tx_capacity_mbit": capacity,
             "compute_service_mbit": compute, "cpu_utilization_sum": cpu,
         })
         assigned = self.env.coop_flow_mbits-before_flow
-        computed = sum((info["compute_service_per_uav_mbits"] for info in service), np.zeros(self.N))
+        computed = sum((info["compute_service_per_uav_mbits"] for info in compute_steps), np.zeros(self.N))
         transmitted = sum((info["tx_service_matrix_mbits"] for info in service), np.zeros((self.N,self.N)))
         after_compute = self.env.Q_loc_high+self.env.Q_loc_low
         after_transfer = self.env.Q_tx_high+self.env.Q_tx_low
@@ -111,14 +115,15 @@ class MeteredMDP(QueueMDP):
                         "queue_mbit": float(after_transfer[source, destination]),
                         "balance_error": float(transfer_error[source, destination]),
                     })
-        cpu_sum = sum((info["cpu_utilization_per_uav"] for info in service), np.zeros(self.N))
-        low_cpu_sum = sum((info["cpu_low_utilization_per_uav"] for info in service), np.zeros(self.N))
+        cpu_sum = sum((info["cpu_utilization_per_uav"] for info in compute_steps), np.zeros(self.N))
+        low_cpu_sum = sum((info["cpu_low_utilization_per_uav"] for info in compute_steps), np.zeros(self.N))
         order = np.argsort(-self.env.zone_expected_offered_load_mbps)
         roles = {int(uav): role for uav, role in zip(order, ("heavy", "medium", "light"))}
         for uav in range(self.N):
             self.uav_readings.append({
                 "time_s": self.env._current_time(), "uav": uav, "role": roles[uav],
                 "service_steps": len(service),
+                "compute_steps": len(compute_steps),
                 "expected_source_load_mbps": float(self.env.zone_expected_offered_load_mbps[uav]),
                 "assigned_source_mbit": float(assigned[uav].sum()),
                 "assigned_destination_mbit": float(assigned[:,uav].sum()),
@@ -143,6 +148,7 @@ def summarize_meter(rows, duration):
     sums = {key: sum(row[key] for row in rows) for key in rows[0]}
     active = max(sums["active_link_steps"], 1)
     service = max(sums["service_steps"], 1)
+    compute_steps = max(sums.get("compute_steps", sums["service_steps"]), 1)
     result = {f"mean_{key}": sums[key]/len(rows) for key in rows[0] if key.startswith("queue_")}
     result.update(
         mean_active_links_service=sums["active_link_steps"]/service,
@@ -151,7 +157,7 @@ def summarize_meter(rows, duration):
         tx_served_mbit=sums["tx_service_mbit"],
         tx_throughput_mbps_wall=sums["tx_service_mbit"]/duration,
         compute_throughput_mbps_wall=sums["compute_service_mbit"]/duration,
-        cpu_utilization_service=sums["cpu_utilization_sum"]/service,
+        cpu_utilization_service=sums["cpu_utilization_sum"]/compute_steps,
         allocated_tx_capacity_utilization=sums["tx_service_mbit"]/max(sums["tx_capacity_mbit"], 1e-12),
     )
     return result
@@ -217,7 +223,8 @@ def run_scene_resource_check(config, output):
         env = QueueMDP(config).env
         env.reset(seed=seeds[0])
         env.set_zone_target_loads(config["phase_loads"][0])
-        duty = 1-env.deployment_dt/env.macro_dt if env.pause_service_during_flight else 1.0
+        duty = (1-env.deployment_dt/env.macro_dt
+                if env.pause_service_during_flight and not env.compute_during_deployment else 1.0)
         capacity = env.F_max_array/(env.C*1e6)*duty
         loads = env.zone_expected_offered_load_mbps.copy()
     budget = {
@@ -396,7 +403,7 @@ def run_bandwidth(source, output, cpu_check=False):
                 for group in groups:
                     selected = [row for row in all_uav if row["level"] == level and row["seed"] == seed and row[grouping] == group]
                     duration = len(selected)*config["environment"]["resource_frame_dt"]
-                    count = max(sum(row["service_steps"] for row in selected), 1)
+                    count = max(sum(row.get("compute_steps", row["service_steps"]) for row in selected), 1)
                     result = {"level":level, "seed":seed, "grouping":grouping, "group":group}
                     for key in ("assigned_source_mbit", "assigned_destination_mbit", "assigned_local_mbit", "actual_tx_in_mbit", "actual_tx_out_mbit", "actual_compute_input_mbit", "computed_mbit"):
                         result[key.replace("_mbit", "_mbps")] = sum(row[key] for row in selected)/duration
