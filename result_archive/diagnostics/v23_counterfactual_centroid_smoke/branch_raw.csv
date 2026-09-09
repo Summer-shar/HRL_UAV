@@ -1,2 +1,0 @@
-episode_index,seed,snapshot_policy,branch_macro,q1_actor,q2_actor,q1_zero,q2_zero,qmin_actor,qmin_zero,q_actor_minus_zero,actor_action_norm_mean,actor_action_norm_max,return_actor,return_zero,return_actor_minus_zero,ranking_agreement,trace_match
-0,61000,centroid,0,-7.415052890777588,-7.428652286529541,-7.533818244934082,-7.582658767700195,-7.428652286529541,-7.582658767700195,0.1540064811706543,0.13880868256092072,0.16097687184810638,-3.830294313575274,-3.7923485267815624,-0.03794578679371163,0.0,True

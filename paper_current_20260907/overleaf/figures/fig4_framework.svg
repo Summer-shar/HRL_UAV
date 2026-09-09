@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="481.889764pt" height="311.811024pt" viewBox="0 0 481.889764 311.811024" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-09-07T02:24:18.307588</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.9.4, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 311.811024 
+L 481.889764 311.811024 
+L 481.889764 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 11.338583 119.055118 
+L 470.551181 119.055118 
+L 470.551181 17.007874 
+L 11.338583 17.007874 
+z
+" clip-path="url(#pffbd4b1663)" style="fill: #ffffff; stroke-dasharray: 2.6,1.3; stroke-dashoffset: 0; stroke: #202020; stroke-width: 0.65; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 25.511811 93.543307 
+L 116.220472 93.543307 
+L 116.220472 53.858268 
+L 25.511811 53.858268 
+z
+" clip-path="url(#pffbd4b1663)" style="fill: #ffffff; stroke: #202020; stroke-width: 0.65; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 141.732283 93.543307 
+L 218.267717 93.543307 
+L 218.267717 53.858268 
+L 141.732283 53.858268 
+z
+" clip-path="url(#pffbd4b1663)" style="fill: #e8e8e8; stroke: #202020; stroke-width: 0.65; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 246.614173 93.543307 
+L 345.826772 93.543307 
+L 345.826772 53.858268 
+L 246.614173 53.858268 
+z
+" clip-path="url(#pffbd4b1663)" style="fill: #ffffff; stroke: #202020; stroke-width: 0.65; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 374.173228 93.543307 
+L 456.377953 93.543307 
+L 456.377953 53.858268 
+L 374.173228 53.858268 
+z
+" clip-path="url(#pffbd4b1663)" style="fill: #ffffff; stroke: #202020; stroke-width: 0.65; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 116.220472 73.700787 
+Q 128.976378 73.700787 140.893758 73.700787 
+" clip-path="url(#pffbd4b1663)" style="fill: none; stroke: #202020; stroke-width: 0.75; stroke-linecap: round"/>
+    <path d="M 138.093758 72.300787 
+L 140.893758 73.700787 
+L 138.093758 75.100787 
+z
+" clip-path="url(#pffbd4b1663)" style="fill: #202020; stroke: #202020; stroke-width: 0.75; stroke-linecap: round"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 218.267717 73.700787 
+Q 232.440945 73.700787 245.775648 73.700787 
+" clip-path="url(#pffbd4b1663)" style="fill: none; stroke: #202020; stroke-width: 0.75; stroke-linecap: round"/>
+    <path d="M 242.975648 72.300787 
+L 245.775648 73.700787 
+L 242.975648 75.100787 
+z
+" clip-path="url(#pffbd4b1663)" style="fill: #202020; stroke: #202020; stroke-width: 0.75; stroke-linecap: round"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 345.826772 73.700787 
+Q 360 73.700787 373.334703 73.700787 
+" clip-path="url(#pffbd4b1663)" style="fill: none; stroke: #202020; stroke-width: 0.75; stroke-linecap: round"/>
+    <path d="M 370.534703 72.300787 
+L 373.334703 73.700787 
+L 370.534703 75.100787 
+z
+" clip-path="url(#pffbd4b1663)" style="fill: #202020; stroke: #202020; stroke-width: 0.75; stroke-linecap: round"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 11.338583 238.110236 
+L 470.551181 238.110236 
+L 470.551181 136.062992 
+L 11.338583 136.062992 
+z
+" clip-path="url(#pffbd4b1663)" style="fill: #ffffff; stroke-dasharray: 2.6,1.3; stroke-dashoffset: 0; stroke: #202020; stroke-width: 0.65; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_11">
+    <path d="M 25.511811 212.598425 
+L 116.220472 212.598425 
+L 116.220472 172.913386 
+L 25.511811 172.913386 
+z
+" clip-path="url(#pffbd4b1663)" style="fill: #ffffff; stroke: #202020; stroke-width: 0.65; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_12">
+    <path d="M 141.732283 212.598425 
+L 218.267717 212.598425 
+L 218.267717 172.913386 
+L 141.732283 172.913386 
+z
+" clip-path="url(#pffbd4b1663)" style="fill: #e8e8e8; stroke: #202020; stroke-width: 0.65; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_13">
+    <path d="M 246.614173 212.598425 
+L 345.826772 212.598425 
+L 345.826772 172.913386 
+L 246.614173 172.913386 
+z
+" clip-path="url(#pffbd4b1663)" style="fill: #ffffff; stroke: #202020; stroke-width: 0.65; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_14">
+    <path d="M 374.173228 212.598425 
+L 456.377953 212.598425 
+L 456.377953 172.913386 
+L 374.173228 172.913386 
+z
+" clip-path="url(#pffbd4b1663)" style="fill: #ffffff; stroke: #202020; stroke-width: 0.65; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_15">
+    <path d="M 116.220472 192.755906 
+Q 128.976378 192.755906 140.893758 192.755906 
+" clip-path="url(#pffbd4b1663)" style="fill: none; stroke: #202020; stroke-width: 0.75; stroke-linecap: round"/>
+    <path d="M 138.093758 191.355906 
+L 140.893758 192.755906 
+L 138.093758 194.155906 
+z
+" clip-path="url(#pffbd4b1663)" style="fill: #202020; stroke: #202020; stroke-width: 0.75; stroke-linecap: round"/>
+   </g>
+   <g id="patch_16">
+    <path d="M 218.267717 192.755906 
+Q 232.440945 192.755906 245.775648 192.755906 
+" clip-path="url(#pffbd4b1663)" style="fill: none; stroke: #202020; stroke-width: 0.75; stroke-linecap: round"/>
+    <path d="M 242.975648 191.355906 
+L 245.775648 192.755906 
+L 242.975648 194.155906 
+z
+" clip-path="url(#pffbd4b1663)" style="fill: #202020; stroke: #202020; stroke-width: 0.75; stroke-linecap: round"/>
+   </g>
+   <g id="patch_17">
+    <path d="M 345.826772 192.755906 
+Q 360 192.755906 373.334703 192.755906 
+" clip-path="url(#pffbd4b1663)" style="fill: none; stroke: #202020; stroke-width: 0.75; stroke-linecap: round"/>
+    <path d="M 370.534703 191.355906 
+L 373.334703 192.755906 
+L 370.534703 194.155906 
+z
+" clip-path="url(#pffbd4b1663)" style="fill: #202020; stroke: #202020; stroke-width: 0.75; stroke-linecap: round"/>
+   </g>
+   <g id="patch_18">
+    <path d="M 415.275591 93.543307 
+Q 415.275591 114.80315 415.275591 135.224467 
+" clip-path="url(#pffbd4b1663)" style="fill: none; stroke: #202020; stroke-width: 0.75; stroke-linecap: round"/>
+    <path d="M 416.675591 132.424467 
+L 415.275591 135.224467 
+L 413.875591 132.424467 
+z
+" clip-path="url(#pffbd4b1663)" style="fill: #202020; stroke: #202020; stroke-width: 0.75; stroke-linecap: round"/>
+   </g>
+   <g id="patch_19">
+    <path d="M 25.511811 297.637795 
+L 456.377953 297.637795 
+L 456.377953 257.952756 
+L 25.511811 257.952756 
+z
+" clip-path="url(#pffbd4b1663)" style="fill: #f2f2f2; stroke: #202020; stroke-width: 0.65; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_20">
+    <path d="M 415.275591 212.598425 
+Q 415.275591 235.275591 415.275591 257.11423 
+" clip-path="url(#pffbd4b1663)" style="fill: none; stroke: #202020; stroke-width: 0.75; stroke-linecap: round"/>
+    <path d="M 416.675591 254.31423 
+L 415.275591 257.11423 
+L 413.875591 254.31423 
+z
+" clip-path="url(#pffbd4b1663)" style="fill: #202020; stroke: #202020; stroke-width: 0.75; stroke-linecap: round"/>
+   </g>
+   <g id="patch_21">
+    <path d="M 4.251969 73.700787 
+Q 14.88189 73.700787 24.673286 73.700787 
+" clip-path="url(#pffbd4b1663)" style="fill: none; stroke-dasharray: 2.25,1.5; stroke-dashoffset: 0; stroke: #202020; stroke-width: 0.75; stroke-linecap: round"/>
+    <path d="M 21.873286 72.300787 
+L 24.673286 73.700787 
+L 21.873286 75.100787 
+z
+" clip-path="url(#pffbd4b1663)" style="fill: #202020; stroke-dasharray: 2.25,1.5; stroke-dashoffset: 0; stroke: #202020; stroke-width: 0.75; stroke-linecap: round"/>
+   </g>
+   <g id="patch_22">
+    <path d="M 4.251969 192.755906 
+Q 14.88189 192.755906 24.673286 192.755906 
+" clip-path="url(#pffbd4b1663)" style="fill: none; stroke-dasharray: 2.25,1.5; stroke-dashoffset: 0; stroke: #202020; stroke-width: 0.75; stroke-linecap: round"/>
+    <path d="M 21.873286 191.355906 
+L 24.673286 192.755906 
+L 21.873286 194.155906 
+z
+" clip-path="url(#pffbd4b1663)" style="fill: #202020; stroke-dasharray: 2.25,1.5; stroke-dashoffset: 0; stroke: #202020; stroke-width: 0.75; stroke-linecap: round"/>
+   </g>
+   <g id="line2d_1">
+    <path d="M 25.511811 277.795276 
+L 4.251969 277.795276 
+" clip-path="url(#pffbd4b1663)" style="fill: none; stroke-dasharray: 2.25,1.5; stroke-dashoffset: 0; stroke: #202020; stroke-width: 0.75"/>
+   </g>
+   <g id="line2d_2">
+    <path d="M 4.251969 277.795276 
+L 4.251969 73.700787 
+" clip-path="url(#pffbd4b1663)" style="fill: none; stroke-dasharray: 2.25,1.5; stroke-dashoffset: 0; stroke: #202020; stroke-width: 0.75"/>
+   </g>
+   <g id="text_1">
+    <text style="fill: #202020; font: 700 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'; text-anchor: start" x="22.677165" y="30.334543" transform="rotate(-0 22.677165 30.334543)">大时间尺度：每 10 s 决策</text>
+   </g>
+   <g id="text_2">
+    <text style="fill: #202020; font: 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'" transform="translate(55.866142 71.238151)">部署观测</text>
+    <text style="fill: #202020; font: 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'" transform="translate(62.428642 79.952096)">67 维</text>
+   </g>
+   <g id="text_3">
+    <text style="fill: #202020; font: 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'" transform="translate(173.121094 71.024547)">PPO</text>
+    <text style="fill: #202020; font: 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'" transform="translate(165.9375 79.980543)">6 维分数</text>
+   </g>
+   <g id="text_4">
+    <text style="fill: #202020; font: 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'" transform="translate(277.470472 71.09067)">协作方向与</text>
+    <text style="fill: #202020; font: 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'" transform="translate(273.720472 80.219108)">可行位移映射</text>
+   </g>
+   <g id="text_5">
+    <text style="fill: #202020; font: 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'" transform="translate(400.275591 71.120465)">部署位置</text>
+    <text style="fill: #202020; font: 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'" transform="translate(396.525591 80.168219)">服务期保持</text>
+   </g>
+   <g id="text_6">
+    <text style="fill: #202020; font: 700 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'; text-anchor: start" x="22.677165" y="149.389661" transform="rotate(-0 22.677165 149.389661)">小时间尺度：每 0.5 s 服务帧决策</text>
+   </g>
+   <g id="text_7">
+    <text style="fill: #202020; font: 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'" transform="translate(55.866142 190.304402)">路由观测</text>
+    <text style="fill: #202020; font: 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'" transform="translate(62.428642 199.018347)">68 维</text>
+   </g>
+   <g id="text_8">
+    <text style="fill: #202020; font: 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'" transform="translate(162.397852 190.079665)">Direct SAC</text>
+    <text style="fill: #202020; font: 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'" transform="translate(164.0625 199.035661)">18 维分数</text>
+   </g>
+   <g id="text_9">
+    <text style="fill: #202020; font: 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'" transform="translate(269.970472 190.249704)">逐行单纯形投影</text>
+    <text style="fill: #202020; font: 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'" transform="translate(274.657972 199.186716)">6 行合法比例</text>
+   </g>
+   <g id="text_10">
+    <text style="fill: #202020; font: 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'" transform="translate(400.275591 190.137702)">任务路由</text>
+    <text style="fill: #202020; font: 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'" transform="translate(400.275591 199.215515)">帧内保持</text>
+   </g>
+   <g id="text_11">
+    <text style="fill: #202020; font: 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'; text-anchor: middle" x="325.984252" y="129.513157" transform="rotate(-0 325.984252 129.513157)">位置改变链路条件</text>
+   </g>
+   <g id="text_12">
+    <text style="fill: #202020; font: 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'; text-anchor: middle" x="240.944882" y="279.75758" transform="rotate(-0 240.944882 279.75758)">同一个物理系统：用户、任务、队列、链路与计算服务</text>
+   </g>
+   <g id="text_13">
+    <text style="fill: #202020; font: 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'; text-anchor: middle" x="240.944882" y="248.636244" transform="rotate(-0 240.944882 248.636244)">等待与能耗按决策间隔聚合，分别形成两层经验</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="pffbd4b1663">
+   <rect x="0" y="0" width="481.889764" height="311.811024"/>
+  </clipPath>
+ </defs>
+</svg>

@@ -1,0 +1,14 @@
+{
+  "figures": 5,
+  "min_font_pt": 7.5,
+  "text_out_of_canvas": [],
+  "width_mm": 170,
+  "style": "grayscale, Chinese labels, original vector artwork",
+  "figure_files": [
+    "fig1_system",
+    "fig2_taskflow",
+    "fig3_timescale",
+    "fig4_framework",
+    "fig5_sac"
+  ]
+}

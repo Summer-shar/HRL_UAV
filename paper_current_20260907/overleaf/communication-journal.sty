@@ -1,0 +1,77 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{communication-journal}[2026/09/07 Author working layout]
+\RequirePackage{iftex}
+\ifXeTeX\else
+  \PackageError{communication-journal}{Please select XeLaTeX}{Overleaf: Settings > Compiler > XeLaTeX.}
+\fi
+\RequirePackage{geometry}
+\geometry{a4paper,left=20mm,right=20mm,top=20mm,bottom=20mm,headheight=14pt,headsep=5mm,footskip=9mm}
+\setlength{\columnsep}{7mm}
+\RequirePackage{amsmath}
+\RequirePackage{fontspec}
+\input{journal-fonts.tex}
+\RequirePackage{unicode-math}
+\IfFontExistsTF{XITS Math}{\setmathfont{XITS Math}}{%
+  \IfFontExistsTF{STIX Two Math}{\setmathfont{STIX Two Math}}{\setmathfont{Latin Modern Math}}}
+\RequirePackage{graphicx}
+\RequirePackage{caption}
+\DeclareCaptionFont{journal}{\songti\fontsize{9bp}{12bp}\selectfont}
+\captionsetup{font=journal,labelsep=quad,skip=5pt,justification=centering}
+\RequirePackage{float}
+\RequirePackage{placeins}
+\RequirePackage{enumitem}
+\RequirePackage{fancyhdr}
+\RequirePackage{algorithm}
+\RequirePackage{algpseudocode}
+\floatname{algorithm}{算法}
+\algrenewcommand\algorithmicrequire{\textbf{输入：}}
+\algrenewcommand\algorithmicensure{\textbf{输出：}}
+\algrenewcommand\algorithmicfor{\textbf{对}}
+\algrenewcommand\algorithmicdo{\textbf{执行}}
+\algrenewcommand\algorithmicif{\textbf{若}}
+\algrenewcommand\algorithmicthen{\textbf{则}}
+\algrenewcommand\algorithmicelse{\textbf{否则}}
+\algrenewcommand\algorithmicend{\textbf{结束}}
+\RequirePackage[unicode,hidelinks]{hyperref}
+\hypersetup{pdftitle={多无人机协同计算的双时间尺度调度},pdfauthor={作者待填写}}
+\ctexset{
+  section={format=\normalfont\heiti\fontsize{12bp}{16bp}\selectfont,numberformat=\rmfamily\bfseries,beforeskip=10bp,afterskip=5bp},
+  subsection={format=\normalfont\heiti\fontsize{10.5bp}{14bp}\selectfont,numberformat=\rmfamily\bfseries,beforeskip=8bp,afterskip=4bp},
+  subsubsection={format=\normalfont\heiti\fontsize{10.5bp}{14bp}\selectfont,numberformat=\rmfamily\bfseries,beforeskip=6bp,afterskip=3bp}
+}
+% ctexart's default 1.3 line spread multiplied the old 15.2pt baseline
+% into ~19.69bp. The reference body uses approximately 16bp leading.
+\linespread{1}
+\AtBeginDocument{\linespread{1}\songti\fontsize{10.5bp}{16bp}\selectfont}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0pt}
+\setlength{\abovedisplayskip}{6pt plus 2pt minus 2pt}
+\setlength{\belowdisplayskip}{6pt plus 2pt minus 2pt}
+\setlength{\textfloatsep}{9pt plus 2pt minus 2pt}
+\setlength{\dbltextfloatsep}{10pt plus 2pt minus 2pt}
+\setlength{\intextsep}{8pt plus 2pt minus 2pt}
+\setcounter{topnumber}{3}
+\renewcommand{\topfraction}{.92}
+\renewcommand{\dbltopfraction}{.92}
+\renewcommand{\textfraction}{.07}
+\renewcommand{\floatpagefraction}{.75}
+\allowdisplaybreaks[1]
+\emergencystretch=1.2em
+\raggedbottom
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small 多无人机协同计算的双时间尺度调度}
+\fancyhead[R]{\small 作者讨论稿}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.3pt}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\clip}{clip}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\vct}[1]{\symbfit{#1}}
+\newcommand{\mat}[1]{\symbfit{#1}}
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\ind}[1]{\mathbb{1}_{\{#1\}}}
+\newcommand{\pos}[1]{\left[#1\right]^+}

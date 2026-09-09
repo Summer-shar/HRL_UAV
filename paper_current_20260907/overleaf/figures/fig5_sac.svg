@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="481.889764pt" height="291.968504pt" viewBox="0 0 481.889764 291.968504" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-09-07T02:24:18.936684</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.9.4, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 291.968504 
+L 481.889764 291.968504 
+L 481.889764 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 11.338583 90.708661 
+L 87.874016 90.708661 
+L 87.874016 51.023622 
+L 11.338583 51.023622 
+z
+" clip-path="url(#pcd58c332a1)" style="fill: #ffffff; stroke: #202020; stroke-width: 0.65; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 113.385827 90.708661 
+L 195.590551 90.708661 
+L 195.590551 51.023622 
+L 113.385827 51.023622 
+z
+" clip-path="url(#pcd58c332a1)" style="fill: #ebebeb; stroke: #202020; stroke-width: 0.65; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 223.937008 90.708661 
+L 306.141732 90.708661 
+L 306.141732 51.023622 
+L 223.937008 51.023622 
+z
+" clip-path="url(#pcd58c332a1)" style="fill: #ffffff; stroke: #202020; stroke-width: 0.65; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 337.322835 90.708661 
+L 467.716535 90.708661 
+L 467.716535 51.023622 
+L 337.322835 51.023622 
+z
+" clip-path="url(#pcd58c332a1)" style="fill: #ffffff; stroke: #202020; stroke-width: 0.65; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 87.874016 70.866142 
+Q 100.629921 70.866142 112.547301 70.866142 
+" clip-path="url(#pcd58c332a1)" style="fill: none; stroke: #202020; stroke-width: 0.75; stroke-linecap: round"/>
+    <path d="M 109.747301 69.466142 
+L 112.547301 70.866142 
+L 109.747301 72.266142 
+z
+" clip-path="url(#pcd58c332a1)" style="fill: #202020; stroke: #202020; stroke-width: 0.75; stroke-linecap: round"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 195.590551 70.866142 
+Q 209.76378 70.866142 223.098482 70.866142 
+" clip-path="url(#pcd58c332a1)" style="fill: none; stroke: #202020; stroke-width: 0.75; stroke-linecap: round"/>
+    <path d="M 220.298482 69.466142 
+L 223.098482 70.866142 
+L 220.298482 72.266142 
+z
+" clip-path="url(#pcd58c332a1)" style="fill: #202020; stroke: #202020; stroke-width: 0.75; stroke-linecap: round"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 306.141732 70.866142 
+Q 321.732283 70.866142 336.484309 70.866142 
+" clip-path="url(#pcd58c332a1)" style="fill: none; stroke: #202020; stroke-width: 0.75; stroke-linecap: round"/>
+    <path d="M 333.684309 69.466142 
+L 336.484309 70.866142 
+L 333.684309 72.266142 
+z
+" clip-path="url(#pcd58c332a1)" style="fill: #202020; stroke: #202020; stroke-width: 0.75; stroke-linecap: round"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 340.15748 178.582677 
+L 467.716535 178.582677 
+L 467.716535 136.062992 
+L 340.15748 136.062992 
+z
+" clip-path="url(#pcd58c332a1)" style="fill: #ffffff; stroke: #202020; stroke-width: 0.65; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 402.519685 90.708661 
+Q 402.519685 113.385827 402.519685 135.224467 
+" clip-path="url(#pcd58c332a1)" style="fill: none; stroke: #202020; stroke-width: 0.75; stroke-linecap: round"/>
+    <path d="M 403.919685 132.424467 
+L 402.519685 135.224467 
+L 401.119685 132.424467 
+z
+" clip-path="url(#pcd58c332a1)" style="fill: #202020; stroke: #202020; stroke-width: 0.75; stroke-linecap: round"/>
+   </g>
+   <g id="patch_11">
+    <path d="M 184.251969 178.582677 
+L 297.637795 178.582677 
+L 297.637795 136.062992 
+L 184.251969 136.062992 
+z
+" clip-path="url(#pcd58c332a1)" style="fill: #ffffff; stroke: #202020; stroke-width: 0.65; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_12">
+    <path d="M 340.15748 157.322835 
+Q 318.897638 157.322835 298.476321 157.322835 
+" clip-path="url(#pcd58c332a1)" style="fill: none; stroke: #202020; stroke-width: 0.75; stroke-linecap: round"/>
+    <path d="M 301.276321 158.722835 
+L 298.476321 157.322835 
+L 301.276321 155.922835 
+z
+" clip-path="url(#pcd58c332a1)" style="fill: #202020; stroke: #202020; stroke-width: 0.75; stroke-linecap: round"/>
+   </g>
+   <g id="patch_13">
+    <path d="M 19.84252 178.582677 
+L 141.732283 178.582677 
+L 141.732283 136.062992 
+L 19.84252 136.062992 
+z
+" clip-path="url(#pcd58c332a1)" style="fill: #ebebeb; stroke: #202020; stroke-width: 0.65; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_14">
+    <path d="M 184.251969 157.322835 
+Q 162.992126 157.322835 142.570809 157.322835 
+" clip-path="url(#pcd58c332a1)" style="fill: none; stroke: #202020; stroke-width: 0.75; stroke-linecap: round"/>
+    <path d="M 145.370809 158.722835 
+L 142.570809 157.322835 
+L 145.370809 155.922835 
+z
+" clip-path="url(#pcd58c332a1)" style="fill: #202020; stroke: #202020; stroke-width: 0.75; stroke-linecap: round"/>
+   </g>
+   <g id="patch_15">
+    <path d="M 22.677165 266.456693 
+L 187.086614 266.456693 
+L 187.086614 223.937008 
+L 22.677165 223.937008 
+z
+" clip-path="url(#pcd58c332a1)" style="fill: #ffffff; stroke: #202020; stroke-width: 0.65; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_16">
+    <path d="M 280.629921 266.456693 
+L 464.88189 266.456693 
+L 464.88189 223.937008 
+L 280.629921 223.937008 
+z
+" clip-path="url(#pcd58c332a1)" style="fill: #ffffff; stroke: #202020; stroke-width: 0.65; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_17">
+    <path d="M 82.204724 178.582677 
+Q 82.204724 201.259843 82.204724 223.098482 
+" clip-path="url(#pcd58c332a1)" style="fill: none; stroke: #202020; stroke-width: 0.75; stroke-linecap: round"/>
+    <path d="M 83.604724 220.298482 
+L 82.204724 223.098482 
+L 80.804724 220.298482 
+z
+" clip-path="url(#pcd58c332a1)" style="fill: #202020; stroke: #202020; stroke-width: 0.75; stroke-linecap: round"/>
+   </g>
+   <g id="patch_18">
+    <path d="M 154.488189 204.094488 
+Q 154.488189 147.401575 154.488189 91.547187 
+" clip-path="url(#pcd58c332a1)" style="fill: none; stroke-dasharray: 2.25,1.5; stroke-dashoffset: 0; stroke: #202020; stroke-width: 0.75; stroke-linecap: round"/>
+    <path d="M 153.088189 94.347187 
+L 154.488189 91.547187 
+L 155.888189 94.347187 
+z
+" clip-path="url(#pcd58c332a1)" style="fill: #202020; stroke-dasharray: 2.25,1.5; stroke-dashoffset: 0; stroke: #202020; stroke-width: 0.75; stroke-linecap: round"/>
+   </g>
+   <g id="patch_19">
+    <path d="M 476.220472 245.19685 
+Q 470.551181 245.19685 465.720415 245.19685 
+" clip-path="url(#pcd58c332a1)" style="fill: none; stroke-dasharray: 2.25,1.5; stroke-dashoffset: 0; stroke: #202020; stroke-width: 0.75; stroke-linecap: round"/>
+    <path d="M 468.520415 246.59685 
+L 465.720415 245.19685 
+L 468.520415 243.79685 
+z
+" clip-path="url(#pcd58c332a1)" style="fill: #202020; stroke-dasharray: 2.25,1.5; stroke-dashoffset: 0; stroke: #202020; stroke-width: 0.75; stroke-linecap: round"/>
+   </g>
+   <g id="line2d_1">
+    <path d="M 187.086614 245.19685 
+L 240.944882 245.19685 
+" clip-path="url(#pcd58c332a1)" style="fill: none; stroke-dasharray: 2.25,1.5; stroke-dashoffset: 0; stroke: #202020; stroke-width: 0.75"/>
+   </g>
+   <g id="line2d_2">
+    <path d="M 240.944882 245.19685 
+L 240.944882 204.094488 
+" clip-path="url(#pcd58c332a1)" style="fill: none; stroke-dasharray: 2.25,1.5; stroke-dashoffset: 0; stroke: #202020; stroke-width: 0.75"/>
+   </g>
+   <g id="line2d_3">
+    <path d="M 240.944882 204.094488 
+L 154.488189 204.094488 
+" clip-path="url(#pcd58c332a1)" style="fill: none; stroke-dasharray: 2.25,1.5; stroke-dashoffset: 0; stroke: #202020; stroke-width: 0.75"/>
+   </g>
+   <g id="line2d_4">
+    <path d="M 265.03937 90.708661 
+L 265.03937 119.055118 
+" clip-path="url(#pcd58c332a1)" style="fill: none; stroke-dasharray: 2.25,1.5; stroke-dashoffset: 0; stroke: #202020; stroke-width: 0.75"/>
+   </g>
+   <g id="line2d_5">
+    <path d="M 265.03937 119.055118 
+L 476.220472 119.055118 
+" clip-path="url(#pcd58c332a1)" style="fill: none; stroke-dasharray: 2.25,1.5; stroke-dashoffset: 0; stroke: #202020; stroke-width: 0.75"/>
+   </g>
+   <g id="line2d_6">
+    <path d="M 476.220472 119.055118 
+L 476.220472 245.19685 
+" clip-path="url(#pcd58c332a1)" style="fill: none; stroke-dasharray: 2.25,1.5; stroke-dashoffset: 0; stroke: #202020; stroke-width: 0.75"/>
+   </g>
+   <g id="text_1">
+    <text style="fill: #202020; font: 700 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'; text-anchor: middle" x="240.944882" y="18.981312" transform="rotate(-0 240.944882 18.981312)">SAC：原始分数采样，执行路由评价</text>
+   </g>
+   <g id="text_2">
+    <text style="fill: #202020; font: 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'" transform="translate(34.606299 68.414638)">路由观测</text>
+    <text style="fill: #202020; font: 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'" transform="translate(41.168799 77.128583)">68 维</text>
+   </g>
+   <g id="text_3">
+    <text style="fill: #202020; font: 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'" transform="translate(145.949908 68.144023)">Actor</text>
+    <text style="fill: #202020; font: 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'" transform="translate(136.542095 77.191776)">高斯 + tanh</text>
+   </g>
+   <g id="text_4">
+    <text style="fill: #202020; font: 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'" transform="translate(247.437222 68.452138)">连续分数 z</text>
+    <text style="fill: #202020; font: 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'" transform="translate(256.60187 77.166083)">18 维</text>
+   </g>
+   <g id="text_5">
+    <text style="fill: #202020; font: 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'" transform="translate(380.019685 68.144169)">逐行欧氏投影</text>
+    <text style="fill: #202020; font: 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'" transform="translate(381.973787 77.452958)">路由 ρ = P(z)</text>
+   </g>
+   <g id="text_6">
+    <text style="fill: #202020; font: 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'" transform="translate(385.187008 154.757161)">任务级环境</text>
+    <text style="fill: #202020; font: 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'" transform="translate(366.437008 163.804915)">执行、回报、后继观测</text>
+   </g>
+   <g id="text_7">
+    <text style="fill: #202020; font: 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'" transform="translate(225.944882 154.813528)">经验回放</text>
+    <text style="fill: #202020; font: 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'" transform="translate(199.694882 163.779016)">观测、分数、路由、折扣</text>
+   </g>
+   <g id="text_8">
+    <text style="fill: #202020; font: 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'" transform="translate(67.559863 154.586477)">双 Critic</text>
+    <text style="fill: #202020; font: 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'" transform="translate(47.037402 163.662708)">输入观测与执行路由</text>
+   </g>
+   <g id="text_9">
+    <text style="fill: #202020; font: 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'" transform="translate(87.906109 242.598569)">Actor 更新</text>
+    <text style="fill: #202020; font: 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'" transform="translate(67.38189 251.644741)">价值梯度经过路由投影</text>
+   </g>
+   <g id="text_10">
+    <text style="fill: #202020; font: 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'" transform="translate(350.255906 242.613218)">熵与温度更新</text>
+    <text style="fill: #202020; font: 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'" transform="translate(327.966257 251.659389)">使用原始分数 z 的对数概率</text>
+   </g>
+   <g id="text_11">
+    <text style="fill: #202020; font: 7.5px 'Times New Roman', 'STZhongsong', 'SimSun', 'DejaVu Sans'; text-anchor: middle" x="240.944882" y="285.513004" transform="rotate(-0 240.944882 285.513004)">实线：前向与经验流　　虚线：更新信号；投影允许精确零比例</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="pcd58c332a1">
+   <rect x="0" y="0" width="481.889764" height="291.968504"/>
+  </clipPath>
+ </defs>
+</svg>

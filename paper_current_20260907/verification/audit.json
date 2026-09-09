@@ -1,0 +1,51 @@
+{
+  "date": "2026-09-07",
+  "manuscript_han_characters": 12984,
+  "abstract_han_characters": 179,
+  "numbered_equations": 55,
+  "figures": 5,
+  "algorithms": 2,
+  "references": 8,
+  "duplicate_labels": [],
+  "unresolved_references": [],
+  "unknown_citations": [],
+  "unused_citations": [],
+  "citation_order_matches_bibliography": true,
+  "environment_nesting": "passed",
+  "brace_balance": "passed",
+  "source_encoding": "UTF-8; no replacement characters",
+  "pdf_assets": [
+    {
+      "file": "figures/fig1_system.pdf",
+      "pages": 1,
+      "width_mm": 170,
+      "raster_images": 0
+    },
+    {
+      "file": "figures/fig2_taskflow.pdf",
+      "pages": 1,
+      "width_mm": 170,
+      "raster_images": 0
+    },
+    {
+      "file": "figures/fig3_timescale.pdf",
+      "pages": 1,
+      "width_mm": 170,
+      "raster_images": 0
+    },
+    {
+      "file": "figures/fig4_framework.pdf",
+      "pages": 1,
+      "width_mm": 170,
+      "raster_images": 0
+    },
+    {
+      "file": "figures/fig5_sac.pdf",
+      "pages": 1,
+      "width_mm": 170,
+      "raster_images": 0
+    }
+  ],
+  "full_xelatex_compile": "NOT_RUN: no local compiler",
+  "experiment_results": "not fabricated; formal joint comparison pending"
+}

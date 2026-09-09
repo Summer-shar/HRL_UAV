@@ -1,0 +1,39 @@
+% Explicit font assets verified against the supplied journal PDF, pp. 1--2.
+% Private authoring assets copied from the author's installed Windows fonts.
+% Do not remove fonts/ when uploading this project to Overleaf.
+\setmainfont{times.ttf}[
+  Path=fonts/,
+  BoldFont=timesbd.ttf,
+  ItalicFont=timesi.ttf,
+  BoldItalicFont=timesbi.ttf
+]
+\setsansfont{times.ttf}[
+  Path=fonts/,
+  BoldFont=timesbd.ttf,
+  ItalicFont=timesi.ttf,
+  BoldItalicFont=timesbi.ttf
+]
+\setCJKmainfont{simsun.ttc}[
+  Path=fonts/,
+  BoldFont=simhei.ttf,
+  ItalicFont=STKAITI.TTF,
+  BoldItalicFont=simhei.ttf
+]
+\setCJKsansfont{simhei.ttf}[Path=fonts/,BoldFont=simhei.ttf]
+\setCJKfamilyfont{zhsong}{simsun.ttc}[Path=fonts/,BoldFont=simhei.ttf]
+\setCJKfamilyfont{zhhei}{simhei.ttf}[Path=fonts/,BoldFont=simhei.ttf]
+\setCJKfamilyfont{zhkai}{STKAITI.TTF}[Path=fonts/,BoldFont=simhei.ttf]
+\providecommand{\songti}{}
+\providecommand{\heiti}{}
+\providecommand{\kaishu}{}
+\renewcommand{\songti}{\CJKfamily{zhsong}}
+\renewcommand{\heiti}{\CJKfamily{zhhei}}
+\renewcommand{\kaishu}{\CJKfamily{zhkai}}
+
+% bp = PDF/PostScript point (1/72 inch), as measured in the reference PDF.
+\newcommand{\JournalChineseTitle}{\normalfont\heiti\fontsize{16bp}{21bp}\selectfont}
+\newcommand{\JournalEnglishTitle}{\normalfont\bfseries\fontsize{16bp}{21bp}\selectfont}
+\newcommand{\JournalChineseAuthor}{\normalfont\kaishu\fontsize{10.5bp}{14bp}\selectfont}
+\newcommand{\JournalEnglishAuthor}{\normalfont\fontsize{10.5bp}{14bp}\selectfont}
+\newcommand{\JournalAffiliation}{\normalfont\songti\fontsize{7.5bp}{11bp}\selectfont}
+\newcommand{\JournalAbstract}{\normalfont\songti\fontsize{9bp}{14.67bp}\selectfont}

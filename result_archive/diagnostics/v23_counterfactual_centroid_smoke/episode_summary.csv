@@ -1,2 +1,0 @@
-episode_index,seed,snapshot_policy,branch_count,trace_match,q_actor_minus_zero_mean,return_actor_minus_zero_mean,ranking_agreement_fraction
-0,61000,centroid,1,True,0.1540064811706543,-0.03794578679371163,0.0
