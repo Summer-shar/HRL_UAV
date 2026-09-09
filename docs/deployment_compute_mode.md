@@ -63,6 +63,28 @@
 
 `git diff --check` 通过。没有执行全量测试、`scripts/run.py` 的任何模式或正式训练/性能评估。
 
+## 追加集成测试：真实 rollout 与尾部经验补齐
+
+2026-09-09，基准 HEAD：`95633816bdbc7e7a48718259b8c14e3b7b5886fb`。原有专项测试覆盖手动推进和 `boundary_reward` 数值，但没有候选模式的完整 rollout 覆盖；本次只补下面一项，不重复添加原有测试，不修改生产代码或正式配置。
+
+测试：`tests/test_deployment_compute.py::DeploymentComputeTests.test_rollout_completes_deployment_boundaries_without_tail_metric_leak`。
+
+- 显式开启 `compute_during_deployment`，调用真实 `rollout(..., macro_count=2, train=True, complete_tail=True)`。只在测试夹具中将记录窗口设为一个大周期，屏蔽随机到达，并初始放入已上传的高优 100.6 Mbit、低优 100.8 Mbit 计算任务。它们是用于跨越边界的人工工作量，不是正式负载或性能样本。
+- 固定宏观/微观动作替身，无学习网络；store 只复制到内存，更新替身仅记录调用时刻，不计算梯度、不修改参数、不加载权重。真实环境计算、观测、回报、pending 和 complete_tail 路径没有被替代。
+- 高优任务在第二周期部署期的 10.1 s 完成。11 s 后继计算队列剩余低优 91.4 Mbit、一个未完成父任务；第二任务在尾部额外部署的 20.2 s 完成，21 s 后继队列和未完成任务数为零。逐条检查实际 store 的观测与真实部署后观测一致，且不是 reset 状态。
+- 两周期共 36 条服务经验，两个 pending 分别在 11/21 s 写入且各一次；源观测、动作与执行路由逐条匹配。两条边界回报均等于末服务帧回报加 gamma、gamma^2 加权的两个部署帧回报，折扣为 gamma^3；其余 34 条为单帧折扣。
+- 完整采样窗口截至 20 s：完成高优一项、低优零项，剩余队列 1.4 Mbit。尾部后环境到 21 s、完成两项；但两个窗口行仍对应 10/20 s，summary 的完成计数、时延、J、功率及时间范围仍使用尾部之前的快照。前 20 s 计算能量为 2000 J，尾部计算能量为 10.64 J；回报与统计同时核对原推进能量账本，尾部能量不计入已结束窗口。
+- 微观动作调用恰好 36 次、实际路由函数调用 180 次，均在服务阶段；SAC 空更新调用只在 12 s，PPO 空更新调用只在 10/20 s。额外宏观动作只用于尾部后继构造，不新增 PPO 经验或更新；记录中的所有实际学习更新计数为零。
+
+实际执行：
+
+```powershell
+.venv/Scripts/python.exe -m unittest tests.test_deployment_compute.DeploymentComputeTests.test_rollout_completes_deployment_boundaries_without_tail_metric_leak -v
+.venv/Scripts/python.exe -m unittest tests.test_deployment_compute -v
+```
+
+结果：新增单测首次运行 1 项通过，用时 0.137 s；部署专项文件 11 项全部通过，用时 0.936 s（均不含解释器和模块导入）。未运行其他测试、训练或性能评估；本次未提交或推送。此处人工任务的完成时延不能作为算法性能结果。
+
 ## 边界与未解决问题
 
 - “移动期间 CPU 可以继续工作”是候选协议假设；实际设备的供电、散热和控制开销尚未建模或验证。

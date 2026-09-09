@@ -1,5 +1,12 @@
 # PROJECT_FACTS
 
+## 2026-09-09 追加核验：候选模式 rollout 集成测试
+
+- 【基准与范围】本轮 HEAD 为 `95633816bdbc7e7a48718259b8c14e3b7b5886fb`，相关文件修改前无差异。只新增一项测试和记录，未修改生产代码、配置、论文或历史结果，未提交或推送。
+- 【运行核实】`tests/test_deployment_compute.py::DeploymentComputeTests.test_rollout_completes_deployment_boundaries_without_tail_metric_leak` 通过。显式开启候选模式，真实 `rollout(..., train=True, complete_tail=True)` 使用固定动作替身、内存 store 和无学习更新替身；不实例化网络、不反向传播、不加载权重。`train=True` 只用于走真实经验写入分支，不是训练实验。
+- 【断言范围】人工父任务分别在 10.1 s 和 20.2 s 完成；36 条服务经验包含两条恰好补齐一次的边界经验，后继为 11/21 s 的实际队列与未完成任务数，回报含两个部署帧、折扣为 gamma^3。尾部环境推进至 21 s，窗口行仍对应 10/20 s，summary 保持 20 s 的完成、时延、代价和功率统计；部署期不增加路由决策或学习更新。
+- 【实际测试】新增单测首次运行 1 项通过（0.137 s）；随后只运行部署专项文件，11 项全部通过（0.936 s，不含解释器导入）。这是短人工集成检查，不是性能、稳定性或收敛证据；详情见 `docs/deployment_compute_mode.md` 的追加集成测试记录。
+
 ## 2026-09-09 候选扩展补充：部署期 CPU 服务
 
 - 【源码静态核实】本轮基准 HEAD 为 `4850092f4d198e53c4826754c12a232cee5df569`；修改前 `hrl_uav/`、配置、脚本、测试及本事实文件相对 HEAD 无未提交差异。下文较早的 HEAD、文件指纹和原模型成绩保留为历史快照，不代表扩展后的工作树。

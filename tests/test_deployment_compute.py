@@ -1,13 +1,14 @@
 import copy
 import json
 from pathlib import Path
+from types import SimpleNamespace
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import numpy as np
 
 from hrl_uav.bandwidth import MeteredMDP, summarize_meter
-from hrl_uav.experiment import boundary_reward
+from hrl_uav.experiment import boundary_reward, rollout
 from hrl_uav.mdp import QueueMDP
 
 
@@ -277,6 +278,181 @@ class DeploymentComputeTests(unittest.TestCase):
         self.assertAlmostEqual(sum(r["computed_mbit"] for r in mdp.uav_readings), 10.0)
         self.assertLess(max(abs(r["compute_balance_error"]) for r in mdp.uav_readings), 1e-10)
         self.assertLess(max(r["transfer_balance_error_max"] for r in mdp.uav_readings), 1e-10)
+
+    def test_rollout_completes_deployment_boundaries_without_tail_metric_leak(self):
+        cfg = config(True)
+        cfg["training"]["window_macros"] = 1
+        gamma = cfg["training"]["gamma_per_resource_frame"]
+        mdp = QueueMDP(cfg)
+        env = mdp.env
+        frames, stored, decisions, routing_times = [], [], [], []
+        prepared, window_ends, parents = {}, {}, []
+        sac_update_times, ppo_update_times = [], []
+        reset_states = []
+        local_action = np.tile(2 * np.eye(3) - 1, (2, 1, 1)).ravel()
+        real_reset, real_step = mdp.reset, mdp.step_frame
+        real_prepare, real_route = mdp.prepare_service, env._route_arrived_parent_tasks
+
+        def initialize(seed, macro_count):
+            real_reset(seed, macro_count)
+            # At 10 Mbit/s these initial queues finish at 10.1 and 20.2 s.
+            parents.append(queued_parent(env, "high", [(0, 100.6, "compute")])[0])
+            parents.append(queued_parent(env, "low", [(0, 100.8, "compute")])[0])
+            reset_states.append(mdp.micro_observation().copy())
+            return reset_states[-1].copy()
+
+        def observe_frame(action, gamma_frame):
+            start = env._current_time()
+            result = real_step(action, gamma_frame)
+            frames.append({
+                "start": start, "result": copy.deepcopy(result),
+                "energy": mdp.total_power_energy, "cost": mdp.cost_sum,
+                "steps": mdp.integration_steps,
+            })
+            if env.global_micro_step in (100, 200):
+                window_ends[env.global_micro_step] = mdp.metrics().copy()
+            return result
+
+        def prepare():
+            state = real_prepare()
+            prepared[round(env._current_time(), 6)] = state.copy()
+            return state
+
+        def choose(state, deterministic=False):
+            self.assertEqual(env.macro_service_pause_steps_remaining, 0)
+            decisions.append((env._current_time(), state.copy()))
+            return local_action.copy()
+
+        def store(state, action, route, reward, next_state, discount):
+            stored.append((state.copy(), action.copy(), route.copy(), reward,
+                           next_state.copy(), discount, env._current_time()))
+
+        def route(*args, **kwargs):
+            self.assertEqual(env.macro_service_pause_steps_remaining, 0)
+            routing_times.append(env._current_time())
+            return real_route(*args, **kwargs)
+
+        # Only the scalar logging interface is stubbed; no torch/network objects.
+        entropy = Mock()
+        entropy.log_alpha.exp.return_value.item.return_value = 0.05
+        agent = SimpleNamespace(
+            stage="fixed-action-test", entropy=entropy, macro_rollout=[],
+            sac_updates=0, sac_actor_updates=0, sac_critic_gradient_steps=0,
+            sac_target_updates=0, ppo_updates=0, last_sac_stats={},
+            macro_action=Mock(return_value=(np.full(6, 0.1), 0.0)),
+            sac_actor=SimpleNamespace(choose_action=Mock(side_effect=choose)),
+            store=Mock(side_effect=store),
+            update_sac=Mock(side_effect=lambda: sac_update_times.append(env._current_time())),
+            update_ppo=Mock(side_effect=lambda progress: ppo_update_times.append(env._current_time())),
+        )
+        with patch("hrl_uav.experiment.QueueMDP", return_value=mdp), \
+             patch("hrl_uav.experiment.DirectHRL", side_effect=AssertionError("no learning networks")), \
+             patch.object(mdp, "reset", side_effect=initialize) as reset_call, \
+             patch.object(mdp, "step_frame", side_effect=observe_frame), \
+             patch.object(mdp, "prepare_service", side_effect=prepare), \
+             patch.object(env, "_generate_traffic", return_value={}), \
+             patch.object(env, "_route_arrived_parent_tasks", side_effect=route):
+            summary, rows, trajectory, routes, returned_mdp = rollout(
+                cfg, agent, 51, 2, macro_enabled=True, train=True, complete_tail=True,
+            )
+
+        self.assertIs(returned_mdp, mdp)
+        reset_call.assert_called_once_with(51, 2)
+        self.assertTrue(env.compute_during_deployment)
+        self.assertAlmostEqual(parents[0].finish_time, 10.1)
+        self.assertAlmostEqual(parents[1].finish_time, 20.2)
+        self.assertEqual(len(frames), 42)
+        self.assertEqual(sum(f["result"]["phase"] == "deployment" for f in frames), 6)
+        self.assertEqual(len(stored), 36)
+        self.assertEqual(summary["boundary_transitions"], 2)
+        self.assertEqual(summary["final_pending_dropped"], 0)
+        self.assertAlmostEqual(summary["boundary_discount_min"], gamma**3)
+
+        service = [f for f in frames if f["result"]["phase"] == "service"]
+        for index, transition in enumerate(stored):
+            np.testing.assert_array_equal(transition[0], decisions[index][1])
+            np.testing.assert_array_equal(transition[1], local_action)
+            np.testing.assert_array_equal(transition[2], service[index]["result"]["route"])
+            if index not in (17, 35):
+                self.assertAlmostEqual(transition[5], gamma)
+                self.assertAlmostEqual(transition[3], service[index]["result"]["reward"])
+        # These are real rollout stores, not standalone boundary_reward calls.
+        for index, last_frame, next_time, low_queue, low_count in (
+            (17, 19, 11.0, 91.4, 1), (35, 39, 21.0, 0.0, 0),
+        ):
+            transition = stored[index]
+            deployment = frames[last_frame + 1:last_frame + 3]
+            self.assertEqual([f["result"]["phase"] for f in deployment], ["deployment"] * 2)
+            expected_reward = (frames[last_frame]["result"]["reward"]
+                               + gamma * deployment[0]["result"]["reward"]
+                               + gamma**2 * deployment[1]["result"]["reward"])
+            self.assertAlmostEqual(transition[3], expected_reward)
+            self.assertAlmostEqual(transition[5], gamma**3)
+            self.assertAlmostEqual(transition[6], next_time)
+            self.assertEqual(sum(np.isclose(t[6], next_time) for t in stored), 1)
+            np.testing.assert_array_equal(transition[4], prepared[next_time])
+            self.assertFalse(np.array_equal(transition[4], reset_states[0]))
+            for feature, expected in (
+                ("compute_queue", [0, 0, 0, low_queue, 0, 0]),
+                ("unfinished_tasks", [0, 0, 0, low_count, 0, 0]),
+            ):
+                start, end = mdp.micro_feature_slices[feature]
+                np.testing.assert_allclose(np.expm1(transition[4][start:end]) * 10,
+                                           expected, atol=2e-5)
+
+        # The extra deployment belongs to replay continuation, not either window.
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(trajectory, [])
+        self.assertEqual(routes, [])
+        for row, end_step in zip(rows, (100, 200)):
+            for key, value in window_ends[end_step].items():
+                self.assertEqual(row[key], value, key)
+        for key, value in window_ends[200].items():
+            self.assertEqual(summary[key], value, key)
+        self.assertEqual(summary["time_s"], 20.0)
+        self.assertEqual(summary["task_completed_high_count"], 1)
+        self.assertEqual(summary["task_completed_low_count"], 0)
+        self.assertAlmostEqual(summary["task_delay_weighted_ms"], 10100)
+        self.assertAlmostEqual(summary["window_delay_ms"], 10100)
+        self.assertEqual(summary["window_low_ms"], 0)
+        self.assertAlmostEqual(summary["queue_compute_mbit"], 1.4)
+        self.assertEqual(summary["unfinished"], 1)
+        prefix_energy = sum(f["result"]["infos"][k]["total_energy"]
+                            for f in frames[:40] for k in range(5))
+        self.assertAlmostEqual(prefix_energy, 2000.0)
+        self.assertAlmostEqual(summary["power_w"] * 20, frames[39]["energy"])
+        self.assertAlmostEqual(summary["J"] * 200, frames[39]["cost"])
+        self.assertAlmostEqual(summary["window_power_w"] * 10,
+                               frames[39]["energy"] - frames[19]["energy"])
+        self.assertAlmostEqual(summary["window_J"] * 100,
+                               frames[39]["cost"] - frames[19]["cost"])
+        tail_energy = sum(info["total_energy"] for f in frames[40:]
+                          for info in f["result"]["infos"])
+        self.assertAlmostEqual(tail_energy, 10.64)
+        self.assertGreater(mdp.total_power_energy, frames[39]["energy"])
+        self.assertGreater(mdp.cost_sum, frames[39]["cost"])
+        self.assertEqual(mdp.integration_steps, 210)
+        self.assertEqual(env._current_time(), 21.0)
+        self.assertEqual(env.completed_task_count, 2)
+        self.assertAlmostEqual(mdp.metrics()["task_delay_low_ms"], 20200)
+        self.assertEqual(mdp.metrics()["unfinished"], 0)
+
+        np.testing.assert_allclose([t for t, _ in decisions],
+                                   [1 + i * .5 for i in range(18)]
+                                   + [11 + i * .5 for i in range(18)])
+        np.testing.assert_allclose(routing_times,
+                                   [1 + i * .1 for i in range(90)]
+                                   + [11 + i * .1 for i in range(90)])
+        np.testing.assert_allclose(sac_update_times, [12.0])
+        np.testing.assert_allclose(ppo_update_times, [10.0, 20.0])
+        self.assertEqual(agent.update_sac.call_count, 36 // cfg["training"]["sac_update_frames"])
+        self.assertEqual(agent.update_ppo.call_count, 2)
+        self.assertEqual(agent.macro_action.call_count, 3)  # includes tail bootstrap only
+        self.assertEqual(len(agent.macro_rollout), 2)
+        for row in rows:
+            for key in ("sac_critic_updates", "sac_actor_updates", "sac_critic_gradient_steps",
+                        "sac_target_updates", "ppo_updates"):
+                self.assertEqual(row[key], 0)
 
 
 if __name__ == "__main__":
