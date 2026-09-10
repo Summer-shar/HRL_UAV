@@ -7,6 +7,7 @@ import hashlib
 import json
 from pathlib import Path
 import random
+import shutil
 import subprocess
 import time
 from unittest.mock import patch
@@ -17,7 +18,7 @@ import torch
 from .experiment import append_csv, parameter_delta, rollout, write_json
 from .mdp import QueueMDP
 from .priority_grid import file_hash
-from .resumption import capture_rng, state_equal
+from .resumption import capture_rng, restore_agent, state_equal
 from .scene_prescreen import ROOT, assert_crn_equal, source_hashes
 from .wireless_long import PILOT, cached_results, rows, stream_plan, window_optimization_summary
 from .wireless_pilot import (ENERGY, MEASURES, OPT_KEYS, PilotMeter, checked_agent,
@@ -115,6 +116,72 @@ def training_reference(scene):
     return folder / "training_streams" / f"{scene}_crn_with_tail.csv"
 
 
+def restore_replica(cfg, output, checkpoint, path):
+    required = ("config", "initialization", "run_state", "training_state", "replay", "optimizers", "updates")
+    if any(key not in checkpoint for key in required):
+        raise ValueError("Incomplete recovery checkpoint")
+    seed = cfg["training"]["seed"]
+    state = checkpoint["run_state"]
+    if (checkpoint["config"] != cfg or checkpoint["initialization"] !=
+            dict(seed=seed, source="fresh", parent_checkpoint=None)
+            or not state["at_rollout_boundary"] or state["completed_windows"] % 3
+            or state["next_training_scene_seed"] != 71000 + state["completed_windows"] // 3
+            or set(state["rng"]) != {"python", "numpy", "torch", "cuda"}):
+        raise ValueError("Recovery is not this initialization's complete stream boundary")
+    if (checkpoint["replay"]["memory_counter"] != state["completed_windows"] * 540
+            or checkpoint["stage"] != "pretrain" or checkpoint["updates"]["ppo"] != 0
+            or checkpoint["training_state"]["stage_initial_updates"] != 0):
+        raise ValueError("Recovery counters/stage differ")
+    torch.set_num_threads(1)
+    model = QueueMDP(cfg)
+    model.reset(state["next_training_scene_seed"], 90)
+    agent, _, _, counters = checked_agent(model, cfg, output)
+    audit = restore_agent(agent, checkpoint, dict(checkpoint=str(path), checkpoint_sha256=file_hash(path),
+        replay_counter=checkpoint["replay"]["memory_counter"], start_window=state["completed_windows"],
+        next_training_scene_seed=state["next_training_scene_seed"], rng_mode="own_complete_stream_anchor"))
+    current = agent.checkpoint(cfg)
+    checks = audit["exact_restore_checks"]
+    checks.update(full_checkpoint=state_equal(current, {k: checkpoint[k] for k in current}),
+                  full_replay=state_equal(current["replay"], checkpoint["replay"]),
+                  full_rng=state_equal(capture_rng(), state["rng"]),
+                  alpha=state_equal(agent.entropy.alpha.detach(), checkpoint["log_alpha"].to(agent.entropy.alpha.device).exp()))
+    if not all(checks.values()):
+        raise AssertionError(f"Exact replica restoration failed: {checks}")
+    audit.update(status="EXACT_RESTORE_PASS", before_new_training_experience=True,
+                 seed101_weights_loaded=False, alpha=agent.entropy.alpha.detach().item())
+    from .experiment import snapshot
+    return agent, snapshot(agent.macro_actor), snapshot(agent.sac_actor.action_net), counters, audit
+
+
+def copy_completed_prefix(parent, output, start):
+    fields = {"training.csv": "window", "optimization_stats.csv": "window",
+              "optimization_windows.csv": "window", "validation.csv": "checkpoint_window",
+              "route_stats.csv": "checkpoint_window", "role_summary.csv": "checkpoint_window",
+              "link_summary.csv": "checkpoint_window", "pairing_audit.csv": "window",
+              "boundary_audit.csv": "end_window", "training_pairing.csv": "scene"}
+    provenance = {}
+    for filename, field in fields.items():
+        path = parent / filename
+        if not path.exists():
+            continue
+        with path.open(encoding="utf-8-sig", newline="") as handle:
+            records = list(csv.DictReader(handle))
+        bound = 71000 + start // 3 - 1 if field == "scene" else start
+        kept = [r for r in records if float(r[field]) <= bound]
+        append_csv(output / filename, kept)
+        provenance[filename] = dict(source=str(path), source_sha256=file_hash(path),
+                                   retained_rows=len(kept), excluded_rows=len(records)-len(kept))
+    shutil.copytree(parent / "evaluations", output / "evaluations")
+    return provenance
+
+
+def completed_folder(seed):
+    folder = ROOT / f"results/sac_only_wireless6_long_seed{seed}"
+    while (folder / "recovery_location.json").is_file():
+        folder = Path(load_json(folder / "recovery_location.json")["output"])
+    return folder
+
+
 def optimization_periods(records):
     result = []
     for low, high in zip((0, *OBSERVE[:-1]), OBSERVE):
@@ -157,7 +224,7 @@ def finish_seed(output, manifest):
     (output / "result.md").write_text("\n".join(lines), encoding="utf-8")
 
 
-def run_fresh(seed):
+def run_fresh(seed, resume_anchor=None):
     prior = load_json(REFERENCE / "manifest.json")
     if prior["status"] != "LONG_COMPLETE":
         raise ValueError("seed101 is not complete")
@@ -167,11 +234,30 @@ def run_fresh(seed):
     cfg = fresh_config(prior["config"], seed)
     fixed, dev_fixed, references, protected = cached_results(load_json(PILOT / "manifest.json"))
     protected.update({str(p): file_hash(p) for p in REFERENCE.rglob("*") if p.is_file()})
-    plan = list(stream_plan(0, 71000))
+    start, next_scene, parent, recovery_checkpoint = 0, 71000, None, None
+    if resume_anchor is not None:
+        resume_anchor = Path(resume_anchor).resolve()
+        parent = resume_anchor.parent.parent
+        previous = load_json(parent / "manifest.json")
+        recorded = previous["latest_resume_anchor"]
+        if (Path(recorded["path"]).resolve() != resume_anchor or file_hash(resume_anchor) != recorded["sha256"]
+                or previous["training_initialization_seed"] != seed or previous["config"] != cfg):
+            raise ValueError("Recovery source/config/hash mismatch")
+        allowed_entry_changes = {"hrl_uav/wireless_replicates.py", "scripts/run_sac_only_wireless6_replicates.py"}
+        unexpected = [p for p, h in previous["source_hashes"].items()
+                      if file_hash(ROOT / p) != h and p not in allowed_entry_changes]
+        if unexpected:
+            raise ValueError(f"Unrelated source changed before recovery: {unexpected}")
+        recovery_checkpoint = torch.load(resume_anchor, map_location="cpu", weights_only=False)
+        start = recovery_checkpoint["run_state"]["completed_windows"]
+        next_scene = recovery_checkpoint["run_state"]["next_training_scene_seed"]
+        protected.update({str(p): file_hash(p) for p in parent.rglob("*") if p.is_file()})
+    plan = list(stream_plan(start, next_scene))
     for _, _, scene in plan:
         if not training_reference(scene).is_file():
             raise FileNotFoundError(f"Missing seed101 training CRN: {training_reference(scene)}")
-    output = ROOT / f"results/sac_only_wireless6_long_seed{seed}"
+    output = (ROOT / f"results/sac_only_wireless6_long_seed{seed}" if parent is None
+              else parent / f"recovery_after{start}")
     output.mkdir(exist_ok=False)
     for directory in ("checkpoints", "resume_anchors", "training_streams"):
         (output / directory).mkdir()
@@ -184,7 +270,7 @@ def run_fresh(seed):
         reference_manifest_sha256=file_hash(REFERENCE / "manifest.json"),
         protected_files=protected, training_initialization_seed=seed, training_seed_count=1,
         training=True, checkpoint_source="fresh", checkpoint=None, teacher=False, macro_enabled=False,
-        completed_windows=0, target_windows=2000, final_checkpoint_window=2000,
+        completed_windows=start, target_windows=2000, final_checkpoint_window=2000,
         training_scene_seeds=[s for _, _, s in plan], observation_windows=list(OBSERVE),
         validation_seeds=[33600, 33601], final_development_seeds=list(SCENES),
         reserved_scenes_executed=[], evaluation_train=False, evaluation_complete_tail=False,
@@ -198,9 +284,26 @@ def run_fresh(seed):
     if manifest["branch"] != "codex/u2u-model":
         raise ValueError("Unexpected branch")
     write_json(output / "manifest.json", manifest)
+    if parent is not None:
+        manifest.update(recovery_source=str(resume_anchor), recovery_source_sha256=file_hash(resume_anchor),
+            parent_output=str(parent), parent_manifest_sha256=file_hash(parent / "manifest.json"),
+            earlier_elapsed_seconds=previous["elapsed_seconds"],
+            operational_source_changes={p: dict(before=h, after=file_hash(ROOT / p))
+                for p, h in previous["source_hashes"].items() if file_hash(ROOT / p) != h},
+            checkpoints=[p for p in previous["checkpoints"] if p["window"] <= start],
+            completed_prefix=copy_completed_prefix(parent, output, start),
+            interrupted_partial_stream_preserved=True, read_only_assertion_scope="current recovery segment")
+        write_json(parent / "recovery_location.json", dict(output=str(output), start_window=start,
+            reason="Previous execution pipe closed; own complete-stream anchor, no parameter changes"))
     started = time.perf_counter()
     try:
-        agent, initial_macro, initial_actor, counters, fresh = fresh_agent(cfg, output)
+        if parent is None:
+            agent, initial_macro, initial_actor, counters, fresh = fresh_agent(cfg, output)
+        else:
+            agent, initial_macro, initial_actor, counters, recovery = restore_replica(cfg, output, recovery_checkpoint, resume_anchor)
+            fresh = previous["fresh"]
+            write_json(output / "restore_audit.json", recovery)
+            del recovery_checkpoint
         original_fresh = load_json(PILOT / "manifest.json")["fresh"]
         if fresh["actor_sha256"] == original_fresh["actor_sha256"]:
             raise AssertionError("Fresh actor unexpectedly matches initialization101")
@@ -211,6 +314,11 @@ def run_fresh(seed):
             source_sha256=protected[str(PILOT / ("validation_fixed_baselines.csv" if r["seed"] < 33610 else "pilot_endpoint.csv"))])
             for r in fixed + dev_fixed])
         cursor, last_validation = {}, None
+        if parent is not None and (output / "validation.csv").exists():
+            prefix_validation = rows(output / "validation.csv")
+            last_window = int(max(r["checkpoint_window"] for r in prefix_validation))
+            last_validation = dict(window=last_window, mean=grouped_means(
+                [r for r in prefix_validation if r["checkpoint_window"] == last_window])["SAC"])
 
         def progress(status="TRAINING"):
             manifest.update(status=status, elapsed_seconds=time.perf_counter() - started)
@@ -342,7 +450,7 @@ def aggregate():
     origin = load_json(REFERENCE / "report.json")
     manifests, reports, endpoint_rows, source_paths = {}, {}, {}, []
     for seed in (101, 102, 103):
-        folder = ROOT / f"results/sac_only_wireless6_long_seed{seed}"
+        folder = completed_folder(seed)
         manifests[seed], reports[seed] = load_json(folder / "manifest.json"), load_json(folder / "report.json")
         if reports[seed]["status"] not in ("LONG_COMPLETE", "FRESH_COMPLETE"):
             raise ValueError(f"Incomplete training initialization {seed}")
@@ -370,7 +478,7 @@ def aggregate():
     append_csv(output / "per_scene.csv", [dict(training_seed=s, **r) for s, rs in endpoint_rows.items() for r in rs])
     route_summary, learning = [], []
     for seed in (101, 102, 103):
-        folder = ROOT / f"results/sac_only_wireless6_long_seed{seed}"
+        folder = completed_folder(seed)
         raw = []
         keys = ["priority", "source", "role", "window_300s", "local_ratio", "raw_mean", "raw_std", "raw_saturation",
                 *[f"destination_{j}" for j in range(3)], *[f"raw_{j}" for j in range(3)]]
@@ -458,4 +566,3 @@ def aggregate():
         "仅验证当前固定6MHz模型和已使用开发场景的训练重复性，不宣称未见场景泛化、全局最优或已收敛。没有运行保留集、3MHz或PPO，也没有修改论文、提交或推送。", ""]
     (output / "result.md").write_text("\n".join(lines), encoding="utf-8")
     print(f"[MULTISEED_COMPLETE] {output}", flush=True)
-
