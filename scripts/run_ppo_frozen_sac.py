@@ -17,6 +17,8 @@ def main():
     parser.add_argument("--ppo-windows", type=int, required=True)
     parser.add_argument("--training-seed-base", type=int, default=72000)
     parser.add_argument("--validation-every", type=int, default=30)
+    parser.add_argument("--smoke", action="store_true",
+                        help="One native training window and short paired checks; no hyperparameter changes. No resume support.")
     args = parser.parse_args()
     run_frozen_ppo(
         args.output,
@@ -24,6 +26,7 @@ def main():
         ppo_windows=args.ppo_windows,
         training_seed_base=args.training_seed_base,
         validation_every=args.validation_every,
+        smoke=args.smoke,
     )
 
 
