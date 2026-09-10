@@ -62,7 +62,8 @@ def boundary_reward(last_reward, deployment_rewards, gamma):
 
 
 def rollout(config, agent, seed, macro_count, macro_enabled=True, train=False,
-            window_offset=0, progress_offset=0.0, record=False, complete_tail=False):
+            window_offset=0, progress_offset=0.0, record=False, complete_tail=False,
+            on_window=None):
     mdp = QueueMDP(config)
     mdp.reset(seed, macro_count)
     cfg = config["training"]
@@ -155,6 +156,9 @@ def rollout(config, agent, seed, macro_count, macro_enabled=True, train=False,
                     "target_std": agent.last_sac_stats.get("target_std",0),
                 })
                 print(f"[{agent.stage} {stage_window}] delay={metrics['window_delay_ms']:.1f}ms low={metrics['window_low_ms']:.1f}ms Q={metrics['queue_total_mbit']:.1f}Mbit SAC={agent.sac_actor_updates}/{agent.sac_updates} PPO={agent.ppo_updates}", flush=True)
+                # Observational checkpoint hook; keep the live stream and pending transition.
+                if on_window is not None:
+                    on_window(dict(rows[-1]), mdp, pending, macro == macro_count - 1)
             previous_completed = dict(mdp.env.completed_priority_count)
             previous_delays = dict(mdp.env.completed_priority_delay_sum)
             window_cost = window_energy = window_reward = 0.0
