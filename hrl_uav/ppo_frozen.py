@@ -301,7 +301,7 @@ def paired_evaluation(config, agent, seeds, output, label, window, *, macros=90)
 
 
 def run_frozen_ppo(output, *, source=DEFAULT_SOURCE, ppo_windows, training_seed_base=DEFAULT_TRAINING_SEED_BASE,
-                   validation_every=30, smoke=False):
+                   validation_every=30, smoke=False, initial_std=None, sample_diagnostics=False):
     """Run PPO-only macro training on one frozen SAC101 checkpoint.
 
     This routine never evaluates the reserved 33700--33709 scenes.  It is a
@@ -316,6 +316,34 @@ def run_frozen_ppo(output, *, source=DEFAULT_SOURCE, ppo_windows, training_seed_
         raise ValueError("validation_every must be a positive integer")
     if smoke and ppo_windows != 1:
         raise ValueError("Smoke is exactly one native window; no algorithm hyperparameters are changed")
+    if initial_std is not None and initial_std != 1 / 6:
+        raise ValueError("Only the predeclared low-exploration initial std 1/6 is authorized")
+    reference_pilot = None
+    if initial_std is not None:
+        prior_dir = ROOT / "results/ppo_frozen_sac_pilot120_seed101"
+        prior = load_json(prior_dir / "manifest.json")
+        expected_config = copy.deepcopy(prior["config"])
+        if smoke:
+            expected_config["training"]["joint_windows"] = 1
+        if (cfg != expected_config or training_scenes != prior["training_scene_seeds"][:len(training_scenes)]
+                or prior["actual_head"] != "b4908d3e78d4c807013c8ff6991637dbae546129"
+                or prior["source_checkpoint_sha256"] != SOURCE_DIGESTS["checkpoint"]
+                or validation_every != 30):
+            raise ValueError("Low-std pilot must otherwise match the original PPO120 protocol")
+        for name, digest in prior["source_hashes"].items():
+            if name != "hrl_uav/ppo_frozen.py" and file_hash(ROOT / name) != digest:
+                raise ValueError(f"Original PPO120 model/training implementation changed: {name}")
+        reference_pilot = {
+            "manifest": str(prior_dir / "manifest.json"),
+            "manifest_sha256": file_hash(prior_dir / "manifest.json"),
+            "report_sha256": file_hash(prior_dir / "report.json"),
+            "source_comparison": "All original inputs unchanged except opt-in ppo_frozen runner extension",
+        }
+    if sample_diagnostics:
+        from .ppo_diagnostics import LoggedDirectHRL, PPOJournal
+        agent_type = LoggedDirectHRL
+    else:
+        agent_type = DirectHRL
     output.mkdir(parents=True, exist_ok=False)
     (output / "checkpoints").mkdir()
     validation_seeds = VALIDATION_SEEDS[:1] if smoke else VALIDATION_SEEDS
@@ -325,7 +353,7 @@ def run_frozen_ppo(output, *, source=DEFAULT_SOURCE, ppo_windows, training_seed_
     torch.set_num_threads(1)
     model = QueueMDP(cfg)
     model.reset(training_scenes[0], cfg["training"]["window_macros"])
-    agent = DirectHRL.from_mdp(model, cfg)
+    agent = agent_type.from_mdp(model, cfg)
     restore_meta = {
         "checkpoint": str(source), "checkpoint_sha256": file_hash(source),
         "transition": STAGE_TRANSITION, "source_stage": "pretrain", "source_sac_window": 2000,
@@ -338,6 +366,15 @@ def run_frozen_ppo(output, *, source=DEFAULT_SOURCE, ppo_windows, training_seed_
     del saved
     if agent.stage != "pretrain" or agent.ppo_updates != 0:
         raise AssertionError("Restored source is not a PPO-fresh SAC-only agent")
+    # Apply only AFTER the complete, unmodified SAC2000 bootstrap is verified.
+    overrides = {}
+    if initial_std is not None:
+        overrides["ppo_initial_std"] = {"source": cfg["training"]["ppo_initial_std"], "effective": initial_std}
+        cfg["training"]["ppo_initial_std"] = initial_std
+        with torch.no_grad():
+            agent.macro_actor.log_std.fill_(np.log(initial_std))
+    if sample_diagnostics:
+        agent.ppo_journal = PPOJournal(output / "ppo_samples", agent.observation_spec, cfg)
     frozen_reference = sac_learning_state(agent, cfg)
     # The shared scheduler's runtime stage is joint, but SAC updates stay blocked.
     # This is not continuation validation, and saved['config'] is never rewritten.
@@ -365,6 +402,9 @@ def run_frozen_ppo(output, *, source=DEFAULT_SOURCE, ppo_windows, training_seed_
         "sac_action_mode": "stochastic during macro training, deterministic during paired evaluation",
         "evaluation_macros": evaluation_macros,
         "actual_head": head, "branch": branch, "config": cfg,
+        "authorized_post_restore_overrides": overrides,
+        "ppo_sample_diagnostics": bool(sample_diagnostics),
+        "reference_pilot": reference_pilot,
         "source_checkpoint": str(source), "source_checkpoint_sha256": file_hash(source),
         "source_run": str(_source_run(source)), "source_manifest_sha256": file_hash(_source_run(source) / "manifest.json"),
         "source_report_sha256": file_hash(_source_run(source) / "report.json"),
@@ -479,6 +519,7 @@ def run_frozen_ppo(output, *, source=DEFAULT_SOURCE, ppo_windows, training_seed_
         "sac_frozen_checks": frozen_checks,
         "sac_actor_max_delta": parameter_delta(frozen_reference["sac_actor"], agent.sac_actor.action_net),
         "macro_mean_max_delta": parameter_delta(initial_macro, agent.macro_actor, ("log_std",)),
+        "ppo_gradients": agent.ppo_gradient_steps,
         "replay_at_entry": initial_replay, "replay_at_exit": agent.replay.memory_counter,
         "validation_history": history, "development_final": final,
         "reserved_scenes_executed": [],
