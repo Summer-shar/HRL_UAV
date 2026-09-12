@@ -236,6 +236,18 @@ class QueueMDP:
         return project_rows_to_simplex(action.reshape(2, self.N, self.N))
 
     def start_macro(self, action):
+        if self.env.continuous_mission:
+            action = np.asarray(action, dtype=np.float64)
+            if action.shape not in ((self.N, 2), (self.macro_action_dim,)) or not np.isfinite(action).all():
+                raise ValueError("Mission macro action must contain finite world-coordinate scores")
+            if self.config["max_displacement_m"] != 20:
+                raise ValueError("mission_rpgm_v1 requires the fixed 20 m displacement limit")
+            action = np.clip(action.reshape(self.N, 2), -1.0, 1.0)
+            action /= np.maximum(np.linalg.norm(action, axis=1, keepdims=True), 1.0)
+            _, _, info = self.env.macro_step(20.0 * action)
+            self.propulsion_share = info["E_macro_total"] / self.env.micro_steps_per_macro
+            self.propulsion_delta_share = info["E_propulsion_increment"] / self.env.micro_steps_per_macro
+            return info
         action = np.asarray(action, dtype=np.float64).reshape(self.N, 2)
         action = np.clip(action, -1.0, 1.0)
         action /= np.maximum(np.linalg.norm(action, axis=1, keepdims=True), 1.0)

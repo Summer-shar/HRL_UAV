@@ -1,0 +1,4741 @@
+{
+  "template_reference.pdf": {
+    "pages": 9,
+    "page_sizes": [
+      [
+        0,
+        0,
+        595.32,
+        807.96
+      ],
+      [
+        0,
+        0,
+        595.32,
+        807.96
+      ],
+      [
+        0,
+        0,
+        595.32,
+        807.96
+      ],
+      [
+        0,
+        0,
+        595.32,
+        807.96
+      ],
+      [
+        0,
+        0,
+        595.32,
+        807.96
+      ],
+      [
+        0,
+        0,
+        595.32,
+        807.96
+      ],
+      [
+        0,
+        0,
+        595.32,
+        807.96
+      ],
+      [
+        0,
+        0,
+        595.32,
+        807.96
+      ],
+      [
+        0,
+        0,
+        595.32,
+        807.96
+      ]
+    ]
+  },
+  "qa_test/test.pdf": {
+    "pages": 1,
+    "page_sizes": [
+      [
+        0,
+        0,
+        612,
+        792
+      ]
+    ]
+  },
+  "sections": [
+    {
+      "width_mm": 210.02625,
+      "height_mm": 285.0444444444444,
+      "top_mm": 24.094722222222224,
+      "bottom_mm": 24.094722222222224,
+      "left_mm": 20.0025,
+      "right_mm": 20.0025,
+      "header_mm": 17.497777777777777,
+      "footer_mm": 13.49375,
+      "columns": "<w:cols xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\" xmlns:wpc=\"http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas\" xmlns:cx=\"http://schemas.microsoft.com/office/drawing/2014/chartex\" xmlns:cx1=\"http://schemas.microsoft.com/office/drawing/2015/9/8/chartex\" xmlns:cx2=\"http://schemas.microsoft.com/office/drawing/2015/10/21/chartex\" xmlns:cx3=\"http://schemas.microsoft.com/office/drawing/2016/5/9/chartex\" xmlns:cx4=\"http://schemas.microsoft.com/office/drawing/2016/5/10/chartex\" xmlns:cx5=\"http://schemas.microsoft.com/office/drawing/2016/5/11/chartex\" xmlns:cx6=\"http://schemas.microsoft.com/office/drawing/2016/5/12/chartex\" xmlns:cx7=\"http://schemas.microsoft.com/office/drawing/2016/5/13/chartex\" xmlns:cx8=\"http://schemas.microsoft.com/office/drawing/2016/5/14/chartex\" xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\" xmlns:aink=\"http://schemas.microsoft.com/office/drawing/2016/ink\" xmlns:am3d=\"http://schemas.microsoft.com/office/drawing/2017/model3d\" xmlns:o=\"urn:schemas-microsoft-com:office:office\" xmlns:oel=\"http://schemas.microsoft.com/office/2019/extlst\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\" xmlns:v=\"urn:schemas-microsoft-com:vml\" xmlns:wp14=\"http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing\" xmlns:wp=\"http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing\" xmlns:w10=\"urn:schemas-microsoft-com:office:word\" xmlns:w14=\"http://schemas.microsoft.com/office/word/2010/wordml\" xmlns:w15=\"http://schemas.microsoft.com/office/word/2012/wordml\" xmlns:w16cex=\"http://schemas.microsoft.com/office/word/2018/wordml/cex\" xmlns:w16cid=\"http://schemas.microsoft.com/office/word/2016/wordml/cid\" xmlns:w16=\"http://schemas.microsoft.com/office/word/2018/wordml\" xmlns:w16du=\"http://schemas.microsoft.com/office/word/2023/wordml/word16du\" xmlns:w16sdtdh=\"http://schemas.microsoft.com/office/word/2020/wordml/sdtdatahash\" xmlns:w16se=\"http://schemas.microsoft.com/office/word/2015/wordml/symex\" xmlns:wpg=\"http://schemas.microsoft.com/office/word/2010/wordprocessingGroup\" xmlns:wpi=\"http://schemas.microsoft.com/office/word/2010/wordprocessingInk\" xmlns:wne=\"http://schemas.microsoft.com/office/word/2006/wordml\" xmlns:wps=\"http://schemas.microsoft.com/office/word/2010/wordprocessingShape\" w:space=\"720\"/>"
+    },
+    {
+      "width_mm": 210.02625,
+      "height_mm": 285.0444444444444,
+      "top_mm": 24.094722222222224,
+      "bottom_mm": 24.094722222222224,
+      "left_mm": 20.0025,
+      "right_mm": 20.0025,
+      "header_mm": 17.497777777777777,
+      "footer_mm": 13.49375,
+      "columns": "<w:cols xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\" xmlns:wpc=\"http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas\" xmlns:cx=\"http://schemas.microsoft.com/office/drawing/2014/chartex\" xmlns:cx1=\"http://schemas.microsoft.com/office/drawing/2015/9/8/chartex\" xmlns:cx2=\"http://schemas.microsoft.com/office/drawing/2015/10/21/chartex\" xmlns:cx3=\"http://schemas.microsoft.com/office/drawing/2016/5/9/chartex\" xmlns:cx4=\"http://schemas.microsoft.com/office/drawing/2016/5/10/chartex\" xmlns:cx5=\"http://schemas.microsoft.com/office/drawing/2016/5/11/chartex\" xmlns:cx6=\"http://schemas.microsoft.com/office/drawing/2016/5/12/chartex\" xmlns:cx7=\"http://schemas.microsoft.com/office/drawing/2016/5/13/chartex\" xmlns:cx8=\"http://schemas.microsoft.com/office/drawing/2016/5/14/chartex\" xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\" xmlns:aink=\"http://schemas.microsoft.com/office/drawing/2016/ink\" xmlns:am3d=\"http://schemas.microsoft.com/office/drawing/2017/model3d\" xmlns:o=\"urn:schemas-microsoft-com:office:office\" xmlns:oel=\"http://schemas.microsoft.com/office/2019/extlst\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\" xmlns:v=\"urn:schemas-microsoft-com:vml\" xmlns:wp14=\"http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing\" xmlns:wp=\"http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing\" xmlns:w10=\"urn:schemas-microsoft-com:office:word\" xmlns:w14=\"http://schemas.microsoft.com/office/word/2010/wordml\" xmlns:w15=\"http://schemas.microsoft.com/office/word/2012/wordml\" xmlns:w16cex=\"http://schemas.microsoft.com/office/word/2018/wordml/cex\" xmlns:w16cid=\"http://schemas.microsoft.com/office/word/2016/wordml/cid\" xmlns:w16=\"http://schemas.microsoft.com/office/word/2018/wordml\" xmlns:w16du=\"http://schemas.microsoft.com/office/word/2023/wordml/word16du\" xmlns:w16sdtdh=\"http://schemas.microsoft.com/office/word/2020/wordml/sdtdatahash\" xmlns:w16se=\"http://schemas.microsoft.com/office/word/2015/wordml/symex\" xmlns:wpg=\"http://schemas.microsoft.com/office/word/2010/wordprocessingGroup\" xmlns:wpi=\"http://schemas.microsoft.com/office/word/2010/wordprocessingInk\" xmlns:wne=\"http://schemas.microsoft.com/office/word/2006/wordml\" xmlns:wps=\"http://schemas.microsoft.com/office/word/2010/wordprocessingShape\" w:num=\"2\" w:space=\"426\"/>"
+    },
+    {
+      "width_mm": 210.02625,
+      "height_mm": 285.0444444444444,
+      "top_mm": 24.094722222222224,
+      "bottom_mm": 24.094722222222224,
+      "left_mm": 20.0025,
+      "right_mm": 20.0025,
+      "header_mm": 17.497777777777777,
+      "footer_mm": 13.49375,
+      "columns": "<w:cols xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\" xmlns:wpc=\"http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas\" xmlns:cx=\"http://schemas.microsoft.com/office/drawing/2014/chartex\" xmlns:cx1=\"http://schemas.microsoft.com/office/drawing/2015/9/8/chartex\" xmlns:cx2=\"http://schemas.microsoft.com/office/drawing/2015/10/21/chartex\" xmlns:cx3=\"http://schemas.microsoft.com/office/drawing/2016/5/9/chartex\" xmlns:cx4=\"http://schemas.microsoft.com/office/drawing/2016/5/10/chartex\" xmlns:cx5=\"http://schemas.microsoft.com/office/drawing/2016/5/11/chartex\" xmlns:cx6=\"http://schemas.microsoft.com/office/drawing/2016/5/12/chartex\" xmlns:cx7=\"http://schemas.microsoft.com/office/drawing/2016/5/13/chartex\" xmlns:cx8=\"http://schemas.microsoft.com/office/drawing/2016/5/14/chartex\" xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\" xmlns:aink=\"http://schemas.microsoft.com/office/drawing/2016/ink\" xmlns:am3d=\"http://schemas.microsoft.com/office/drawing/2017/model3d\" xmlns:o=\"urn:schemas-microsoft-com:office:office\" xmlns:oel=\"http://schemas.microsoft.com/office/2019/extlst\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\" xmlns:v=\"urn:schemas-microsoft-com:vml\" xmlns:wp14=\"http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing\" xmlns:wp=\"http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing\" xmlns:w10=\"urn:schemas-microsoft-com:office:word\" xmlns:w14=\"http://schemas.microsoft.com/office/word/2010/wordml\" xmlns:w15=\"http://schemas.microsoft.com/office/word/2012/wordml\" xmlns:w16cex=\"http://schemas.microsoft.com/office/word/2018/wordml/cex\" xmlns:w16cid=\"http://schemas.microsoft.com/office/word/2016/wordml/cid\" xmlns:w16=\"http://schemas.microsoft.com/office/word/2018/wordml\" xmlns:w16du=\"http://schemas.microsoft.com/office/word/2023/wordml/word16du\" xmlns:w16sdtdh=\"http://schemas.microsoft.com/office/word/2020/wordml/sdtdatahash\" xmlns:w16se=\"http://schemas.microsoft.com/office/word/2015/wordml/symex\" xmlns:wpg=\"http://schemas.microsoft.com/office/word/2010/wordprocessingGroup\" xmlns:wpi=\"http://schemas.microsoft.com/office/word/2010/wordprocessingInk\" xmlns:wne=\"http://schemas.microsoft.com/office/word/2006/wordml\" xmlns:wps=\"http://schemas.microsoft.com/office/word/2010/wordprocessingShape\" w:space=\"720\"/>"
+    },
+    {
+      "width_mm": 210.02625,
+      "height_mm": 285.0444444444444,
+      "top_mm": 24.094722222222224,
+      "bottom_mm": 24.094722222222224,
+      "left_mm": 20.0025,
+      "right_mm": 20.0025,
+      "header_mm": 17.497777777777777,
+      "footer_mm": 13.49375,
+      "columns": "<w:cols xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\" xmlns:wpc=\"http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas\" xmlns:cx=\"http://schemas.microsoft.com/office/drawing/2014/chartex\" xmlns:cx1=\"http://schemas.microsoft.com/office/drawing/2015/9/8/chartex\" xmlns:cx2=\"http://schemas.microsoft.com/office/drawing/2015/10/21/chartex\" xmlns:cx3=\"http://schemas.microsoft.com/office/drawing/2016/5/9/chartex\" xmlns:cx4=\"http://schemas.microsoft.com/office/drawing/2016/5/10/chartex\" xmlns:cx5=\"http://schemas.microsoft.com/office/drawing/2016/5/11/chartex\" xmlns:cx6=\"http://schemas.microsoft.com/office/drawing/2016/5/12/chartex\" xmlns:cx7=\"http://schemas.microsoft.com/office/drawing/2016/5/13/chartex\" xmlns:cx8=\"http://schemas.microsoft.com/office/drawing/2016/5/14/chartex\" xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\" xmlns:aink=\"http://schemas.microsoft.com/office/drawing/2016/ink\" xmlns:am3d=\"http://schemas.microsoft.com/office/drawing/2017/model3d\" xmlns:o=\"urn:schemas-microsoft-com:office:office\" xmlns:oel=\"http://schemas.microsoft.com/office/2019/extlst\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" xmlns:m=\"http://schemas.openxmlformats.org/officeDocument/2006/math\" xmlns:v=\"urn:schemas-microsoft-com:vml\" xmlns:wp14=\"http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing\" xmlns:wp=\"http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing\" xmlns:w10=\"urn:schemas-microsoft-com:office:word\" xmlns:w14=\"http://schemas.microsoft.com/office/word/2010/wordml\" xmlns:w15=\"http://schemas.microsoft.com/office/word/2012/wordml\" xmlns:w16cex=\"http://schemas.microsoft.com/office/word/2018/wordml/cex\" xmlns:w16cid=\"http://schemas.microsoft.com/office/word/2016/wordml/cid\" xmlns:w16=\"http://schemas.microsoft.com/office/word/2018/wordml\" xmlns:w16du=\"http://schemas.microsoft.com/office/word/2023/wordml/word16du\" xmlns:w16sdtdh=\"http://schemas.microsoft.com/office/word/2020/wordml/sdtdatahash\" xmlns:w16se=\"http://schemas.microsoft.com/office/word/2015/wordml/symex\" xmlns:wpg=\"http://schemas.microsoft.com/office/word/2010/wordprocessingGroup\" xmlns:wpi=\"http://schemas.microsoft.com/office/word/2010/wordprocessingInk\" xmlns:wne=\"http://schemas.microsoft.com/office/word/2006/wordml\" xmlns:wps=\"http://schemas.microsoft.com/office/word/2010/wordprocessingShape\" w:num=\"2\" w:space=\"426\"/>"
+    }
+  ],
+  "paragraphs": [
+    {
+      "i": 0,
+      "text": "基于Wi-Fi指纹且计算外包的室内定位隐私保护方案",
+      "style": "Heading 1",
+      "runs": [
+        {
+          "text": "基于",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Wi-Fi",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "指纹且计算外包的室内定位隐私",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "保护方案",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 1,
+      "text": "张应辉1，张思睿1，赵秋霞2，郑晓坤2，曹进3",
+      "style": "人名",
+      "runs": [
+        {
+          "text": "张应辉",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "1",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "，张思睿",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "1",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "，赵秋霞",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 2,
+      "text": "（1. 西安邮电大学网络空间安全学院，陕西 西安 710121；2. 青海师范大学计算机学院，青海 西宁 810016；\n3. 西安电子科技大学网络与信息安全学院，陕西 西安 710126）",
+      "style": "地名",
+      "runs": [
+        {
+          "text": "（",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "1. ",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "西安邮电大学网络空间安全学院，陕西",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": " ",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "西安",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 3,
+      "text": "摘  要：为了解决室内定位中用户和服务器双方的隐私保护问题，提出了一种在使用Paillier加密的过程中将部分计算外包给云服务器的方案，这不仅保护了用户和定位服务器的隐私，而且避免了产生过大的计算和通信开销。该方案的主要思想是服务器先在离线阶段建立指纹数据库，在线阶段用户将k匿名算法和Paillier加密结合，将加密后的Wi-Fi指纹发送给定位服务器，服务器对接收到的Wi-Fi指纹和数据库指纹进行聚合处理，然后外包给云服务器进行解密和距离计算，最终得到定位结果。理论分析和实验结果表明了所提方案的安全性、有效性和实用性。",
+      "style": "摘要",
+      "runs": [
+        {
+          "text": "摘",
+          "size_pt": null,
+          "font": "黑体",
+          "bold": null,
+          "eastAsia": "黑体"
+        },
+        {
+          "text": "  ",
+          "size_pt": null,
+          "font": "黑体",
+          "bold": null,
+          "eastAsia": "黑体"
+        },
+        {
+          "text": "要：",
+          "size_pt": null,
+          "font": "黑体",
+          "bold": null,
+          "eastAsia": "黑体"
+        },
+        {
+          "text": "",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "为了解决室内定位中用户和服务器双方的隐私保护问题，提出了一种在使用",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 4,
+      "text": "关键词：Wi-Fi指纹；计算外包；云服务；Paillier加密",
+      "style": "摘要",
+      "runs": [
+        {
+          "text": "关键词：",
+          "size_pt": null,
+          "font": "黑体",
+          "bold": null,
+          "eastAsia": "黑体"
+        },
+        {
+          "text": "",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Wi-Fi",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "指纹；计算外包；云服务；",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Paillier",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 5,
+      "text": "中图分类号：TP309",
+      "style": "摘要",
+      "runs": [
+        {
+          "text": "中图分类号：",
+          "size_pt": null,
+          "font": "黑体",
+          "bold": null,
+          "eastAsia": "黑体"
+        },
+        {
+          "text": "",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "TP309",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 6,
+      "text": "文献标志码：A",
+      "style": "摘要",
+      "runs": [
+        {
+          "text": "文献标志码：",
+          "size_pt": null,
+          "font": "黑体",
+          "bold": null,
+          "eastAsia": "黑体"
+        },
+        {
+          "text": "A",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 7,
+      "text": "doi: 10.11959/j.issn.1000−436x.",
+      "style": "摘要",
+      "runs": [
+        {
+          "text": "doi:",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": " ",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "10.11959/j.issn.1000−436x.",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 8,
+      "text": "Privacy-preserving indoor localization scheme based on Wi-Fi fingerprint with outsourced computing",
+      "style": "Heading 1",
+      "runs": [
+        {
+          "text": "Privacy-preserving indoor localization s",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 9,
+      "text": "Zhang Yinghui1, Zhang Sirui1, Zhao Qiuxia2, Zheng Xiaokun2, Cao Jin3",
+      "style": "人名",
+      "runs": [
+        {
+          "text": "Zhang Yinghui",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "1",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": ", Zhang Sirui",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "1",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": ", Zhao Qiuxia",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 10,
+      "text": "1. School of Cyberspace Security, Xi’an University of Posts & Telecommunications, Xi’an 710121, China\n2. The College of Computer, Qinghai Normal University, Xining 810016, China\n3. School of Cyber Engineering, Xidian University, Xi’an 710126, China",
+      "style": "地名",
+      "runs": [
+        {
+          "text": "1. School of Cyberspace Security, Xi’an ",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\n",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "2. The College of Computer, Qinghai Norm",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\n",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "3. School of Cyber Engineering, Xidian U",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 11,
+      "text": "Abstract: To solve the privacy-preserving problem of both the user and the server in indoor positioning, outsourcing part of the calculation to cloud server in the process of using Paillier encryption was considered. The scheme not only protected the privacy of the user and the positioning server, but also avoided excessive computing and communication overhead. The main idea of the scheme was that the fingerprint database in the offline stage was established by the server firstly. The k-anonymity algorithm was combined with Paillier encryption in the online stage by the user, and the encrypted Wi-Fi fingerprints were sent to the positioning server. An aggregation of the received Wi-Fi fingerprints and database fingerprints were performed by the server. Then they were outsourced to the cloud server for decryption and distance calculation by the positioning server. Finally, the positioning result was obtained. Theoretical analysis and experimental results show that the proposed scheme is safe, effective and practical.",
+      "style": "摘要",
+      "runs": [
+        {
+          "text": "Abstract:",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": " To solve the privacy-preserving problem",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "k",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "-anonymity algorithm was combi",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 12,
+      "text": "Keywords: Wi-Fi fingerprint, outsourced computing, cloud service, Paillier encryption",
+      "style": "摘要",
+      "runs": [
+        {
+          "text": "",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "Keywords: ",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "Wi-Fi fingerprint, outsource",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "d",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": " computing, cloud service, ",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 15,
+      "text": "0  引言",
+      "style": "Heading 2",
+      "runs": [
+        {
+          "text": "0",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "  ",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "引言",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 16,
+      "text": "随着智能手机等移动智能设备的兴起，位置数据已经成为一种重要的资产。从传统的导航和地图应用程序到社交媒体和定向广告，位置数据被用于各种基于位置的服务中[1-4]。任何基于位置的服务的一个明显的先决条件都是定位，即获取客户端的物理位置。在户外环境中，定位主要是基于全球导航卫星系统（global navigation satellite system, GNSS），如GPS或北斗卫星导航系统。然而，GNSS卫星信号非常弱，在进行定位的过程中可能被障碍物阻挡，导致不能提供良好的定位服务，尤其是在室内环境中。因此，在室内环境中，需要其他定位技术来提供定位服务。常见的室内定位技术有基于Wi-Fi指纹的定位技术、红外线定位技术、频射识别定位技术、蓝牙定位技术、ZigBee定位技术、超宽带定位技术[5-8]等。其中，基于Wi-Fi指纹的定位技术是应用最多的，其原因是许多室内环境已经部署了广泛的Wi-Fi设备，在进行定位服务时可以使用现有的基础设施，从而降低成本。与此同时，随着室内定位服务的日益普及，人们对隐私保护有了更高的要求，所以在进行定位服务的过程中还要保护客户端的位置隐私和服务器端的数据隐私。",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "随着智能手机等移动智能设备的兴起，位置数据已经成为一种重要的资产。从传统的导航和",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "[1-4]",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "。任何基于位置的服务的一个明显的先决条件都是定位，即获取客户端的物理位置。在户外",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "全球导航卫星系统（",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "global navigation satellite system, GNSS",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 17,
+      "text": "在基于Wi-Fi指纹的室内定位服务中，用户想要知道自己所处的位置，就要通过计算当前位置采样的接收信号强度（received signal strength, RSS）和若干个参考点的RSS之间的距离，来获取用户的位置坐标。在这个过程中，用户公开了自己的RSS，就会被不受信任的室内定位系统（indoor positioning system, IPS）或其他恶意攻击者获取，从而泄露用户的位置隐私，用户敏感的个人信息将有可能被披露并以恶意的方式使用[9-11]。与此同时，定位过程中存在恶意用户通过对IPS发送多次定位请求以获取整个指纹数据库，侵害服务器的数据隐私，对IPS造成财产的损失。因此，在进行定位服务的过程中保护用户和IPS双方的隐私是十分必要的。然而具有隐私保护的室内定位方案通常伴随着较高的计算和通信开销。针对此问题，计算外包是一种好的解决方法。",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "在基于",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Wi-Fi",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "指纹的室内定位服务中，用户想要知道自己所处的位置，就要通过计算当前位置采样的接收",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "received signal strength, RSS",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "）和若干个参考点的",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 18,
+      "text": "1  相关工作",
+      "style": "Heading 2",
+      "runs": [
+        {
+          "text": "1",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "  ",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "相关工作",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 19,
+      "text": "1.1  现存工作",
+      "style": "Heading 3",
+      "runs": [
+        {
+          "text": "1.1",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "  ",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "现存工作",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 20,
+      "text": "目前，针对室内定位中的隐私保护主要采用基于密码学的方案。文献[12]提出了第一个通过加密测量的Wi-Fi RSS保护隐私的方案，即在用户端使用同态加密算法处理测量的Wi-Fi RSS，然后通过随机选择多个接入点（access point, AP），在服务器端处理用户的定位请求。Wang等[13]结合了同态加密和模糊逻辑来保护Wi-Fi定位的隐私。Shu等[14]利用Paillier加密系统和不经意传输构建了一个定位协议，该协议根据其他移动设备的位置来确定用户的位置。Konstantinidis等[15]在提出的隐私保护室内定位（privacy-preserving indoor localization, PPIL）方案中使用了k匿名算法，确保了在一组k个客户端中，用户的身份难以被识别。Li等[16]研究利用差分隐私向参与者的指纹数据中注入噪声，来保护位置隐私。Järvinen等[17]的方案结合了不同的安全两方计算协议，并为PPIL设计了尺寸和深度优化的电路。具体来说，构建了独立的高效电路构建块：单指令多数据，能够忽略访问低电路深度的阵列，并选择小电路尺寸的k个最近邻。Zhao等[18]提出了可信虚拟位置保护算法，通过利用合理的虚拟位置来加强虚拟技术，以抵御攻击。Hu等[19]提出了基于RSS和部分同态加密的方案PriHorus，该方案依赖于最大似然估计，而不是经典的K最近邻（K-nearest neighbor, KNN）算法。Li等[20]将基于位置的服务与区块链技术相结合，提出了一种利用基于区块链的空天地一体化网络系统来提高位置数据管理的安全性和信任度的方案。该方案可以在提高位置数据管理效率的同时保护用户数据隐私。Zhang等[21]提出了一种在边缘计算中使用差分隐私指纹融合半监督极限学习机进行室内定位的方案，称为Adp-FSELM，这种融合式训练模型依赖于边缘节点中的半可信聚合和大量参与者，且方案中引入多个实体。",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "目前，针对室内定位中的隐私保护主要采用基于密码学的方案。",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "文献",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "[12]",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "提出了第一个通过加密",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 21,
+      "text": "以上方案主要存在3个问题：一是大多数方案只关注了用户侧的位置隐私，而没有考虑到IPS的数据隐私；二是定位过程中产生了很大的通信和计算开销；三是为了保护隐私，在数据中注入噪声，从而导致较大的定位误差，降低定位服务的质量。综上所述，研究隐私保护的轻量化室内定位技术是十分必要的，可以在保护隐私的同时减小通信和计算开销。",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "以上方案主要存在",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "3",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "个问题：一是大多数方案只关注了用户侧的位置隐私，而没有考虑到",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "IPS",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "的数据隐私；二是定位过",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 22,
+      "text": "1.2  本文工作",
+      "style": "Heading 3",
+      "runs": [
+        {
+          "text": "1.2",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "  ",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "本文工作",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 23,
+      "text": "为了解决上述问题，本文提出了一种将部分计算外包给云服务提供商（cloud service provider, CSP）的定位方案。该方案可以在减小开销的同时，保护用户和服务器的隐私。其主要思想是IPS在离线阶段建立指纹数据库，用户在在线阶段采用k匿名的方法，将得到的k组Wi-Fi指纹经过Paillier加密后发送给IPS，IPS对加密的数据库指纹信息和接收到的加密数据进行聚合，然后发送给云服务提供商解密并计算距离。在此过程中，因为用户的指纹信息被k−1组匿名信息隐藏并进行了加密，攻击者无法进行区分，所以用户的隐私得到了保护。服务器端的指纹数据库使用加密后的数据，并且位置检索阶段也是在服务器端完成，这就避免了数据的泄露。",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "为了解决上述问题，",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "本文",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "提出了一种将部分计算外包给云服务提供商（",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "cloud service provider, CSP",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "）的定位方案。",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 24,
+      "text": "2  预备知识",
+      "style": "Heading 2",
+      "runs": [
+        {
+          "text": "2",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "  ",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "预备知识",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 25,
+      "text": "2.1  基于Wi-Fi指纹的室内定位",
+      "style": "Heading 3",
+      "runs": [
+        {
+          "text": "2.1",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "  ",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "基于",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Wi-Fi",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "指纹的室内定位",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 26,
+      "text": "在众多室内定位的技术中，基于Wi-Fi指纹的室内定位是最常见且最受欢迎的。简单来说，定位的过程分为2个阶段：离线阶段和在线阶段。",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "在众多室内定位的技术中，基于",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Wi-Fi",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "指纹的室内定位是最常见",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "且",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "最受欢迎的。简单来说，定位的过程分为",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 27,
+      "text": "离线阶段。IPS建立数据库 ，其中，i是索引，N是接入点的数量，M是测量点的数量，是处的Wi-Fi指纹。",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "离线阶段",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "。",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "IPS",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "建立数据库",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 28,
+      "text": "在线阶段。待定位的用户测量其Wi-Fi指纹，然后计算与服务器数据库中之间的距离，得到用户的具体位置信息，完成一次定位工作。",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "在线阶段",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "。",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "待定位的用户测量其",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Wi-Fi",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "指纹",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 29,
+      "text": "2.2  Sφrensen距离",
+      "style": "Heading 3",
+      "runs": [
+        {
+          "text": "2.2",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "  ",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "Sφrensen",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "距离",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 30,
+      "text": "本文方案使用Sφrensen距离计算方法。Sφrensen距离基于Manhattan距离，由结果值的总和标准化得来。Sφrensen距离计算式为：",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "本文",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "方案使用",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Sφrensen",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "距离计算方法",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "。",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 31,
+      "text": "\t\t(1)",
+      "style": "公式",
+      "runs": [
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "(",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "1",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 32,
+      "text": "室内定位中常用的距离计算方法还有Manhattan距离、Euclidean距离、Kumar-Hassebrook距离等。但是Torres-Sospedra等[22]研究表明，这3种距离计算方法的成功率和准确度都不及Sφrensen距离，具体如表1所示。",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "室内定位中常用的距离计算方法还有",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Manhattan",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "距离、",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Euclidean",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "距离、",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 33,
+      "text": "表1\t4种距离计算方法的成功率和误差",
+      "style": "表题",
+      "runs": [
+        {
+          "text": "表",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "1",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "4",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "种距离计算方法的成功率和",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 34,
+      "text": "2.3  Paillier加密系统",
+      "style": "Heading 3",
+      "runs": [
+        {
+          "text": "2.3",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "  ",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "Paillier",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "加密系统",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 35,
+      "text": "Paillier加密方案[23]是Paillier于1999年提出的一种加法同态概率公钥密码系统。该密码系统的使用步骤及性质如下所示。",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "Paillier",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "加密方案",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "[23]",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "是",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Paillier",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 36,
+      "text": "密钥生成。设p和q是2个随机选择的大素数，满足。计算，，。公钥，私钥。",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "密钥生成",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "。",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "设",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "p",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "和",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 37,
+      "text": "加密。选择一个随机的，对于明文m，使用式(2)计算密文c，加密操作如下：",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "加密",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "。",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "选择一个随机的",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "，对于明文",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 38,
+      "text": "\t\t(2)",
+      "style": "公式",
+      "runs": [
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\t(",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "2",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": ")",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 39,
+      "text": "解密。密文c的解密操作如下：",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "解密",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "。",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "密文",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "c",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "的解密操作如下",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 40,
+      "text": "\t\t(3)",
+      "style": "公式",
+      "runs": [
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\t(",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "3",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": ")",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 41,
+      "text": "Paillier加密是一种满足加法同态和数乘同态的加密方法。对于明文,和常数c，有：",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "Paillier",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "加密是一种满足加法同态和数乘同态的加密方法。对于明文",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": ",",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 42,
+      "text": "\t\t(4)",
+      "style": "公式",
+      "runs": [
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\t(",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "4",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": ")",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 43,
+      "text": "\t\t(5)",
+      "style": "公式",
+      "runs": [
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\t(",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "5",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": ")",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 44,
+      "text": "2.4  敌手模型",
+      "style": "Heading 3",
+      "runs": [
+        {
+          "text": "2.4",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "  ",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "敌手模型",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 45,
+      "text": "本文方案同时考虑用户端的位置隐私和IPS的数据隐私。从用户的角度来看，攻击者有可能是好奇的IPS，想要通过搜集用户的位置隐私来制定相应的营销策略，也有可能是外部的攻击者，想要通过售卖用户的位置信息来牟利。因而，Wi-Fi定位系统在提供位置服务的过程中应该确保用户的位置隐私不被泄露。攻击者一般会通过以下2种方式获取用户的位置隐私。",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "本文",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "方案同时考虑用户端的位置隐私和",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "IPS",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "的数据隐私。从用户的角度来看，攻击者",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "有",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 46,
+      "text": "（1）攻击者直接从查询中获取用户的位置信息。",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "（",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "1",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "）",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "攻击者直接从查询中获取用户的位置信息。",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 47,
+      "text": "（2）攻击者获取用户Wi-Fi RSS，推断用户的位置信息。",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "（",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "2",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "）",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "攻击者获取用户",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Wi-Fi RSS",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 48,
+      "text": "从IPS的角度来看，攻击者可能是恶意用户，想要通过多次定位请求获取数据库来牟利。因而，在提供定位服务的过程中应防止Wi-Fi指纹数据库的泄露。攻击者一般会通过以下2种方式攻击服务提供商的数据库。",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "从",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "IPS",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "的角度来看，攻击者可能是恶意用户，想要通过多次定位请求获取数据库来牟利。因而，在",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Wi-Fi",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "指纹数据库的泄露。攻击者一般会通过",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 49,
+      "text": "（1）攻击者得到一个与IPS的数据库完全相同Wi-Fi指纹数据库。",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "（",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "1",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "）",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "攻击者得到一个与",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "IPS",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 50,
+      "text": "（2）攻击者得到一个与IPS的数据库D相似且定位精度相同的Wi-Fi指纹数库。",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "（",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "2",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "）",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "攻击者得到一个与",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "IPS",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 51,
+      "text": "3  具体方案",
+      "style": "Heading 2",
+      "runs": [
+        {
+          "text": "3",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "  ",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "具体方案",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 52,
+      "text": "本文方案的系统架构如图1所示。离线阶段，IPS对采样点的Wi-Fi RSS使用Paillier半同态加密算法进行加密，并建立指纹数据库。在线阶段，一个待定位的用户在自己当前位置测量从不同AP采样到的Wi-Fi RSS，使用Paillier半同态加密算法进行加密，并将加密后的真实RSS和虚拟RSS（通过k匿名技术生成，除用户外其他人无法进行区分）发送给IPS进行定位请求。在接收到用户的定位请求后，IPS对自己数据库中的加密RSS和接收到的RSS进行初步处理，然后外包给CSP解密并计算Sφrensen距离，CSP将计算结果返回给IPS，IPS使用KNN算法进行计算并从数据库中匹配对应的物理坐标，返回给用户，用户从中找出自己的真实位置。总体上，本文方案主要包括以下4个阶段。本文方案中涉及的符号说明如表2所示。",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "本文",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "方案的系统架构如图",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "1",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "所示",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 55,
+      "text": "图1  系统架构",
+      "style": "图注",
+      "runs": [
+        {
+          "text": "图",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "1  ",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "系统架构",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 57,
+      "text": "表2\t符号说明",
+      "style": "表题",
+      "runs": [
+        {
+          "text": "表",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "2",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "符号说明",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 59,
+      "text": "离线阶段。IPS在M个测量点测量Wi-Fi RSS值，记为，其中。CSP生成一对Paillier密钥，其中，是公钥，是私钥，CSP公开。IPS使用加密采样到的RSS值，记为。再对所有RSS值取负值后加密，记为。建立指纹数据库D，数据库中包括索引、物理位置、采样点的RSS值以及加密后的RSS值，记为 。",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "离线阶段。",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "IPS",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "在",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "M",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "个测量点测量",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 60,
+      "text": "准备阶段。用户采样当前位置的Wi-Fi RSS值，记为，其中N是AP的数量。使用k匿名算法，使用户的真实指纹与k−1条匿名指纹不能被除了用户之外的所有攻击者区分。将这k条指纹数据使用进行加密后发送给IPS，记为。IPS计算：",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "准备阶段。用户采样当前位置的",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Wi-Fi RSS",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "值，记为",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "，其中",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 61,
+      "text": "\t(6)",
+      "style": "公式",
+      "runs": [
+        {
+          "text": "",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\t(",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "6",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": ")",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 62,
+      "text": "\t\t\t\t(7)",
+      "style": "公式",
+      "runs": [
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 63,
+      "text": "其中，，。然后将 和发送给CSP。",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "其中，",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "，",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "。然后将",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 64,
+      "text": "距离计算阶段。CSP使用解密和，得到和，然后计算：",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "距离计算阶段。",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "CSP",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "使用",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "解密",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 65,
+      "text": "\t\t(8)",
+      "style": "公式",
+      "runs": [
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\t(",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "8",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": ")",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 66,
+      "text": "其中，。CSP将计算结果集返回给IPS。",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "其中，",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "。",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "CSP",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "将计算结果集",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 67,
+      "text": "位置检索阶段。IPS对收到的k组计算结果集的每一组分别使用KNN算法进行处理，每组数据都找到其K个最近的距离，再根据索引从数据库中匹配对应的物理坐标，通过计算质心，最终得到k组定位结果，将其发送给用户，用户从k组结果中找到自己对应的位置，完成定位请求。",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "位置检索阶段。",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "IPS",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "对收到的",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "k",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "组计算结果集",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 68,
+      "text": "4  安全性分析",
+      "style": "Heading 2",
+      "runs": [
+        {
+          "text": "4",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "  ",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "安全性分析",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 69,
+      "text": "将部分计算外包给云的隐私保护室内定位可以保证用户位置的安全性以及IPS数据的安全性。",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "将部分计算外包给云的隐私保护室内定位可以保证用户位置的安全性以及",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "IPS",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "数据的安全性。",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 70,
+      "text": "（1）抵抗位置隐私攻击",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "（",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "1",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "）",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "抵抗位置隐私攻击",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 71,
+      "text": "用户将自己测量到的Wi-Fi RSS信息和k−1个虚拟位置信息以不可区分的方式使用公钥加密后发送给IPS。在定位过程中，假设Paillier加密系统是安全的，攻击者只有在拥有私钥的情况下才可以对用户发送的数据进行解密，那么用户的测量信息Wi-Fi RSS对于任何对手都是安全的。在位置检索阶段，恶意服务器想通过和指纹数据库恢复用户的Wi-Fi RSS，假设对于用户发送的同一组Wi-Fi RSS，N=3，可以得到",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "用户将自己测量到的",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Wi-Fi RSS",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "信息和",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "k−",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "1",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 72,
+      "text": "\t\t\t\t(9)",
+      "style": "公式",
+      "runs": [
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 73,
+      "text": "其中，都是已知的，但是由于攻击者无法获得和的大小关系，因此不能对用户的Wi-Fi RSS进行恢复。本文方案可以抵抗位置隐私攻击。",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "其中，",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "都是已知的，但是由于攻击者",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "无法获得",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 74,
+      "text": "（2）抵抗数据隐私攻击",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "（",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "2",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "）",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "抵抗数据隐私攻击",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 75,
+      "text": "在定位的整个过程中，距离计算阶段是在CSP上进行的，最终IPS返回给用户的数据是具体的位置坐标，而不是Wi-Fi RSS，所以恶意用户不能通过发送多次定位请求来得到IPS的指纹数据库。此外，IPS外包给CSP进行计算的数据是加密后再经过处理的中间数据，所以即使恶意的CSP拥有私钥，也不能还原得到IPS的指纹数据库。",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "在定位的整个过程中，距离计算阶段是在",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "CSP",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "上进行的，最终",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "IPS",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "返回给用户的数据是具体的位置坐标",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 76,
+      "text": "数据库中存储的所有测量点的物理位置都是不公开的，所以恶意用户不能通过采样这些测量点的Wi-Fi RSS来建立相似的指纹数据库。所以本文方案可以抵抗数据隐私攻击。",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "数据库中存储的所有测量点的物理位置都是不公开的，所以恶意用户不能通过采样这些测量",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Wi-Fi RSS",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "来建立相似的指纹数据库。所以",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "本文",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "方案可以抵抗数据隐私攻击。",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 77,
+      "text": "（3）抵抗IPS与CSP的合谋攻击",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "（",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "3",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "）",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "抵抗",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "IPS",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 78,
+      "text": "假设合谋攻击由恶意的IPS和CSP组成，其目的是通过获取用户的Wi-Fi RSS值来定位用户的具体位置。恶意的IPS在收到用户的定位请求后，将接收到的加密Wi-Fi RSS直接发送给CSP进行解密，CSP返回解密结果，IPS进行距离计算，得到用户的具体位置坐标。但在此过程中，用户通过k匿名算法，将自己的真实Wi-Fi RSS混淆在k−1组虚拟信息中，对于除用户外任何人都是不可区分的，这意味着恶意IPS和CSP成功猜中用户Wi-Fi RSS的概率为。",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "假设合谋攻击由恶意的",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "IPS",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "和",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "CSP",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "组成，其目的是通过获取用户的",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 79,
+      "text": "5  性能评估",
+      "style": "Heading 2",
+      "runs": [
+        {
+          "text": "5",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "  ",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "性能评估",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 80,
+      "text": "5.1  理论分析",
+      "style": "Heading 3",
+      "runs": [
+        {
+          "text": "5.1",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": " ",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": " ",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "理论分析",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 81,
+      "text": "对本文方案进行理论分析，得到各个阶段的计算和通信开销，如表3所示。其中，Exp为一个模指数运算，Mul为一个模乘法运算，L是密文的位长。",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "对",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "本文",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "方案进行理论分析，得到各个阶段的计算和通信开销，如表",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "3",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "所示。其中，",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 82,
+      "text": "在离线阶段，只有IPS会产生计算开销，因为IPS使用加密了所有测量点的Wi-Fi指纹以及，其中且。产生的计算开销为，其中N是AP的个数，M是采样点的个数。在准备阶段，用户首先将采样到的Wi-Fi指纹和k−1组虚拟指纹进行加密，然后发送给IPS，产生的计算开销为。通信开销为。IPS对接收到的用户指纹和数据库中的指纹进行预处理，IPS再将计算结果发送给CSP，产生的计算开销为，通信开销为。在距离计算阶段，只有CSP参与了计算，然后将结果返回给IPS，因为发送的数据是明文，所以通信开销忽略不计，产生的计算开销为。在整个定位过程中，离线阶段的计算开销是在定位请求前产生的，在分析计算和通信开销时，不进行考虑。所以在本文方案中，进行一次定位请求产生的计算开销为，通信开销为。",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "在离线阶段，只有",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "IPS",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "会产生计算开销，因为",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "IPS",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "使用",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 83,
+      "text": "现有方案中，文献[12]方案和文献[24]方案同样采用了Paillier半同态加密算法保护定位过程中的隐私，但是本文方案具有更高的定位效率。文献[25]方案将k-means++聚类和安全多方计算相结合，减少了使用Paillier半同态加密算法带来的模指数运算，从而提高了效率，但是由于使用了k-means++聚类的方法，因此定位精度远低于本文方案。Adp-FSELM在边缘计算中将差分隐私和机器学习相结合，在多个阶段进行了加噪处理，且需要大量参与者来训练模型，与本文方案相比，计算开销更大。",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "现有方案",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "中",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "，",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "文献",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 84,
+      "text": "5.2  时间开销",
+      "style": "Heading 3",
+      "runs": [
+        {
+          "text": "5.2",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "  ",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "时间开销",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 85,
+      "text": "本节实验使用UJIndoorLoc开源数据库[26]来评估方案的性能。UJIndoorLoc数据库是一个基于WLAN指纹识别的多建筑和多层定位数据库，涵盖了海梅一世大学的三座建筑，每座建筑有4层或5 层，近11万平方米。数据库由20多个不同的用户和20个安卓设备创建，包括25条训练记录和19 937 条测试记录。用于采样RSS的AP数量为520个，信号强度的缺失值为100。每条记录给出了用户实际的位置坐标、用户所在楼层、用户所在建筑物等。本文方案选用UJIndoorLoc数据库中某一层的数据，选择AP的数量为40个，测量点的数量为1 000个。",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "本",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "节",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "实验使用",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "UJIndoorLoc",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "开源数据库",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 86,
+      "text": "根据本文方案进行仿真实验并计算平均时间开销，将其与文献[12]方案和文献[24]方案的平均时间开销进行分析对比并绘制折线。由图2和图3可以看出，3种方案的平均时间开销随着AP的数量N以及测量点的数量M的增加而增大。导致这种结果的原因是AP数量增加，用户测量到的Wi-Fi RSS和IPS测量点采样到的Wi-Fi RSS就会增加，双方参与计算的数据量增大，需要进行同态加解密的明文增加，就会耗费更多的时间进行处理。本文方案将解密计算外包给CSP进行处理，平均时间开销明显比文献[12]方案和文献[24]方案低。",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "根据",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "本文",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "方案进行仿真实验并计算平均时间开销，将其与",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "文献",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "[12]",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 88,
+      "text": "图2  平均时间开销与AP的数量N的关系",
+      "style": "图注",
+      "runs": [
+        {
+          "text": "图",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "2  ",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "平均时间开销与",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "AP",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "的数量",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 90,
+      "text": "图3  平均时间开销与测量点的数量M的关系",
+      "style": "图注",
+      "runs": [
+        {
+          "text": "图",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "3 ",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": " ",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "平均时间开销与",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "测量点的数量",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 91,
+      "text": "在本文方案中，为了保护用户的位置隐私，采用了k匿名方法。对于k值的不同选择，本文方案的时间开销也会不同。平均时间开销随k值的变化如图4所示。由图4可知，定位的平均时间开销随k值的增大而增加，两者呈近似线性关系。",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "在本文方案中，为了保护用户的位置隐私，采用了",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "k",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "匿名方法。对于",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "k",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "值的不同选择，",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 93,
+      "text": "图4 平均时间开销随k值的变化",
+      "style": "图注",
+      "runs": [
+        {
+          "text": "图",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "4 ",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "平均时间开销随",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "k",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "值的变化",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 94,
+      "text": "5.3  通信开销",
+      "style": "Heading 3",
+      "runs": [
+        {
+          "text": "5.3",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "  ",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "通信开销",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 95,
+      "text": "通信开销主要产生于用户进行定位请求时向IPS发送加密数据阶段，本文实验用带宽成本衡量通信开销，具体结果如图5和图6所示。由图5和图6可知，通信开销都是随着AP的数量的增加而增大，这是因为AP的数量越多，测量到的Wi-Fi RSS就越多，用户需要发送所有AP测量到的数据给IPS，通信开销就会增加。此外，因为在本文方案和文献[24]方案中，用户发送给IPS的加密数据与AP的数量N有关，与测量点的数量M无关，所以本文方案和文献[24]方案的通信开销远小于文献[12]方案。而且在本文方案中，IPS返回给用户的是解密后的明文数据，相比于密文数据，大小可以忽略不计，所以本文方案通信开销也优于文献[24]方案。",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "通信开销主要产生于用户进行定位请求时向",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "IPS",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "发送加密数据阶段，",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "本文实验用带宽成本衡量通信开销，",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "具体结果如图",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 97,
+      "text": "图5  带宽成本与AP的数量N的关系",
+      "style": "图注",
+      "runs": [
+        {
+          "text": "图",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "5 ",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": " ",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "带宽成本与",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "AP",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 99,
+      "text": "图6 带宽成本与测量点的数量M的关系",
+      "style": "图注",
+      "runs": [
+        {
+          "text": "图",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "6 ",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "带宽成本与",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "测量点的数量",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "M",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 100,
+      "text": "5.4  定位误差",
+      "style": "Heading 3",
+      "runs": [
+        {
+          "text": "5.4",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "  ",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "定位误差",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 101,
+      "text": "在室内定位中，经常通过定位误差的累积分布函数（cumulative distribution function, CDF）来量化定位精度，通常取CDF=0.5时对应的误差距离作为本文方案的定位误差。图7对3种方案进行了比较，本文方案中近50%的定位误差小于3.5 m，与文献[12]方案和文献[24]方案相比，比文献[12]方案定位误差减小了18.42%，比文献[24]方案减小了3.13%，因为本文方案使用的Sφrensen距离计算方法的成功率和定位误差优于室内定位中常用的Euclidean距离计算方法，且方案中的指纹数据没有进行加噪处理。",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "在室内定位中，",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "经",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "常通过定位误差的累积分布函数（",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "cumulative distribution function, CDF",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "）来量化定位精度，通常取",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 103,
+      "text": "图7  定位误差",
+      "style": "图注",
+      "runs": [
+        {
+          "text": "图",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "7",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "  ",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "定位误差",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 104,
+      "text": "如图8所示，通过比较在不同数据集大小的情况下本文方案与文献[25]方案的定位误差可以看出，本文方案的定位误差远小于文献[25]方案，误差降低了近50%，且数据集越大，定位误差越小。对于数据集大小的选择，可以根据具体的实际情况，平衡效率和误差来选择最合适的大小。",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "如图",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "8",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "所示，通过比较在不同数据集大小的情况下本文方案与",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "文献",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "[25]",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 106,
+      "text": "图8  定位误差和数据集大小关系",
+      "style": "图注",
+      "runs": [
+        {
+          "text": "图",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "8",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "  ",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "定位误差和数据集大小关系",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 107,
+      "text": "6  结束语",
+      "style": "Heading 2",
+      "runs": [
+        {
+          "text": "6",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "  ",
+          "size_pt": null,
+          "font": null,
+          "bold": true,
+          "eastAsia": null
+        },
+        {
+          "text": "结束语",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 108,
+      "text": "本文提出了一种将部分计算外包给云的隐私保护方案，该方案既可以保护用户端位置的隐私，也可以保护服务器端的数据库隐私。将部分计算外包给云，减少了定位过程中IPS的计算和通信开销。相比于常用的Euclidean距离算法，使用Sφrensen距离算法提高了定位的成功率，减小了定位误差，可以给用户提供更好的定位服务。研究结果证明了本文方案的有效性、实用性和安全性。",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "本文提出了一种将部分计算外包给云的隐私保护方案，该方案既可以保护用户端位置的隐私",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "IPS",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "的计算和通信开销。相比于常用的",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Euclidean",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "距离算法，",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 109,
+      "text": "参考文献：",
+      "style": "文献",
+      "runs": [
+        {
+          "text": "参考文献：",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 110,
+      "text": "[1]\tObeidat H, Shuaieb W, Obeidat O, et al. A review of indoor localization techniques and wireless technologies[J]. Wireless Personal Communications, 2021, 119(1): 289-327.",
+      "style": "文献文",
+      "runs": [
+        {
+          "text": "[1]",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Obeidat H, Shuaieb W, Obeidat O, et al. ",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "[J].",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 111,
+      "text": "[2]\tSzyc K, Nikodem M, Zdunek M. Bluetooth low energy indoor localization for large industrial areas and limited infrastructure[J]. Ad Hoc Networks, 2023, 139: 103024.",
+      "style": "文献文",
+      "runs": [
+        {
+          "text": "[2]",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Szyc K, Nikodem M, Zdunek M. Bluetooth l",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 112,
+      "text": "[3]\tHayward S J, Lopik K V, Hinde C, et al. A survey of indoor location technologies, techniques and applications in industry[J]. Internet of Things, 2022, 20: 100608.",
+      "style": "文献文",
+      "runs": [
+        {
+          "text": "[3]",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Hayward S J, Lopik K",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": " V",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": ", Hinde C, et al. A survey of indoor loc",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 113,
+      "text": "[4]\tLi S H, Hedley M, Bengston K, et al. Passive localization of standard WiFi devices[J]. IEEE Systems Journal, 2019, 13(4): 3929-3932. ",
+      "style": "文献文",
+      "runs": [
+        {
+          "text": "[4]",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Li S H, Hedley M, Bengston K, et al. Pas",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 114,
+      "text": "[5]\tSugano M, Kawazoe T, Ohta Y, et al. Indoor localization system using RSSI measurement of wireless sensor network based on ZigBee standard[J]. Wireless and Optical Communications, 2006, 538: 1-6.",
+      "style": "文献文",
+      "runs": [
+        {
+          "text": "[5]",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Sugano M, Kawazoe T, Ohta Y, et al. Indo",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 115,
+      "text": "[6]\tAbbas M, Elhamshary M, Rizk H, et al. WiDeep: WiFi-based accurate and robust indoor localization system using deep learning[C]//Proceedings of the 2019 IEEE International Conference on Pervasive Computing and Communications. Piscataway: IEEE Press, 2019: 1-10.",
+      "style": "文献文",
+      "runs": [
+        {
+          "text": "[6]",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Abbas M, Elhamshary M, Rizk H, et al. Wi",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "ing[C]//Pr",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 116,
+      "text": "[7]\tKhelifi F, Bradai A, Benslimane A, et al. A survey of localization systems in Internet of things[J]. Mobile Networks and Applications, 2019, 24(3): 761-785.",
+      "style": "文献文",
+      "runs": [
+        {
+          "text": "[7]",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Khelifi F, Bradai A, Benslimane A, et al",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 117,
+      "text": "[8]\tZwirello L, Schipper T, Harter M, et al. UWB localization system for indoor applications: concept, realization and analysis[J]. Journal of Electrical and Computer Engineering, 2012, 2012: 4.",
+      "style": "文献文",
+      "runs": [
+        {
+          "text": "[8]",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Zwirello L, Schipper T, Harter M, et al.",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 118,
+      "text": "[9]\tHiguchi T, Martin P, Chakraborty S, et al. AnonyCast: privacy-preserving location distribution for anonymous crowd tracking systems[C]//Proceedings of the 2015 ACM International Joint Conference on Pervasive and Ubiquitous Computing. New York: ACM Press, 2015: 1119-1130.",
+      "style": "文献文",
+      "runs": [
+        {
+          "text": "[9]",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Higuchi T, Martin P, Chakraborty S, et a",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 119,
+      "text": "[10]\tLi L, Liu J Q, Cheng L C, et al. CreditCoin: a privacy-preserving blockchain-based incentive announcement network for communications of smart vehicles[J]. IEEE Transactions on Intelligent Transportation Systems, 2018, 19(7): 2204-2220.",
+      "style": "文献文",
+      "runs": [
+        {
+          "text": "[10]",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Li L, Liu J Q, Cheng L C, et al. CreditC",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 120,
+      "text": "[11]\tArmengol P, Tobkes R, Akkaya K, et al. Efficient privacy-preserving fingerprint-based indoor localization using crowdsourcing[C]//Proceedings of the 2015 IEEE 12th International Conference on Mobile Ad Hoc and Sensor Systems. Piscataway: IEEE Press, 2015: 549-554.",
+      "style": "文献文",
+      "runs": [
+        {
+          "text": "[11]",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Armengol P, Tobkes R, Akkaya K, et al. E",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 121,
+      "text": "[12]\tLi H, Sun L M, Zhu H J, et al. Achieving privacy preservation in WiFi fingerprint-based localization[C]//Proceedings of the IEEE Conference on Computer Communications. Piscataway: IEEE Press, 2014: 2337-2345.",
+      "style": "文献文",
+      "runs": [
+        {
+          "text": "[12]",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Li H, Sun L M, Zhu H J, et al. Achieving",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 122,
+      "text": "[13]\tWang X S, Liu Y, Shi Z Q, et al. A privacy-preserving fuzzy localization scheme with CSI fingerprint[C]//Proceedings of the 2015 IEEE Global Communications Conference (GLOBECOM). Piscataway: IEEE Press, 2015: 1-6.",
+      "style": "文献文",
+      "runs": [
+        {
+          "text": "[13]",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Wang X S, Liu Y, Shi Z Q, et al. A priva",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 123,
+      "text": "[14]\tShu T, Chen Y Y, Yang J, et al. Multi-lateral privacy-preserving localization in pervasive environments[C]//Proceedings of the IEEE Conference on Computer Communications. Piscataway: IEEE Press, 2014: 2319-2327.",
+      "style": "文献文",
+      "runs": [
+        {
+          "text": "[14]",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Shu T, Chen Y Y, Yang J, et al. Multi-la",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 124,
+      "text": "[15]\tKonstantinidis A, Chatzimilioudis G, Zeinalipour-yazti D, et al. Privacy-preserving indoor localization on smartphones[J]. IEEE Transactions on Knowledge and Data Engineering, 2015, 27(11): 3042-3055.",
+      "style": "文献文",
+      "runs": [
+        {
+          "text": "[15]",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Konstantinidis A, Chatzimilioudis G, Zei",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 125,
+      "text": "[16]\tLi S J, Li H, Sun L M. Privacy-preserving crowdsourced site survey in WiFi fingerprint-based localization[J]. EURASIP Journal on Wireless Communications and Networking, 2016, 2016(1): 123.",
+      "style": "文献文",
+      "runs": [
+        {
+          "text": "[16]",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Li S J, Li H, Sun L M. Privacy-preservin",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 126,
+      "text": "[17]\tJärvinen K, Leppäkoski H, Lohan E S, et al. PILOT: practical privacy-preserving indoor localization using outsourcing[C]// Proceedings of the 2019 IEEE European Symposium on Security and Privacy (EuroS&P). Piscataway: IEEE Press, 2019: 448-463.",
+      "style": "文献文",
+      "runs": [
+        {
+          "text": "[17]",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Järvinen K, Leppäkoski H, Lohan E S, et ",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": " ",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Proceedings of the 2019 IEEE European Sy",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 127,
+      "text": "[18]\tZhao P, Liu W W, Zhang G L, et al. Preserving privacy in WiFi localization with plausible dummy locations[J]. IEEE Transactions on Vehicular Technology, 2020, 69(10): 11909-11925.",
+      "style": "文献文",
+      "runs": [
+        {
+          "text": "[18]",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Zhao P, Liu W W, Zhang G L, et al. Prese",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 128,
+      "text": "[19]\tHu Z H, Li Y Z, Jiang G S, et al. PriHorus: privacy-preserving RSS-based indoor positioning[C]//Proceedings of the IEEE International Conference on Communications. Piscataway: IEEE Press, 2022: 5627-5632.",
+      "style": "文献文",
+      "runs": [
+        {
+          "text": "[19]",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Hu Z H, Li Y Z, Jiang G S, et al. PriHor",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 129,
+      "text": "[20]\tLi B H, Liang R C, Zhou W, et al. LBS meets blockchain: an efficient method with security preserving trust in SAGIN[J]. IEEE Internet of Things Journal, 2022, 9(8): 5932-5942.",
+      "style": "文献文",
+      "runs": [
+        {
+          "text": "[20]",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Li B H, Liang R C, Zhou W, et al. LBS me",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 130,
+      "text": "[21]\tZhang X J, He F C, Chen Q, et al. A differentially private indoor localization scheme with fusion of WiFi and bluetooth fingerprints in edge computing[J]. Neural Computing and Applications, 2022, 34(6): 4111-4132.",
+      "style": "文献文",
+      "runs": [
+        {
+          "text": "[21]",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Zhang X J, He F C, Chen Q, et al. A diff",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "4111-4132.",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 131,
+      "text": "[22]\tTorres-sospedra J, Montoliu R, Trilles S, et al. Comprehensive analysis of distance and similarity measures for Wi-Fi fingerprinting indoor positioning systems[J]. Expert Systems with Applications, 2015, 42(23): 9263-9278.",
+      "style": "文献文",
+      "runs": [
+        {
+          "text": "[22]",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Torres-sospedra J, Montoliu ",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "R",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": ", Trilles ",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 132,
+      "text": "[23]\tPaillier P. Public-key cryptosystems based on composite degree residuosity classes[C]//International Conference on the Theory and Applications of Cryptographic Techniques. Berlin: Springer, 1999: 223-238.",
+      "style": "文献文",
+      "runs": [
+        {
+          "text": "[23]",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\tPaillier ",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "P",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": ". Public-key cryptosystems based on comp",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 133,
+      "text": "[24]\tZhan G, Zhang A, Zhao P, et al. Lightweight privacy- preserving scheme in Wi-Fi fingerprint-based indoor localization[J]. IEEE Systems Journal, 2020, 14(3): 4638-4647.",
+      "style": "文献文",
+      "runs": [
+        {
+          "text": "[24]",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Zhan",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": " ",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "G",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 134,
+      "text": "[25]\tYang X, Luo Y C, Xu M, et al. Privacy-preserving WiFi fingerprint localization based on spatial linear correlation[C]//International Conference on Wireless Algorithms, Systems, and Applications. Berlin: Springer, 2022: 401-412.",
+      "style": "文献文",
+      "runs": [
+        {
+          "text": "[2",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "5",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "]",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Yang ",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 135,
+      "text": "[26]\tTorres-sospedra J, Montoliu R, Martínez-usó A, et al. UJIIndoorLoc: a new multi-building and multi-floor database for WLAN fingerprint-based indoor localization problems[C]//Proceedings of the 2014 International Conference on Indoor Positioning and Indoor Navigation (IPIN). Piscataway: IEEE Press, 2014: 261-270.",
+      "style": "文献文",
+      "runs": [
+        {
+          "text": "[2",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "6",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "]",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "\t",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "Torres-sospedra ",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 138,
+      "text": "[作者简介]",
+      "style": "作者简介：",
+      "runs": [
+        {
+          "text": "[",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "作者简介",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "]",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        },
+        {
+          "text": "",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    },
+    {
+      "i": 140,
+      "text": "一寸证件照",
+      "style": "Normal",
+      "runs": [
+        {
+          "text": "一寸证件照",
+          "size_pt": null,
+          "font": null,
+          "bold": null,
+          "eastAsia": null
+        }
+      ]
+    }
+  ],
+  "original_template_sha256": "dd866f0c567cb01b7b18a0a56ee7e19f96c1f1253d311a335dc421d9e50221db"
+}

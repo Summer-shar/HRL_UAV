@@ -167,12 +167,39 @@ class UAV_MEC_Env:
         u2u_tx_budget_w=1.0,
         u2u_reference_bandwidth_hz=512820.5128205128,
         u2u_reference_power_w=1.0,
+        motion_protocol="legacy_fly_hover",
+        mission_routes_m=None,
+        mission_duration_s=900.0,
     ):
 
         # ================== 1. 系统物理设定与参数 ==================
         self.macro_dt = 10.0   # 宏观周期 10 秒
         self.micro_dt = 0.1    # 物理积分步长 0.1 秒
         self.micro_steps_per_macro = int(self.macro_dt / self.micro_dt)
+        if motion_protocol not in ("legacy_fly_hover", "mission_rpgm_v1"):
+            raise ValueError("Unknown motion_protocol")
+        self.motion_protocol = motion_protocol
+        self.continuous_mission = motion_protocol == "mission_rpgm_v1"
+        if self.continuous_mission:
+            routes = np.asarray(mission_routes_m, dtype=np.float64)
+            if (num_uavs != 3 or routes.shape != (3, 2, 2)
+                    or not np.isfinite(routes).all()
+                    or np.any((routes < 0) | (routes > 1000))):
+                raise ValueError("mission_routes_m must contain three finite in-map start/end pairs")
+            if not np.array_equal(routes[:, 0], [[350, 350], [350, 650], [650, 500]]):
+                raise ValueError("mission route starts must match the fixed source anchors")
+            self.mission_routes_m = routes.copy()
+            self.mission_duration_s = self._positive_wireless_parameter(
+                "mission_duration_s", mission_duration_s)
+            if (deployment_dt != 0 or pause_service_during_flight is not False
+                    or arrivals_during_deployment is not True
+                    or deployment_transient_energy_mode != "none"
+                    or gm_heading_mode != "reference_point_group" or users_static
+                    or resource_frame_dt != 0.5 or arrival_dt != 0.5):
+                raise ValueError("mission_rpgm_v1 requires zero deployment, continuous radio, "
+                                 "arrivals, RPGM, 0.5 s frames and no deployment transient")
+        elif mission_routes_m is not None:
+            raise ValueError("mission_routes_m requires mission_rpgm_v1")
         self.resource_frame_dt = float(resource_frame_dt)
         self.deployment_dt = float(deployment_dt)
         self.deployment_transient_energy_mode = str(
@@ -189,7 +216,8 @@ class UAV_MEC_Env:
         self.uav_mass_kg = float(uav_mass_kg)
         if self.uav_mass_kg <= 0.0:
             raise ValueError("uav_mass_kg must be positive.")
-        if self.resource_frame_dt <= 0.0 or self.deployment_dt <= 0.0:
+        if (self.resource_frame_dt <= 0.0
+                or (self.deployment_dt <= 0.0 and not self.continuous_mission)):
             raise ValueError("resource_frame_dt and deployment_dt must be positive.")
         self.resource_frame_steps = int(
             round(self.resource_frame_dt / self.micro_dt)
@@ -295,7 +323,8 @@ class UAV_MEC_Env:
         if not isinstance(compute_during_deployment, (bool, np.bool_)):
             raise ValueError("compute_during_deployment must be a boolean.")
         self.compute_during_deployment = bool(compute_during_deployment)
-        if self.compute_during_deployment and not self.pause_service_during_flight:
+        if (self.compute_during_deployment and not self.pause_service_during_flight
+                and not self.continuous_mission):
             raise ValueError(
                 "compute_during_deployment requires pause_service_during_flight=True "
                 "so deployment communication remains paused."
@@ -1751,6 +1780,8 @@ class UAV_MEC_Env:
                 size=(self.M, 2),
             )
             self._clip_user_local_velocities()
+            if self.continuous_mission:
+                self._set_mission_group_velocity(0.0)
             self.user_mean_headings = self.mobility_group_headings[
                 self.user_allocations
             ].copy()
@@ -1791,6 +1822,8 @@ class UAV_MEC_Env:
         self.resource_frame_prepare_count = 0
         self.deployment_arrival_prepare_count = 0
         self.mobility_update_count = 0
+        if self.continuous_mission:
+            self.mission_user_boundary_hits = 0
         self._u2u_spectral_cache_coords = None
         self._u2u_spectral_cache_result = None
         self.last_u2u_link_bandwidth_matrix_hz = (
@@ -1902,6 +1935,10 @@ class UAV_MEC_Env:
             ]
         )
 
+        if self.continuous_mission:
+            # Retain legacy RNG draws before the local innovations and traffic.
+            self._set_mission_group_velocity(self._current_time())
+
         c_local = self.rpgm_local_velocity_memory
         local_innovation = self.np_random.normal(
             0.0,
@@ -1928,6 +1965,14 @@ class UAV_MEC_Env:
             + self.user_local_velocities
         )
         self._set_user_velocity_vectors(total_velocities)
+
+    def _set_mission_group_velocity(self, time_s):
+        velocity = (self.mission_routes_m[:, 1] - self.mission_routes_m[:, 0]) / self.mission_duration_s
+        if time_s >= self.mission_duration_s:
+            velocity = np.zeros_like(velocity)
+        self.mobility_group_velocities = velocity
+        self.mobility_group_speeds = np.linalg.norm(velocity, axis=1)
+        self.mobility_group_headings = np.arctan2(velocity[:, 1], velocity[:, 0])
 
     def _update_gauss_markov_mobility(self):
         if self.users_static:
@@ -1997,6 +2042,10 @@ class UAV_MEC_Env:
                 self.mobility_group_centers
                 + self.mobility_group_velocities * self.micro_dt
             )
+            if self.continuous_mission:
+                fraction = min((self._current_time() + self.micro_dt) / self.mission_duration_s, 1.0)
+                proposed_centers = (self.mission_routes_m[:, 0]
+                                    + fraction * (self.mission_routes_m[:, 1] - self.mission_routes_m[:, 0]))
             center_hits = (proposed_centers < 0.0) | (proposed_centers > 1000.0)
             if np.any(center_hits):
                 self.mobility_group_velocities[center_hits] *= -1.0
@@ -2018,6 +2067,8 @@ class UAV_MEC_Env:
             boundary_hits = (
                 (proposed_coords < 0.0) | (proposed_coords > 1000.0)
             )
+            if self.continuous_mission:
+                self.mission_user_boundary_hits += int(np.any(boundary_hits, axis=1).sum())
             if np.any(boundary_hits):
                 self.user_local_velocities[boundary_hits] *= -1.0
                 proposed_coords = np.clip(proposed_coords, 0.0, 1000.0)
@@ -2826,15 +2877,16 @@ class UAV_MEC_Env:
         uplink_metrics = self._serve_uplink_task_queues()
         self._clear_current_arrivals(discard_tasks=False)
 
-        self._integrate_user_positions()
+        if not self.continuous_mission:
+            self._integrate_user_positions()
 
-        if self.macro_fly_steps_remaining > 0:
-            delta_x_uav = self.current_macro_v * np.cos(self.current_macro_theta) * self.micro_dt
-            delta_y_uav = self.current_macro_v * np.sin(self.current_macro_theta) * self.micro_dt
-            self.uav_coords[:, 0] += delta_x_uav
-            self.uav_coords[:, 1] += delta_y_uav
-            self.macro_fly_steps_remaining -= 1
-        self.uav_coords = np.clip(self.uav_coords, 0.0, 1000.0)
+            if self.macro_fly_steps_remaining > 0:
+                delta_x_uav = self.current_macro_v * np.cos(self.current_macro_theta) * self.micro_dt
+                delta_y_uav = self.current_macro_v * np.sin(self.current_macro_theta) * self.micro_dt
+                self.uav_coords[:, 0] += delta_x_uav
+                self.uav_coords[:, 1] += delta_y_uav
+                self.macro_fly_steps_remaining -= 1
+            self.uav_coords = np.clip(self.uav_coords, 0.0, 1000.0)
 
         self._route_arrived_parent_tasks(
             arrived_task_ids_by_uav,
@@ -2914,6 +2966,18 @@ class UAV_MEC_Env:
                 axis=1,
             ).astype(np.float32)
         total_E_trans = float(np.sum(energy_trans_per_uav))
+        if self.continuous_mission:
+            # All services used step-start geometry. Newly uploaded work was
+            # excluded by the ready-list snapshot; U2U completion follows CPU.
+            self._integrate_user_positions()
+            if self.macro_fly_steps_remaining > 0:
+                self.uav_coords += self.current_macro_velocity_xy * self.micro_dt
+                self.macro_fly_steps_remaining -= 1
+                if self.macro_fly_steps_remaining == 0:
+                    # Remove integration roundoff, not an additional motion.
+                    if not np.allclose(self.uav_coords, self.current_macro_target, atol=1e-8, rtol=0):
+                        raise AssertionError("Continuous displacement integration mismatch")
+                    self.uav_coords = self.current_macro_target.copy()
         uav_battery_energy_per_uav = (
             energy_comp_per_uav + energy_trans_per_uav
         )
@@ -3173,6 +3237,8 @@ class UAV_MEC_Env:
         The action is interpreted as a desired 2D displacement [dx, dy] in
         meters. UAVs fly for 1s and then hover for 9s.
         """
+        if self.continuous_mission:
+            return self._mission_macro_step(macro_actions)
         macro_actions = np.asarray(macro_actions, dtype=np.float64)
         if macro_actions.shape != (self.N, 2):
             raise ValueError(
@@ -3267,6 +3333,42 @@ class UAV_MEC_Env:
                 self.macro_service_pause_steps_remaining
             ),
         }
+
+    def _mission_macro_step(self, delta):
+        delta = np.asarray(delta, dtype=np.float64)
+        if delta.shape != (self.N, 2) or not np.isfinite(delta).all():
+            raise ValueError("Mission displacement must be a finite (N,2) matrix")
+        if self.global_micro_step % self.micro_steps_per_macro:
+            raise ValueError("Mission commands must start at a macro boundary")
+        if self.macro_fly_steps_remaining:
+            raise ValueError("Previous continuous macro is unfinished")
+        delta = delta / np.maximum(np.linalg.norm(delta, axis=1, keepdims=True) / 20.0, 1.0)
+        before = self.uav_coords.copy()
+        requested = np.clip(before + delta, 0.0, 1000.0)
+        actual, scale = self._project_joint_motion_to_safe_separation(before, requested - before)
+        self.current_macro_target = before + actual
+        self.current_macro_velocity_xy = actual / self.macro_dt
+        self.current_macro_v = np.linalg.norm(self.current_macro_velocity_xy, axis=1)
+        self.current_macro_theta = np.arctan2(actual[:, 1], actual[:, 0])
+        self.macro_fly_steps_remaining = self.micro_steps_per_macro if np.any(actual) else 0
+        self.macro_service_pause_steps_remaining = 0
+        self._resource_frame_prepared = False
+        energy = self._compute_tcom_flying_power(self.current_macro_v) * self.macro_dt
+        hover = self._compute_tcom_flying_power(np.zeros(self.N)) * self.macro_dt
+        info = {
+            "motion_protocol": self.motion_protocol,
+            "energy_model": "quasi_steady_no_acceleration_or_turn_cost",
+            "E_macro_total": float(energy.sum()), "E_macro_per_uav": energy.copy(),
+            "E_propulsion_increment": float((energy - hover).sum()),
+            "E_propulsion_increment_per_uav": energy - hover,
+            "E_steady_motion": float(energy.sum()), "E_deployment_transient": 0.0,
+            "requested_uav_coords": requested, "projected_uav_coords": self.current_macro_target.copy(),
+            "actual_displacement_m": actual, "velocity_xy_mps": self.current_macro_velocity_xy.copy(),
+            "motion_duration_s": self.macro_dt, "macro_service_pause_steps": 0,
+            "separation_projection_scale": float(scale),
+            "minimum_flight_separation_m": float(self._minimum_separation_along_joint_motion(before, actual)),
+        }
+        return self.get_raw_state(), 0.0, info
 
     def render_trajectory(self, save_path=None, show=False):
         if not self.record_trajectory: return
