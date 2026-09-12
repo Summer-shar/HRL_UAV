@@ -13,6 +13,7 @@ import torch
 from .bandwidth import summarize_links, summarize_meter
 from .experiment import append_csv, isolated_rng, rollout, write_json
 from .mdp import QueueMDP
+from .mission_provenance import PHYSICS_BASE_COMMIT, physics_provenance
 from .ppo_frozen import MacroPairMeter, SOURCE_DIGESTS, exogenous_records
 from .priority_grid import file_hash
 from .scene_prescreen import ROOT, assert_crn_equal, digest_update, role_summary
@@ -274,17 +275,17 @@ def run(output):
     spec = load_spec()
     if Path(output).exists():
         raise FileExistsError("Use a new smoke output directory; historical output is never overwritten")
+    physics = physics_provenance()
     saved, source_manifest = load_source(spec)
     cfg = mission_config(saved["config"], spec)
     head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
-    if head != BASE:
-        raise ValueError("This smoke is pinned to the reviewed pre-extension HEAD")
     tracked = (*CORE_FILES, "hrl_uav/mission_smoke.py", "configs/mission_rpgm_v1_smoke.json",
                "scripts/run_mission_rpgm_v1_smoke.py", "tests/test_mission_rpgm_v1.py")
     hashes = {name: file_hash(ROOT / name) for name in tracked}
     output = Path(output)
     output.mkdir(parents=True, exist_ok=False)
     manifest = dict(status="RUNNING", actual_head=head, base_commit=BASE,
+                    physics_base_commit=PHYSICS_BASE_COMMIT, physics_hashes=physics,
                     branch=subprocess.check_output(["git", "branch", "--show-current"], cwd=ROOT, text=True).strip(),
                     worktree=subprocess.check_output(["git", "status", "--short"], cwd=ROOT, text=True),
                     protocol=spec, config=cfg, source_checkpoint_sha256=spec["checkpoint_sha256"],
