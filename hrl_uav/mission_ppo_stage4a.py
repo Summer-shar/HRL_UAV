@@ -373,8 +373,7 @@ def run_smoke(output=None):
     prior, historical_crn, evidence_hashes = verify_baselines(saved["config"], spec)
     tracked = subprocess.check_output(["git", "ls-files"], cwd=ROOT, text=True).splitlines()
     protected = [p for p in tracked if p.endswith((".py", ".json", ".md")) and not p.startswith("results/")]
-    protected += ["docs/mission_predictive_stage3b.md", "hrl_uav/mission_future_analysis.py",
-                  "hrl_uav/mission_future_check.py", "scripts/run_mission_future_check.py", "tests/test_mission_future_check.py"]
+    # Untracked, unrelated diagnostics are not Stage4A runtime dependencies.
     hashes = {p: file_hash(ROOT / p) for p in dict.fromkeys((*protected, *NEW_FILES))}
     source_paths = (ROOT / spec["source_checkpoint"],)
     source_hashes = {str(p): file_hash(p) for p in source_paths}

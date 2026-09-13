@@ -121,3 +121,11 @@ interruption recovery are not exposed here. The smoke checkpoint is labeled
 `mission_direct_ppo_smoke_only` and must not be used to start qualification.
 Recorded tests/results are in the independent smoke output; until commands
 actually finish, this document is an implementation protocol, not a pass claim.
+
+## Subsequent Runner Extension
+
+The separate `mission_ppo_qualification` entry now implements the formal scheduler,
+full900s window0 gate, fixed monitors and stream-boundary recovery. See
+`docs/mission_ppo_qualification.md` for its separate acceptance scope and status.
+This smoke entry and its checkpoint remain smoke-only. Neither implementing the
+runner nor its synthetic tests starts or authorizes the120-window qualification.
