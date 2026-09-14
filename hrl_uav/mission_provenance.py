@@ -7,7 +7,7 @@ import subprocess
 
 from .scene_prescreen import ROOT
 
-PHYSICS_BASE_COMMIT = "ad1e69298f10ea24ddefe48f896d6612af8dba47"
+PHYSICS_BASE_COMMIT = "16cf358c9f7a39f9a2ec13b8b9e37e630abbd948"
 PHYSICS_FILES = (
     "hrl_uav/env.py", "hrl_uav/mdp.py", "hrl_uav/geometry.py",
     "hrl_uav/load_switching.py", "hrl_uav/routing.py", "hrl_uav/experiment.py",
