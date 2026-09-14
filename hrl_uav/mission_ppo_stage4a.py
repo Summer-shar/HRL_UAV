@@ -131,6 +131,13 @@ class MissionMacroPPO(learning.DirectHRL):
             self.macro_actor.log_std.data.fill_(np.log(self.cfg["ppo_initial_std"]))
             self.ppo_actor_optimizer = torch.optim.Adam(self.macro_actor.parameters(), lr=self.cfg["ppo_actor_lr"], eps=1e-5)
             self.ppo_critic_optimizer = torch.optim.Adam(self.macro_critic.parameters(), lr=self.cfg["ppo_critic_lr"], eps=1e-5)
+            # Set up macro_gamma for GAE (normally done in DirectHRL.__init__)
+            if "macro_gamma" in self.cfg:
+                self._macro_gamma = self.cfg["macro_gamma"]
+            elif "macro_gamma_frames" in self.cfg:
+                self._macro_gamma = self.cfg["gamma_per_resource_frame"] ** self.cfg["macro_gamma_frames"]
+            else:
+                self._macro_gamma = 0.95  # Default 10-frame equivalent
             self.rng = capture_rng()
         self.macro_rollout, self.batch_log, self.update_log = [], [], []
         self.ppo_updates = self.ppo_gradient_steps = self.collected_macros = self.consumed_macros = 0
