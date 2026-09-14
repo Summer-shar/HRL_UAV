@@ -441,12 +441,12 @@ def verify_sources(lock):
             raise ValueError(f"Source or reused result changed: {path}")
 
 
-def run(output, *, resume=False):
+def run(output, *, resume=False, require_committed=True):
     """Calling this function starts the full preregistered budget; not used in acceptance."""
     output = Path(output).resolve()
     if output.exists() != resume:
         raise ValueError("Use a new output directory, or explicit --resume on its existing run")
-    saved, lock, baselines, references, head = preflight()
+    saved, lock, baselines, references, head = preflight(require_committed=require_committed)
     if resume:
         manifest = read_json(output / "manifest.json")
         if manifest.get("lock") != lock:

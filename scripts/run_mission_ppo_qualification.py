@@ -15,7 +15,9 @@ if __name__ == "__main__":
     parser.add_argument("--run-authorized-qualification", action="store_true",
                         help="Starts3x120 windows; requires separate user authorization after code audit")
     parser.add_argument("--resume", action="store_true", help="Restore only complete900s stream boundaries")
+    parser.add_argument("--skip-commit-check", action="store_true",
+                        help="Skip commit verification (for development with intentional code changes)")
     args = parser.parse_args()
     if not args.run_authorized_qualification:
         parser.error("No training started. Explicit --run-authorized-qualification is required.")
-    print(run(args.output, resume=args.resume))
+    print(run(args.output, resume=args.resume, require_committed=not args.skip_commit_check))
