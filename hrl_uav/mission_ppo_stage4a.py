@@ -37,9 +37,11 @@ MONITORS = (0, 30, 60, 90, 120)
 BASELINES = ("hover", "current_centroid", "progressive_centroid", "predictive_centroid")
 NEW_FILES = ("hrl_uav/mission_ppo_stage4a.py", "scripts/run_mission_ppo_stage4a.py",
              "tests/test_mission_ppo_stage4a.py", "docs/mission_ppo_stage4a.md")
-PPO_SETTINGS = dict(ppo_initial_std=1/3, ppo_final_std=1/30,
-                    ppo_std_decay_windows=200, ppo_update_macros=300, ppo_epochs=10,
-                    ppo_actor_lr=3e-4, ppo_critic_lr=1e-3, ppo_clip=.2, ppo_target_kl=.03)
+PPO_SETTINGS = dict(ppo_initial_std=1/3, ppo_final_std=0.015,  # Phase2: was 1/30
+                    ppo_std_decay_windows=350,                     # Phase2: was 200
+                    ppo_update_macros=300, ppo_epochs=5,          # Phase2: was 10
+                    ppo_actor_lr=1e-4, ppo_critic_lr=2e-4,        # Phase2: was 3e-4/1e-3 (1:3)
+                    ppo_clip=.2, ppo_target_kl=.03)
 
 
 def protocol():
