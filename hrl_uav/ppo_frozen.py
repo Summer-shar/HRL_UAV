@@ -35,7 +35,7 @@ RESERVED_SEEDS = tuple(range(33700, 33710))
 # Seed101 provenance frozen by ab5287d; new branch files are not old source inputs.
 SOURCE_DIGESTS = {
     "checkpoint": "be946d3a576918460690a16f1a57f2c6dc33dde13db86d360db5690858a76932",
-    "manifest.json": "74d6ee2568a96332ebb1f8e5e635a6685cd9cfc4dce2437ca1206dc248a2220e",
+    "manifest.json": "9c0cc1d5210c192b2703a9f87b0d5083c330470614e574906243f298615af4c7",
     "report.json": "3f8738199d1b00f7f2d725d1709efa8e94cd8758cd3bf90cd322d3f64675761c",
 }
 STAGE_TRANSITION = "completed_sac_only_checkpoint_to_ppo_only_macro_stage"
