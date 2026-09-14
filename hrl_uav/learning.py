@@ -17,6 +17,7 @@ def tensor(value):
 
 
 def gae(rewards, values, next_values, trace_continue, discount, trace_lambda):
+    """Generalized Advantage Estimation with configurable lambda and discount."""
     output = np.zeros(len(rewards), dtype=np.float32)
     running = 0.0
     for i in range(len(rewards) - 1, -1, -1):
@@ -24,6 +25,63 @@ def gae(rewards, values, next_values, trace_continue, discount, trace_lambda):
         running = delta + discount * trace_lambda * trace_continue[i] * running
         output[i] = running
     return output, output + values
+
+
+# Default hyperparameters for PPO macro-learner
+PPO_DEFAULTS = {
+    "gae_lambda": 0.97,           # Phase2 fix: was missing (defaulted to 0)
+    "macro_gamma_frames": 10,      # Phase2 fix: 0.99^10=0.904 effective horizon
+    "macro_gamma": 0.95,           # Alternative: explicit discount factor (10-frame horizon)
+}
+
+
+def potential_distance_shaping(positions, centroids, scale=1.0):
+    """
+    Reward shaping based on centroid-relative distance (potential-based function).
+
+    Args:
+        positions: Array of UAV positions (n_uav, 2) or flattened (n_uav*2,)
+        centroids: Array of centroid positions (n_uav, 2) or flattened (n_uav*2,)
+        scale: Scaling factor for shaping reward
+
+    Returns:
+        Potential-based shaping reward (float)
+        Closer to centroid = positive shaping, farther = negative shaping
+    """
+    pos = np.asarray(positions).reshape(-1, 2)
+    cent = np.asarray(centroids).reshape(-1, 2)
+
+    # Euclidean distance from each UAV to its centroid
+    distances = np.linalg.norm(pos - cent, axis=1)
+    mean_distance = distances.mean()
+
+    # Potential: negative distance (closer = higher potential)
+    potential = -mean_distance / scale
+
+    return potential
+
+
+def distance_shaping_reward(state, next_state, scale=50.0):
+    """
+    Compute shaping reward as difference in potentials.
+
+    Args:
+        state: Current state dict with 'positions' and 'centroids'
+        next_state: Next state dict with 'positions' and 'centroids'
+        scale: Distance scale for normalization
+
+    Returns:
+        Shaping reward: phi(s') - phi(s) (should be added to intrinsic reward)
+    """
+    if not all(k in state for k in ("positions", "centroids")):
+        return 0.0
+
+    phi_curr = potential_distance_shaping(state["positions"], state["centroids"], scale)
+    phi_next = potential_distance_shaping(next_state["positions"], next_state["centroids"], scale)
+
+    # Potential-based shaping: reward = phi(s') - phi(s)
+    # If we get closer (phi_next > phi_curr), reward is positive
+    return phi_next - phi_curr
 
 
 class DirectHRL:
@@ -82,6 +140,16 @@ class DirectHRL:
         self.macro_actor.log_std.data.fill_(np.log(self.cfg["ppo_initial_std"]))
         self.ppo_actor_optimizer = torch.optim.Adam(self.macro_actor.parameters(), lr=self.cfg["ppo_actor_lr"], eps=1e-5)
         self.ppo_critic_optimizer = torch.optim.Adam(self.macro_critic.parameters(), lr=self.cfg["ppo_critic_lr"], eps=1e-5)
+        # Ensure PPO macro-learner defaults are set
+        self.cfg.setdefault("gae_lambda", PPO_DEFAULTS["gae_lambda"])
+        # macro_gamma: either explicit value or computed from frames
+        if "macro_gamma" in self.cfg:
+            macro_gamma = self.cfg["macro_gamma"]
+        elif "macro_gamma_frames" in self.cfg:
+            macro_gamma = self.cfg["gamma_per_resource_frame"] ** self.cfg["macro_gamma_frames"]
+        else:
+            macro_gamma = PPO_DEFAULTS["macro_gamma"]  # 0.95 (10-frame equivalent)
+        self._macro_gamma = macro_gamma
         self.macro_rollout = []
         self.sac_updates = self.sac_actor_updates = self.ppo_updates = self.ppo_gradient_steps = 0
         self.sac_critic_gradient_steps = self.sac_target_updates = 0
@@ -206,8 +274,7 @@ class DirectHRL:
         with torch.no_grad():
             values = self.macro_critic(s).ravel().cpu().numpy()
             next_values = self.macro_critic(tensor(next_states)).ravel().cpu().numpy()
-        macro_gamma = self.cfg["gamma_per_resource_frame"] ** 20
-        advantages, returns = gae(rewards, values, next_values, continuations, macro_gamma, self.cfg["gae_lambda"])
+        advantages, returns = gae(rewards, values, next_values, continuations, self._macro_gamma, self.cfg["gae_lambda"])
         adv = tensor((advantages - advantages.mean()) / (advantages.std() + 1e-8))
         returns = tensor(returns)
         with torch.no_grad():
