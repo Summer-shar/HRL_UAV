@@ -137,7 +137,8 @@ class MissionMacroPPO(learning.DirectHRL):
             elif "macro_gamma_frames" in self.cfg:
                 self._macro_gamma = self.cfg["gamma_per_resource_frame"] ** self.cfg["macro_gamma_frames"]
             else:
-                self._macro_gamma = 0.95  # Default 10-frame equivalent
+                # Archived qualification ran learning.py with gamma**20 hardcoded.
+                self._macro_gamma = self.cfg["gamma_per_resource_frame"] ** 20
             self.rng = capture_rng()
         self.macro_rollout, self.batch_log, self.update_log = [], [], []
         self.ppo_updates = self.ppo_gradient_steps = self.collected_macros = self.consumed_macros = 0
@@ -242,8 +243,12 @@ class Stage4Meter(FullSceneMeter):
 
 
 def collect_stream(cfg, policy, scene, *, train, macros=90, macro_offset=0,
-                   meter_factory=Stage4Meter, record=True):
-    """Macro-only collection. No micro pending transition, replay or tail action exists."""
+                   meter_factory=Stage4Meter, record=True, micro_controller=None):
+    """Macro-only collection. No micro pending transition, replay or tail action exists.
+
+    micro_controller=None resolves to policy.sac.sac_actor (the archived SAC path,
+    bit-exact); an injected controller replaces only the per-frame routing scores.
+    """
     allowed = TRAIN_SCENES if train else VALIDATION_SCENES
     if (type(scene) is not int or scene not in allowed or type(macros) is not int
             or macros not in range(1, 91) or type(macro_offset) is not int
@@ -251,6 +256,7 @@ def collect_stream(cfg, policy, scene, *, train, macros=90, macro_offset=0,
         raise ValueError("Out-of-protocol scene, horizon or macro budget")
     if train and (macro_offset % 90 or scene != TRAIN_SCENES[macro_offset // 90]):
         raise ValueError("Training scene order must follow the fixed900s schedule")
+    controller = policy.sac.sac_actor if micro_controller is None else micro_controller
     meter = meter_factory(cfg)
     # Even a short smoke is a prefix of the predefined900s scene, not a shortened mission.
     meter.reset(scene, 90)
@@ -269,7 +275,7 @@ def collect_stream(cfg, policy, scene, *, train, macros=90, macro_offset=0,
         micro_state = meter.prepare_service()
         for frame in range(20):
             with torch.no_grad():
-                micro = policy.sac.sac_actor.choose_action(micro_state, deterministic=True)
+                micro = controller.choose_action(micro_state, deterministic=True)
             reading = meter.step_frame(micro, gamma)
             rewards.append(reading["reward"])
             if record:
