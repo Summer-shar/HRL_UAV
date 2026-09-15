@@ -59,8 +59,6 @@ def stage_name(micro):
 
 def protocol(micro, cfg):
     p = qual_protocol()
-    p.pop("smoke")
-    p.pop("formal_training_authorized")
     training = cfg["training"]
     p.update(
         stage=stage_name(micro), micro_controller=MICRO_LABELS[micro],
