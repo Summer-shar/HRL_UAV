@@ -398,7 +398,7 @@ def run_baselines(output, lock, micro, sac, references):
                                         micro_controller=controller)
             if not state_equal(rng, capture_rng()):
                 raise AssertionError("Hover reference changed RNG")
-            row = persist_case(attempt, policy, scene, 0, result, micro)
+            row = persist_case(attempt / str(scene), policy, scene, 0, result, micro)
             row.update(policy="hover", ppo_seed="none")
             write_json(attempt / "summary.json", row)
             gate = window0_gate(result, row, HISTORY / f"hover_{scene}")
