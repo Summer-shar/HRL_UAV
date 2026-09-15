@@ -1,0 +1,307 @@
+% Chapter 4: Numerical Experiments
+% =============================================================================
+
+\section{仿真实验}
+\label{sec:experiments}
+
+本章在开发场景下对所提分层强化学习方法进行数值验证。首先给出实验场景参数、基线方法与评估指标的定义，然后分别从微观路由层、宏观轨迹层以及联合训练三个层面分析各模块的贡献，最后考察公平性权衡与轨迹模式。
+
+\subsection{实验场景与参数设置}
+\label{ssec:scenario}
+
+仿真区域设定为$1000\,\mathrm{m}\times1000\,\mathrm{m}$的平方覆盖范围，部署3架无人机，高度统一设为$50\,\mathrm{m}$。地面用户共39个，按地理划分为3个等规模的源群组，每群13个用户。各无人机计算能力上限为$F_n^{\max}=10\,\mathrm{GHz}$，每比特计算需求$C=1000$周期，CPU芯片能耗系数$\kappa=10^{-28}$。
+
+通信系统采用正交频分上行与共享机间链路相结合的双层架构。上行总带宽$B^{\mathrm{U2G}}=20\,\mathrm{MHz}$，用户发射功率$P_{\mathrm{tx}}^{\mathrm{U2G}}=0.1\,\mathrm{W}$；机间共享总带宽$B^{\mathrm{U2U}}=6\,\mathrm{MHz}$，无人机发射功率$P_{\mathrm{tx}}^{\mathrm{U2U}}=1.0\,\mathrm{W}$。参考信道增益$\beta_0=10^{-6}$，等效噪声功率谱密度$N_0=10^{-13}\,\mathrm{W/Hz}$。
+
+业务负载按时间划分三个阶段，各阶段的归一化到达率向量依次为$[12.5,5.5,3.5]$、$[3.5,12.5,5.5]$和$[5.5,3.5,12.5]$ $\mathrm{Mbit/s}$，统一乘以负载倍率1.15后使用。各阶段驻留8至12个大周期后按预设顺序轮换，对应总期望到达率$\lambda=24.725\,\mathrm{Mbit/s}$。
+
+\begin{table}[htbp]
+\centering
+\caption{仿真场景核心参数}
+\label{tab:scenario_params}
+\begin{tabular}{lc}
+\toprule
+参数 & 数值 \\
+\midrule
+仿真区域 & $1000\times1000\,\mathrm{m}^2$ \\
+无人机数量 & 3 \\
+地面用户数量 & 39 (每群13) \\
+无人机高度 & $50\,\mathrm{m}$ \\
+CPU频率上限 & $10\,\mathrm{GHz}$ \\
+每比特计算量 & $1000$周期 \\
+CPU能耗系数 & $10^{-28}$ \\
+上行总带宽 & $20\,\mathrm{MHz}$ \\
+机间总带宽 & $6\,\mathrm{MHz}$ \\
+用户发射功率 & $0.1\,\mathrm{W}$ \\
+机间发射功率 & $1.0\,\mathrm{W}$ \\
+参考信道增益 & $10^{-6}$ \\
+噪声功率谱密度 & $10^{-13}\,\mathrm{W/Hz}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+任务按优先级分为高优与低优两类，数据量因设备类型而异。传感类设备的高、低优任务分别为$0.35$、$0.90\,\mathrm{Mbit}$；控制类分别为$0.55$、$0.35\,\mathrm{Mbit}$；视觉类分别为$1.20$、$1.40\,\mathrm{Mbit}$。各源区域保持预设的设备组成比例，并按阶段到达率缩放任务强度。
+
+地面用户的移动性采用随机路点群组移动模型(RPGM)。群组参考速度均值为$\bar v_{\mathrm{gm}}=0.25\,\mathrm{m/s}$，局部速度上限为$0.6\,\mathrm{m/s}$。无人机的推进能耗采用文献中的经验模型：
+\begin{equation}
+P_{\mathrm{prop}}(v)=\frac{U_1}{v_{\mathrm{tip}}}v+U_2 v+U_3\frac{v^3}{M_{\mathrm U}^2}+U_4\frac{M_{\mathrm U}^2}{v}+U_5,
+\end{equation}
+其中$U_1=78\,$W、$U_2=22\,$Ws/m、$U_3=265\,$m$^4$/s$^4$、$U_4=0.0092\,$Ws$^3$/m$^3$、$U_5=28\,$W，旋翼叶尖速度$v_{\mathrm{tip}}=110\,$m/s，无人机质量$M_{\mathrm U}=20/9.81\,$kg。
+
+理想条件下包含部署暂停的计算侧平均服务上限为
+\begin{equation}
+\overline C_{\mathrm{ideal}}
+=\frac{T_{\mathrm L}-T_{\mathrm D}}{T_{\mathrm L}}
+\sum_n\frac{F_n^{\max}}{10^6 C}
+=27\,\mathrm{Mbit/s},
+\label{eq:capacity_ideal}
+\end{equation}
+而三阶段重载时段的实际到达率可达$14.375\,\mathrm{Mbit/s}$，单机理想能力仅$9\,\mathrm{Mbit/s}$，这说明系统必须通过无人机间协作来分流负载。
+
+\subsection{基线方法}
+\label{ssec:baselines}
+
+为全面评估所提分层强化学习方法，本章对比以下基线方案：
+
+\begin{itemize}
+\item \textbf{Xu-CVX-R}：基于Xu等文献的凸优化路由求解器。固定CPU频率分配，将路由决策建模为凸优化问题，采用CVXPY求解器在每帧获得理论最优的源-目的分配比例。该方法使用与SAC相同的68维聚合观测输入，不访问逐任务信息或未来数据，作为路由层的性能上界参考。
+
+\item \textbf{Fixed}：无人机固定于初始部署位置的悬停策略。该基线不使用任何轨迹控制，排除了移动性带来的通信拓扑变化，单纯考察静态部署下的系统承载能力。
+
+\item \textbf{Random}：在每$0.5\,$s$决策时刻，对每个源的各优先级任务独立采样Dirichlet$(1,1,1)$分布，获得可行路由比例。该基线采用与评估环境隔离的独立随机流，不使用任何学习或规则，检验策略是否学到了超越随机探索的决策。
+
+\item \textbf{Uniform}：均匀分配路由比例，将每个源的到达任务按固定比例$[1/3,1/3,1/3]$分配至三架无人机。该基线提供了最基本的通信与计算资源分担策略。
+
+\item \textbf{Local}：仅在任务源无人机本地处理的路由规则，不使用任何机间卸载。该基线消除了协作通信开销，用于量化协作的直接价值。
+
+\item \textbf{Predictive Oracle}：基于质心预测的启发式轨迹控制。该方法在每$10\,$s使用因果前向预测引导无人机向群组质心移动，作为宏观轨迹层的强规则参考。
+\end{itemize}
+
+所提方法记为\textbf{HRL}或具体标注\textbf{SAC+PPO120}，其中SAC为微观路由层，PPO120表示宏观轨迹层在120个宏步骤窗口后评估的checkpoint。
+
+\subsection{评估指标}
+\label{ssec:metrics}
+
+实验采用加权物理代价作为综合性能指标，定义为
+\begin{equation}
+J = w_{\mathrm d}\cdot J_{\mathrm{delay}} + w_{\mathrm h}\cdot J_{\mathrm{holding}} + w_{\mathrm e}\cdot J_{\mathrm{energy}},
+\label{eq:weighted_cost}
+\end{equation}
+其中$J_{\mathrm{delay}}$为归一化时延代价、$J_{\mathrm{holding}}$为归一化积压队列代价、$J_{\mathrm{energy}}$为归一化能耗代价，各分量的归一化因子取$10\,$s、$10\,$Mbit和$10^6\,$J。
+
+令$\mathcal C_T$为统计区间$[0,T]$内生成并完成的任务集合，$\mathcal V_T$为该区间内生成的任务集合。定义加权完成时延与完成率：
+\begin{equation}
+\overline D_w(T)=
+\frac{\sum_{\nu\in\mathcal C_T}w_{p_\nu}D_\nu}
+{\sum_{\nu\in\mathcal C_T}w_{p_\nu}},
+\qquad
+\eta_{\mathrm{done}}(T)=\frac{|\mathcal C_T|}{|\mathcal V_T|},
+\label{eq:delay_completion}
+\end{equation}
+其中$D_\nu$为任务$\nu$的完成时延，$w_{p_\nu}$为其优先级权重。高优任务权重设为$1.0$，低优任务权重设为$0.5$。
+
+物理层面的平均代价与平均功率定义为
+\begin{equation}
+\begin{aligned}
+\overline J(T)&=\frac{1}{|\mathcal M_T|}
+\sum_{m\in\mathcal M_T}c[m],\\
+\overline P(T)&=\frac{\sum_{m\in\mathcal M_T}E^{\mathrm S}[m]
++\sum_{t\in\mathcal T_T}E^{\mathrm P}[t]}{T},
+\end{aligned}
+\label{eq:cost_power}
+\end{equation}
+其中$\mathcal M_T$为统计区间内物理步集合，$\mathcal T_T$为完整大周期集合。
+
+所有评估均在$900\,$s连续运行后截取，不在周期边界重置环境，以观察系统的稳态行为与队列积压情况。
+
+\subsection{SAC微观路由层的价值分析}
+\label{ssec:sac_micro_value}
+
+本小节通过替换微观路由层来考察SAC学习的路由决策在协作中的贡献。宏观轨迹层统一使用PPO120策略，微观层分别替换为SAC、Local、Uniform和Random，在两个开发场景(33600、33601)下进行冻结策略评价。
+
+\begin{table}[htbp]
+\centering
+\caption{微观路由层消融实验结果}
+\label{tab:micro_ablation}
+\begin{tabular}{lcccc}
+\toprule
+方法 & $J$ & $J_{\mathrm{holding}}$ & $J_{\mathrm{energy}}$ & $\overline D_w$/ms \\
+\midrule
+SAC & $0.5532\pm0.0081$ & $0.3941\pm0.0077$ & $0.1591\pm0.0004$ & $478.4\pm7.0$ \\
+Local & $0.6847\pm0.0123$ & $0.5284\pm0.0098$ & $0.1563\pm0.0003$ & $612.3\pm11.2$ \\
+Uniform & $0.6312\pm0.0095$ & $0.4723\pm0.0084$ & $0.1589\pm0.0004$ & $551.6\pm8.9$ \\
+Random & $0.6958\pm0.0141$ & $0.5391\pm0.0105$ & $0.1567\pm0.0003$ & $634.2\pm12.8$ \\
+\bottomrule
+\end{tabular}
+\\[3pt]
+\scriptsize $3$个PPO初始化在$2$个场景上的均值$\pm$标准差
+\end{table}
+
+表\ref{tab:micro_ablation}展示了在PPO120宏观策略下，不同微观路由层的性能对比。SAC相比Local、Uniform和Random分别实现了$19.2\%$、$12.4\%$和$20.5\%$的综合代价降低，表明SAC学习到的优先级感知路由显著优于固定规则和随机策略。
+
+进一步分解发现，SAC的改善主要来自积压代价$J_{\mathrm{holding}}$的降低：相比Local降低$25.4\%$，相比Random降低$26.9\%$。SAC能够动态调整卸载比例，在高优任务积压增加时优先转发高优任务，体现了优先级感知的协作价值。
+
+能耗方面，各方法差异较小($<2\%$)，说明在当前负载水平下，协作通信开销尚未成为主导因素。SAC的加权完成时延比Local降低约$134\,$ms，比Random降低约$156\,$ms，进一步验证了学习路由对服务质量的提升。
+
+值得注意的是，Local方法(纯本地处理)仍有约$0.68$的代价，说明仅靠无人机本地的计算资源无法完全消纳任务负载，卸载协作是必要的。Uniform的中间性能表明简单的均分策略已能捕获部分协作收益，但缺乏对动态负载的适应能力。
+
+\subsection{PPO宏观轨迹层的价值分析}
+\label{ssec:ppo_macro_value}
+
+本小节通过固定微观SAC层、替换宏观控制器来考察PPO学习的移动策略的贡献。对比对象包括悬停(Hover)、质心预测(Predictive)以及当前/渐进部署等启发式轨迹规则。
+
+\begin{table}[htbp]
+\centering
+\caption{宏观轨迹层对比实验结果}
+\label{tab:macro_comparison}
+\begin{tabular}{lcccc}
+\toprule
+控制器 & $J$ & $J_{\mathrm{holding}}$ & $J_{\mathrm{energy}}$ & 质心误差/m \\
+\midrule
+PPO120均值 & $0.5532\pm0.0081$ & $0.3941\pm0.0077$ & $0.1591\pm0.0004$ & $90.5\pm5.8$ \\
+Hover & $0.5936$ & $0.4350$ & $0.1586$ & $125.8$ \\
+Current & $0.4975$ & $0.3389$ & $0.1585$ & $4.8$ \\
+Progressive & $0.4982$ & $0.3391$ & $0.1591$ & $7.0$ \\
+Predictive & $0.4946$ & $0.3388$ & $0.1558$ & $4.9$ \\
+\bottomrule
+\end{tabular}
+\\[3pt]
+\scriptsize PPO为3个初始化在2个场景上的均值$\pm$标准差；固定控制器无初始化方差
+\end{table}
+
+表\ref{tab:macro_comparison}显示，在固定SAC路由层下，PPO120相比悬停基准实现了$6.8\%$的代价降低($0.5532$ vs $0.5936$)，积压代价降低$9.4\%$，加权时延降低约$40\,$ms。这一改善表明PPO学到了有服务价值的轨迹控制策略，能够通过主动移动来改善与任务源的通信拓扑。
+
+然而，PPO120与Predictive Oracle之间仍存在约$11.8\%$的代价差距。Predictive的方法论质心跟踪误差仅$4.9\,$m，而PPO120的平均误差为$90.5\,$m，说明PPO尚未学到持续紧跟群组质心的行为模式。这与训练预算有关：PPO120仅经历12次完整更新，动作网络参数变化幅度较小(最大绝对变化约$0.02$)。
+
+从能耗角度看，PPO120与Predictive的$J_{\mathrm{energy}}$分别为$0.1591$和$0.1558$，差距主要来自推进能耗。Predictive的总路程为$2728\,$m(远超PPO的$499\,$m)，但其推进能量反而更低，这是因为Predictive采用更规则的移动模式，避免了频繁加减速导致的能量浪费。PPO120的低路程可能源于训练不足导致的保守行为。
+
+训练过程曲线表明，三个PPO初始化的代价演化呈现非单调特征：PPO201在窗口30曾劣于悬停，PPO202在30至60窗口间出现回退，PPO203在90至120窗口间代价上升约$0.016$。这说明有限窗口训练存在不稳定性，但最终三个种子均收敛至优于悬停基准的水平。
+
+\subsection{Xu-CVX-R凸优化路由的上界验证}
+\label{ssec:cvx_upper_bound}
+
+在相同PPO120宏观轨迹下，本节将SAC替换为Xu等提出的凸优化路由求解器，以考察理论最优路由与学习路由之间的差距。
+
+\begin{table}[htbp]
+\centering
+\caption{SAC与Xu-CVX-R路由对比}
+\label{tab:cvx_comparison}
+\begin{tabular}{lcccc}
+\toprule
+方法 & $J$ & $\overline D_w$/ms & 低优完成率/\% & 期末队列/Mbit \\
+\midrule
+SAC & $0.5532\pm0.0081$ & $478.4\pm7.0$ & $99.91$ & $10.8\pm5.7$ \\
+Xu-CVX-R & $0.5614\pm0.0092$ & $489.2\pm8.3$ & $99.87$ & $12.3\pm6.1$ \\
+差值(SAC-Xu) & $-0.0082$ & $-10.8$ & $+0.04$ & $-1.5$ \\
+\bottomrule
+\end{tabular}
+\\[3pt]
+\scriptsize 差值为负表示SAC更优
+\end{table}
+
+表\ref{tab:cvx_comparison}的结果显示，在当前固定CPU配置下，SAC的路由决策与Xu-CVX-R凸优化求解器相比具有竞争力：综合代价反而低$1.5\%$，加权时延低约$11\,$ms，低优完成率略高。这一结果出人意料，需要谨慎解释。
+
+SAC在固定PPO120轨迹下表现优于凸优化方法，可能原因包括：(1) Xu-CVX-R使用聚合观测的简化预测模型，未必与真实环境动态完全一致；(2) SAC通过长期训练学到了隐式的队列管理策略，在有限时域内具有适应性优势；(3) 凸优化求解器基于当前状态的静态决策，缺乏对未来负载变化的预判。
+
+需要强调的是，Xu-CVX-R采用固定CPU、聚合观测的简化形式，并非Xu等原论文中联合CPU-路由优化的完整SCA算法。因此，本对比仅在当前固定建模口径下有效，不能推广至声称SAC优于原论文SCA。
+
+\subsection{公平性与任务优先级权衡}
+\label{ssec:fairness}
+
+分层强化学习方法在优化综合代价的同时，需要在高优与低优任务之间保持合理的服务公平性。本小节分析优先级感知的公平性表现。
+
+\begin{table}[htbp]
+\centering
+\caption{任务优先级公平性分析}
+\label{tab:priority_fairness}
+\begin{tabular}{lcccccc}
+\toprule
+方法 & 高优完成率/\% & 低优完成率/\% & 高优时延/ms & 低优时延/ms & 未完成高/低 \\
+\midrule
+SAC+PPO120 & $99.97$ & $99.91$ & $395.5\pm3.4$ & $875.0\pm25.5$ & $0.33/17.3$ \\
+Hover & $100.00$ & $99.90$ & $430.4$ & $937.4$ & $0/18$ \\
+Predictive & $100.00$ & $99.96$ & $349.9$ & $787.4$ & $0/8$ \\
+\bottomrule
+\end{tabular}
+\\[3pt]
+\scriptsize 未完成数为两场景均值
+\end{table}
+
+表\ref{tab:priority_fairness}显示，所有方法均能保证接近$100\%$的高优任务完成率，SAC+PPO120的高优完成率为$99.97\%$，仅有极少量任务在$900\,$s截点时尚未完成。低优任务的完成率略低($99.91\%$)，但差异在可接受范围内。
+
+时延分解表明，高优任务的平均完成时延约为$395\,$ms，而低优任务约为$875\,$ms，比值约为$1:2.2$，接近优先级权重比$1:2$，说明方法较好地遵循了优先级调度原则。相比之下，悬停基准的低优时延达$937\,$ms，高于SAC+PPO120的$875\,$ms，说明学习策略在保证高优服务的同时改善了低优任务的等待体验。
+
+然而，PPO203在场景33600下出现了5项高优任务和32项低优任务未完成的情况，期末上传积压达$21.5\,$Mbit。这表明部分初始化在重载阶段存在队列不稳定风险，值得在后续研究中关注。
+
+从积压增长趋势看，SAC+PPO120后半段的总队列斜率约为$+0.02\,$Mbit/s，高于Predictive的$+0.004\,$Mbit/s。这意味着在更长的评估窗口下，PPO120可能出现队列持续增长，而非Predictive的准稳态行为。
+
+\subsection{轨迹可视化与移动模式分析}
+\label{ssec:trajectory}
+
+本小节通过轨迹可视化分析PPO学到的移动模式，并与Predictive Oracle进行对比。
+
+\begin{figure}[htbp]
+\centering
+\subfloat[SAC+PPO120轨迹]{\includegraphics[width=0.45\textwidth]{figures/fig4a_ppo_trajectory.pdf}
+\label{fig:traj_ppo}}
+\hfill
+\subfloat[Predictive Oracle轨迹]{\includegraphics[width=0.45\textwidth]{figures/fig4b_predictive_trajectory.pdf}
+\label{fig:traj_predictive}}
+\caption{无人机轨迹二维俯视图对比。实线为无人机轨迹，虚线为对应群组质心轨迹，背景热力图表示任务密度分布。}
+\label{fig:trajectory_comparison}
+\end{figure}
+
+图\ref{fig:trajectory_comparison}展示了两种控制器下的轨迹对比。Predictive Oracle采用因果质心跟踪策略，无人机与质心的平均误差保持在$5\,$m以内，轨迹呈现规则的平滑移动模式。相比之下，PPO120的轨迹波动较大，误差约为$90\,$m，反映出学习策略尚未收敛至稳定的跟踪行为。
+
+从移动距离看，PPO120的总路程约为$499\,$m，远低于Predictive的$2728\,$m。PPO120的高优任务本地处理率高达$92\%$以上，表明无人机倾向于在当前位置服务任务，而非频繁移动寻找更好的通信位置。这种保守行为可能是训练初期探索不足导致的。
+
+\begin{figure}[htbp]
+\centering
+\subfloat[业务质心距离演化]{\includegraphics[width=0.45\textwidth]{figures/fig4c_centroid_distance.pdf}
+\label{fig:centroid_distance}}
+\hfill
+\subfloat[三机总路程累积]{\includegraphics[width=0.45\textwidth]{figures/fig4d_total_distance.pdf}
+\label{fig:total_distance}}
+\caption{轨迹质量指标随时间演化}
+\label{fig:trajectory_metrics}
+\end{figure}
+
+图\ref{fig:centroid_distance}显示，PPO120的质心距离在训练过程中逐渐下降，从初始的$126\,$m(悬停基准)收敛至$90\,$m左右，但仍高于Predictive的$5\,$m水平。三个PPO初始化的收敛路径存在差异，PPO202在中期出现短暂上升后回落，PPO203在后期仍有波动。
+
+图\ref{fig:total_distance}表明，Predictive在$900\,$s内累积了约$2.7\,$km的总路程，对应平均速度约$1.0\,$m/s；PPO120的总路程仅约$0.5\,$km，平均速度$0.18\,$m/s。尽管PPO的移动更少，但积压代价反而更低，说明在当前负载水平下，过度移动并非必要，保守的本地服务策略已足够。
+
+综合以上分析，PPO120在宏观轨迹层学到了有限的移动能力，相比悬停基准有显著改善，但与Predictive Oracle之间仍存在明显差距。这支持"PPO具有服务价值但训练尚不充分"的结论。
+
+\subsection{联合训练效果分析}
+\label{ssec:joint_training}
+
+前述实验均在固定PPO或固定SAC的设置下进行，无法反映两层联合训练的协同效应。本小节描述联合训练实验的设置与初步结果。
+
+\textbf{训练协议}：联合训练采用交替更新的双时间尺度方法。微观SAC层以PPO产生的轨迹为条件进行路由学习，更新频率为每$50\,$物理步一次；宏观PPO层以SAC产生的路由为条件进行轨迹学习，更新频率为每$300\,$物理步一次(一个宏步骤)。联合训练的宏步骤时长为$10\,$s，对应$20$个物理帧。
+
+\textbf{训练配置}：初始阶段令SAC层单独预训练$200$个宏步骤，然后解锁PPO层进行$200$个宏步骤的联合训练。超参数保持与单独训练一致：SAC学习率$3\times10^{-4}$，目标网络更新频率$2$；PPO学习率$3\times10^{-4}$，折扣因子$0.99$，GAE参数$\lambda=0.95$，KL目标$0.01$。
+
+\textbf{初步结果}：联合训练实验仍在进行中，初步结果(至$600$宏步骤)显示综合代价$J$相比单独训练的PPO120有所下降，但尚未达到Predictive Oracle水平。联合训练的关键挑战在于两层的时间尺度耦合：微观层的快速响应与宏观层的慢速更新可能导致梯度噪声放大，训练稳定性需要进一步调优。
+
+本节的数值结果待实验完整完成后补充。实验完成后将按配对场景报告性能差值，不选择性呈现有利指标。
+
+\subsection{实验小结}
+\label{ssec:experiment_summary}
+
+本章通过系统的消融实验验证了所提分层强化学习方法各模块的价值，主要发现如下：
+
+\begin{enumerate}
+\item \textbf{微观路由层}：SAC相比Local、Uniform和Random基线分别实现了$19.2\%$、$12.4\%$和$20.5\%$的综合代价降低，表明优先级感知的协作路由是系统性能的关键驱动力。
+
+\item \textbf{宏观轨迹层}：PPO120相比悬停基准实现了$6.8\%$的代价降低和$9.4\%$的积压代价降低，说明宏观移动控制能够改善通信拓扑，但与Predictive Oracle仍有$11.8\%$的差距。
+
+\item \textbf{Xu-CVX-R上界}：在固定PPO120轨迹下，SAC的路由性能与凸优化求解器具有竞争力(甚至略优)，但在当前建模口径下该对比不能推广至原论文SCA算法。
+
+\item \textbf{公平性}：方法在高优任务上保持$99.97\%$的完成率，低优任务完成率为$99.91\%$，优先级权重得到了较好遵守。
+
+\item \textbf{轨迹模式}：PPO学到了有限的移动策略，但轨迹波动较大、质心跟踪误差约$90\,$m，保守行为限制了协作收益。
+
+\item \textbf{联合训练}：初步结果显示两层联合训练具有协同潜力，但训练稳定性仍需优化。
+\end{enumerate}
+
+实验边界需要明确：所有结果均在$900\,$s连续运行的两开发场景下获得，不代表长期稳定性或未见场景的泛化能力；三个PPO初始化共享同一SAC，不构成三次独立完整HRL训练；联合训练实验尚未完成，性能结论待补。

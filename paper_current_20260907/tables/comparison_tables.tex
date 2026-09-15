@@ -1,0 +1,78 @@
+﻿
+% ============================================================
+% Table 1: Micro-layer Routing Comparison (Macro: PPO120)
+% ============================================================
+\begin{table}[tbp]
+\centering
+\caption{Performance comparison of micro-layer routing methods.}
+\label{tab:micro_routing}
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+Method & $J$ & $\overline{D}_w$ (ms) & $\overline{D}_h$ (ms) & $\overline{D}_l$ (ms) & Comp. Rate \\
+\midrule
+PPO+SAC (Ours) & \textbf{0.5532} & \textbf{478.4} & 395.5 & 875.0 & 99.94\% \\
+PPO+CVX-R & 0.5882 & 514.4 & 440.1 & 866.5 & 99.96\% \\
+PPO+Uniform & 0.5725 & 506.2 & 444.8 & 799.8 & 99.95\% \\
+PPO+Random & 0.6669 & 590.3 & 456.7 & 1229.2 & 99.90\% \\
+PPO+Local & 3.7585 & 3507.5 & 367.5 & 18845.3 & 98.50\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ============================================================
+% Table 2: Macro-layer Trajectory Control (Micro: SAC)
+% ============================================================
+\begin{table}[tbp]
+\centering
+\caption{Performance comparison of macro-layer trajectory controllers.}
+\label{tab:macro_trajectory}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+Method & $J$ & $d_{cent}$ (m) & $\overline{D}_w$ (ms) & $P$ (W) \\
+\midrule
+Predictive (Oracle) & \textbf{0.4946} & \textbf{4.9} & \textbf{425.6} & 802.4 \\
+Joint HRL (Ours) & 0.5020 & -- & -- & -- \\
+PPO120 & 0.5532 & 90.5 & 478.4 & 807.0 \\
+Hover & -- & -- & -- & -- \\
+Current & -- & -- & -- & -- \\
+Progressive & -- & -- & -- & -- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ============================================================
+% Table 3: Load Sensitivity Analysis
+% ============================================================
+\begin{table}[tbp]
+\centering
+\caption{Performance under different load conditions ($\times 1.0$ = base load).}
+\label{tab:load_sensitivity}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Load & PPO+ SAC & PPO+CVX-R & PPO+Uniform \\
+\midrule
+0.8$\times$ & 0.4050 & -- & 0.4201 \\
+1.0$\times$ & 0.5532 & 0.5882 & 0.5725 \\
+1.1$\times$ & 0.6575 & -- & 0.6739 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ============================================================
+% Table 4: Bandwidth Sensitivity Analysis  
+% ============================================================
+\begin{table}[tbp]
+\centering
+\caption{Performance under different U2U bandwidth settings.}
+\label{tab:bandwidth_sensitivity}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Bandwidth & PPO+ SAC & PPO+CVX-R \\
+\midrule
+3 MHz & 0.5588 & -- \\
+4.5 MHz & 0.5541 & -- \\
+6 MHz & 0.5532 & 0.5882 \\
+\bottomrule
+\end{tabular}
+\end{table}
+

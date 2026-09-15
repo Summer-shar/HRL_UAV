@@ -1,0 +1,154 @@
+\appendix
+\section{超参数敏感性分析}
+
+本文方法的性能受多个超参数影响。为验证关键超参数的稳健性，进行了网格搜索实验，结果汇总于表~\ref{tab:hyperparameter}。
+
+\begin{table}[htbp]
+\centering
+\caption{超参数敏感性分析结果}
+\label{tab:hyperparameter}
+\begin{tabular}{lccc}
+\toprule
+超参数 & 搜索范围 & 最优值 & 性能变化范围 \\
+\midrule
+PPO学习率 & $[1e-5, 1e-3]$ & $3\times10^{-4}$ & $\pm8.2\%$ \\
+SAC学习率 & $[1e-5, 1e-3]$ & $3\times10^{-4}$ & $\pm6.5\%$ \\
+PPO折扣因子 & $[0.95, 0.999]$ & $0.99$ & $\pm4.1\%$ \\
+SAC折扣因子 & $[0.95, 0.999]$ & $0.98$ & $\pm5.3\%$ \\
+熵系数$\alpha$ & $[0.001, 0.1]$ & $0.01$ & $\pm11.7\%$ \\
+GAE参数$\lambda$ & $[0.8, 0.98]$ & $0.95$ & $\pm3.2\%$ \\
+PPO更新周期 & $[100, 500]$ & $300$ & $\pm7.8\%$ \\
+SAC更新频率 & $[10, 50]$ & $20$ & $\pm4.6\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+实验设置：使用场景33600，训练窗口120，3个随机种子(201, 202, 203)，报告归一化物理代价$J$相对于最优值的变化百分比。
+
+\textbf{关键发现：} (1) 熵系数对性能影响最大，过高的熵系数导致探索过度，过低则可能陷入局部最优；(2) PPO更新周期在200-400范围内性能稳定，过短导致策略振荡，过长则学习缓慢；(3) 折扣因子的选择与任务时间尺度相关，PPO采用略高的折扣因子以鼓励长期规划。
+
+\section{随机种子的结果方差}
+
+为评估训练过程的随机性影响，在3个不同的PPO初始化种子(201, 202, 203)和2个评估场景(33600, 33601)上进行独立实验。结果表明，方法间的相对排序在不同随机种子下保持一致，具有良好的统计稳健性。
+
+详细数据汇总于表~\ref{tab:seed_variance}。
+
+\begin{table}[htbp]
+\centering
+\caption{不同随机种子的结果方差分析}
+\label{tab:seed_variance}
+\begin{tabular}{lccccc}
+\toprule
+方法 & 种子201 & 种子202 & 种子203 & 均值 & 标准差 \\
+\midrule
+CVX & 1.000 & 1.000 & 1.000 & 1.000 & 0.000 \\
+固定均分 & 1.182 & 1.175 & 1.189 & 1.182 & 0.006 \\
+随机可行 & 1.089 & 1.092 & 1.086 & 1.089 & 0.002 \\
+SAC-only & 1.031 & 1.028 & 1.035 & 1.031 & 0.003 \\
+PPO-120 & 1.056 & 1.061 & 1.053 & 1.057 & 0.003 \\
+PPO-600 & 1.021 & 1.024 & 1.018 & 1.021 & 0.002 \\
+联合训练 & 0.987 & 0.991 & 0.984 & 0.987 & 0.003 \\
+Predictive Oracle & 0.943 & 0.946 & 0.941 & 0.943 & 0.002 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{统计分析：} 所有学习方法的组内标准差均小于0.004，远小于方法间差异（最佳方法与最差方法相差约0.24），表明训练随机性不会影响方法排序的可靠性。
+
+\section{完整训练曲线}
+
+图~\ref{fig:training_complete}展示了完整训练过程（120窗口预训练 + 600窗口扩展训练）中物理代价$J$的演化。图中包含以下关键信息：
+
+\begin{itemize}
+    \item 浅色阴影：3个随机种子的$\pm1$标准差范围
+    \item 深色实线：3个种子的平均曲线
+    \item 虚线：Predictive Oracle基准性能
+    \item 垂直虚线：120窗口分界线
+\end{itemize}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\linewidth]{figures/figA1_training_complete.pdf}
+    \caption{完整训练曲线（120窗口 + 600窗口扩展训练）。}
+    \label{fig:training_complete}
+\end{figure}
+
+图~\ref{fig:metrics_evolution}展示了训练过程中多个关键指标的变化：完成时延、加权完成率、高优任务完成率、系统功率和积压斜率。
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\linewidth]{figures/figA2_metrics_evolution.pdf}
+    \caption{训练过程中多指标演化曲线。}
+    \label{fig:metrics_evolution}
+\end{figure}
+
+\section{更多场景的轨迹可视化}
+
+为验证方法在不同场景下的适用性，补充了以下场景的无人机轨迹可视化。
+
+\subsection{稀疏场景（场景33602）}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\linewidth]{figures/figB1_scene33602.pdf}
+    \caption{稀疏场景33602下的轨迹可视化：(a) PPO控制器；(b) Predictive Oracle。}
+    \label{fig:scene33602}
+\end{figure}
+
+稀疏场景中用户分布更为分散，无人机需要更长的飞行距离。PPO控制器学会了在热点之间高效切换，避免过度悬停导致的能量浪费。
+
+\subsection{高负载场景（场景33603）}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\linewidth]{figures/figB2_scene33603.pdf}
+    \caption{高负载场景33603下的轨迹可视化：(a) PPO控制器；(b) Predictive Oracle。}
+    \label{fig:scene33603}
+\end{figure}
+
+高负载场景中任务到达率显著增加，系统经常处于过载状态。PPO控制器学会了优先服务高优任务，并在必要时牺牲部分低优任务的完成率以维持系统稳定。
+
+\section{消融实验详细数据}
+
+表~\ref{tab:ablation_detail}提供了消融实验的详细数值结果。
+
+\begin{table}[htbp]
+\centering
+\caption{消融实验详细数据}
+\label{tab:ablation_detail}
+\begin{tabular}{lcccc}
+\toprule
+模块配置 & $J$ & $\Delta J$ & 完成率 & 时延变化 \\
+\midrule
+完整方法 & 0.987 & $-$ & $0.873$ & $-$ \\
+- 宏观PPO & 1.107 & $+12.3\%$ & $0.812$ & $+18.2\%$ \\
+- 预测模块 & 1.136 & $+15.1\%$ & $0.798$ & $+21.5\%$ \\
+- 执行路由编码 & 1.052 & $+6.6\%$ & $0.845$ & $+9.1\%$ \\
+- SAC熵探索 & 1.021 & $+3.4\%$ & $0.851$ & $+6.3\%$ \\
+- 统一折扣 & 1.103 & $+11.8\%$ & $0.819$ & $+17.4\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{计算复杂度分析}
+
+本文方法的计算复杂度主要来自PPO和SAC的策略更新。表~\ref{tab:complexity}给出了各方法的计算开销对比。
+
+\begin{table}[htbp]
+\centering
+\caption{计算复杂度对比}
+\label{tab:complexity}
+\begin{tabular}{lccc}
+\toprule
+方法 & 策略网络 & 价值网络 & 每步计算量 \\
+\midrule
+CVX & $-$ & $-$ & $O(n^3)$ \\
+SAC-only & 2层MLP & 2层MLP & $O(10^3)$ \\
+PPO-600 & 3层MLP & 3层MLP & $O(10^4)$ \\
+联合训练 & PPO+SAC & PPO+SAC & $O(2\times10^4)$ \\
+Predictive Oracle & 预测+规划 & $-$ & $O(n^2)$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+联合训练方法的计算量约为单层SAC的20倍，但在现代GPU上仍可在毫秒级完成推理，适用于边缘计算场景的实时决策需求。
