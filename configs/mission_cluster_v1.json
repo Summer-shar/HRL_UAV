@@ -1,0 +1,40 @@
+{
+  "schema": "mission_cluster_v1_scenario",
+  "base_commit": "8072a27",
+  "source_checkpoint": "results/sac_only_wireless6_long_seed101/checkpoints/window2000.pt",
+  "checkpoint_sha256": "be946d3a576918460690a16f1a57f2c6dc33dde13db86d360db5690858a76932",
+  "scene_seed": 33600,
+  "duration_s": 60,
+  "controllers": ["hover", "current_centroid", "progressive_centroid", "predictive_centroid", "blind_patrol"],
+  "progressive_coefficient": 0.5,
+  "predictive_lead_s": 10.0,
+  "blind_patrol": {
+    "world_axis": "x",
+    "speed_mps": 2.0,
+    "leg_duration_s": 30.0,
+    "direction": "all UAVs +x for 30 s, then -x for 30 s; repeat",
+    "purpose": "sanity check only, not an algorithm baseline"
+  },
+  "environment_overrides": {
+    "motion_protocol": "mission_rpgm_v1",
+    "deployment_dt": 0.0,
+    "pause_service_during_flight": false,
+    "deployment_transient_energy_mode": "none",
+    "mission_duration_s": 900.0,
+    "mission_routes_m": [
+      [[350.0, 350.0], [620.0, 430.0]],
+      [[350.0, 650.0], [620.0, 650.0]],
+      [[650.0, 500.0], [900.0, 400.0]]
+    ],
+    "cluster_count": 3,
+    "user_zone_scatter_std": 60.0
+  },
+  "config_overrides": {
+    "phase_cluster_shares": [
+      [[0.7, 0.2, 0.1], [0.2, 0.1, 0.7], [0.1, 0.7, 0.2]],
+      [[0.2, 0.1, 0.7], [0.1, 0.7, 0.2], [0.7, 0.2, 0.1]],
+      [[0.1, 0.7, 0.2], [0.7, 0.2, 0.1], [0.2, 0.1, 0.7]]
+    ],
+    "phase_cluster_dwell": [8, 12]
+  }
+}

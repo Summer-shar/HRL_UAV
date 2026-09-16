@@ -4,7 +4,11 @@ import numpy as np
 
 from .env import UAV_MEC_Env
 from .geometry import cooperation_aligned_basis
-from .load_switching import build_load_switch_schedule
+from .load_switching import (
+    build_cluster_share_schedule,
+    build_load_switch_schedule,
+    parse_cluster_share_phases,
+)
 from .routing import project_rows_to_simplex
 
 
@@ -64,6 +68,17 @@ class QueueMDP:
         self.observation_layout = config.get("observation", {}).get("layout", "shared_v1")
         if self.observation_layout not in ("shared_v1", "split_v1"):
             raise ValueError(f"Unknown observation layout: {self.observation_layout}")
+        self.cluster_count = int(self.env.cluster_count)
+        self.observe_clusters = self.cluster_count > 1
+        self.cluster_schedule = None
+        # Cluster aggregates extend only the macro policy input; the micro
+        # observation (frozen SAC checkpoint) stays byte-identical.
+        self.macro_features = MACRO_FEATURES
+        if self.observe_clusters:
+            self.macro_features = MACRO_FEATURES + (
+                "cluster_load_share",
+                "cluster_backlog",
+            )
         self.phase_age = 0
         self.macro_index = 0
         self.centroid_velocity = np.zeros((self.N, 2))
@@ -82,6 +97,22 @@ class QueueMDP:
             "cyclic_random", self.config["phase_loads"], macro_count + 1, seed,
             *self.config["phase_dwell"],
         )
+        cluster_phases = self.config.get("phase_cluster_shares")
+        if cluster_phases is not None:
+            if not self.observe_clusters:
+                raise ValueError(
+                    "phase_cluster_shares requires environment cluster_count > 1"
+                )
+            shares = parse_cluster_share_phases(
+                cluster_phases, self.N, self.cluster_count
+            )
+            dwell = self.config.get("phase_cluster_dwell", self.config["phase_dwell"])
+            self.cluster_schedule = build_cluster_share_schedule(
+                "cyclic_random", shares, macro_count + 1, seed, *dwell
+            )
+            self.env.set_cluster_target_shares(self.cluster_schedule.shares(0))
+        else:
+            self.cluster_schedule = None
         self.phase_age = 0
         self.macro_index = 0
         self.centroid_velocity.fill(0.0)
@@ -103,6 +134,12 @@ class QueueMDP:
             self.env.set_zone_target_loads(self.schedule.loads(self.macro_index))
         else:
             self.phase_age += 1
+        if self.cluster_schedule is not None and self.cluster_schedule.switched(
+            self.macro_index
+        ):
+            self.env.set_cluster_target_shares(
+                self.cluster_schedule.shares(self.macro_index)
+            )
 
     def task_aggregates(self):
         counts = np.zeros((2, self.N))
@@ -179,6 +216,26 @@ class QueueMDP:
             ready_work, ready_counts = self.routing_ready_aggregates()
             parts["routing_ready_work"] = compress(ready_work, 10.0)
             parts["routing_ready_count"] = compress(ready_counts, 10.0)
+        if self.observe_clusters:
+            cluster_loads = self.env.cluster_expected_offered_load_mbps.astype(
+                np.float64
+            )
+            cluster_totals = cluster_loads.sum(axis=1, keepdims=True)
+            parts["cluster_load_share"] = np.divide(
+                cluster_loads,
+                cluster_totals,
+                out=np.zeros_like(cluster_loads),
+                where=cluster_totals > 0.0,
+            )
+            cluster_backlog = np.zeros((self.N, self.cluster_count))
+            for parent in self.env.parent_tasks.values():
+                if parent.finish_time is not None:
+                    continue
+                cluster_backlog[
+                    parent.source_uav,
+                    self.env.user_cluster_ids[parent.user_id],
+                ] += 1.0
+            parts["cluster_backlog"] = compress(cluster_backlog, 10.0)
         # Sum physical bits by destination before applying nonlinear encoding.
         parts["inbound_transfer_queue"] = compress(q_tx.sum(axis=1), 10.0)
         return parts
@@ -186,7 +243,7 @@ class QueueMDP:
     def _observation(self, level):
         parts = self._observation_parts()
         keys = SHARED_FEATURES if self.observation_layout == "shared_v1" else (
-            MICRO_FEATURES if level == "micro" else MACRO_FEATURES
+            MICRO_FEATURES if level == "micro" else self.macro_features
         )
         if self.observe_routing_ready and (level == "micro" or self.observation_layout == "shared_v1"):
             keys += ("routing_ready_work", "routing_ready_count")

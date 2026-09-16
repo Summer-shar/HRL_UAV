@@ -150,6 +150,7 @@ class UAV_MEC_Env:
         gm_speed_noise_std=0.1,
         gm_heading_noise_std=0.1,
         user_zone_radius=80.0,
+        user_zone_scatter_std=40.0,
         min_uav_separation_m=5.0,
         u2u_link_bandwidth_matrix_mhz=None,
         gm_heading_mode="shared_mean",
@@ -170,6 +171,7 @@ class UAV_MEC_Env:
         motion_protocol="legacy_fly_hover",
         mission_routes_m=None,
         mission_duration_s=900.0,
+        cluster_count=1,
     ):
 
         # ================== 1. 系统物理设定与参数 ==================
@@ -356,6 +358,19 @@ class UAV_MEC_Env:
         self.user_task_size_low_mbits = np.zeros(self.M, dtype=np.float32)
         self.zone_expected_offered_load_mbps = np.zeros(
             self.N,
+            dtype=np.float32,
+        )
+        self.cluster_count = int(cluster_count)
+        if self.cluster_count < 1:
+            raise ValueError("cluster_count must be a positive integer.")
+        self.user_cluster_ids = np.zeros(self.M, dtype=np.int32)
+        self.cluster_target_shares = np.full(
+            (self.N, self.cluster_count),
+            1.0 / self.cluster_count,
+            dtype=np.float64,
+        )
+        self.cluster_expected_offered_load_mbps = np.zeros(
+            (self.N, self.cluster_count),
             dtype=np.float32,
         )
         
@@ -545,7 +560,7 @@ class UAV_MEC_Env:
         self.user_local_velocities = np.zeros((self.M, 2), dtype=np.float64)
         self.users_static = bool(users_static)
         self.user_zone_radius = float(user_zone_radius)
-        self.user_zone_scatter_std = 40.0
+        self.user_zone_scatter_std = float(user_zone_scatter_std)
         # 用于宏观-微观时隙解耦的缓存向量
         self.current_macro_v = np.zeros(self.N)
         self.current_macro_theta = np.zeros(self.N)
@@ -1537,6 +1552,55 @@ class UAV_MEC_Env:
         self._configure_industrial_device_profiles()
         return self.zone_expected_offered_load_mbps.copy()
 
+    def _assign_user_clusters(self):
+        """Deterministically split each zone's users into spatial clusters.
+
+        The split is a zero-RNG projection partition: zone users are sorted by
+        their projection onto a zone-specific fixed axis and cut into
+        ``cluster_count`` contiguous bands. Projection bands are spatially
+        separated (unlike angular sectors of a centred cloud), so rotating the
+        load shares moves the traffic-weighted centroid, and the same scene
+        seed always yields the same membership without consuming any
+        agent/environment RNG stream.
+        """
+        for zone_idx in range(self.N):
+            zone_users = np.where(self.user_allocations == zone_idx)[0]
+            if zone_users.size == 0:
+                continue
+            if zone_users.size < self.cluster_count:
+                raise ValueError(
+                    "cluster_count exceeds the number of users in zone "
+                    f"{zone_idx} ({zone_users.size})."
+                )
+            axis_angle = zone_idx * np.pi / 3.0
+            axis = np.array([np.cos(axis_angle), np.sin(axis_angle)])
+            offsets = self.user_coords[zone_users] - self.anchor_points[zone_idx]
+            order = np.argsort(offsets @ axis, kind="stable")
+            band = np.arange(zone_users.size) % self.cluster_count
+            self.user_cluster_ids[zone_users[order]] = band.astype(np.int32)
+
+    def set_cluster_target_shares(self, shares):
+        """Update intra-zone cluster load shares without touching queues.
+
+        ``shares`` must have shape ``(N, cluster_count)``; each row is
+        normalized to sum to one so the zone-level offered load (and hence the
+        global feasibility envelope) is preserved exactly.
+        """
+        shares = np.asarray(shares, dtype=np.float64)
+        if shares.shape != (self.N, self.cluster_count):
+            raise ValueError(
+                "cluster shares must have shape "
+                f"({self.N}, {self.cluster_count}), got {shares.shape}."
+            )
+        if not np.all(np.isfinite(shares)) or np.any(shares < 0.0):
+            raise ValueError("Cluster shares must be finite and non-negative.")
+        row_sums = shares.sum(axis=1)
+        if np.any(row_sums <= 1e-12):
+            raise ValueError("Each zone's cluster shares must sum to a positive value.")
+        self.cluster_target_shares = shares / row_sums[:, None]
+        self._configure_industrial_device_profiles()
+        return self.cluster_expected_offered_load_mbps.copy()
+
     def get_compute_capacity_audit(self):
         """Return the deterministic arrival/service envelope per macro period."""
         arrival_duration_s = (
@@ -1650,30 +1714,47 @@ class UAV_MEC_Env:
                     "low_size_mbits"
                 ]
 
-            raw_zone_load = float(
-                np.sum(
-                    self.user_lambda_high[zone_users]
-                    * self.user_task_size_high_mbits[zone_users]
-                    + self.user_lambda_low[zone_users]
-                    * self.user_task_size_low_mbits[zone_users]
-                )
-            )
             target_zone_load = float(self._get_zone_target_load_mbps(zone_idx))
-
-            if raw_zone_load > 1e-8:
-                zone_rate_scale = max(target_zone_load / raw_zone_load, 1e-6)
-                self.user_lambda_high[zone_users] *= zone_rate_scale
-                self.user_lambda_low[zone_users] *= zone_rate_scale
-                raw_zone_load = float(
+            shares = self.cluster_target_shares[zone_idx]
+            for cluster_idx in range(self.cluster_count):
+                cluster_users = zone_users[
+                    self.user_cluster_ids[zone_users] == cluster_idx
+                ]
+                if cluster_users.size == 0:
+                    self.cluster_expected_offered_load_mbps[
+                        zone_idx, cluster_idx
+                    ] = 0.0
+                    continue
+                raw_cluster_load = float(
                     np.sum(
-                        self.user_lambda_high[zone_users]
-                        * self.user_task_size_high_mbits[zone_users]
-                        + self.user_lambda_low[zone_users]
-                        * self.user_task_size_low_mbits[zone_users]
+                        self.user_lambda_high[cluster_users]
+                        * self.user_task_size_high_mbits[cluster_users]
+                        + self.user_lambda_low[cluster_users]
+                        * self.user_task_size_low_mbits[cluster_users]
                     )
                 )
+                target_cluster_load = target_zone_load * float(shares[cluster_idx])
+                if raw_cluster_load > 1e-8:
+                    cluster_rate_scale = max(
+                        target_cluster_load / raw_cluster_load, 1e-6
+                    )
+                    self.user_lambda_high[cluster_users] *= cluster_rate_scale
+                    self.user_lambda_low[cluster_users] *= cluster_rate_scale
+                    raw_cluster_load = float(
+                        np.sum(
+                            self.user_lambda_high[cluster_users]
+                            * self.user_task_size_high_mbits[cluster_users]
+                            + self.user_lambda_low[cluster_users]
+                            * self.user_task_size_low_mbits[cluster_users]
+                        )
+                    )
+                self.cluster_expected_offered_load_mbps[
+                    zone_idx, cluster_idx
+                ] = raw_cluster_load
 
-            self.zone_expected_offered_load_mbps[zone_idx] = raw_zone_load
+            self.zone_expected_offered_load_mbps[zone_idx] = float(
+                np.sum(self.cluster_expected_offered_load_mbps[zone_idx])
+            )
 
     def _compute_tcom_flying_power(self, v):
         """Compute UAV fly/hover power with the TCOM U-shaped curve."""
@@ -1732,6 +1813,7 @@ class UAV_MEC_Env:
         
         self.user_coords = assigned_anchors + self.user_offsets
         self.user_coords = np.clip(self.user_coords, 0.0, 1000.0)
+        self._assign_user_clusters()
         
         # 2. 计算初始的各管辖区质心
         for i in range(self.N):

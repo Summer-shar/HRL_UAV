@@ -45,11 +45,14 @@ def mission_config(source_config, spec=None):
     spec = load_spec() if spec is None else spec
     cfg = copy.deepcopy(source_config)
     cfg["environment"].update(copy.deepcopy(spec["environment_overrides"]))
+    cfg.update(copy.deepcopy(spec.get("config_overrides", {})))
     env = cfg["environment"]
     if (cfg["observation"] != {"layout": "split_v1", "routing_ready": False}
             or env["wireless_model"] != "psd_per_uav_budget" or env["u2u_bandwidth_mhz"] != 6
             or cfg["cpu_ghz"] != 10 or cfg["max_displacement_m"] != 20):
         raise ValueError("Unexpected SAC101 physical or observation configuration")
+    if "phase_cluster_shares" in cfg and int(env.get("cluster_count", 1)) < 2:
+        raise ValueError("phase_cluster_shares requires cluster_count >= 2")
     return cfg
 
 
@@ -69,8 +72,13 @@ def load_source(spec):
             or saved["updates"]["ppo"] != 0 or saved["stage"] != "pretrain"):
         raise ValueError("Not the declared SAC-only window2000 source")
     # This is a new environment, not a falsified same-stage continuation.
+    # load_switching.py is whitelisted with env/mdp: the cluster-share extension
+    # only appends new schedule machinery and leaves the legacy zone-load
+    # functions byte-compatible, so the frozen SAC micro policy is unaffected.
     for name in CORE_FILES:
-        if name in manifest["source_hashes"] and name not in ("hrl_uav/env.py", "hrl_uav/mdp.py"):
+        if name in manifest["source_hashes"] and name not in (
+            "hrl_uav/env.py", "hrl_uav/mdp.py", "hrl_uav/load_switching.py"
+        ):
             if file_hash(ROOT / name) != manifest["source_hashes"][name]:
                 raise ValueError(f"Unregistered SAC/source change: {name}")
     return saved, manifest
