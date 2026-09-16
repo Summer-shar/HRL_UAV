@@ -7,12 +7,13 @@ import subprocess
 
 from .scene_prescreen import ROOT
 
-PHYSICS_BASE_COMMIT = "832ff4834517f0e9de619ce2f693ad8bb20070c8"
+PHYSICS_BASE_COMMIT = "bbc274d7271a91f4b822a742fd0433a00f771232"
 PHYSICS_FILES = (
     "hrl_uav/env.py", "hrl_uav/mdp.py", "hrl_uav/geometry.py",
     "hrl_uav/load_switching.py", "hrl_uav/routing.py", "hrl_uav/experiment.py",
     "hrl_uav/learning.py", "hrl_uav/agents/sac_agent.py", "hrl_uav/agents/ppo_agent.py",
     "configs/mission_rpgm_v1_smoke.json",
+    "configs/mission_cluster_v1.json",
     "hrl_uav/bandwidth.py", "hrl_uav/scene_prescreen.py", "hrl_uav/ppo_frozen.py",
     "hrl_uav/trajectory_check.py", "hrl_uav/wireless_check.py", "hrl_uav/wireless_pilot.py",
 )

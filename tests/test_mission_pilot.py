@@ -35,7 +35,7 @@ class MissionPilotTests(unittest.TestCase):
     def test_physics_lock_independent_of_head_and_detects_changes(self):
         physics = physics_provenance()
         self.assertIn("hrl_uav/env.py", physics)
-        self.assertEqual(PHYSICS_BASE_COMMIT, "19976306281cf213f1e7f6973b999f2dcd39d593")
+        self.assertEqual(PHYSICS_BASE_COMMIT, "bbc274d7271a91f4b822a742fd0433a00f771232")
         self.assertEqual(text_digest(b"a\r\nb\r\n"), text_digest(b"a\nb\n"))
         original = Path.read_bytes
 
