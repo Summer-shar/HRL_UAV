@@ -1,0 +1,67 @@
+{
+  "status": "complete",
+  "committed_episodes": 300,
+  "target_episodes": 300,
+  "updates": {
+    "ppo": 0,
+    "ppo_actor_gradient_steps": 0,
+    "sac": 26951,
+    "sac_actor": 13425,
+    "sac_critic_fits": 53902,
+    "replay_writes": 540000
+  },
+  "latest_checkpoint": {
+    "path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_fresh_sac_lr1e5_20260924\\training\\checkpoints\\rolling\\checkpoint-1790262673011438800-daa34f7993704f208f20304158a848d9.pt",
+    "sha256": "590901e066b4467f78d0a6a2ed88ce2111f10669ed030bf0b1db3f01625ec61f",
+    "index": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_fresh_sac_lr1e5_20260924\\training\\checkpoints\\rolling\\latest.json",
+    "latest": {
+      "filename": "checkpoint-1790262673011438800-daa34f7993704f208f20304158a848d9.pt",
+      "sha256": "590901e066b4467f78d0a6a2ed88ce2111f10669ed030bf0b1db3f01625ec61f"
+    },
+    "previous": {
+      "filename": "checkpoint-1790262672220951500-fe43e55304984aadb463c731c85adadb.pt",
+      "sha256": "590901e066b4467f78d0a6a2ed88ce2111f10669ed030bf0b1db3f01625ec61f"
+    },
+    "persistent_path": null
+  },
+  "selected": {
+    "episode": 250,
+    "report_path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_fresh_sac_lr1e5_20260924\\training\\evaluations\\episode-0250\\report.json",
+    "report_sha256": "49542b91ac669acf47787dbb448851f49cc94057b919eb6595ccaf195aa4507b",
+    "checkpoint": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_fresh_sac_lr1e5_20260924\\training\\checkpoints\\episode-0250\\pretrain_final.pt",
+    "checkpoint_sha256": "1f23ed9d3423e92ccdc0827d1ebe7f1692a3332e218c336a23890830addec22a",
+    "quality_passed": true,
+    "seconds": 5400.0,
+    "cost_sum": 56355.37346028189,
+    "mean_cost_per_s": 10.436180270422572,
+    "physical_return": -56355.37346028189,
+    "holding_task_s": 276340.9999999999,
+    "energy_j": {
+      "cpu": 1245622.6755551426,
+      "propulsion": 3155167.8090227623,
+      "u2u": 3807.5125488292474,
+      "upload": 3257.6873131991338
+    },
+    "priority": [
+      {
+        "arrived": 33852,
+        "completed": 33848,
+        "unfinished": 4,
+        "completion_rate": 0.999881838591516,
+        "delay_sum_s": 16211.000000001473,
+        "mean_delay_ms": 478.9352398960492
+      },
+      {
+        "arrived": 92057,
+        "completed": 91943,
+        "unfinished": 114,
+        "completion_rate": 0.9987616368119752,
+        "delay_sum_s": 114089.50000000055,
+        "mean_delay_ms": 1240.872062038443
+      }
+    ],
+    "weighted_delay_ms": 641.6931716009955
+  },
+  "joint_started": false,
+  "elapsed_seconds": 6323.6363422
+}

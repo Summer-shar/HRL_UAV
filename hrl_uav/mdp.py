@@ -30,6 +30,11 @@ MACRO_FEATURES = (
     "u2g_mean_rate", "uav_coordinates", "centroid_offset", "centroid_velocity",
     "phase_age",
 )
+HOTSPOT_MACRO_FEATURES = (
+    "compute_queue", "inbound_transfer_queue", "unfinished_tasks", "oldest_age",
+    "u2u_pair_quality", "uav_coordinates", "centroid_velocity", "phase_age",
+    "cluster_offset", "cluster_offered_load", "cluster_upload",
+)
 
 
 def compress(values, scale):
@@ -56,9 +61,9 @@ class QueueMDP:
     executed routes, as selected by the training configuration.
     """
 
-    def __init__(self, config):
+    def __init__(self, config, *, environment_factory=UAV_MEC_Env):
         self.config = config
-        self.env = UAV_MEC_Env(**config["environment"])
+        self.env = environment_factory(**config["environment"])
         self.env.F_max_array[:] = config["cpu_ghz"] * 1e9
         self.N = self.env.N
         self.micro_action_dim = 2 * self.N * self.N
@@ -72,13 +77,20 @@ class QueueMDP:
         self.observe_clusters = self.cluster_count > 1
         self.cluster_schedule = None
         # Cluster aggregates extend only the macro policy input; the micro
-        # observation (frozen SAC checkpoint) stays byte-identical.
+        # observation layout stays compatible; its values can change.
         self.macro_features = MACRO_FEATURES
         if self.observe_clusters:
             self.macro_features = MACRO_FEATURES + (
                 "cluster_load_share",
                 "cluster_backlog",
             )
+        macro_layout = config.get("macro_observation_layout", "legacy")
+        if macro_layout not in ("legacy", "hotspot_upload_v2"):
+            raise ValueError(f"Unknown macro observation layout: {macro_layout}")
+        if macro_layout == "hotspot_upload_v2":
+            if not self.observe_clusters or self.observation_layout != "split_v1":
+                raise ValueError("hotspot_upload_v2 requires clusters and split_v1")
+            self.macro_features = HOTSPOT_MACRO_FEATURES
         self.phase_age = 0
         self.macro_index = 0
         self.centroid_velocity = np.zeros((self.N, 2))
@@ -236,6 +248,32 @@ class QueueMDP:
                     self.env.user_cluster_ids[parent.user_id],
                 ] += 1.0
             parts["cluster_backlog"] = compress(cluster_backlog, 10.0)
+            if self.config.get("macro_observation_layout") == "hotspot_upload_v2":
+                offsets = np.zeros((self.N, self.cluster_count, 2))
+                for source in range(self.N):
+                    for cluster in range(self.cluster_count):
+                        users = ((self.env.user_allocations == source)
+                                 & (self.env.user_cluster_ids == cluster))
+                        if not np.any(users):
+                            raise ValueError("Hotspot observation requires nonempty clusters")
+                        offsets[source, cluster] = (
+                            self.env.user_coords[users].mean(axis=0)
+                            - self.env.uav_coords[source]
+                        )
+                upload_by_cluster = np.zeros((2, self.N, self.cluster_count))
+                for parent in self.env.parent_tasks.values():
+                    if parent.finish_time is None:
+                        priority = 0 if parent.priority == "high" else 1
+                        upload_by_cluster[priority, parent.source_uav,
+                                          self.env.user_cluster_ids[parent.user_id]] += (
+                            parent.remaining_upload_mbits
+                        )
+                if not np.allclose(u2u_eta, u2u_eta.T, rtol=0, atol=1e-12):
+                    raise ValueError("Pair encoding requires symmetric U2U reference quality")
+                parts["u2u_pair_quality"] = compress(u2u_eta[np.triu_indices(self.N, 1)], 1.0)
+                parts["cluster_offset"] = offsets / 60.0
+                parts["cluster_offered_load"] = compress(cluster_loads, 10.0)
+                parts["cluster_upload"] = compress(upload_by_cluster, 10.0)
         # Sum physical bits by destination before applying nonlinear encoding.
         parts["inbound_transfer_queue"] = compress(q_tx.sum(axis=1), 10.0)
         return parts

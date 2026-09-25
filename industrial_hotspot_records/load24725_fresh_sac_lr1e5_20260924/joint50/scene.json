@@ -1,0 +1,992 @@
+{
+  "schema": "industrial_hotspot_scene_v4",
+  "status": "load24725_candidate_untrained",
+  "base_scene": {
+    "schema": "industrial_static_v1",
+    "status": "deployment_v3_training_reference",
+    "num_uavs": 3,
+    "num_users": 39,
+    "map_size_m": 1000.0,
+    "height_m": 50.0,
+    "regions_m": [
+      [
+        [
+          200,
+          200
+        ],
+        [
+          500,
+          500
+        ]
+      ],
+      [
+        [
+          200,
+          500
+        ],
+        [
+          500,
+          800
+        ]
+      ],
+      [
+        [
+          500,
+          350
+        ],
+        [
+          800,
+          650
+        ]
+      ]
+    ],
+    "device_counts": [
+      [
+        5,
+        4,
+        4
+      ],
+      [
+        8,
+        4,
+        1
+      ],
+      [
+        6,
+        2,
+        5
+      ]
+    ],
+    "uav_initial_positions_m": [
+      [
+        350,
+        350
+      ],
+      [
+        350,
+        650
+      ],
+      [
+        650,
+        500
+      ]
+    ],
+    "region_multipliers": [
+      1.0508944724911116,
+      0.7005963149940744,
+      0.875745393742593
+    ],
+    "activity": {
+      "normal_mean_s": 60.0,
+      "busy_mean_s": 30.0,
+      "normal_multiplier": 1.0,
+      "busy_multiplier": 3.0
+    },
+    "task_types": {
+      "sensor": {
+        "rate_per_s": 0.35,
+        "high_probability": 0.2,
+        "input_bits": [
+          350000,
+          900000
+        ],
+        "cycles_per_bit": [
+          800,
+          800
+        ]
+      },
+      "controller": {
+        "rate_per_s": 0.4,
+        "high_probability": 0.6,
+        "input_bits": [
+          550000,
+          350000
+        ],
+        "cycles_per_bit": [
+          1000,
+          1000
+        ]
+      },
+      "vision": {
+        "rate_per_s": 0.5,
+        "high_probability": 0.1,
+        "input_bits": [
+          1200000,
+          1400000
+        ],
+        "cycles_per_bit": [
+          1500,
+          1500
+        ]
+      }
+    },
+    "time": {
+      "physical_s": 0.1,
+      "routing_s": 0.5,
+      "motion_s": 5.0,
+      "history_s": 10.0,
+      "report_window_s": 900.0
+    },
+    "motion": {
+      "max_speed_mps": 10.0,
+      "min_separation_m": 5.0
+    },
+    "resources": {
+      "cpu_hz": [
+        10000000000,
+        10000000000,
+        10000000000
+      ],
+      "cpu_kappa": 1e-28,
+      "uplink_bandwidth_hz": 20000000,
+      "u2u_bandwidth_hz": 6000000,
+      "terminal_power_w": 0.1,
+      "u2u_source_power_w": 1.0,
+      "reference_gain": 1e-06,
+      "noise_psd_w_per_hz": 1.95e-19
+    },
+    "objective": {
+      "priority_weights": [
+        10.0,
+        1.0
+      ],
+      "holding_weight": 0.9,
+      "holding_reference_task_s": 10.0,
+      "energy_reference_j": 14.0,
+      "gamma_per_routing_frame": 0.99,
+      "energy_mode": "full"
+    },
+    "parameter_sources": {
+      "inherited_simulation": [
+        "num_uavs",
+        "num_users",
+        "map_size_m",
+        "height_m",
+        "device_counts",
+        "uav_initial_positions_m",
+        "task input_bits",
+        "resources",
+        "physical_s",
+        "routing_s",
+        "history_s",
+        "priority_weights",
+        "objective scales"
+      ],
+      "new_simulation_assumptions": [
+        "rectangular uniform fixed layout",
+        "region_multipliers",
+        "activity",
+        "task rates",
+        "high_probability",
+        "cycles_per_bit",
+        "deployment adjustment speed cap 10 m/s"
+      ],
+      "motion_period_rationale": "Candidate service commitment H=5 s, shared linear adjustment M=1 s, hold=4 s. D_max=10 m preserves the former per-period action range; M=D_max/v_max. Neither final hardware validation nor timescale optimality is claimed. Long-run maximum net displacement per period remains 2 m/s."
+    }
+  },
+  "deployment": {
+    "macro_period_s": 5.0,
+    "adjustment_s": 1.0,
+    "max_target_step_m": 10.0,
+    "profile": "synchronous_linear_then_hold"
+  },
+  "geometry": {
+    "cluster_count_per_region": 9,
+    "background_count_per_region": 4,
+    "center_margin_m": 75.0,
+    "cluster_radius_m": 45.0,
+    "center_bounds_m": [
+      [
+        [
+          275,
+          275
+        ],
+        [
+          425,
+          425
+        ]
+      ],
+      [
+        [
+          275,
+          575
+        ],
+        [
+          425,
+          725
+        ]
+      ],
+      [
+        [
+          575,
+          425
+        ],
+        [
+          725,
+          575
+        ]
+      ]
+    ],
+    "cluster_sampling": "uniform_disk_area",
+    "background_sampling": "uniform_region_reject_inside_cluster_disk",
+    "coordinate_clipping": false,
+    "initial_min_separation_m": 5.0,
+    "hidden_from_policy": [
+      "generator_center",
+      "membership",
+      "profile_id",
+      "profile_permutation",
+      "business_multiplier_label",
+      "load_seed",
+      "other_seeds",
+      "future_arrivals"
+    ],
+    "environment_reset_contract": "reset(sealed_realization, arrival_seed)",
+    "geometry_record_includes": [
+      "actual_terminal_positions",
+      "fixed_uav_initial_positions",
+      "cluster_membership",
+      "cluster_centers",
+      "profile_by_region",
+      "profile_slot_to_physical_user_mapping",
+      "layout_seed",
+      "load_seed"
+    ],
+    "uav_initial_positions_m": [
+      [
+        350,
+        350
+      ],
+      [
+        350,
+        650
+      ],
+      [
+        650,
+        500
+      ]
+    ],
+    "uav_start_mode": "fixed_identically_across_all_episodes",
+    "random_uav_start": false,
+    "max_start_to_generated_center_m": 106.06601717798213,
+    "stationary_within_episode": [
+      "terminals",
+      "cluster_centers",
+      "membership",
+      "profile_by_region",
+      "business_parameters"
+    ],
+    "cluster_counts_by_type_source": "Assigned business profile; quota moves with the profile",
+    "member_and_local_geometry_rng_binding": "profile_id, slot, purpose with layout_seed; physical region center uses layout_seed and physical region only"
+  },
+  "business_profiles": {
+    "mode": "whole_profile_permutation",
+    "catalog": [
+      {
+        "profile_id": 0,
+        "device_counts_by_type": [
+          5,
+          4,
+          4
+        ],
+        "business_multiplier": 1.0508944724911116,
+        "cluster_counts_by_type": [
+          3,
+          3,
+          3
+        ],
+        "activity_parameters": {
+          "normal_mean_s": 60.0,
+          "busy_mean_s": 30.0,
+          "normal_multiplier": 1.0,
+          "busy_multiplier": 3.0
+        },
+        "slots": [
+          {
+            "task_type": "sensor",
+            "parameters": {
+              "rate_per_s": 0.35,
+              "high_probability": 0.2,
+              "input_bits": [
+                350000,
+                900000
+              ],
+              "cycles_per_bit": [
+                800,
+                800
+              ]
+            }
+          },
+          {
+            "task_type": "sensor",
+            "parameters": {
+              "rate_per_s": 0.35,
+              "high_probability": 0.2,
+              "input_bits": [
+                350000,
+                900000
+              ],
+              "cycles_per_bit": [
+                800,
+                800
+              ]
+            }
+          },
+          {
+            "task_type": "sensor",
+            "parameters": {
+              "rate_per_s": 0.35,
+              "high_probability": 0.2,
+              "input_bits": [
+                350000,
+                900000
+              ],
+              "cycles_per_bit": [
+                800,
+                800
+              ]
+            }
+          },
+          {
+            "task_type": "sensor",
+            "parameters": {
+              "rate_per_s": 0.35,
+              "high_probability": 0.2,
+              "input_bits": [
+                350000,
+                900000
+              ],
+              "cycles_per_bit": [
+                800,
+                800
+              ]
+            }
+          },
+          {
+            "task_type": "sensor",
+            "parameters": {
+              "rate_per_s": 0.35,
+              "high_probability": 0.2,
+              "input_bits": [
+                350000,
+                900000
+              ],
+              "cycles_per_bit": [
+                800,
+                800
+              ]
+            }
+          },
+          {
+            "task_type": "controller",
+            "parameters": {
+              "rate_per_s": 0.4,
+              "high_probability": 0.6,
+              "input_bits": [
+                550000,
+                350000
+              ],
+              "cycles_per_bit": [
+                1000,
+                1000
+              ]
+            }
+          },
+          {
+            "task_type": "controller",
+            "parameters": {
+              "rate_per_s": 0.4,
+              "high_probability": 0.6,
+              "input_bits": [
+                550000,
+                350000
+              ],
+              "cycles_per_bit": [
+                1000,
+                1000
+              ]
+            }
+          },
+          {
+            "task_type": "controller",
+            "parameters": {
+              "rate_per_s": 0.4,
+              "high_probability": 0.6,
+              "input_bits": [
+                550000,
+                350000
+              ],
+              "cycles_per_bit": [
+                1000,
+                1000
+              ]
+            }
+          },
+          {
+            "task_type": "controller",
+            "parameters": {
+              "rate_per_s": 0.4,
+              "high_probability": 0.6,
+              "input_bits": [
+                550000,
+                350000
+              ],
+              "cycles_per_bit": [
+                1000,
+                1000
+              ]
+            }
+          },
+          {
+            "task_type": "vision",
+            "parameters": {
+              "rate_per_s": 0.5,
+              "high_probability": 0.1,
+              "input_bits": [
+                1200000,
+                1400000
+              ],
+              "cycles_per_bit": [
+                1500,
+                1500
+              ]
+            }
+          },
+          {
+            "task_type": "vision",
+            "parameters": {
+              "rate_per_s": 0.5,
+              "high_probability": 0.1,
+              "input_bits": [
+                1200000,
+                1400000
+              ],
+              "cycles_per_bit": [
+                1500,
+                1500
+              ]
+            }
+          },
+          {
+            "task_type": "vision",
+            "parameters": {
+              "rate_per_s": 0.5,
+              "high_probability": 0.1,
+              "input_bits": [
+                1200000,
+                1400000
+              ],
+              "cycles_per_bit": [
+                1500,
+                1500
+              ]
+            }
+          },
+          {
+            "task_type": "vision",
+            "parameters": {
+              "rate_per_s": 0.5,
+              "high_probability": 0.1,
+              "input_bits": [
+                1200000,
+                1400000
+              ],
+              "cycles_per_bit": [
+                1500,
+                1500
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "profile_id": 1,
+        "device_counts_by_type": [
+          8,
+          4,
+          1
+        ],
+        "business_multiplier": 0.7005963149940744,
+        "cluster_counts_by_type": [
+          5,
+          3,
+          1
+        ],
+        "activity_parameters": {
+          "normal_mean_s": 60.0,
+          "busy_mean_s": 30.0,
+          "normal_multiplier": 1.0,
+          "busy_multiplier": 3.0
+        },
+        "slots": [
+          {
+            "task_type": "sensor",
+            "parameters": {
+              "rate_per_s": 0.35,
+              "high_probability": 0.2,
+              "input_bits": [
+                350000,
+                900000
+              ],
+              "cycles_per_bit": [
+                800,
+                800
+              ]
+            }
+          },
+          {
+            "task_type": "sensor",
+            "parameters": {
+              "rate_per_s": 0.35,
+              "high_probability": 0.2,
+              "input_bits": [
+                350000,
+                900000
+              ],
+              "cycles_per_bit": [
+                800,
+                800
+              ]
+            }
+          },
+          {
+            "task_type": "sensor",
+            "parameters": {
+              "rate_per_s": 0.35,
+              "high_probability": 0.2,
+              "input_bits": [
+                350000,
+                900000
+              ],
+              "cycles_per_bit": [
+                800,
+                800
+              ]
+            }
+          },
+          {
+            "task_type": "sensor",
+            "parameters": {
+              "rate_per_s": 0.35,
+              "high_probability": 0.2,
+              "input_bits": [
+                350000,
+                900000
+              ],
+              "cycles_per_bit": [
+                800,
+                800
+              ]
+            }
+          },
+          {
+            "task_type": "sensor",
+            "parameters": {
+              "rate_per_s": 0.35,
+              "high_probability": 0.2,
+              "input_bits": [
+                350000,
+                900000
+              ],
+              "cycles_per_bit": [
+                800,
+                800
+              ]
+            }
+          },
+          {
+            "task_type": "sensor",
+            "parameters": {
+              "rate_per_s": 0.35,
+              "high_probability": 0.2,
+              "input_bits": [
+                350000,
+                900000
+              ],
+              "cycles_per_bit": [
+                800,
+                800
+              ]
+            }
+          },
+          {
+            "task_type": "sensor",
+            "parameters": {
+              "rate_per_s": 0.35,
+              "high_probability": 0.2,
+              "input_bits": [
+                350000,
+                900000
+              ],
+              "cycles_per_bit": [
+                800,
+                800
+              ]
+            }
+          },
+          {
+            "task_type": "sensor",
+            "parameters": {
+              "rate_per_s": 0.35,
+              "high_probability": 0.2,
+              "input_bits": [
+                350000,
+                900000
+              ],
+              "cycles_per_bit": [
+                800,
+                800
+              ]
+            }
+          },
+          {
+            "task_type": "controller",
+            "parameters": {
+              "rate_per_s": 0.4,
+              "high_probability": 0.6,
+              "input_bits": [
+                550000,
+                350000
+              ],
+              "cycles_per_bit": [
+                1000,
+                1000
+              ]
+            }
+          },
+          {
+            "task_type": "controller",
+            "parameters": {
+              "rate_per_s": 0.4,
+              "high_probability": 0.6,
+              "input_bits": [
+                550000,
+                350000
+              ],
+              "cycles_per_bit": [
+                1000,
+                1000
+              ]
+            }
+          },
+          {
+            "task_type": "controller",
+            "parameters": {
+              "rate_per_s": 0.4,
+              "high_probability": 0.6,
+              "input_bits": [
+                550000,
+                350000
+              ],
+              "cycles_per_bit": [
+                1000,
+                1000
+              ]
+            }
+          },
+          {
+            "task_type": "controller",
+            "parameters": {
+              "rate_per_s": 0.4,
+              "high_probability": 0.6,
+              "input_bits": [
+                550000,
+                350000
+              ],
+              "cycles_per_bit": [
+                1000,
+                1000
+              ]
+            }
+          },
+          {
+            "task_type": "vision",
+            "parameters": {
+              "rate_per_s": 0.5,
+              "high_probability": 0.1,
+              "input_bits": [
+                1200000,
+                1400000
+              ],
+              "cycles_per_bit": [
+                1500,
+                1500
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "profile_id": 2,
+        "device_counts_by_type": [
+          6,
+          2,
+          5
+        ],
+        "business_multiplier": 0.875745393742593,
+        "cluster_counts_by_type": [
+          4,
+          1,
+          4
+        ],
+        "activity_parameters": {
+          "normal_mean_s": 60.0,
+          "busy_mean_s": 30.0,
+          "normal_multiplier": 1.0,
+          "busy_multiplier": 3.0
+        },
+        "slots": [
+          {
+            "task_type": "sensor",
+            "parameters": {
+              "rate_per_s": 0.35,
+              "high_probability": 0.2,
+              "input_bits": [
+                350000,
+                900000
+              ],
+              "cycles_per_bit": [
+                800,
+                800
+              ]
+            }
+          },
+          {
+            "task_type": "sensor",
+            "parameters": {
+              "rate_per_s": 0.35,
+              "high_probability": 0.2,
+              "input_bits": [
+                350000,
+                900000
+              ],
+              "cycles_per_bit": [
+                800,
+                800
+              ]
+            }
+          },
+          {
+            "task_type": "sensor",
+            "parameters": {
+              "rate_per_s": 0.35,
+              "high_probability": 0.2,
+              "input_bits": [
+                350000,
+                900000
+              ],
+              "cycles_per_bit": [
+                800,
+                800
+              ]
+            }
+          },
+          {
+            "task_type": "sensor",
+            "parameters": {
+              "rate_per_s": 0.35,
+              "high_probability": 0.2,
+              "input_bits": [
+                350000,
+                900000
+              ],
+              "cycles_per_bit": [
+                800,
+                800
+              ]
+            }
+          },
+          {
+            "task_type": "sensor",
+            "parameters": {
+              "rate_per_s": 0.35,
+              "high_probability": 0.2,
+              "input_bits": [
+                350000,
+                900000
+              ],
+              "cycles_per_bit": [
+                800,
+                800
+              ]
+            }
+          },
+          {
+            "task_type": "sensor",
+            "parameters": {
+              "rate_per_s": 0.35,
+              "high_probability": 0.2,
+              "input_bits": [
+                350000,
+                900000
+              ],
+              "cycles_per_bit": [
+                800,
+                800
+              ]
+            }
+          },
+          {
+            "task_type": "controller",
+            "parameters": {
+              "rate_per_s": 0.4,
+              "high_probability": 0.6,
+              "input_bits": [
+                550000,
+                350000
+              ],
+              "cycles_per_bit": [
+                1000,
+                1000
+              ]
+            }
+          },
+          {
+            "task_type": "controller",
+            "parameters": {
+              "rate_per_s": 0.4,
+              "high_probability": 0.6,
+              "input_bits": [
+                550000,
+                350000
+              ],
+              "cycles_per_bit": [
+                1000,
+                1000
+              ]
+            }
+          },
+          {
+            "task_type": "vision",
+            "parameters": {
+              "rate_per_s": 0.5,
+              "high_probability": 0.1,
+              "input_bits": [
+                1200000,
+                1400000
+              ],
+              "cycles_per_bit": [
+                1500,
+                1500
+              ]
+            }
+          },
+          {
+            "task_type": "vision",
+            "parameters": {
+              "rate_per_s": 0.5,
+              "high_probability": 0.1,
+              "input_bits": [
+                1200000,
+                1400000
+              ],
+              "cycles_per_bit": [
+                1500,
+                1500
+              ]
+            }
+          },
+          {
+            "task_type": "vision",
+            "parameters": {
+              "rate_per_s": 0.5,
+              "high_probability": 0.1,
+              "input_bits": [
+                1200000,
+                1400000
+              ],
+              "cycles_per_bit": [
+                1500,
+                1500
+              ]
+            }
+          },
+          {
+            "task_type": "vision",
+            "parameters": {
+              "rate_per_s": 0.5,
+              "high_probability": 0.1,
+              "input_bits": [
+                1200000,
+                1400000
+              ],
+              "cycles_per_bit": [
+                1500,
+                1500
+              ]
+            }
+          },
+          {
+            "task_type": "vision",
+            "parameters": {
+              "rate_per_s": 0.5,
+              "high_probability": 0.1,
+              "input_bits": [
+                1200000,
+                1400000
+              ],
+              "cycles_per_bit": [
+                1500,
+                1500
+              ]
+            }
+          }
+        ]
+      }
+    ],
+    "physical_source_rule": "user_id // 13",
+    "physical_uav_ids_permuted": false,
+    "physical_terminal_type_binding": "May change across independent episodes; fixed within an episode",
+    "global_device_counts_by_type": [
+      19,
+      10,
+      10
+    ],
+    "sampling": "iid uniform over all six permutations each training episode",
+    "adjacent_repetition_allowed": true,
+    "forced_rotation": false,
+    "profile_by_region_permutations": [
+      [
+        0,
+        1,
+        2
+      ],
+      [
+        0,
+        2,
+        1
+      ],
+      [
+        1,
+        0,
+        2
+      ],
+      [
+        1,
+        2,
+        0
+      ],
+      [
+        2,
+        0,
+        1
+      ],
+      [
+        2,
+        1,
+        0
+      ]
+    ],
+    "logical_event_rng_key": [
+      "arrival_seed",
+      "profile_id",
+      "slot",
+      "purpose"
+    ],
+    "same_scene_cross_controller_comparison": "Exact mapped physical events",
+    "cross_permutation_comparison": "Canonical profile_id/slot/local_event_index plus birth/priority/bits/cycles; physical IDs may differ",
+    "expected_global_load_invariant": true,
+    "realized_load_equal_for_independent_arrival_seeds": false,
+    "equal_actual_control_difficulty_guaranteed": false
+  }
+}

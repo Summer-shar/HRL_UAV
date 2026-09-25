@@ -1,0 +1,37 @@
+{
+  "passed": true,
+  "verified_at": "2026-09-24T21:01:49.259913+00:00",
+  "completed_episodes": 30,
+  "updates": {
+    "ppo": 18,
+    "ppo_actor_gradient_steps": 180,
+    "sac": 25151,
+    "sac_actor": 12525,
+    "sac_critic_fits": 50302,
+    "replay_writes": 504000
+  },
+  "actual_optimizer_lrs": [
+    [
+      1e-05
+    ],
+    [
+      0.0003
+    ],
+    [
+      3e-05
+    ],
+    [
+      0.0003
+    ],
+    [
+      0.001
+    ]
+  ],
+  "checkpoint_sha256": "4f2e9f2eac824c5f2122ca714ab2d4bc827f6d75881cfb45960c13acafc4cf7f",
+  "total_joint_physical_steps": 270000,
+  "new_joint_physical_steps": 45000,
+  "source_hashes_verified": true,
+  "seed_cursor_verified": true,
+  "additional_service_steps": 0,
+  "additional_learning_updates": 0
+}

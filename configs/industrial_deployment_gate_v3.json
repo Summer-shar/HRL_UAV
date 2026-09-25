@@ -1,0 +1,89 @@
+{
+  "schema": "industrial_deployment_v3",
+  "scene_config": "configs/industrial_deployment_scene_v3.json",
+  "methods": [
+    "ppo_sac",
+    "ppo_cvx",
+    "ppo_random",
+    "ppo_local"
+  ],
+  "training_seeds": [
+    1
+  ],
+  "budget": {
+    "pretrain_seconds": 5,
+    "joint_seconds": 10,
+    "stream_seconds": 5,
+    "log_window_seconds": 5
+  },
+  "randomness": {
+    "seed_stride": 100,
+    "pretrain": {
+      "arrival_base": 80000000,
+      "layout_base": 81000000,
+      "routing_base": 82000000
+    },
+    "joint": {
+      "arrival_base": 80000500,
+      "layout_base": 81000500,
+      "routing_base": 82000500
+    }
+  },
+  "evaluation": {
+    "arrival_seeds": [
+      80000900
+    ],
+    "layout_seeds": [
+      81000900
+    ],
+    "routing_seeds": [
+      82000900
+    ],
+    "seconds": 5,
+    "warmup_seconds": 0,
+    "selection": "fixed_budget_final_only",
+    "hover_pair": "same_frozen_sac"
+  },
+  "learning": {
+    "micro_algorithm": "sac",
+    "gamma_per_resource_frame": 0.99,
+    "gae_lambda": 0.95,
+    "batch_size": 4,
+    "replay_capacity": 16,
+    "replay_warmup": 10,
+    "sac_update_frames": 10,
+    "sac_policy_delay": 1,
+    "sac_actor_warmup_updates": 0,
+    "sac_critic_steps_per_update": 2,
+    "initial_alpha": 0.05,
+    "initial_sac_log_std": -2.0,
+    "pretrain_lr": [
+      3e-05,
+      0.0003,
+      3e-05
+    ],
+    "sac_stage_policy": "preserve",
+    "grad_clip": 1.0,
+    "tau": 0.01,
+    "ppo_update_macros": 2,
+    "ppo_epochs": 2,
+    "ppo_actor_lr": 0.0003,
+    "ppo_critic_lr": 0.001,
+    "ppo_clip": 0.2,
+    "ppo_target_kl": 0.03,
+    "ppo_initial_std": 0.3333333333333333,
+    "ppo_final_std": 0.03333333333333333,
+    "ppo_update_guard": "post_step_batch_kl_v1",
+    "ppo_guard_retries": 4,
+    "ppo_std_backtracks": 12,
+    "ppo_std_decay_updates": 360
+  },
+  "runtime": {
+    "device": "cpu",
+    "torch_threads": 1,
+    "max_wall_seconds_per_job": 600,
+    "resume": "stream_boundary"
+  },
+  "purpose": "gate",
+  "observation_version": "industrial_deployment_v3"
+}

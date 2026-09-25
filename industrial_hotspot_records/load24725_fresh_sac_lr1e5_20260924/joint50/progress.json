@@ -1,0 +1,94 @@
+{
+  "status": "complete",
+  "committed_episodes": 50,
+  "target_episodes": 50,
+  "updates": {
+    "ppo": 30,
+    "ppo_actor_gradient_steps": 300,
+    "sac": 26951,
+    "sac_actor": 13425,
+    "sac_critic_fits": 53902,
+    "replay_writes": 540000
+  },
+  "latest_checkpoint": {
+    "path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_fresh_sac_lr1e5_20260924\\joint50\\checkpoints\\rolling\\checkpoint-1790284220485207600-edcda2c1c2804eb49df30083d1b72b77.pt",
+    "sha256": "ef2e9913e4d6840937dc185379e6670a94d32118e25d8eed9691f8821a1688cc",
+    "index": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_fresh_sac_lr1e5_20260924\\joint50\\checkpoints\\rolling\\latest.json",
+    "latest": {
+      "filename": "checkpoint-1790284220485207600-edcda2c1c2804eb49df30083d1b72b77.pt",
+      "sha256": "ef2e9913e4d6840937dc185379e6670a94d32118e25d8eed9691f8821a1688cc"
+    },
+    "previous": {
+      "filename": "checkpoint-1790284057011326900-2dac7f81fc3a44a3bd656e3a86584427.pt",
+      "sha256": "850e2c608ceea812f01d7d5cd91b9ce63eae0c6c5cef25d48314b75fa75bd5b3"
+    },
+    "persistent_path": null
+  },
+  "evaluation": {
+    "moving": {
+      "seconds": 5400.0,
+      "cost_sum": 70008.15243286872,
+      "mean_cost_per_s": 12.964472672753468,
+      "physical_return": -70008.15243286872,
+      "holding_task_s": 428505.49999999977,
+      "energy_j": {
+        "cpu": 1254251.6724608499,
+        "propulsion": 3140036.6660785098,
+        "u2u": 3587.0588606426873,
+        "upload": 4096.643202023492
+      },
+      "priority": [
+        {
+          "arrived": 33852,
+          "completed": 33811,
+          "unfinished": 41,
+          "completion_rate": 0.9987888455630392,
+          "delay_sum_s": 23323.20000000087,
+          "mean_delay_ms": 689.8110082517782
+        },
+        {
+          "arrived": 92057,
+          "completed": 91714,
+          "unfinished": 343,
+          "completion_rate": 0.9962740476009428,
+          "delay_sum_s": 184863.9999999996,
+          "mean_delay_ms": 2015.657369649122
+        }
+      ],
+      "weighted_delay_ms": 972.7144133412938
+    },
+    "hover": {
+      "seconds": 5400.0,
+      "cost_sum": 61621.41153232491,
+      "mean_cost_per_s": 11.411372505986096,
+      "physical_return": -61621.41153232491,
+      "holding_task_s": 333682.59999999916,
+      "energy_j": {
+        "cpu": 1260834.714642938,
+        "propulsion": 3155167.8090227623,
+        "u2u": 3336.6435470594683,
+        "upload": 3257.6873131991338
+      },
+      "priority": [
+        {
+          "arrived": 33852,
+          "completed": 33848,
+          "unfinished": 4,
+          "completion_rate": 0.999881838591516,
+          "delay_sum_s": 16320.300000001424,
+          "mean_delay_ms": 482.1643819428452
+        },
+        {
+          "arrived": 92057,
+          "completed": 91900,
+          "unfinished": 157,
+          "completion_rate": 0.9982945349077202,
+          "delay_sum_s": 170214.6000000004,
+          "mean_delay_ms": 1852.1719260065333
+        }
+      ],
+      "weighted_delay_ms": 774.7051442911256
+    }
+  },
+  "elapsed_seconds": 610.4753209
+}

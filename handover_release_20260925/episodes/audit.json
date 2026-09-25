@@ -1,0 +1,163 @@
+{
+  "passed": true,
+  "episodes": 700,
+  "pretrain": 300,
+  "joint": 400,
+  "physical_steps": 6300000,
+  "trajectory_samples": 126000,
+  "simulation_steps_added": 0,
+  "optimizer_steps_added": 0,
+  "sources": [
+    {
+      "source": "industrial_hotspot_records/load24725_fresh_sac_lr1e5_20260924/training/episodes.jsonl",
+      "first": 1,
+      "last": 300,
+      "episodes": 300,
+      "bytes": 21551071,
+      "sha256": "e7a1598d2f9bd2f1b2256c6e76ef8951e2f3a6d9fcec3fb529eb61287683012c",
+      "archive": "handover_release_20260925/episodes/training.episodes.jsonl.gz"
+    },
+    {
+      "source": "industrial_hotspot_records/load24725_fresh_sac_lr1e5_20260924/joint25_run02/episodes.jsonl",
+      "first": 1,
+      "last": 25,
+      "episodes": 25,
+      "bytes": 3218818,
+      "sha256": "fe7f0b89678cf526a3262fd2cd15f628b9dbe02e02fc679ca948a8aa84b3674d",
+      "archive": "handover_release_20260925/episodes/joint25_run02.episodes.jsonl.gz"
+    },
+    {
+      "source": "industrial_hotspot_records/load24725_fresh_sac_lr1e5_20260924/joint50/episodes.jsonl",
+      "first": 26,
+      "last": 50,
+      "episodes": 25,
+      "bytes": 3220235,
+      "sha256": "2d3b06b847f1bb8ccb1051c01a87b13a3d4f71fab7eeefded2928b6c9e616d09",
+      "archive": "handover_release_20260925/episodes/joint50.episodes.jsonl.gz"
+    },
+    {
+      "source": "industrial_hotspot_records/load24725_fresh_sac_lr1e5_20260924/joint400/episodes.jsonl",
+      "first": 51,
+      "last": 400,
+      "episodes": 350,
+      "bytes": 45039688,
+      "sha256": "211af060ed0890dbb07698e86ede7ab7d417da7e6fa7038bd8f4e7d21682ba3f",
+      "archive": "handover_release_20260925/episodes/joint400.episodes.jsonl.gz"
+    }
+  ],
+  "note": "Training episodes vary in scenarios and include exploration/updates. Block delays are arithmetic means of per-episode weighted completed-parent delay, not pooled frozen evaluation.",
+  "blocks": [
+    {
+      "stage": "pretrain",
+      "first": 1,
+      "last": 50,
+      "mean_episode_delay_ms": 5127.335522159581,
+      "mean_cost_per_s": 49.02748195031993,
+      "mean_episode_low_unfinished": 861.86
+    },
+    {
+      "stage": "pretrain",
+      "first": 51,
+      "last": 100,
+      "mean_episode_delay_ms": 1456.9602272423767,
+      "mean_cost_per_s": 16.84192479472062,
+      "mean_episode_low_unfinished": 136.02
+    },
+    {
+      "stage": "pretrain",
+      "first": 101,
+      "last": 150,
+      "mean_episode_delay_ms": 1511.9604254527726,
+      "mean_cost_per_s": 18.771626885465,
+      "mean_episode_low_unfinished": 241.92
+    },
+    {
+      "stage": "pretrain",
+      "first": 151,
+      "last": 200,
+      "mean_episode_delay_ms": 698.9093084621867,
+      "mean_cost_per_s": 10.743302640087533,
+      "mean_episode_low_unfinished": 20.86
+    },
+    {
+      "stage": "pretrain",
+      "first": 201,
+      "last": 250,
+      "mean_episode_delay_ms": 660.6368348431693,
+      "mean_cost_per_s": 10.460732179092478,
+      "mean_episode_low_unfinished": 18.08
+    },
+    {
+      "stage": "pretrain",
+      "first": 251,
+      "last": 300,
+      "mean_episode_delay_ms": 643.0846511353753,
+      "mean_cost_per_s": 10.32120367278372,
+      "mean_episode_low_unfinished": 12.88
+    },
+    {
+      "stage": "joint",
+      "first": 1,
+      "last": 50,
+      "mean_episode_delay_ms": 706.3106038657468,
+      "mean_cost_per_s": 10.736381330653606,
+      "mean_episode_low_unfinished": 21.88
+    },
+    {
+      "stage": "joint",
+      "first": 51,
+      "last": 100,
+      "mean_episode_delay_ms": 878.1778242302672,
+      "mean_cost_per_s": 12.084834623415206,
+      "mean_episode_low_unfinished": 52.84
+    },
+    {
+      "stage": "joint",
+      "first": 101,
+      "last": 150,
+      "mean_episode_delay_ms": 870.8473395442663,
+      "mean_cost_per_s": 12.034009210089375,
+      "mean_episode_low_unfinished": 50.24
+    },
+    {
+      "stage": "joint",
+      "first": 151,
+      "last": 200,
+      "mean_episode_delay_ms": 1118.5195590525905,
+      "mean_cost_per_s": 14.509236256700548,
+      "mean_episode_low_unfinished": 145.74
+    },
+    {
+      "stage": "joint",
+      "first": 201,
+      "last": 250,
+      "mean_episode_delay_ms": 823.230561465811,
+      "mean_cost_per_s": 11.645569710835769,
+      "mean_episode_low_unfinished": 42.26
+    },
+    {
+      "stage": "joint",
+      "first": 251,
+      "last": 300,
+      "mean_episode_delay_ms": 707.0014467788181,
+      "mean_cost_per_s": 10.747697223708922,
+      "mean_episode_low_unfinished": 17.74
+    },
+    {
+      "stage": "joint",
+      "first": 301,
+      "last": 350,
+      "mean_episode_delay_ms": 833.9121835605479,
+      "mean_cost_per_s": 11.778071495485728,
+      "mean_episode_low_unfinished": 32.4
+    },
+    {
+      "stage": "joint",
+      "first": 351,
+      "last": 400,
+      "mean_episode_delay_ms": 721.029188281641,
+      "mean_cost_per_s": 10.89700620425521,
+      "mean_episode_low_unfinished": 23.86
+    }
+  ]
+}

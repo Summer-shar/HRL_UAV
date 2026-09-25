@@ -1,0 +1,28 @@
+{
+  "status": "complete",
+  "committed_episodes": 400,
+  "target_episodes": 400,
+  "updates": {
+    "ppo": 240,
+    "ppo_actor_gradient_steps": 2295,
+    "sac": 58451,
+    "sac_actor": 29175,
+    "sac_critic_fits": 116902,
+    "replay_writes": 1170000
+  },
+  "latest_checkpoint": {
+    "path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_fresh_sac_lr1e5_20260924\\joint400\\checkpoints\\rolling\\checkpoint-1790295023370105700-11ccdb5d5320477faa74398285ad1b7c.pt",
+    "sha256": "ae35fd82bff6687007115947115e1db58cd127d579c4e4e4d1b2ab59e0644463",
+    "index": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_fresh_sac_lr1e5_20260924\\joint400\\checkpoints\\rolling\\latest.json",
+    "latest": {
+      "filename": "checkpoint-1790295023370105700-11ccdb5d5320477faa74398285ad1b7c.pt",
+      "sha256": "ae35fd82bff6687007115947115e1db58cd127d579c4e4e4d1b2ab59e0644463"
+    },
+    "previous": {
+      "filename": "checkpoint-1790295022511549400-56fd3580f40f4f17bb2b6aa80c95ed39.pt",
+      "sha256": "ae35fd82bff6687007115947115e1db58cd127d579c4e4e4d1b2ab59e0644463"
+    },
+    "persistent_path": null
+  },
+  "elapsed_seconds": 7589.7817747
+}

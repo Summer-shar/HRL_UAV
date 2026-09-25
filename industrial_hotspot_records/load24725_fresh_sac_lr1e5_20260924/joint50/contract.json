@@ -1,0 +1,26 @@
+{
+  "schema": "fresh_joint_continuation_25_to_50_v1",
+  "source_checkpoint": {
+    "path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_fresh_sac_lr1e5_20260924\\joint25_run02\\checkpoints\\rolling\\checkpoint-1790268594858475300-49d474342234431ea0319359d19ed507.pt",
+    "sha256": "556dd1c805fccc8b3bb067a3daa520e9afab220e66a8d09bd71349c1faeb74e1"
+  },
+  "start_episode": 25,
+  "target_episode": 50,
+  "extra_training_physical_steps": 225000,
+  "extra_evaluation_physical_steps": 108000,
+  "episode_seconds": 900,
+  "evaluation_nodes": [
+    50
+  ],
+  "wall_seconds": 3600,
+  "task_flow": "Continue existing joint runner seed indices 25..49 without reseeding learner RNG",
+  "automatic_extension": false,
+  "automatic_retry": false,
+  "inherited_protocol_sha256": "e335ab3b0da75314b2b80aaa109e85f9317fd83bbef1e1f4fb5ab39f7950d26a",
+  "runner_sha256": {
+    "__init__.py": "d11fade914f3c74a2d1668b3ede9e930e39bbf06473f2ccda3b8cf9f9aefdf15",
+    "experiment.py": "b54e595e47a0b77042bd35af4fce5fffd964dbc29d25994488137081a1ee5eb5",
+    "evaluation.py": "e5e819e8d53688def52d6226fcc3596ee402a7ff3d6f81c4d377a65db46afe1c",
+    "continue50.py": "9333ac7b8430e54ac5322ca8a65eb0b949f3c0360e0a2b9999b23de41d6aa909"
+  }
+}

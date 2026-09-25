@@ -1,0 +1,193 @@
+{
+  "schema": "industrial_deployment_scene_v3",
+  "status": "implementation_v3_training_reference",
+  "base_scene": {
+    "schema": "industrial_static_v1",
+    "status": "deployment_v3_training_reference",
+    "num_uavs": 3,
+    "num_users": 39,
+    "map_size_m": 1000.0,
+    "height_m": 50.0,
+    "regions_m": [
+      [
+        [
+          200,
+          200
+        ],
+        [
+          500,
+          500
+        ]
+      ],
+      [
+        [
+          200,
+          500
+        ],
+        [
+          500,
+          800
+        ]
+      ],
+      [
+        [
+          500,
+          350
+        ],
+        [
+          800,
+          650
+        ]
+      ]
+    ],
+    "device_counts": [
+      [
+        5,
+        4,
+        4
+      ],
+      [
+        8,
+        4,
+        1
+      ],
+      [
+        6,
+        2,
+        5
+      ]
+    ],
+    "uav_initial_positions_m": [
+      [
+        350,
+        350
+      ],
+      [
+        350,
+        650
+      ],
+      [
+        650,
+        500
+      ]
+    ],
+    "region_multipliers": [
+      1.2,
+      0.8,
+      1.0
+    ],
+    "activity": {
+      "normal_mean_s": 60.0,
+      "busy_mean_s": 30.0,
+      "normal_multiplier": 1.0,
+      "busy_multiplier": 3.0
+    },
+    "task_types": {
+      "sensor": {
+        "rate_per_s": 0.35,
+        "high_probability": 0.2,
+        "input_bits": [
+          350000,
+          900000
+        ],
+        "cycles_per_bit": [
+          800,
+          800
+        ]
+      },
+      "controller": {
+        "rate_per_s": 0.4,
+        "high_probability": 0.6,
+        "input_bits": [
+          550000,
+          350000
+        ],
+        "cycles_per_bit": [
+          1000,
+          1000
+        ]
+      },
+      "vision": {
+        "rate_per_s": 0.5,
+        "high_probability": 0.1,
+        "input_bits": [
+          1200000,
+          1400000
+        ],
+        "cycles_per_bit": [
+          1500,
+          1500
+        ]
+      }
+    },
+    "time": {
+      "physical_s": 0.1,
+      "routing_s": 0.5,
+      "motion_s": 5.0,
+      "history_s": 10.0,
+      "report_window_s": 900.0
+    },
+    "motion": {
+      "max_speed_mps": 10.0,
+      "min_separation_m": 5.0
+    },
+    "resources": {
+      "cpu_hz": [
+        10000000000,
+        10000000000,
+        10000000000
+      ],
+      "cpu_kappa": 1e-28,
+      "uplink_bandwidth_hz": 20000000,
+      "u2u_bandwidth_hz": 6000000,
+      "terminal_power_w": 0.1,
+      "u2u_source_power_w": 1.0,
+      "reference_gain": 1e-06,
+      "noise_psd_w_per_hz": 1.95e-19
+    },
+    "objective": {
+      "priority_weights": [
+        10.0,
+        1.0
+      ],
+      "holding_weight": 0.9,
+      "holding_reference_task_s": 10.0,
+      "energy_reference_j": 14.0,
+      "gamma_per_routing_frame": 0.99,
+      "energy_mode": "full"
+    },
+    "parameter_sources": {
+      "inherited_simulation": [
+        "num_uavs",
+        "num_users",
+        "map_size_m",
+        "height_m",
+        "device_counts",
+        "uav_initial_positions_m",
+        "task input_bits",
+        "resources",
+        "physical_s",
+        "routing_s",
+        "history_s",
+        "priority_weights",
+        "objective scales"
+      ],
+      "new_simulation_assumptions": [
+        "rectangular uniform fixed layout",
+        "region_multipliers",
+        "activity",
+        "task rates",
+        "high_probability",
+        "cycles_per_bit",
+        "deployment adjustment speed cap 10 m/s"
+      ],
+      "motion_period_rationale": "Candidate service commitment H=5 s, shared linear adjustment M=1 s, hold=4 s. D_max=10 m preserves the former per-period action range; M=D_max/v_max. Neither final hardware validation nor timescale optimality is claimed. Long-run maximum net displacement per period remains 2 m/s."
+    }
+  },
+  "deployment": {
+    "macro_period_s": 5.0,
+    "adjustment_s": 1.0,
+    "max_target_step_m": 10.0,
+    "profile": "synchronous_linear_then_hold"
+  }
+}

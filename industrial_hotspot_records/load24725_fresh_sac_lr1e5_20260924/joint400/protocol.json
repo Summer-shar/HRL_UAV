@@ -1,0 +1,1092 @@
+{
+  "schema": "industrial_device_fresh_hover_sac_v1",
+  "purpose": "research",
+  "training_seed": 1,
+  "reference_device_protocol": {
+    "arm": "device",
+    "automatic_extension": false,
+    "baseline_protocol": {
+      "arm": "control",
+      "budget": {
+        "episode_seconds": 900,
+        "joint_development_check_episodes": [
+          25,
+          50
+        ],
+        "joint_episodes": 50,
+        "max_evaluation_physical_steps": 216000,
+        "max_training_physical_steps": 450000
+      },
+      "development_manifest": {
+        "scenarios": [
+          {
+            "arrival_seed": 330000000,
+            "layout_seed": 310000000,
+            "load_seed": 350000000,
+            "profile_permutation": [
+              0,
+              1,
+              2
+            ],
+            "routing_seed": 340000000,
+            "scenario_id": "development_00_0"
+          },
+          {
+            "arrival_seed": 330000001,
+            "layout_seed": 310000001,
+            "load_seed": 350000001,
+            "profile_permutation": [
+              0,
+              2,
+              1
+            ],
+            "routing_seed": 340000001,
+            "scenario_id": "development_01_0"
+          },
+          {
+            "arrival_seed": 330000002,
+            "layout_seed": 310000002,
+            "load_seed": 350000002,
+            "profile_permutation": [
+              1,
+              0,
+              2
+            ],
+            "routing_seed": 340000002,
+            "scenario_id": "development_02_0"
+          },
+          {
+            "arrival_seed": 330000003,
+            "layout_seed": 310000003,
+            "load_seed": 350000003,
+            "profile_permutation": [
+              1,
+              2,
+              0
+            ],
+            "routing_seed": 340000003,
+            "scenario_id": "development_03_0"
+          },
+          {
+            "arrival_seed": 330000004,
+            "layout_seed": 310000004,
+            "load_seed": 350000004,
+            "profile_permutation": [
+              2,
+              0,
+              1
+            ],
+            "routing_seed": 340000004,
+            "scenario_id": "development_04_0"
+          },
+          {
+            "arrival_seed": 330000005,
+            "layout_seed": 310000005,
+            "load_seed": 350000005,
+            "profile_permutation": [
+              2,
+              1,
+              0
+            ],
+            "routing_seed": 340000005,
+            "scenario_id": "development_05_0"
+          }
+        ],
+        "schema": "industrial_hotspot_development_v1",
+        "seconds": 900
+      },
+      "episode_semantics": {
+        "added_terminal_penalty": false,
+        "bootstrap_same_scene_successor": true,
+        "business_profile_assignment_fixed_within_episode": true,
+        "business_profile_assignment_resampled_between_episodes": true,
+        "claim_infinite_horizon_queue_stability": false,
+        "drain_queues_after_cutoff": false,
+        "end_is_sampling_truncation": true,
+        "gae_trace_crosses_reset": false,
+        "layout_fixed_within_episode": true,
+        "learning_state_preserved_between_episodes": true,
+        "log_windows_per_episode": 3,
+        "macro_slots_per_episode": 180,
+        "physical_steps_per_episode": 9000,
+        "queue_reset_between_episodes": true,
+        "queues_carried_across_macro_slots": true,
+        "reset_observation_as_previous_successor": false,
+        "routing_frames_per_episode": 1800,
+        "terminated": false,
+        "truncated": true
+      },
+      "initial_motion_diagnostic": "record_only; one reference is not an optimum or proof of absent benefit",
+      "learning": {
+        "batch_size": 128,
+        "gae_lambda": 0.95,
+        "gamma_per_resource_frame": 0.99,
+        "grad_clip": 1.0,
+        "initial_alpha": 0.05,
+        "initial_sac_log_std": -2.0,
+        "micro_algorithm": "sac",
+        "ppo_actor_lr": 0.0003,
+        "ppo_clip": 0.2,
+        "ppo_critic_lr": 0.001,
+        "ppo_epochs": 10,
+        "ppo_final_std": 0.03333333333333333,
+        "ppo_guard_retries": 4,
+        "ppo_initial_std": 0.3333333333333333,
+        "ppo_std_backtracks": 12,
+        "ppo_std_decay_updates": 360,
+        "ppo_target_kl": 0.03,
+        "ppo_update_guard": "post_step_batch_kl_v1",
+        "ppo_update_macros": 300,
+        "pretrain_lr": [
+          3e-05,
+          0.0003,
+          3e-05
+        ],
+        "replay_capacity": 100000,
+        "replay_warmup": 1000,
+        "sac_actor_warmup_updates": 100,
+        "sac_critic_steps_per_update": 2,
+        "sac_policy_delay": 2,
+        "sac_stage_policy": "preserve",
+        "sac_update_frames": 20,
+        "tau": 0.01
+      },
+      "lower_objective": "unchanged V4 discounted physical cost plus SAC entropy",
+      "parent": {
+        "path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_seed1_20260923\\training\\checkpoints\\candidate-joint-0600.pt",
+        "sha256": "593609143427e023c0a924da40667a59e0b8064f652a94cacd2c5ca847be7be8"
+      },
+      "purpose": "pilot",
+      "quality_rule": {
+        "automatic_extension": false,
+        "consecutive_bad_nodes": 2,
+        "cost_ratio_bad": 1.1,
+        "delay_ratio_bad": 1.1,
+        "upload_area_ratio_bad": 2.0
+      },
+      "randomness": {
+        "arrival_base": 630000000,
+        "layout_base": 610000000,
+        "load_base": 650000000,
+        "routing_base": 640000000,
+        "training_stride": 1000000
+      },
+      "runtime": {
+        "device": "cpu",
+        "max_wall_seconds_per_job": 3600,
+        "torch_threads": 1
+      },
+      "scene_path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_seed1_20260923\\training\\scene.json",
+      "scene_sha256": "91aff57f70f3adf0962f13620700417f52596781edf848850c8becd2a7449c24",
+      "schema": "industrial_upper_horizon_pilot_v1",
+      "training_seed": 1,
+      "transfer": "Full unchanged SAC learning state; newly seeded PPO networks, optimizers, exploration, guard and rollout.",
+      "upper_half_life_s": null,
+      "upper_objective": "discounted physical cost with independent upper physical-time discount"
+    },
+    "budget": {
+      "episode_seconds": 900,
+      "joint_development_check_episodes": [
+        25,
+        50
+      ],
+      "joint_episodes": 50,
+      "max_evaluation_physical_steps": 216000,
+      "max_training_physical_steps": 450000
+    },
+    "development_manifest": {
+      "scenarios": [
+        {
+          "arrival_seed": 330000000,
+          "layout_seed": 310000000,
+          "load_seed": 350000000,
+          "profile_permutation": [
+            0,
+            1,
+            2
+          ],
+          "routing_seed": 340000000,
+          "scenario_id": "development_00_0"
+        },
+        {
+          "arrival_seed": 330000001,
+          "layout_seed": 310000001,
+          "load_seed": 350000001,
+          "profile_permutation": [
+            0,
+            2,
+            1
+          ],
+          "routing_seed": 340000001,
+          "scenario_id": "development_01_0"
+        },
+        {
+          "arrival_seed": 330000002,
+          "layout_seed": 310000002,
+          "load_seed": 350000002,
+          "profile_permutation": [
+            1,
+            0,
+            2
+          ],
+          "routing_seed": 340000002,
+          "scenario_id": "development_02_0"
+        },
+        {
+          "arrival_seed": 330000003,
+          "layout_seed": 310000003,
+          "load_seed": 350000003,
+          "profile_permutation": [
+            1,
+            2,
+            0
+          ],
+          "routing_seed": 340000003,
+          "scenario_id": "development_03_0"
+        },
+        {
+          "arrival_seed": 330000004,
+          "layout_seed": 310000004,
+          "load_seed": 350000004,
+          "profile_permutation": [
+            2,
+            0,
+            1
+          ],
+          "routing_seed": 340000004,
+          "scenario_id": "development_04_0"
+        },
+        {
+          "arrival_seed": 330000005,
+          "layout_seed": 310000005,
+          "load_seed": 350000005,
+          "profile_permutation": [
+            2,
+            1,
+            0
+          ],
+          "routing_seed": 340000005,
+          "scenario_id": "development_05_0"
+        }
+      ],
+      "schema": "industrial_hotspot_development_v1",
+      "seconds": 900
+    },
+    "episode_semantics": {
+      "added_terminal_penalty": false,
+      "bootstrap_same_scene_successor": true,
+      "business_profile_assignment_fixed_within_episode": true,
+      "business_profile_assignment_resampled_between_episodes": true,
+      "claim_infinite_horizon_queue_stability": false,
+      "drain_queues_after_cutoff": false,
+      "end_is_sampling_truncation": true,
+      "gae_trace_crosses_reset": false,
+      "layout_fixed_within_episode": true,
+      "learning_state_preserved_between_episodes": true,
+      "log_windows_per_episode": 3,
+      "macro_slots_per_episode": 180,
+      "physical_steps_per_episode": 9000,
+      "queue_reset_between_episodes": true,
+      "queues_carried_across_macro_slots": true,
+      "reset_observation_as_previous_successor": false,
+      "routing_frames_per_episode": 1800,
+      "terminated": false,
+      "truncated": true
+    },
+    "first_stop_episode": 25,
+    "initial_motion_diagnostic": "record_only; one reference is not an optimum or proof of absent benefit",
+    "intervention": "PPO per-device raw workload/position observation and shared device encoding only.",
+    "learning": {
+      "batch_size": 128,
+      "gae_lambda": 0.95,
+      "gamma_per_resource_frame": 0.99,
+      "grad_clip": 1.0,
+      "initial_alpha": 0.05,
+      "initial_sac_log_std": -2.0,
+      "micro_algorithm": "sac",
+      "ppo_actor_lr": 0.0003,
+      "ppo_clip": 0.2,
+      "ppo_critic_lr": 0.001,
+      "ppo_epochs": 10,
+      "ppo_final_std": 0.03333333333333333,
+      "ppo_guard_retries": 4,
+      "ppo_initial_std": 0.3333333333333333,
+      "ppo_std_backtracks": 12,
+      "ppo_std_decay_updates": 360,
+      "ppo_target_kl": 0.03,
+      "ppo_update_guard": "post_step_batch_kl_v1",
+      "ppo_update_macros": 300,
+      "pretrain_lr": [
+        3e-05,
+        0.0003,
+        3e-05
+      ],
+      "replay_capacity": 100000,
+      "replay_warmup": 1000,
+      "sac_actor_warmup_updates": 100,
+      "sac_critic_steps_per_update": 2,
+      "sac_policy_delay": 2,
+      "sac_stage_policy": "preserve",
+      "sac_update_frames": 20,
+      "tau": 0.01
+    },
+    "lower_objective": "unchanged V4 discounted physical cost plus SAC entropy",
+    "observation_schema": "industrial_device_observation_v1",
+    "parent": {
+      "path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_seed1_20260923\\training\\checkpoints\\candidate-joint-0600.pt",
+      "sha256": "593609143427e023c0a924da40667a59e0b8064f652a94cacd2c5ca847be7be8"
+    },
+    "ppo_architecture": "device_set_mean_max_phi32_head256_v1",
+    "ppo_initialization_seed": 8700001,
+    "purpose": "pilot",
+    "quality_rule": {
+      "automatic_extension": false,
+      "consecutive_bad_nodes": 2,
+      "cost_ratio_bad": 1.1,
+      "delay_ratio_bad": 1.1,
+      "upload_area_ratio_bad": 2.0
+    },
+    "randomness": {
+      "arrival_base": 630000000,
+      "layout_base": 610000000,
+      "load_base": 650000000,
+      "routing_base": 640000000,
+      "training_stride": 1000000
+    },
+    "runtime": {
+      "device": "cpu",
+      "max_wall_seconds_per_job": 3600,
+      "torch_threads": 1
+    },
+    "scene_path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_seed1_20260923\\training\\scene.json",
+    "scene_sha256": "91aff57f70f3adf0962f13620700417f52596781edf848850c8becd2a7449c24",
+    "schema": "industrial_device_joint_pilot_v1",
+    "training_seed": 1,
+    "transfer": "Full unchanged SAC learner; fresh PPO device encoders and optimizers; direct joint learning.",
+    "upper_half_life_s": null,
+    "upper_objective": "discounted physical cost with independent upper physical-time discount"
+  },
+  "original_v4_protocol": {
+    "schema": "industrial_hotspot_v4",
+    "purpose": "research",
+    "scene_config": "industrial_hotspot_variants/load24725_20260923/scene.json",
+    "observation_version": "industrial_deployment_v3",
+    "methods": [
+      "ppo_sac",
+      "ppo_cvx",
+      "ppo_random",
+      "ppo_local"
+    ],
+    "training_seeds": [
+      1
+    ],
+    "budget": {
+      "episode_seconds": 900,
+      "stream_seconds_alias": 900,
+      "log_window_seconds": 300,
+      "pretrain_max_episodes": 667,
+      "pretrain_check_episodes": [
+        200,
+        300,
+        400,
+        500,
+        600,
+        667
+      ],
+      "joint_episodes": 600,
+      "joint_development_check_episodes": [
+        200,
+        400,
+        600
+      ],
+      "previous_pretrain_reference_windows": 2000,
+      "previous_log_window_seconds": 300,
+      "whole_episode_rounding_extra_seconds": 300,
+      "no_short_tail_episode": true
+    },
+    "randomness": {
+      "training_stride": 1000000,
+      "pretrain": {
+        "layout_base": 110000000,
+        "arrival_base": 130000000,
+        "routing_base": 140000000,
+        "load_base": 150000000
+      },
+      "joint": {
+        "layout_base": 210000000,
+        "arrival_base": 230000000,
+        "routing_base": 240000000,
+        "load_base": 250000000
+      },
+      "development": {
+        "layout_base": 310000000,
+        "arrival_base": 330000000,
+        "routing_base": 340000000,
+        "scenario_count": 6,
+        "load_base": 350000000,
+        "profile_permutation_assignment": "Each of six registered scenarios uses one different permutation; fixed before results"
+      },
+      "final_test": {
+        "layout_base": 510000000,
+        "arrival_base": 530000000,
+        "routing_base": 540000000,
+        "layout_count": 10,
+        "arrival_repeats_per_layout": 2,
+        "load_base": 550000000,
+        "profile_permutation_assignment": "Cover all six permutations across ten layout/load scenarios as evenly as possible; fixed before results"
+      },
+      "formula": "Training: base + training_seed*stride + episode_index; load_seed selects iid profile permutation. Development/test explicit permutations sealed in manifest. UAV starts fixed.",
+      "rule_rng_purpose": "Only for methods requiring stochastic routing; independent from arrivals",
+      "layout_shared_across_final_arrival_repeats": true,
+      "fixed_uav_start_shared_by_all_scenarios": true
+    },
+    "learning": {
+      "micro_algorithm": "sac",
+      "gamma_per_resource_frame": 0.99,
+      "gae_lambda": 0.95,
+      "batch_size": 128,
+      "replay_capacity": 100000,
+      "replay_warmup": 1000,
+      "sac_update_frames": 20,
+      "sac_policy_delay": 2,
+      "sac_actor_warmup_updates": 100,
+      "sac_critic_steps_per_update": 2,
+      "initial_alpha": 0.05,
+      "initial_sac_log_std": -2.0,
+      "pretrain_lr": [
+        3e-05,
+        0.0003,
+        3e-05
+      ],
+      "sac_stage_policy": "preserve",
+      "grad_clip": 1.0,
+      "tau": 0.01,
+      "ppo_update_macros": 300,
+      "ppo_epochs": 10,
+      "ppo_actor_lr": 0.0003,
+      "ppo_critic_lr": 0.001,
+      "ppo_clip": 0.2,
+      "ppo_target_kl": 0.03,
+      "ppo_initial_std": 0.3333333333333333,
+      "ppo_final_std": 0.03333333333333333,
+      "ppo_update_guard": "post_step_batch_kl_v1",
+      "ppo_guard_retries": 4,
+      "ppo_std_backtracks": 12,
+      "ppo_std_decay_updates": 360
+    },
+    "runtime": {
+      "device": "cpu",
+      "torch_threads": 1,
+      "max_wall_seconds_per_job": 86400,
+      "resume": "stream_boundary"
+    },
+    "admission": {
+      "version": "hotspot_sac_usable_v1",
+      "consecutive_checkpoints_required": 2,
+      "cost_ratio_to_local_max": 0.95,
+      "per_scene_cost_ratio_to_local_max": 1.02,
+      "per_scene_required_count": 4,
+      "pooled_high_completion_deficit_max_percentage_points": 1.0,
+      "pooled_low_unfinished_ratio_to_local_max": 0.9,
+      "local_zero_unfinished_requires_sac_zero": true,
+      "cvx_is_reference_only": true,
+      "technical_failures_abort": true,
+      "at_cap_without_admission": "needs_review",
+      "source": "proposed engineering thresholds; not empirical convergence or significance evidence",
+      "low_unfinished_measurement": "Sum over six frozen pre-priming t=900 metrics of priority[1].arrived - priority[1].completed",
+      "cache_identity_includes_load_assignment": true
+    },
+    "opportunity_diagnostic": {
+      "scenarios": 6,
+      "seconds": 900,
+      "report_collection_seconds": 10,
+      "reference": "one causal priority-weighted recent-bit center target, constrained deployment then hold, CVX routing",
+      "baseline": "same-scene hover CVX cached from developer baselines",
+      "positive_total_cost_benefit_required": true,
+      "per_scene_cost_ratio_max": 1.02,
+      "per_scene_required_count": 4,
+      "failure_status": "spatial_benefit_unconfirmed",
+      "new_learning_stage": false,
+      "failure_blocks_automatic_training": false,
+      "reference_target_tolerance_m": 0.001,
+      "safety_projection_stall": "keep original target; report residual; never force arrival; remain within original 900s budget"
+    },
+    "evaluation_budget": {
+      "admission_sac_flows_max": 36,
+      "cached_local_cvx_flows": 12,
+      "joint_paired_flows": 36,
+      "extra_reference_motion_flows": 6,
+      "flow_seconds": 900,
+      "first_batch_total_physical_steps_max": 810000,
+      "reserved_final_test_physical_steps": 360000,
+      "physical_step_cap_includes_failed_attempts": true,
+      "automatic_retry_reserve_steps": 0,
+      "insufficient_remaining_budget_action": "needs_review; retain matching complete results"
+    },
+    "functional_gate_budget": {
+      "physical_steps_max": 5000,
+      "backward_calls_max": 300,
+      "test_weights_and_replay_excluded_from_research": true
+    },
+    "episode_semantics": {
+      "macro_slots_per_episode": 180,
+      "routing_frames_per_episode": 1800,
+      "physical_steps_per_episode": 9000,
+      "log_windows_per_episode": 3,
+      "layout_fixed_within_episode": true,
+      "queues_carried_across_macro_slots": true,
+      "queue_reset_between_episodes": true,
+      "learning_state_preserved_between_episodes": true,
+      "end_is_sampling_truncation": true,
+      "truncated": true,
+      "terminated": false,
+      "bootstrap_same_scene_successor": true,
+      "gae_trace_crosses_reset": false,
+      "reset_observation_as_previous_successor": false,
+      "added_terminal_penalty": false,
+      "drain_queues_after_cutoff": false,
+      "claim_infinite_horizon_queue_stability": false,
+      "business_profile_assignment_fixed_within_episode": true,
+      "business_profile_assignment_resampled_between_episodes": true
+    },
+    "plotting": {
+      "x_axis": "actual_completed_episode_index; phase boundary labelled",
+      "primary_reward": "negative sum of all physical costs in one 900s episode, undiscounted, counted once",
+      "primary_queue": "end-of-episode unfinished parent count per priority, frozen before priming and reset",
+      "queue_units": {
+        "upload": "Mbit",
+        "transfer": "Mbit",
+        "cpu": "Gcycles"
+      },
+      "raw_episode_points": true,
+      "moving_average_episodes": 20,
+      "moving_average_resets_at_stage_boundary": true,
+      "fixed_development_evaluation_curve": true,
+      "monotonic_reward_guarantee": false,
+      "arbitrary_unseen_initialization_guarantee": false,
+      "report_actual_profile_by_region": true,
+      "report_expected_and_realized_per_region_bit_cycle_arrivals": true,
+      "routing_diagnostics_condition_on_physical_uav_and_current_business_role": true
+    },
+    "development_manifest": {
+      "schema": "industrial_hotspot_development_v1",
+      "seconds": 900,
+      "scenarios": [
+        {
+          "scenario_id": "development_00_0",
+          "layout_seed": 310000000,
+          "load_seed": 350000000,
+          "arrival_seed": 330000000,
+          "routing_seed": 340000000,
+          "profile_permutation": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "scenario_id": "development_01_0",
+          "layout_seed": 310000001,
+          "load_seed": 350000001,
+          "arrival_seed": 330000001,
+          "routing_seed": 340000001,
+          "profile_permutation": [
+            0,
+            2,
+            1
+          ]
+        },
+        {
+          "scenario_id": "development_02_0",
+          "layout_seed": 310000002,
+          "load_seed": 350000002,
+          "arrival_seed": 330000002,
+          "routing_seed": 340000002,
+          "profile_permutation": [
+            1,
+            0,
+            2
+          ]
+        },
+        {
+          "scenario_id": "development_03_0",
+          "layout_seed": 310000003,
+          "load_seed": 350000003,
+          "arrival_seed": 330000003,
+          "routing_seed": 340000003,
+          "profile_permutation": [
+            1,
+            2,
+            0
+          ]
+        },
+        {
+          "scenario_id": "development_04_0",
+          "layout_seed": 310000004,
+          "load_seed": 350000004,
+          "arrival_seed": 330000004,
+          "routing_seed": 340000004,
+          "profile_permutation": [
+            2,
+            0,
+            1
+          ]
+        },
+        {
+          "scenario_id": "development_05_0",
+          "layout_seed": 310000005,
+          "load_seed": 350000005,
+          "arrival_seed": 330000005,
+          "routing_seed": 340000005,
+          "profile_permutation": [
+            2,
+            1,
+            0
+          ]
+        }
+      ]
+    },
+    "final_test_manifest": {
+      "schema": "industrial_hotspot_final_test_v1",
+      "seconds": 900,
+      "auto_run": false,
+      "scenarios": [
+        {
+          "scenario_id": "final_test_00_0",
+          "layout_seed": 510000000,
+          "load_seed": 550000000,
+          "arrival_seed": 530000000,
+          "routing_seed": 540000000,
+          "profile_permutation": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "scenario_id": "final_test_00_1",
+          "layout_seed": 510000000,
+          "load_seed": 550000000,
+          "arrival_seed": 530000001,
+          "routing_seed": 540000001,
+          "profile_permutation": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "scenario_id": "final_test_01_0",
+          "layout_seed": 510000001,
+          "load_seed": 550000001,
+          "arrival_seed": 530000002,
+          "routing_seed": 540000002,
+          "profile_permutation": [
+            0,
+            2,
+            1
+          ]
+        },
+        {
+          "scenario_id": "final_test_01_1",
+          "layout_seed": 510000001,
+          "load_seed": 550000001,
+          "arrival_seed": 530000003,
+          "routing_seed": 540000003,
+          "profile_permutation": [
+            0,
+            2,
+            1
+          ]
+        },
+        {
+          "scenario_id": "final_test_02_0",
+          "layout_seed": 510000002,
+          "load_seed": 550000002,
+          "arrival_seed": 530000004,
+          "routing_seed": 540000004,
+          "profile_permutation": [
+            1,
+            0,
+            2
+          ]
+        },
+        {
+          "scenario_id": "final_test_02_1",
+          "layout_seed": 510000002,
+          "load_seed": 550000002,
+          "arrival_seed": 530000005,
+          "routing_seed": 540000005,
+          "profile_permutation": [
+            1,
+            0,
+            2
+          ]
+        },
+        {
+          "scenario_id": "final_test_03_0",
+          "layout_seed": 510000003,
+          "load_seed": 550000003,
+          "arrival_seed": 530000006,
+          "routing_seed": 540000006,
+          "profile_permutation": [
+            1,
+            2,
+            0
+          ]
+        },
+        {
+          "scenario_id": "final_test_03_1",
+          "layout_seed": 510000003,
+          "load_seed": 550000003,
+          "arrival_seed": 530000007,
+          "routing_seed": 540000007,
+          "profile_permutation": [
+            1,
+            2,
+            0
+          ]
+        },
+        {
+          "scenario_id": "final_test_04_0",
+          "layout_seed": 510000004,
+          "load_seed": 550000004,
+          "arrival_seed": 530000008,
+          "routing_seed": 540000008,
+          "profile_permutation": [
+            2,
+            0,
+            1
+          ]
+        },
+        {
+          "scenario_id": "final_test_04_1",
+          "layout_seed": 510000004,
+          "load_seed": 550000004,
+          "arrival_seed": 530000009,
+          "routing_seed": 540000009,
+          "profile_permutation": [
+            2,
+            0,
+            1
+          ]
+        },
+        {
+          "scenario_id": "final_test_05_0",
+          "layout_seed": 510000005,
+          "load_seed": 550000005,
+          "arrival_seed": 530000010,
+          "routing_seed": 540000010,
+          "profile_permutation": [
+            2,
+            1,
+            0
+          ]
+        },
+        {
+          "scenario_id": "final_test_05_1",
+          "layout_seed": 510000005,
+          "load_seed": 550000005,
+          "arrival_seed": 530000011,
+          "routing_seed": 540000011,
+          "profile_permutation": [
+            2,
+            1,
+            0
+          ]
+        },
+        {
+          "scenario_id": "final_test_06_0",
+          "layout_seed": 510000006,
+          "load_seed": 550000006,
+          "arrival_seed": 530000012,
+          "routing_seed": 540000012,
+          "profile_permutation": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "scenario_id": "final_test_06_1",
+          "layout_seed": 510000006,
+          "load_seed": 550000006,
+          "arrival_seed": 530000013,
+          "routing_seed": 540000013,
+          "profile_permutation": [
+            0,
+            1,
+            2
+          ]
+        },
+        {
+          "scenario_id": "final_test_07_0",
+          "layout_seed": 510000007,
+          "load_seed": 550000007,
+          "arrival_seed": 530000014,
+          "routing_seed": 540000014,
+          "profile_permutation": [
+            0,
+            2,
+            1
+          ]
+        },
+        {
+          "scenario_id": "final_test_07_1",
+          "layout_seed": 510000007,
+          "load_seed": 550000007,
+          "arrival_seed": 530000015,
+          "routing_seed": 540000015,
+          "profile_permutation": [
+            0,
+            2,
+            1
+          ]
+        },
+        {
+          "scenario_id": "final_test_08_0",
+          "layout_seed": 510000008,
+          "load_seed": 550000008,
+          "arrival_seed": 530000016,
+          "routing_seed": 540000016,
+          "profile_permutation": [
+            1,
+            0,
+            2
+          ]
+        },
+        {
+          "scenario_id": "final_test_08_1",
+          "layout_seed": 510000008,
+          "load_seed": 550000008,
+          "arrival_seed": 530000017,
+          "routing_seed": 540000017,
+          "profile_permutation": [
+            1,
+            0,
+            2
+          ]
+        },
+        {
+          "scenario_id": "final_test_09_0",
+          "layout_seed": 510000009,
+          "load_seed": 550000009,
+          "arrival_seed": 530000018,
+          "routing_seed": 540000018,
+          "profile_permutation": [
+            1,
+            2,
+            0
+          ]
+        },
+        {
+          "scenario_id": "final_test_09_1",
+          "layout_seed": 510000009,
+          "load_seed": 550000009,
+          "arrival_seed": 530000019,
+          "routing_seed": 540000019,
+          "profile_permutation": [
+            1,
+            2,
+            0
+          ]
+        }
+      ]
+    }
+  },
+  "scene_sha256": "91aff57f70f3adf0962f13620700417f52596781edf848850c8becd2a7449c24",
+  "scene_path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_seed1_20260923\\training\\scene.json",
+  "observation_schema": "industrial_device_observation_v1",
+  "macro_dim": 523,
+  "micro_dim": 86,
+  "learning": {
+    "batch_size": 128,
+    "gae_lambda": 0.95,
+    "gamma_per_resource_frame": 0.99,
+    "grad_clip": 1.0,
+    "initial_alpha": 0.05,
+    "initial_sac_log_std": -2.0,
+    "micro_algorithm": "sac",
+    "ppo_actor_lr": 0.0003,
+    "ppo_clip": 0.2,
+    "ppo_critic_lr": 0.001,
+    "ppo_epochs": 10,
+    "ppo_final_std": 0.03333333333333333,
+    "ppo_guard_retries": 4,
+    "ppo_initial_std": 0.3333333333333333,
+    "ppo_std_backtracks": 12,
+    "ppo_std_decay_updates": 360,
+    "ppo_target_kl": 0.03,
+    "ppo_update_guard": "post_step_batch_kl_v1",
+    "ppo_update_macros": 300,
+    "pretrain_lr": [
+      1e-05,
+      0.0003,
+      3e-05
+    ],
+    "replay_capacity": 100000,
+    "replay_warmup": 1000,
+    "sac_actor_warmup_updates": 100,
+    "sac_critic_steps_per_update": 2,
+    "sac_policy_delay": 2,
+    "sac_stage_policy": "preserve",
+    "sac_update_frames": 20,
+    "tau": 0.01
+  },
+  "runtime": {
+    "device": "cpu",
+    "torch_threads": 1,
+    "max_wall_seconds_per_job": 14400
+  },
+  "budget": {
+    "episode_seconds": 900,
+    "pretrain_episodes": 300,
+    "evaluation_nodes": [
+      50,
+      100,
+      150,
+      200,
+      250,
+      300
+    ],
+    "max_training_physical_steps": 2700000,
+    "max_evaluation_physical_steps": 324000,
+    "joint_episodes": 0,
+    "automatic_extension": false,
+    "automatic_retry": false
+  },
+  "randomness": {
+    "layout_base": 110000000,
+    "arrival_base": 130000000,
+    "routing_base": 140000000,
+    "load_base": 150000000
+  },
+  "training_stride": 1000000,
+  "development_manifest": {
+    "schema": "industrial_hotspot_development_v1",
+    "seconds": 900,
+    "scenarios": [
+      {
+        "scenario_id": "development_00_0",
+        "layout_seed": 310000000,
+        "load_seed": 350000000,
+        "arrival_seed": 330000000,
+        "routing_seed": 340000000,
+        "profile_permutation": [
+          0,
+          1,
+          2
+        ]
+      },
+      {
+        "scenario_id": "development_01_0",
+        "layout_seed": 310000001,
+        "load_seed": 350000001,
+        "arrival_seed": 330000001,
+        "routing_seed": 340000001,
+        "profile_permutation": [
+          0,
+          2,
+          1
+        ]
+      },
+      {
+        "scenario_id": "development_02_0",
+        "layout_seed": 310000002,
+        "load_seed": 350000002,
+        "arrival_seed": 330000002,
+        "routing_seed": 340000002,
+        "profile_permutation": [
+          1,
+          0,
+          2
+        ]
+      },
+      {
+        "scenario_id": "development_03_0",
+        "layout_seed": 310000003,
+        "load_seed": 350000003,
+        "arrival_seed": 330000003,
+        "routing_seed": 340000003,
+        "profile_permutation": [
+          1,
+          2,
+          0
+        ]
+      },
+      {
+        "scenario_id": "development_04_0",
+        "layout_seed": 310000004,
+        "load_seed": 350000004,
+        "arrival_seed": 330000004,
+        "routing_seed": 340000004,
+        "profile_permutation": [
+          2,
+          0,
+          1
+        ]
+      },
+      {
+        "scenario_id": "development_05_0",
+        "layout_seed": 310000005,
+        "load_seed": 350000005,
+        "arrival_seed": 330000005,
+        "routing_seed": 340000005,
+        "profile_permutation": [
+          2,
+          1,
+          0
+        ]
+      }
+    ]
+  },
+  "admission_rules": {
+    "version": "hotspot_sac_usable_v1",
+    "consecutive_checkpoints_required": 2,
+    "cost_ratio_to_local_max": 0.95,
+    "per_scene_cost_ratio_to_local_max": 1.02,
+    "per_scene_required_count": 4,
+    "pooled_high_completion_deficit_max_percentage_points": 1.0,
+    "pooled_low_unfinished_ratio_to_local_max": 0.9,
+    "local_zero_unfinished_requires_sac_zero": true,
+    "cvx_is_reference_only": true,
+    "technical_failures_abort": true,
+    "at_cap_without_admission": "needs_review",
+    "source": "proposed engineering thresholds; not empirical convergence or significance evidence",
+    "low_unfinished_measurement": "Sum over six frozen pre-priming t=900 metrics of priority[1].arrived - priority[1].completed",
+    "cache_identity_includes_load_assignment": true
+  },
+  "baseline_report": {
+    "path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_seed1_20260923\\training\\evaluations\\pretrain-0200\\report.json",
+    "sha256": "758c93bb8c1facd891daf1d6af7dca174e4e99c7f1739a336d7547d98a91bf35"
+  },
+  "initialization": "Fresh SAC networks, targets, temperature, empty Adam and replay; fresh inactive 523D PPO.",
+  "selection": {
+    "eligibility": "Original single-checkpoint Local usability rules; no convergence claim.",
+    "primary": "minimum pooled mean physical cost per second among eligible evaluated nodes",
+    "tie_break": "earliest episode",
+    "final_test_used": false,
+    "auto_joint": false
+  },
+  "episode_semantics": {
+    "macro_slots_per_episode": 180,
+    "routing_frames_per_episode": 1800,
+    "physical_steps_per_episode": 9000,
+    "log_windows_per_episode": 3,
+    "layout_fixed_within_episode": true,
+    "queues_carried_across_macro_slots": true,
+    "queue_reset_between_episodes": true,
+    "learning_state_preserved_between_episodes": true,
+    "end_is_sampling_truncation": true,
+    "truncated": true,
+    "terminated": false,
+    "bootstrap_same_scene_successor": true,
+    "gae_trace_crosses_reset": false,
+    "reset_observation_as_previous_successor": false,
+    "added_terminal_penalty": false,
+    "drain_queues_after_cutoff": false,
+    "claim_infinite_horizon_queue_stability": false,
+    "business_profile_assignment_fixed_within_episode": true,
+    "business_profile_assignment_resampled_between_episodes": true
+  }
+}

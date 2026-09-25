@@ -1,0 +1,36 @@
+{
+  "passed": true,
+  "verified_at": "2026-09-24T22:05:00.176137+00:00",
+  "completed_episodes": 53,
+  "updates": {
+    "ppo": 31,
+    "ppo_actor_gradient_steps": 310,
+    "sac": 27221,
+    "sac_actor": 13560,
+    "sac_critic_fits": 54442,
+    "replay_writes": 545400
+  },
+  "extra_training_physical_steps": 27000,
+  "actual_optimizer_lrs": [
+    [
+      1e-05
+    ],
+    [
+      0.0003
+    ],
+    [
+      3e-05
+    ],
+    [
+      0.0003
+    ],
+    [
+      0.001
+    ]
+  ],
+  "checkpoint_sha256": "5b43ce34d8851880f58eaeb448a2086442e673e92afbd4cb7234ec8e7a341dd7",
+  "runner_identity_verified": true,
+  "seed_cursor_verified": true,
+  "additional_service_steps": 0,
+  "additional_learning_updates": 0
+}

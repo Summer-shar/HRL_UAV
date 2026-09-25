@@ -1,0 +1,1489 @@
+{
+  "arm": "device_lr1e5",
+  "automatic_extension": false,
+  "baseline_protocol": {
+    "arm": "control",
+    "budget": {
+      "episode_seconds": 900,
+      "joint_development_check_episodes": [
+        25,
+        50
+      ],
+      "joint_episodes": 50,
+      "max_evaluation_physical_steps": 216000,
+      "max_training_physical_steps": 450000
+    },
+    "development_manifest": {
+      "scenarios": [
+        {
+          "arrival_seed": 330000000,
+          "layout_seed": 310000000,
+          "load_seed": 350000000,
+          "profile_permutation": [
+            0,
+            1,
+            2
+          ],
+          "routing_seed": 340000000,
+          "scenario_id": "development_00_0"
+        },
+        {
+          "arrival_seed": 330000001,
+          "layout_seed": 310000001,
+          "load_seed": 350000001,
+          "profile_permutation": [
+            0,
+            2,
+            1
+          ],
+          "routing_seed": 340000001,
+          "scenario_id": "development_01_0"
+        },
+        {
+          "arrival_seed": 330000002,
+          "layout_seed": 310000002,
+          "load_seed": 350000002,
+          "profile_permutation": [
+            1,
+            0,
+            2
+          ],
+          "routing_seed": 340000002,
+          "scenario_id": "development_02_0"
+        },
+        {
+          "arrival_seed": 330000003,
+          "layout_seed": 310000003,
+          "load_seed": 350000003,
+          "profile_permutation": [
+            1,
+            2,
+            0
+          ],
+          "routing_seed": 340000003,
+          "scenario_id": "development_03_0"
+        },
+        {
+          "arrival_seed": 330000004,
+          "layout_seed": 310000004,
+          "load_seed": 350000004,
+          "profile_permutation": [
+            2,
+            0,
+            1
+          ],
+          "routing_seed": 340000004,
+          "scenario_id": "development_04_0"
+        },
+        {
+          "arrival_seed": 330000005,
+          "layout_seed": 310000005,
+          "load_seed": 350000005,
+          "profile_permutation": [
+            2,
+            1,
+            0
+          ],
+          "routing_seed": 340000005,
+          "scenario_id": "development_05_0"
+        }
+      ],
+      "schema": "industrial_hotspot_development_v1",
+      "seconds": 900
+    },
+    "episode_semantics": {
+      "added_terminal_penalty": false,
+      "bootstrap_same_scene_successor": true,
+      "business_profile_assignment_fixed_within_episode": true,
+      "business_profile_assignment_resampled_between_episodes": true,
+      "claim_infinite_horizon_queue_stability": false,
+      "drain_queues_after_cutoff": false,
+      "end_is_sampling_truncation": true,
+      "gae_trace_crosses_reset": false,
+      "layout_fixed_within_episode": true,
+      "learning_state_preserved_between_episodes": true,
+      "log_windows_per_episode": 3,
+      "macro_slots_per_episode": 180,
+      "physical_steps_per_episode": 9000,
+      "queue_reset_between_episodes": true,
+      "queues_carried_across_macro_slots": true,
+      "reset_observation_as_previous_successor": false,
+      "routing_frames_per_episode": 1800,
+      "terminated": false,
+      "truncated": true
+    },
+    "initial_motion_diagnostic": "record_only; one reference is not an optimum or proof of absent benefit",
+    "learning": {
+      "batch_size": 128,
+      "gae_lambda": 0.95,
+      "gamma_per_resource_frame": 0.99,
+      "grad_clip": 1.0,
+      "initial_alpha": 0.05,
+      "initial_sac_log_std": -2.0,
+      "micro_algorithm": "sac",
+      "ppo_actor_lr": 0.0003,
+      "ppo_clip": 0.2,
+      "ppo_critic_lr": 0.001,
+      "ppo_epochs": 10,
+      "ppo_final_std": 0.03333333333333333,
+      "ppo_guard_retries": 4,
+      "ppo_initial_std": 0.3333333333333333,
+      "ppo_std_backtracks": 12,
+      "ppo_std_decay_updates": 360,
+      "ppo_target_kl": 0.03,
+      "ppo_update_guard": "post_step_batch_kl_v1",
+      "ppo_update_macros": 300,
+      "pretrain_lr": [
+        3e-05,
+        0.0003,
+        3e-05
+      ],
+      "replay_capacity": 100000,
+      "replay_warmup": 1000,
+      "sac_actor_warmup_updates": 100,
+      "sac_critic_steps_per_update": 2,
+      "sac_policy_delay": 2,
+      "sac_stage_policy": "preserve",
+      "sac_update_frames": 20,
+      "tau": 0.01
+    },
+    "lower_objective": "unchanged V4 discounted physical cost plus SAC entropy",
+    "parent": {
+      "path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_seed1_20260923\\training\\checkpoints\\candidate-joint-0600.pt",
+      "sha256": "593609143427e023c0a924da40667a59e0b8064f652a94cacd2c5ca847be7be8"
+    },
+    "purpose": "pilot",
+    "quality_rule": {
+      "automatic_extension": false,
+      "consecutive_bad_nodes": 2,
+      "cost_ratio_bad": 1.1,
+      "delay_ratio_bad": 1.1,
+      "upload_area_ratio_bad": 2.0
+    },
+    "randomness": {
+      "arrival_base": 630000000,
+      "layout_base": 610000000,
+      "load_base": 650000000,
+      "routing_base": 640000000,
+      "training_stride": 1000000
+    },
+    "runtime": {
+      "device": "cpu",
+      "max_wall_seconds_per_job": 3600,
+      "torch_threads": 1
+    },
+    "scene_path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_seed1_20260923\\training\\scene.json",
+    "scene_sha256": "91aff57f70f3adf0962f13620700417f52596781edf848850c8becd2a7449c24",
+    "schema": "industrial_upper_horizon_pilot_v1",
+    "training_seed": 1,
+    "transfer": "Full unchanged SAC learning state; newly seeded PPO networks, optimizers, exploration, guard and rollout.",
+    "upper_half_life_s": null,
+    "upper_objective": "discounted physical cost with independent upper physical-time discount"
+  },
+  "budget": {
+    "episode_seconds": 900,
+    "joint_development_check_episodes": [
+      25,
+      50,
+      75
+    ],
+    "joint_episodes": 75,
+    "max_evaluation_physical_steps": 324000,
+    "max_training_physical_steps": 675000
+  },
+  "development_manifest": {
+    "scenarios": [
+      {
+        "arrival_seed": 330000000,
+        "layout_seed": 310000000,
+        "load_seed": 350000000,
+        "profile_permutation": [
+          0,
+          1,
+          2
+        ],
+        "routing_seed": 340000000,
+        "scenario_id": "development_00_0"
+      },
+      {
+        "arrival_seed": 330000001,
+        "layout_seed": 310000001,
+        "load_seed": 350000001,
+        "profile_permutation": [
+          0,
+          2,
+          1
+        ],
+        "routing_seed": 340000001,
+        "scenario_id": "development_01_0"
+      },
+      {
+        "arrival_seed": 330000002,
+        "layout_seed": 310000002,
+        "load_seed": 350000002,
+        "profile_permutation": [
+          1,
+          0,
+          2
+        ],
+        "routing_seed": 340000002,
+        "scenario_id": "development_02_0"
+      },
+      {
+        "arrival_seed": 330000003,
+        "layout_seed": 310000003,
+        "load_seed": 350000003,
+        "profile_permutation": [
+          1,
+          2,
+          0
+        ],
+        "routing_seed": 340000003,
+        "scenario_id": "development_03_0"
+      },
+      {
+        "arrival_seed": 330000004,
+        "layout_seed": 310000004,
+        "load_seed": 350000004,
+        "profile_permutation": [
+          2,
+          0,
+          1
+        ],
+        "routing_seed": 340000004,
+        "scenario_id": "development_04_0"
+      },
+      {
+        "arrival_seed": 330000005,
+        "layout_seed": 310000005,
+        "load_seed": 350000005,
+        "profile_permutation": [
+          2,
+          1,
+          0
+        ],
+        "routing_seed": 340000005,
+        "scenario_id": "development_05_0"
+      }
+    ],
+    "schema": "industrial_hotspot_development_v1",
+    "seconds": 900
+  },
+  "episode_semantics": {
+    "added_terminal_penalty": false,
+    "bootstrap_same_scene_successor": true,
+    "business_profile_assignment_fixed_within_episode": true,
+    "business_profile_assignment_resampled_between_episodes": true,
+    "claim_infinite_horizon_queue_stability": false,
+    "drain_queues_after_cutoff": false,
+    "end_is_sampling_truncation": true,
+    "gae_trace_crosses_reset": false,
+    "layout_fixed_within_episode": true,
+    "learning_state_preserved_between_episodes": true,
+    "log_windows_per_episode": 3,
+    "macro_slots_per_episode": 180,
+    "physical_steps_per_episode": 9000,
+    "queue_reset_between_episodes": true,
+    "queues_carried_across_macro_slots": true,
+    "reset_observation_as_previous_successor": false,
+    "routing_frames_per_episode": 1800,
+    "terminated": false,
+    "truncated": true
+  },
+  "extension": {
+    "added_evaluation_physical_steps": 108000,
+    "added_training_physical_steps": 225000,
+    "automatic_extension": false,
+    "reason": "User requested continuation after the completed lower actor-LR comparison.",
+    "source_checkpoint": {
+      "path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_device_lr_pilot_20260924\\phase50\\checkpoints\\rolling\\checkpoint-1790241759467295800-dba56530eb324e12ba95a770daf1672c.pt",
+      "sha256": "db40ebdd7bdd90e4e8eafc5a737e077c02ef82698c21a07f1fb4255694d43d8a"
+    },
+    "start_completed_episodes": 50,
+    "stop_completed_episodes": 75
+  },
+  "first_stop_episode": 25,
+  "initial_motion_diagnostic": "record_only; one reference is not an optimum or proof of absent benefit",
+  "intervention": {
+    "from_lr": 3e-05,
+    "kind": "sac_actor_learning_rate_only",
+    "start_completed_episodes": 25,
+    "stop_completed_episodes": 50,
+    "to_lr": 1e-05
+  },
+  "learning": {
+    "batch_size": 128,
+    "gae_lambda": 0.95,
+    "gamma_per_resource_frame": 0.99,
+    "grad_clip": 1.0,
+    "initial_alpha": 0.05,
+    "initial_sac_log_std": -2.0,
+    "micro_algorithm": "sac",
+    "ppo_actor_lr": 0.0003,
+    "ppo_clip": 0.2,
+    "ppo_critic_lr": 0.001,
+    "ppo_epochs": 10,
+    "ppo_final_std": 0.03333333333333333,
+    "ppo_guard_retries": 4,
+    "ppo_initial_std": 0.3333333333333333,
+    "ppo_std_backtracks": 12,
+    "ppo_std_decay_updates": 360,
+    "ppo_target_kl": 0.03,
+    "ppo_update_guard": "post_step_batch_kl_v1",
+    "ppo_update_macros": 300,
+    "pretrain_lr": [
+      1e-05,
+      0.0003,
+      3e-05
+    ],
+    "replay_capacity": 100000,
+    "replay_warmup": 1000,
+    "sac_actor_warmup_updates": 100,
+    "sac_critic_steps_per_update": 2,
+    "sac_policy_delay": 2,
+    "sac_stage_policy": "preserve",
+    "sac_update_frames": 20,
+    "tau": 0.01
+  },
+  "lower_objective": "unchanged V4 discounted physical cost plus SAC entropy",
+  "migration_source": {
+    "path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_device_pilot_20260924\\serialization_fix\\checkpoint\\final.pt",
+    "sha256": "c9f28ba4186d6df9a2c8e0e9e2bf6bea2de50f37bc994d2ecb3d374aa8240cd5"
+  },
+  "observation_schema": "industrial_device_observation_v1",
+  "parent": {
+    "path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_seed1_20260923\\training\\checkpoints\\candidate-joint-0600.pt",
+    "sha256": "593609143427e023c0a924da40667a59e0b8064f652a94cacd2c5ca847be7be8"
+  },
+  "ppo_architecture": "device_set_mean_max_phi32_head256_v1",
+  "ppo_initialization_seed": 8700001,
+  "purpose": "pilot",
+  "quality_rule": {
+    "automatic_extension": false,
+    "consecutive_bad_nodes": 2,
+    "cost_ratio_bad": 1.1,
+    "delay_ratio_bad": 1.1,
+    "upload_area_ratio_bad": 2.0
+  },
+  "randomness": {
+    "arrival_base": 630000000,
+    "layout_base": 610000000,
+    "load_base": 650000000,
+    "routing_base": 640000000,
+    "training_stride": 1000000
+  },
+  "reference_device_protocol": {
+    "arm": "device",
+    "automatic_extension": false,
+    "baseline_protocol": {
+      "arm": "control",
+      "budget": {
+        "episode_seconds": 900,
+        "joint_development_check_episodes": [
+          25,
+          50
+        ],
+        "joint_episodes": 50,
+        "max_evaluation_physical_steps": 216000,
+        "max_training_physical_steps": 450000
+      },
+      "development_manifest": {
+        "scenarios": [
+          {
+            "arrival_seed": 330000000,
+            "layout_seed": 310000000,
+            "load_seed": 350000000,
+            "profile_permutation": [
+              0,
+              1,
+              2
+            ],
+            "routing_seed": 340000000,
+            "scenario_id": "development_00_0"
+          },
+          {
+            "arrival_seed": 330000001,
+            "layout_seed": 310000001,
+            "load_seed": 350000001,
+            "profile_permutation": [
+              0,
+              2,
+              1
+            ],
+            "routing_seed": 340000001,
+            "scenario_id": "development_01_0"
+          },
+          {
+            "arrival_seed": 330000002,
+            "layout_seed": 310000002,
+            "load_seed": 350000002,
+            "profile_permutation": [
+              1,
+              0,
+              2
+            ],
+            "routing_seed": 340000002,
+            "scenario_id": "development_02_0"
+          },
+          {
+            "arrival_seed": 330000003,
+            "layout_seed": 310000003,
+            "load_seed": 350000003,
+            "profile_permutation": [
+              1,
+              2,
+              0
+            ],
+            "routing_seed": 340000003,
+            "scenario_id": "development_03_0"
+          },
+          {
+            "arrival_seed": 330000004,
+            "layout_seed": 310000004,
+            "load_seed": 350000004,
+            "profile_permutation": [
+              2,
+              0,
+              1
+            ],
+            "routing_seed": 340000004,
+            "scenario_id": "development_04_0"
+          },
+          {
+            "arrival_seed": 330000005,
+            "layout_seed": 310000005,
+            "load_seed": 350000005,
+            "profile_permutation": [
+              2,
+              1,
+              0
+            ],
+            "routing_seed": 340000005,
+            "scenario_id": "development_05_0"
+          }
+        ],
+        "schema": "industrial_hotspot_development_v1",
+        "seconds": 900
+      },
+      "episode_semantics": {
+        "added_terminal_penalty": false,
+        "bootstrap_same_scene_successor": true,
+        "business_profile_assignment_fixed_within_episode": true,
+        "business_profile_assignment_resampled_between_episodes": true,
+        "claim_infinite_horizon_queue_stability": false,
+        "drain_queues_after_cutoff": false,
+        "end_is_sampling_truncation": true,
+        "gae_trace_crosses_reset": false,
+        "layout_fixed_within_episode": true,
+        "learning_state_preserved_between_episodes": true,
+        "log_windows_per_episode": 3,
+        "macro_slots_per_episode": 180,
+        "physical_steps_per_episode": 9000,
+        "queue_reset_between_episodes": true,
+        "queues_carried_across_macro_slots": true,
+        "reset_observation_as_previous_successor": false,
+        "routing_frames_per_episode": 1800,
+        "terminated": false,
+        "truncated": true
+      },
+      "initial_motion_diagnostic": "record_only; one reference is not an optimum or proof of absent benefit",
+      "learning": {
+        "batch_size": 128,
+        "gae_lambda": 0.95,
+        "gamma_per_resource_frame": 0.99,
+        "grad_clip": 1.0,
+        "initial_alpha": 0.05,
+        "initial_sac_log_std": -2.0,
+        "micro_algorithm": "sac",
+        "ppo_actor_lr": 0.0003,
+        "ppo_clip": 0.2,
+        "ppo_critic_lr": 0.001,
+        "ppo_epochs": 10,
+        "ppo_final_std": 0.03333333333333333,
+        "ppo_guard_retries": 4,
+        "ppo_initial_std": 0.3333333333333333,
+        "ppo_std_backtracks": 12,
+        "ppo_std_decay_updates": 360,
+        "ppo_target_kl": 0.03,
+        "ppo_update_guard": "post_step_batch_kl_v1",
+        "ppo_update_macros": 300,
+        "pretrain_lr": [
+          3e-05,
+          0.0003,
+          3e-05
+        ],
+        "replay_capacity": 100000,
+        "replay_warmup": 1000,
+        "sac_actor_warmup_updates": 100,
+        "sac_critic_steps_per_update": 2,
+        "sac_policy_delay": 2,
+        "sac_stage_policy": "preserve",
+        "sac_update_frames": 20,
+        "tau": 0.01
+      },
+      "lower_objective": "unchanged V4 discounted physical cost plus SAC entropy",
+      "parent": {
+        "path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_seed1_20260923\\training\\checkpoints\\candidate-joint-0600.pt",
+        "sha256": "593609143427e023c0a924da40667a59e0b8064f652a94cacd2c5ca847be7be8"
+      },
+      "purpose": "pilot",
+      "quality_rule": {
+        "automatic_extension": false,
+        "consecutive_bad_nodes": 2,
+        "cost_ratio_bad": 1.1,
+        "delay_ratio_bad": 1.1,
+        "upload_area_ratio_bad": 2.0
+      },
+      "randomness": {
+        "arrival_base": 630000000,
+        "layout_base": 610000000,
+        "load_base": 650000000,
+        "routing_base": 640000000,
+        "training_stride": 1000000
+      },
+      "runtime": {
+        "device": "cpu",
+        "max_wall_seconds_per_job": 3600,
+        "torch_threads": 1
+      },
+      "scene_path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_seed1_20260923\\training\\scene.json",
+      "scene_sha256": "91aff57f70f3adf0962f13620700417f52596781edf848850c8becd2a7449c24",
+      "schema": "industrial_upper_horizon_pilot_v1",
+      "training_seed": 1,
+      "transfer": "Full unchanged SAC learning state; newly seeded PPO networks, optimizers, exploration, guard and rollout.",
+      "upper_half_life_s": null,
+      "upper_objective": "discounted physical cost with independent upper physical-time discount"
+    },
+    "budget": {
+      "episode_seconds": 900,
+      "joint_development_check_episodes": [
+        25,
+        50
+      ],
+      "joint_episodes": 50,
+      "max_evaluation_physical_steps": 216000,
+      "max_training_physical_steps": 450000
+    },
+    "development_manifest": {
+      "scenarios": [
+        {
+          "arrival_seed": 330000000,
+          "layout_seed": 310000000,
+          "load_seed": 350000000,
+          "profile_permutation": [
+            0,
+            1,
+            2
+          ],
+          "routing_seed": 340000000,
+          "scenario_id": "development_00_0"
+        },
+        {
+          "arrival_seed": 330000001,
+          "layout_seed": 310000001,
+          "load_seed": 350000001,
+          "profile_permutation": [
+            0,
+            2,
+            1
+          ],
+          "routing_seed": 340000001,
+          "scenario_id": "development_01_0"
+        },
+        {
+          "arrival_seed": 330000002,
+          "layout_seed": 310000002,
+          "load_seed": 350000002,
+          "profile_permutation": [
+            1,
+            0,
+            2
+          ],
+          "routing_seed": 340000002,
+          "scenario_id": "development_02_0"
+        },
+        {
+          "arrival_seed": 330000003,
+          "layout_seed": 310000003,
+          "load_seed": 350000003,
+          "profile_permutation": [
+            1,
+            2,
+            0
+          ],
+          "routing_seed": 340000003,
+          "scenario_id": "development_03_0"
+        },
+        {
+          "arrival_seed": 330000004,
+          "layout_seed": 310000004,
+          "load_seed": 350000004,
+          "profile_permutation": [
+            2,
+            0,
+            1
+          ],
+          "routing_seed": 340000004,
+          "scenario_id": "development_04_0"
+        },
+        {
+          "arrival_seed": 330000005,
+          "layout_seed": 310000005,
+          "load_seed": 350000005,
+          "profile_permutation": [
+            2,
+            1,
+            0
+          ],
+          "routing_seed": 340000005,
+          "scenario_id": "development_05_0"
+        }
+      ],
+      "schema": "industrial_hotspot_development_v1",
+      "seconds": 900
+    },
+    "episode_semantics": {
+      "added_terminal_penalty": false,
+      "bootstrap_same_scene_successor": true,
+      "business_profile_assignment_fixed_within_episode": true,
+      "business_profile_assignment_resampled_between_episodes": true,
+      "claim_infinite_horizon_queue_stability": false,
+      "drain_queues_after_cutoff": false,
+      "end_is_sampling_truncation": true,
+      "gae_trace_crosses_reset": false,
+      "layout_fixed_within_episode": true,
+      "learning_state_preserved_between_episodes": true,
+      "log_windows_per_episode": 3,
+      "macro_slots_per_episode": 180,
+      "physical_steps_per_episode": 9000,
+      "queue_reset_between_episodes": true,
+      "queues_carried_across_macro_slots": true,
+      "reset_observation_as_previous_successor": false,
+      "routing_frames_per_episode": 1800,
+      "terminated": false,
+      "truncated": true
+    },
+    "first_stop_episode": 25,
+    "initial_motion_diagnostic": "record_only; one reference is not an optimum or proof of absent benefit",
+    "intervention": "PPO per-device raw workload/position observation and shared device encoding only.",
+    "learning": {
+      "batch_size": 128,
+      "gae_lambda": 0.95,
+      "gamma_per_resource_frame": 0.99,
+      "grad_clip": 1.0,
+      "initial_alpha": 0.05,
+      "initial_sac_log_std": -2.0,
+      "micro_algorithm": "sac",
+      "ppo_actor_lr": 0.0003,
+      "ppo_clip": 0.2,
+      "ppo_critic_lr": 0.001,
+      "ppo_epochs": 10,
+      "ppo_final_std": 0.03333333333333333,
+      "ppo_guard_retries": 4,
+      "ppo_initial_std": 0.3333333333333333,
+      "ppo_std_backtracks": 12,
+      "ppo_std_decay_updates": 360,
+      "ppo_target_kl": 0.03,
+      "ppo_update_guard": "post_step_batch_kl_v1",
+      "ppo_update_macros": 300,
+      "pretrain_lr": [
+        3e-05,
+        0.0003,
+        3e-05
+      ],
+      "replay_capacity": 100000,
+      "replay_warmup": 1000,
+      "sac_actor_warmup_updates": 100,
+      "sac_critic_steps_per_update": 2,
+      "sac_policy_delay": 2,
+      "sac_stage_policy": "preserve",
+      "sac_update_frames": 20,
+      "tau": 0.01
+    },
+    "lower_objective": "unchanged V4 discounted physical cost plus SAC entropy",
+    "observation_schema": "industrial_device_observation_v1",
+    "parent": {
+      "path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_seed1_20260923\\training\\checkpoints\\candidate-joint-0600.pt",
+      "sha256": "593609143427e023c0a924da40667a59e0b8064f652a94cacd2c5ca847be7be8"
+    },
+    "ppo_architecture": "device_set_mean_max_phi32_head256_v1",
+    "ppo_initialization_seed": 8700001,
+    "purpose": "pilot",
+    "quality_rule": {
+      "automatic_extension": false,
+      "consecutive_bad_nodes": 2,
+      "cost_ratio_bad": 1.1,
+      "delay_ratio_bad": 1.1,
+      "upload_area_ratio_bad": 2.0
+    },
+    "randomness": {
+      "arrival_base": 630000000,
+      "layout_base": 610000000,
+      "load_base": 650000000,
+      "routing_base": 640000000,
+      "training_stride": 1000000
+    },
+    "runtime": {
+      "device": "cpu",
+      "max_wall_seconds_per_job": 3600,
+      "torch_threads": 1
+    },
+    "scene_path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_seed1_20260923\\training\\scene.json",
+    "scene_sha256": "91aff57f70f3adf0962f13620700417f52596781edf848850c8becd2a7449c24",
+    "schema": "industrial_device_joint_pilot_v1",
+    "training_seed": 1,
+    "transfer": "Full unchanged SAC learner; fresh PPO device encoders and optimizers; direct joint learning.",
+    "upper_half_life_s": null,
+    "upper_objective": "discounted physical cost with independent upper physical-time discount"
+  },
+  "reference_lr_protocol": {
+    "arm": "device_lr1e5",
+    "automatic_extension": false,
+    "baseline_protocol": {
+      "arm": "control",
+      "budget": {
+        "episode_seconds": 900,
+        "joint_development_check_episodes": [
+          25,
+          50
+        ],
+        "joint_episodes": 50,
+        "max_evaluation_physical_steps": 216000,
+        "max_training_physical_steps": 450000
+      },
+      "development_manifest": {
+        "scenarios": [
+          {
+            "arrival_seed": 330000000,
+            "layout_seed": 310000000,
+            "load_seed": 350000000,
+            "profile_permutation": [
+              0,
+              1,
+              2
+            ],
+            "routing_seed": 340000000,
+            "scenario_id": "development_00_0"
+          },
+          {
+            "arrival_seed": 330000001,
+            "layout_seed": 310000001,
+            "load_seed": 350000001,
+            "profile_permutation": [
+              0,
+              2,
+              1
+            ],
+            "routing_seed": 340000001,
+            "scenario_id": "development_01_0"
+          },
+          {
+            "arrival_seed": 330000002,
+            "layout_seed": 310000002,
+            "load_seed": 350000002,
+            "profile_permutation": [
+              1,
+              0,
+              2
+            ],
+            "routing_seed": 340000002,
+            "scenario_id": "development_02_0"
+          },
+          {
+            "arrival_seed": 330000003,
+            "layout_seed": 310000003,
+            "load_seed": 350000003,
+            "profile_permutation": [
+              1,
+              2,
+              0
+            ],
+            "routing_seed": 340000003,
+            "scenario_id": "development_03_0"
+          },
+          {
+            "arrival_seed": 330000004,
+            "layout_seed": 310000004,
+            "load_seed": 350000004,
+            "profile_permutation": [
+              2,
+              0,
+              1
+            ],
+            "routing_seed": 340000004,
+            "scenario_id": "development_04_0"
+          },
+          {
+            "arrival_seed": 330000005,
+            "layout_seed": 310000005,
+            "load_seed": 350000005,
+            "profile_permutation": [
+              2,
+              1,
+              0
+            ],
+            "routing_seed": 340000005,
+            "scenario_id": "development_05_0"
+          }
+        ],
+        "schema": "industrial_hotspot_development_v1",
+        "seconds": 900
+      },
+      "episode_semantics": {
+        "added_terminal_penalty": false,
+        "bootstrap_same_scene_successor": true,
+        "business_profile_assignment_fixed_within_episode": true,
+        "business_profile_assignment_resampled_between_episodes": true,
+        "claim_infinite_horizon_queue_stability": false,
+        "drain_queues_after_cutoff": false,
+        "end_is_sampling_truncation": true,
+        "gae_trace_crosses_reset": false,
+        "layout_fixed_within_episode": true,
+        "learning_state_preserved_between_episodes": true,
+        "log_windows_per_episode": 3,
+        "macro_slots_per_episode": 180,
+        "physical_steps_per_episode": 9000,
+        "queue_reset_between_episodes": true,
+        "queues_carried_across_macro_slots": true,
+        "reset_observation_as_previous_successor": false,
+        "routing_frames_per_episode": 1800,
+        "terminated": false,
+        "truncated": true
+      },
+      "initial_motion_diagnostic": "record_only; one reference is not an optimum or proof of absent benefit",
+      "learning": {
+        "batch_size": 128,
+        "gae_lambda": 0.95,
+        "gamma_per_resource_frame": 0.99,
+        "grad_clip": 1.0,
+        "initial_alpha": 0.05,
+        "initial_sac_log_std": -2.0,
+        "micro_algorithm": "sac",
+        "ppo_actor_lr": 0.0003,
+        "ppo_clip": 0.2,
+        "ppo_critic_lr": 0.001,
+        "ppo_epochs": 10,
+        "ppo_final_std": 0.03333333333333333,
+        "ppo_guard_retries": 4,
+        "ppo_initial_std": 0.3333333333333333,
+        "ppo_std_backtracks": 12,
+        "ppo_std_decay_updates": 360,
+        "ppo_target_kl": 0.03,
+        "ppo_update_guard": "post_step_batch_kl_v1",
+        "ppo_update_macros": 300,
+        "pretrain_lr": [
+          3e-05,
+          0.0003,
+          3e-05
+        ],
+        "replay_capacity": 100000,
+        "replay_warmup": 1000,
+        "sac_actor_warmup_updates": 100,
+        "sac_critic_steps_per_update": 2,
+        "sac_policy_delay": 2,
+        "sac_stage_policy": "preserve",
+        "sac_update_frames": 20,
+        "tau": 0.01
+      },
+      "lower_objective": "unchanged V4 discounted physical cost plus SAC entropy",
+      "parent": {
+        "path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_seed1_20260923\\training\\checkpoints\\candidate-joint-0600.pt",
+        "sha256": "593609143427e023c0a924da40667a59e0b8064f652a94cacd2c5ca847be7be8"
+      },
+      "purpose": "pilot",
+      "quality_rule": {
+        "automatic_extension": false,
+        "consecutive_bad_nodes": 2,
+        "cost_ratio_bad": 1.1,
+        "delay_ratio_bad": 1.1,
+        "upload_area_ratio_bad": 2.0
+      },
+      "randomness": {
+        "arrival_base": 630000000,
+        "layout_base": 610000000,
+        "load_base": 650000000,
+        "routing_base": 640000000,
+        "training_stride": 1000000
+      },
+      "runtime": {
+        "device": "cpu",
+        "max_wall_seconds_per_job": 3600,
+        "torch_threads": 1
+      },
+      "scene_path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_seed1_20260923\\training\\scene.json",
+      "scene_sha256": "91aff57f70f3adf0962f13620700417f52596781edf848850c8becd2a7449c24",
+      "schema": "industrial_upper_horizon_pilot_v1",
+      "training_seed": 1,
+      "transfer": "Full unchanged SAC learning state; newly seeded PPO networks, optimizers, exploration, guard and rollout.",
+      "upper_half_life_s": null,
+      "upper_objective": "discounted physical cost with independent upper physical-time discount"
+    },
+    "budget": {
+      "episode_seconds": 900,
+      "joint_development_check_episodes": [
+        25,
+        50
+      ],
+      "joint_episodes": 50,
+      "max_evaluation_physical_steps": 216000,
+      "max_training_physical_steps": 450000
+    },
+    "development_manifest": {
+      "scenarios": [
+        {
+          "arrival_seed": 330000000,
+          "layout_seed": 310000000,
+          "load_seed": 350000000,
+          "profile_permutation": [
+            0,
+            1,
+            2
+          ],
+          "routing_seed": 340000000,
+          "scenario_id": "development_00_0"
+        },
+        {
+          "arrival_seed": 330000001,
+          "layout_seed": 310000001,
+          "load_seed": 350000001,
+          "profile_permutation": [
+            0,
+            2,
+            1
+          ],
+          "routing_seed": 340000001,
+          "scenario_id": "development_01_0"
+        },
+        {
+          "arrival_seed": 330000002,
+          "layout_seed": 310000002,
+          "load_seed": 350000002,
+          "profile_permutation": [
+            1,
+            0,
+            2
+          ],
+          "routing_seed": 340000002,
+          "scenario_id": "development_02_0"
+        },
+        {
+          "arrival_seed": 330000003,
+          "layout_seed": 310000003,
+          "load_seed": 350000003,
+          "profile_permutation": [
+            1,
+            2,
+            0
+          ],
+          "routing_seed": 340000003,
+          "scenario_id": "development_03_0"
+        },
+        {
+          "arrival_seed": 330000004,
+          "layout_seed": 310000004,
+          "load_seed": 350000004,
+          "profile_permutation": [
+            2,
+            0,
+            1
+          ],
+          "routing_seed": 340000004,
+          "scenario_id": "development_04_0"
+        },
+        {
+          "arrival_seed": 330000005,
+          "layout_seed": 310000005,
+          "load_seed": 350000005,
+          "profile_permutation": [
+            2,
+            1,
+            0
+          ],
+          "routing_seed": 340000005,
+          "scenario_id": "development_05_0"
+        }
+      ],
+      "schema": "industrial_hotspot_development_v1",
+      "seconds": 900
+    },
+    "episode_semantics": {
+      "added_terminal_penalty": false,
+      "bootstrap_same_scene_successor": true,
+      "business_profile_assignment_fixed_within_episode": true,
+      "business_profile_assignment_resampled_between_episodes": true,
+      "claim_infinite_horizon_queue_stability": false,
+      "drain_queues_after_cutoff": false,
+      "end_is_sampling_truncation": true,
+      "gae_trace_crosses_reset": false,
+      "layout_fixed_within_episode": true,
+      "learning_state_preserved_between_episodes": true,
+      "log_windows_per_episode": 3,
+      "macro_slots_per_episode": 180,
+      "physical_steps_per_episode": 9000,
+      "queue_reset_between_episodes": true,
+      "queues_carried_across_macro_slots": true,
+      "reset_observation_as_previous_successor": false,
+      "routing_frames_per_episode": 1800,
+      "terminated": false,
+      "truncated": true
+    },
+    "first_stop_episode": 25,
+    "initial_motion_diagnostic": "record_only; one reference is not an optimum or proof of absent benefit",
+    "intervention": {
+      "from_lr": 3e-05,
+      "kind": "sac_actor_learning_rate_only",
+      "start_completed_episodes": 25,
+      "stop_completed_episodes": 50,
+      "to_lr": 1e-05
+    },
+    "learning": {
+      "batch_size": 128,
+      "gae_lambda": 0.95,
+      "gamma_per_resource_frame": 0.99,
+      "grad_clip": 1.0,
+      "initial_alpha": 0.05,
+      "initial_sac_log_std": -2.0,
+      "micro_algorithm": "sac",
+      "ppo_actor_lr": 0.0003,
+      "ppo_clip": 0.2,
+      "ppo_critic_lr": 0.001,
+      "ppo_epochs": 10,
+      "ppo_final_std": 0.03333333333333333,
+      "ppo_guard_retries": 4,
+      "ppo_initial_std": 0.3333333333333333,
+      "ppo_std_backtracks": 12,
+      "ppo_std_decay_updates": 360,
+      "ppo_target_kl": 0.03,
+      "ppo_update_guard": "post_step_batch_kl_v1",
+      "ppo_update_macros": 300,
+      "pretrain_lr": [
+        1e-05,
+        0.0003,
+        3e-05
+      ],
+      "replay_capacity": 100000,
+      "replay_warmup": 1000,
+      "sac_actor_warmup_updates": 100,
+      "sac_critic_steps_per_update": 2,
+      "sac_policy_delay": 2,
+      "sac_stage_policy": "preserve",
+      "sac_update_frames": 20,
+      "tau": 0.01
+    },
+    "lower_objective": "unchanged V4 discounted physical cost plus SAC entropy",
+    "migration_source": {
+      "path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_device_pilot_20260924\\serialization_fix\\checkpoint\\final.pt",
+      "sha256": "c9f28ba4186d6df9a2c8e0e9e2bf6bea2de50f37bc994d2ecb3d374aa8240cd5"
+    },
+    "observation_schema": "industrial_device_observation_v1",
+    "parent": {
+      "path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_seed1_20260923\\training\\checkpoints\\candidate-joint-0600.pt",
+      "sha256": "593609143427e023c0a924da40667a59e0b8064f652a94cacd2c5ca847be7be8"
+    },
+    "ppo_architecture": "device_set_mean_max_phi32_head256_v1",
+    "ppo_initialization_seed": 8700001,
+    "purpose": "pilot",
+    "quality_rule": {
+      "automatic_extension": false,
+      "consecutive_bad_nodes": 2,
+      "cost_ratio_bad": 1.1,
+      "delay_ratio_bad": 1.1,
+      "upload_area_ratio_bad": 2.0
+    },
+    "randomness": {
+      "arrival_base": 630000000,
+      "layout_base": 610000000,
+      "load_base": 650000000,
+      "routing_base": 640000000,
+      "training_stride": 1000000
+    },
+    "reference_device_protocol": {
+      "arm": "device",
+      "automatic_extension": false,
+      "baseline_protocol": {
+        "arm": "control",
+        "budget": {
+          "episode_seconds": 900,
+          "joint_development_check_episodes": [
+            25,
+            50
+          ],
+          "joint_episodes": 50,
+          "max_evaluation_physical_steps": 216000,
+          "max_training_physical_steps": 450000
+        },
+        "development_manifest": {
+          "scenarios": [
+            {
+              "arrival_seed": 330000000,
+              "layout_seed": 310000000,
+              "load_seed": 350000000,
+              "profile_permutation": [
+                0,
+                1,
+                2
+              ],
+              "routing_seed": 340000000,
+              "scenario_id": "development_00_0"
+            },
+            {
+              "arrival_seed": 330000001,
+              "layout_seed": 310000001,
+              "load_seed": 350000001,
+              "profile_permutation": [
+                0,
+                2,
+                1
+              ],
+              "routing_seed": 340000001,
+              "scenario_id": "development_01_0"
+            },
+            {
+              "arrival_seed": 330000002,
+              "layout_seed": 310000002,
+              "load_seed": 350000002,
+              "profile_permutation": [
+                1,
+                0,
+                2
+              ],
+              "routing_seed": 340000002,
+              "scenario_id": "development_02_0"
+            },
+            {
+              "arrival_seed": 330000003,
+              "layout_seed": 310000003,
+              "load_seed": 350000003,
+              "profile_permutation": [
+                1,
+                2,
+                0
+              ],
+              "routing_seed": 340000003,
+              "scenario_id": "development_03_0"
+            },
+            {
+              "arrival_seed": 330000004,
+              "layout_seed": 310000004,
+              "load_seed": 350000004,
+              "profile_permutation": [
+                2,
+                0,
+                1
+              ],
+              "routing_seed": 340000004,
+              "scenario_id": "development_04_0"
+            },
+            {
+              "arrival_seed": 330000005,
+              "layout_seed": 310000005,
+              "load_seed": 350000005,
+              "profile_permutation": [
+                2,
+                1,
+                0
+              ],
+              "routing_seed": 340000005,
+              "scenario_id": "development_05_0"
+            }
+          ],
+          "schema": "industrial_hotspot_development_v1",
+          "seconds": 900
+        },
+        "episode_semantics": {
+          "added_terminal_penalty": false,
+          "bootstrap_same_scene_successor": true,
+          "business_profile_assignment_fixed_within_episode": true,
+          "business_profile_assignment_resampled_between_episodes": true,
+          "claim_infinite_horizon_queue_stability": false,
+          "drain_queues_after_cutoff": false,
+          "end_is_sampling_truncation": true,
+          "gae_trace_crosses_reset": false,
+          "layout_fixed_within_episode": true,
+          "learning_state_preserved_between_episodes": true,
+          "log_windows_per_episode": 3,
+          "macro_slots_per_episode": 180,
+          "physical_steps_per_episode": 9000,
+          "queue_reset_between_episodes": true,
+          "queues_carried_across_macro_slots": true,
+          "reset_observation_as_previous_successor": false,
+          "routing_frames_per_episode": 1800,
+          "terminated": false,
+          "truncated": true
+        },
+        "initial_motion_diagnostic": "record_only; one reference is not an optimum or proof of absent benefit",
+        "learning": {
+          "batch_size": 128,
+          "gae_lambda": 0.95,
+          "gamma_per_resource_frame": 0.99,
+          "grad_clip": 1.0,
+          "initial_alpha": 0.05,
+          "initial_sac_log_std": -2.0,
+          "micro_algorithm": "sac",
+          "ppo_actor_lr": 0.0003,
+          "ppo_clip": 0.2,
+          "ppo_critic_lr": 0.001,
+          "ppo_epochs": 10,
+          "ppo_final_std": 0.03333333333333333,
+          "ppo_guard_retries": 4,
+          "ppo_initial_std": 0.3333333333333333,
+          "ppo_std_backtracks": 12,
+          "ppo_std_decay_updates": 360,
+          "ppo_target_kl": 0.03,
+          "ppo_update_guard": "post_step_batch_kl_v1",
+          "ppo_update_macros": 300,
+          "pretrain_lr": [
+            3e-05,
+            0.0003,
+            3e-05
+          ],
+          "replay_capacity": 100000,
+          "replay_warmup": 1000,
+          "sac_actor_warmup_updates": 100,
+          "sac_critic_steps_per_update": 2,
+          "sac_policy_delay": 2,
+          "sac_stage_policy": "preserve",
+          "sac_update_frames": 20,
+          "tau": 0.01
+        },
+        "lower_objective": "unchanged V4 discounted physical cost plus SAC entropy",
+        "parent": {
+          "path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_seed1_20260923\\training\\checkpoints\\candidate-joint-0600.pt",
+          "sha256": "593609143427e023c0a924da40667a59e0b8064f652a94cacd2c5ca847be7be8"
+        },
+        "purpose": "pilot",
+        "quality_rule": {
+          "automatic_extension": false,
+          "consecutive_bad_nodes": 2,
+          "cost_ratio_bad": 1.1,
+          "delay_ratio_bad": 1.1,
+          "upload_area_ratio_bad": 2.0
+        },
+        "randomness": {
+          "arrival_base": 630000000,
+          "layout_base": 610000000,
+          "load_base": 650000000,
+          "routing_base": 640000000,
+          "training_stride": 1000000
+        },
+        "runtime": {
+          "device": "cpu",
+          "max_wall_seconds_per_job": 3600,
+          "torch_threads": 1
+        },
+        "scene_path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_seed1_20260923\\training\\scene.json",
+        "scene_sha256": "91aff57f70f3adf0962f13620700417f52596781edf848850c8becd2a7449c24",
+        "schema": "industrial_upper_horizon_pilot_v1",
+        "training_seed": 1,
+        "transfer": "Full unchanged SAC learning state; newly seeded PPO networks, optimizers, exploration, guard and rollout.",
+        "upper_half_life_s": null,
+        "upper_objective": "discounted physical cost with independent upper physical-time discount"
+      },
+      "budget": {
+        "episode_seconds": 900,
+        "joint_development_check_episodes": [
+          25,
+          50
+        ],
+        "joint_episodes": 50,
+        "max_evaluation_physical_steps": 216000,
+        "max_training_physical_steps": 450000
+      },
+      "development_manifest": {
+        "scenarios": [
+          {
+            "arrival_seed": 330000000,
+            "layout_seed": 310000000,
+            "load_seed": 350000000,
+            "profile_permutation": [
+              0,
+              1,
+              2
+            ],
+            "routing_seed": 340000000,
+            "scenario_id": "development_00_0"
+          },
+          {
+            "arrival_seed": 330000001,
+            "layout_seed": 310000001,
+            "load_seed": 350000001,
+            "profile_permutation": [
+              0,
+              2,
+              1
+            ],
+            "routing_seed": 340000001,
+            "scenario_id": "development_01_0"
+          },
+          {
+            "arrival_seed": 330000002,
+            "layout_seed": 310000002,
+            "load_seed": 350000002,
+            "profile_permutation": [
+              1,
+              0,
+              2
+            ],
+            "routing_seed": 340000002,
+            "scenario_id": "development_02_0"
+          },
+          {
+            "arrival_seed": 330000003,
+            "layout_seed": 310000003,
+            "load_seed": 350000003,
+            "profile_permutation": [
+              1,
+              2,
+              0
+            ],
+            "routing_seed": 340000003,
+            "scenario_id": "development_03_0"
+          },
+          {
+            "arrival_seed": 330000004,
+            "layout_seed": 310000004,
+            "load_seed": 350000004,
+            "profile_permutation": [
+              2,
+              0,
+              1
+            ],
+            "routing_seed": 340000004,
+            "scenario_id": "development_04_0"
+          },
+          {
+            "arrival_seed": 330000005,
+            "layout_seed": 310000005,
+            "load_seed": 350000005,
+            "profile_permutation": [
+              2,
+              1,
+              0
+            ],
+            "routing_seed": 340000005,
+            "scenario_id": "development_05_0"
+          }
+        ],
+        "schema": "industrial_hotspot_development_v1",
+        "seconds": 900
+      },
+      "episode_semantics": {
+        "added_terminal_penalty": false,
+        "bootstrap_same_scene_successor": true,
+        "business_profile_assignment_fixed_within_episode": true,
+        "business_profile_assignment_resampled_between_episodes": true,
+        "claim_infinite_horizon_queue_stability": false,
+        "drain_queues_after_cutoff": false,
+        "end_is_sampling_truncation": true,
+        "gae_trace_crosses_reset": false,
+        "layout_fixed_within_episode": true,
+        "learning_state_preserved_between_episodes": true,
+        "log_windows_per_episode": 3,
+        "macro_slots_per_episode": 180,
+        "physical_steps_per_episode": 9000,
+        "queue_reset_between_episodes": true,
+        "queues_carried_across_macro_slots": true,
+        "reset_observation_as_previous_successor": false,
+        "routing_frames_per_episode": 1800,
+        "terminated": false,
+        "truncated": true
+      },
+      "first_stop_episode": 25,
+      "initial_motion_diagnostic": "record_only; one reference is not an optimum or proof of absent benefit",
+      "intervention": "PPO per-device raw workload/position observation and shared device encoding only.",
+      "learning": {
+        "batch_size": 128,
+        "gae_lambda": 0.95,
+        "gamma_per_resource_frame": 0.99,
+        "grad_clip": 1.0,
+        "initial_alpha": 0.05,
+        "initial_sac_log_std": -2.0,
+        "micro_algorithm": "sac",
+        "ppo_actor_lr": 0.0003,
+        "ppo_clip": 0.2,
+        "ppo_critic_lr": 0.001,
+        "ppo_epochs": 10,
+        "ppo_final_std": 0.03333333333333333,
+        "ppo_guard_retries": 4,
+        "ppo_initial_std": 0.3333333333333333,
+        "ppo_std_backtracks": 12,
+        "ppo_std_decay_updates": 360,
+        "ppo_target_kl": 0.03,
+        "ppo_update_guard": "post_step_batch_kl_v1",
+        "ppo_update_macros": 300,
+        "pretrain_lr": [
+          3e-05,
+          0.0003,
+          3e-05
+        ],
+        "replay_capacity": 100000,
+        "replay_warmup": 1000,
+        "sac_actor_warmup_updates": 100,
+        "sac_critic_steps_per_update": 2,
+        "sac_policy_delay": 2,
+        "sac_stage_policy": "preserve",
+        "sac_update_frames": 20,
+        "tau": 0.01
+      },
+      "lower_objective": "unchanged V4 discounted physical cost plus SAC entropy",
+      "observation_schema": "industrial_device_observation_v1",
+      "parent": {
+        "path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_seed1_20260923\\training\\checkpoints\\candidate-joint-0600.pt",
+        "sha256": "593609143427e023c0a924da40667a59e0b8064f652a94cacd2c5ca847be7be8"
+      },
+      "ppo_architecture": "device_set_mean_max_phi32_head256_v1",
+      "ppo_initialization_seed": 8700001,
+      "purpose": "pilot",
+      "quality_rule": {
+        "automatic_extension": false,
+        "consecutive_bad_nodes": 2,
+        "cost_ratio_bad": 1.1,
+        "delay_ratio_bad": 1.1,
+        "upload_area_ratio_bad": 2.0
+      },
+      "randomness": {
+        "arrival_base": 630000000,
+        "layout_base": 610000000,
+        "load_base": 650000000,
+        "routing_base": 640000000,
+        "training_stride": 1000000
+      },
+      "runtime": {
+        "device": "cpu",
+        "max_wall_seconds_per_job": 3600,
+        "torch_threads": 1
+      },
+      "scene_path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_seed1_20260923\\training\\scene.json",
+      "scene_sha256": "91aff57f70f3adf0962f13620700417f52596781edf848850c8becd2a7449c24",
+      "schema": "industrial_device_joint_pilot_v1",
+      "training_seed": 1,
+      "transfer": "Full unchanged SAC learner; fresh PPO device encoders and optimizers; direct joint learning.",
+      "upper_half_life_s": null,
+      "upper_objective": "discounted physical cost with independent upper physical-time discount"
+    },
+    "runtime": {
+      "device": "cpu",
+      "max_wall_seconds_per_job": 3600,
+      "torch_threads": 1
+    },
+    "scene_path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_seed1_20260923\\training\\scene.json",
+    "scene_sha256": "91aff57f70f3adf0962f13620700417f52596781edf848850c8becd2a7449c24",
+    "schema": "industrial_device_actor_lr_pilot_v1",
+    "training_seed": 1,
+    "transfer": "Full unchanged SAC learner; fresh PPO device encoders and optimizers; direct joint learning.",
+    "upper_half_life_s": null,
+    "upper_objective": "discounted physical cost with independent upper physical-time discount"
+  },
+  "runtime": {
+    "device": "cpu",
+    "max_wall_seconds_per_job": 3600,
+    "torch_threads": 1
+  },
+  "scene_path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_seed1_20260923\\training\\scene.json",
+  "scene_sha256": "91aff57f70f3adf0962f13620700417f52596781edf848850c8becd2a7449c24",
+  "schema": "industrial_device_lr_budget_extension_v1",
+  "training_seed": 1,
+  "transfer": "Full unchanged SAC learner; fresh PPO device encoders and optimizers; direct joint learning.",
+  "upper_half_life_s": null,
+  "upper_objective": "discounted physical cost with independent upper physical-time discount"
+}

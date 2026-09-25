@@ -172,6 +172,7 @@ class UAV_MEC_Env:
         mission_routes_m=None,
         mission_duration_s=900.0,
         cluster_count=1,
+        cluster_load_mode="exact_share",
     ):
 
         # ================== 1. 系统物理设定与参数 ==================
@@ -363,6 +364,11 @@ class UAV_MEC_Env:
         self.cluster_count = int(cluster_count)
         if self.cluster_count < 1:
             raise ValueError("cluster_count must be a positive integer.")
+        if cluster_load_mode not in (
+            "exact_share", "preserve_type_priority", "preserve_type_priority_capped",
+        ):
+            raise ValueError("Unknown cluster_load_mode")
+        self.cluster_load_mode = cluster_load_mode
         self.user_cluster_ids = np.zeros(self.M, dtype=np.int32)
         self.cluster_target_shares = np.full(
             (self.N, self.cluster_count),
@@ -1576,15 +1582,20 @@ class UAV_MEC_Env:
             axis = np.array([np.cos(axis_angle), np.sin(axis_angle)])
             offsets = self.user_coords[zone_users] - self.anchor_points[zone_idx]
             order = np.argsort(offsets @ axis, kind="stable")
-            band = np.arange(zone_users.size) % self.cluster_count
-            self.user_cluster_ids[zone_users[order]] = band.astype(np.int32)
+            for cluster_idx, members in enumerate(
+                np.array_split(zone_users[order], self.cluster_count)
+            ):
+                self.user_cluster_ids[members] = cluster_idx
 
     def set_cluster_target_shares(self, shares):
         """Update intra-zone cluster load shares without touching queues.
 
         ``shares`` must have shape ``(N, cluster_count)``; each row is
-        normalized to sum to one so the zone-level offered load (and hence the
-        global feasibility envelope) is preserved exactly.
+        normalized to sum to one. In exact_share mode these are aggregate load
+        targets. In preserve_type_priority mode they are spatial weights for
+        each device type, conditioned on the clusters containing that type.
+        Actual aggregate shares can differ; zone/type/priority arrival totals
+        are preserved instead. Queues and device identities never change.
         """
         shares = np.asarray(shares, dtype=np.float64)
         if shares.shape != (self.N, self.cluster_count):
@@ -1715,6 +1726,28 @@ class UAV_MEC_Env:
                 ]
 
             target_zone_load = float(self._get_zone_target_load_mbps(zone_idx))
+            if (self.cluster_load_mode == "preserve_type_priority_capped"
+                    or (self.cluster_count > 1 and self.cluster_load_mode == "preserve_type_priority")):
+                # Match the single-cluster workload before redistributing it.
+                raw_zone_load = float(np.sum(
+                    self.user_lambda_high[zone_users] * self.user_task_size_high_mbits[zone_users]
+                    + self.user_lambda_low[zone_users] * self.user_task_size_low_mbits[zone_users]
+                ))
+                if raw_zone_load > 1e-8:
+                    zone_scale = max(target_zone_load / raw_zone_load, 1e-6)
+                    self.user_lambda_high[zone_users] *= zone_scale
+                    self.user_lambda_low[zone_users] *= zone_scale
+                self._redistribute_cluster_arrivals(zone_idx, zone_users)
+                for cluster_idx in range(self.cluster_count):
+                    users = zone_users[self.user_cluster_ids[zone_users] == cluster_idx]
+                    self.cluster_expected_offered_load_mbps[zone_idx, cluster_idx] = np.sum(
+                        self.user_lambda_high[users] * self.user_task_size_high_mbits[users]
+                        + self.user_lambda_low[users] * self.user_task_size_low_mbits[users]
+                    )
+                self.zone_expected_offered_load_mbps[zone_idx] = np.sum(
+                    self.cluster_expected_offered_load_mbps[zone_idx]
+                )
+                continue
             shares = self.cluster_target_shares[zone_idx]
             for cluster_idx in range(self.cluster_count):
                 cluster_users = zone_users[
@@ -1755,6 +1788,83 @@ class UAV_MEC_Env:
             self.zone_expected_offered_load_mbps[zone_idx] = float(
                 np.sum(self.cluster_expected_offered_load_mbps[zone_idx])
             )
+
+    def _redistribute_cluster_arrivals(self, zone_idx, zone_users):
+        """Move arrival intensity between same-type users, preserving its mix."""
+        capped = self.cluster_load_mode == "preserve_type_priority_capped"
+        ceiling = self.uplink_peak_rate_mbps() if capped else None
+        for type_idx in range(len(self.device_type_names)):
+            users = zone_users[self.user_device_type_ids[zone_users] == type_idx]
+            if users.size == 0:
+                continue
+            clusters = self.user_cluster_ids[users]
+            counts = np.bincount(clusters, minlength=self.cluster_count)
+            weights = np.where(counts > 0, self.cluster_target_shares[zone_idx], 0.0)
+            total = float(weights.sum())
+            if total == 0.0:
+                # No requested hotspot contains this type: keep its baseline.
+                if not capped:
+                    continue
+                fractions = np.full(users.size, 1.0 / users.size)
+            else:
+                weights /= total
+                fractions = weights[clusters] / counts[clusters]
+            if capped:
+                type_load = float(np.sum(
+                    self.user_lambda_high[users].astype(np.float64)
+                    * self.user_task_size_high_mbits[users]
+                    + self.user_lambda_low[users].astype(np.float64)
+                    * self.user_task_size_low_mbits[users]
+                ))
+                if type_load > users.size * ceiling:
+                    raise ValueError(
+                        f"Uplink arrival cap infeasible: zone={zone_idx}, "
+                        f"type={self.device_type_names[type_idx]}, "
+                        f"load={type_load:.9g} Mbps > {users.size} * {ceiling:.9g} Mbps; "
+                        "cannot preserve this workload without exceeding the cap"
+                    )
+                if type_load > 0.0:
+                    fractions = self._capacity_limited_fractions(fractions, ceiling / type_load)
+            for rates in (self.user_lambda_high, self.user_lambda_low):
+                type_rate = float(np.sum(rates[users], dtype=np.float64))
+                rates[users] = type_rate * fractions
+
+    def uplink_peak_rate_mbps(self):
+        """Single-terminal overhead link bound, independent of the flown path."""
+        return float(self.compute_u2g_rate_bps(
+            user_coords=np.zeros((1, 2)),
+            uav_coords=np.zeros((self.N, 2)),
+            associations=np.zeros(1, dtype=np.int64),
+        )[0] / 1e6)
+
+    @staticmethod
+    def _capacity_limited_fractions(weights, upper):
+        """Cap proportional shares; spill excess to other same-type terminals."""
+        weights = np.asarray(weights, dtype=np.float64)
+        if (weights.ndim != 1 or not weights.size or not np.all(np.isfinite(weights))
+                or np.any(weights < 0) or weights.sum() <= 0):
+            raise ValueError("Arrival weights must be a nonzero finite nonnegative vector")
+        if not np.isfinite(upper) or upper <= 0 or weights.size * upper < 1.0 - 1e-12:
+            raise ValueError("Arrival fraction cap cannot preserve total workload")
+        fractions = np.zeros_like(weights)
+        active = np.ones(weights.size, dtype=bool)
+        remaining = 1.0
+        while np.any(active):
+            indices = np.flatnonzero(active)
+            preference = weights[indices]
+            # Zero-weight terminals receive overflow only when positive support is full.
+            if preference.sum() == 0.0:
+                preference = np.ones(indices.size)
+            proposed = remaining * preference / preference.sum()
+            saturated = proposed > upper
+            if not np.any(saturated):
+                fractions[indices] = proposed
+                break
+            filled = indices[saturated]
+            fractions[filled] = upper
+            remaining -= upper * filled.size
+            active[filled] = False
+        return fractions
 
     def _compute_tcom_flying_power(self, v):
         """Compute UAV fly/hover power with the TCOM U-shaped curve."""

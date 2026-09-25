@@ -1,0 +1,118 @@
+{
+  "schema": "industrial_deployment_v3",
+  "scene_config": "configs/industrial_deployment_scene_v3.json",
+  "methods": [
+    "ppo_sac",
+    "ppo_cvx",
+    "ppo_random",
+    "ppo_local"
+  ],
+  "training_seeds": [
+    1,
+    2,
+    3
+  ],
+  "budget": {
+    "pretrain_seconds": 60000,
+    "joint_seconds": 540000,
+    "stream_seconds": 900,
+    "log_window_seconds": 300
+  },
+  "randomness": {
+    "seed_stride": 100000,
+    "pretrain": {
+      "arrival_base": 10000000,
+      "layout_base": 20000000,
+      "routing_base": 30000000
+    },
+    "joint": {
+      "arrival_base": 40000000,
+      "layout_base": 50000000,
+      "routing_base": 60000000
+    }
+  },
+  "evaluation": {
+    "arrival_seeds": [
+      910000,
+      910001,
+      910002,
+      910003,
+      910004,
+      910005,
+      910006,
+      910007,
+      910008,
+      910009
+    ],
+    "layout_seeds": [
+      920000,
+      920001,
+      920002,
+      920003,
+      920004,
+      920005,
+      920006,
+      920007,
+      920008,
+      920009
+    ],
+    "routing_seeds": [
+      930000,
+      930001,
+      930002,
+      930003,
+      930004,
+      930005,
+      930006,
+      930007,
+      930008,
+      930009
+    ],
+    "seconds": 900,
+    "warmup_seconds": 0,
+    "selection": "fixed_budget_final_only",
+    "hover_pair": "same_frozen_sac"
+  },
+  "learning": {
+    "micro_algorithm": "sac",
+    "gamma_per_resource_frame": 0.99,
+    "gae_lambda": 0.95,
+    "batch_size": 128,
+    "replay_capacity": 100000,
+    "replay_warmup": 1000,
+    "sac_update_frames": 20,
+    "sac_policy_delay": 2,
+    "sac_actor_warmup_updates": 100,
+    "sac_critic_steps_per_update": 2,
+    "initial_alpha": 0.05,
+    "initial_sac_log_std": -2.0,
+    "pretrain_lr": [
+      3e-05,
+      0.0003,
+      3e-05
+    ],
+    "sac_stage_policy": "preserve",
+    "grad_clip": 1.0,
+    "tau": 0.01,
+    "ppo_update_macros": 300,
+    "ppo_epochs": 10,
+    "ppo_actor_lr": 0.0003,
+    "ppo_critic_lr": 0.001,
+    "ppo_clip": 0.2,
+    "ppo_target_kl": 0.03,
+    "ppo_initial_std": 0.3333333333333333,
+    "ppo_final_std": 0.03333333333333333,
+    "ppo_update_guard": "post_step_batch_kl_v1",
+    "ppo_guard_retries": 4,
+    "ppo_std_backtracks": 12,
+    "ppo_std_decay_updates": 360
+  },
+  "runtime": {
+    "device": "cpu",
+    "torch_threads": 1,
+    "max_wall_seconds_per_job": 86400,
+    "resume": "stream_boundary"
+  },
+  "purpose": "research",
+  "observation_version": "industrial_deployment_v3"
+}

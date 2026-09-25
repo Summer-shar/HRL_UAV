@@ -1,0 +1,278 @@
+{
+  "status": "complete",
+  "rule": {
+    "eligibility": "Original single-checkpoint Local usability rules; no convergence claim.",
+    "primary": "minimum pooled mean physical cost per second among eligible evaluated nodes",
+    "tie_break": "earliest episode",
+    "final_test_used": false,
+    "auto_joint": false
+  },
+  "evaluations": [
+    {
+      "episode": 50,
+      "report_path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_fresh_sac_lr1e5_20260924\\training\\evaluations\\episode-0050\\report.json",
+      "report_sha256": "11d401cbaa383547b0c28e750e05a10f2c96570bbd12de659e9b1e44e99a925c",
+      "checkpoint": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_fresh_sac_lr1e5_20260924\\training\\checkpoints\\episode-0050\\pretrain_final.pt",
+      "checkpoint_sha256": "78a330df443a22703ae3ea738ddad1d77e2a8da3f71519fc81b2aef49a3e0580",
+      "quality_passed": true,
+      "seconds": 5400.0,
+      "cost_sum": 89383.84822280034,
+      "mean_cost_per_s": 16.552564485703765,
+      "physical_return": -89383.84822280034,
+      "holding_task_s": 644035.7999999996,
+      "energy_j": {
+        "cpu": 1234782.721863483,
+        "propulsion": 3155167.8090227623,
+        "u2u": 5679.452993081416,
+        "upload": 3257.6873131991338
+      },
+      "priority": [
+        {
+          "arrived": 33852,
+          "completed": 33848,
+          "unfinished": 4,
+          "completion_rate": 0.999881838591516,
+          "delay_sum_s": 16475.300000001436,
+          "mean_delay_ms": 486.74367761762693
+        },
+        {
+          "arrived": 92057,
+          "completed": 91198,
+          "unfinished": 859,
+          "completion_rate": 0.9906688247498833,
+          "delay_sum_s": 471571.29999999626,
+          "mean_delay_ms": 5170.851334459047
+        }
+      ],
+      "weighted_delay_ms": 1480.9329311717393
+    },
+    {
+      "episode": 100,
+      "report_path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_fresh_sac_lr1e5_20260924\\training\\evaluations\\episode-0100\\report.json",
+      "report_sha256": "10c7a7f75ea4d0dffa2cc28ad326f0f64db63a871ab5ef3056880c23564404ae",
+      "checkpoint": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_fresh_sac_lr1e5_20260924\\training\\checkpoints\\episode-0100\\pretrain_final.pt",
+      "checkpoint_sha256": "b4c4f5bc941ec4d3b83067243b6fa2e6f1d20788de1581998114f7826b952e71",
+      "quality_passed": true,
+      "seconds": 5400.0,
+      "cost_sum": 120613.13362320518,
+      "mean_cost_per_s": 22.335765485778737,
+      "physical_return": -120613.13362320518,
+      "holding_task_s": 991050.800000002,
+      "energy_j": {
+        "cpu": 1236249.301100389,
+        "propulsion": 3155167.8090227623,
+        "u2u": 3923.8298128374727,
+        "upload": 3257.6873131991338
+      },
+      "priority": [
+        {
+          "arrived": 33852,
+          "completed": 33848,
+          "unfinished": 4,
+          "completion_rate": 0.999881838591516,
+          "delay_sum_s": 16385.10000000146,
+          "mean_delay_ms": 484.0788229733355
+        },
+        {
+          "arrived": 92057,
+          "completed": 90975,
+          "unfinished": 1082,
+          "completion_rate": 0.988246412548747,
+          "delay_sum_s": 809422.3000000002,
+          "mean_delay_ms": 8897.194833745536
+        }
+      ],
+      "weighted_delay_ms": 2266.298680886274
+    },
+    {
+      "episode": 150,
+      "report_path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_fresh_sac_lr1e5_20260924\\training\\evaluations\\episode-0150\\report.json",
+      "report_sha256": "de33a55d5882f09787505b30e993aee2eb9d909dcb3d6438dc403d3bee3c50ff",
+      "checkpoint": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_fresh_sac_lr1e5_20260924\\training\\checkpoints\\episode-0150\\pretrain_final.pt",
+      "checkpoint_sha256": "8a1457f277b331757f8cc249b2da4f0ffa0d3d81dbc474f8c6ea53f86c075c95",
+      "quality_passed": true,
+      "seconds": 5400.0,
+      "cost_sum": 57556.85660444829,
+      "mean_cost_per_s": 10.658677148971904,
+      "physical_return": -57556.85660444829,
+      "holding_task_s": 290364.2000000003,
+      "energy_j": {
+        "cpu": 1236076.338104809,
+        "propulsion": 3155167.8090227623,
+        "u2u": 4869.170182461202,
+        "upload": 3257.6873131991338
+      },
+      "priority": [
+        {
+          "arrived": 33852,
+          "completed": 33848,
+          "unfinished": 4,
+          "completion_rate": 0.999881838591516,
+          "delay_sum_s": 16405.800000001444,
+          "mean_delay_ms": 484.69038052474133
+        },
+        {
+          "arrived": 92057,
+          "completed": 91908,
+          "unfinished": 149,
+          "completion_rate": 0.9983814375875816,
+          "delay_sum_s": 126115.19999999934,
+          "mean_delay_ms": 1372.189580885226
+        }
+      ],
+      "weighted_delay_ms": 674.2130356794655
+    },
+    {
+      "episode": 200,
+      "report_path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_fresh_sac_lr1e5_20260924\\training\\evaluations\\episode-0200\\report.json",
+      "report_sha256": "8d4cfd341693a8d2fed7690e8cc9b6ba220637cc055e8c16901e31e50721c706",
+      "checkpoint": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_fresh_sac_lr1e5_20260924\\training\\checkpoints\\episode-0200\\pretrain_final.pt",
+      "checkpoint_sha256": "26afe20fe3d8f57dc870f73af9cb63fc3240bc74580a5c988f381d2942d1c0b1",
+      "quality_passed": true,
+      "seconds": 5400.0,
+      "cost_sum": 57515.77874305261,
+      "mean_cost_per_s": 10.651070137602336,
+      "physical_return": -57515.77874305261,
+      "holding_task_s": 289529.09999999974,
+      "energy_j": {
+        "cpu": 1241538.7820016616,
+        "propulsion": 3155167.8090227623,
+        "u2u": 4178.0856902135765,
+        "upload": 3257.6873131991338
+      },
+      "priority": [
+        {
+          "arrived": 33852,
+          "completed": 33848,
+          "unfinished": 4,
+          "completion_rate": 0.999881838591516,
+          "delay_sum_s": 16353.60000000148,
+          "mean_delay_ms": 483.14819191684825
+        },
+        {
+          "arrived": 92057,
+          "completed": 91926,
+          "unfinished": 131,
+          "completion_rate": 0.9985769686172697,
+          "delay_sum_s": 125828.10000000021,
+          "mean_delay_ms": 1368.7977286077955
+        }
+      ],
+      "weighted_delay_ms": 672.3049864546847
+    },
+    {
+      "episode": 250,
+      "report_path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_fresh_sac_lr1e5_20260924\\training\\evaluations\\episode-0250\\report.json",
+      "report_sha256": "49542b91ac669acf47787dbb448851f49cc94057b919eb6595ccaf195aa4507b",
+      "checkpoint": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_fresh_sac_lr1e5_20260924\\training\\checkpoints\\episode-0250\\pretrain_final.pt",
+      "checkpoint_sha256": "1f23ed9d3423e92ccdc0827d1ebe7f1692a3332e218c336a23890830addec22a",
+      "quality_passed": true,
+      "seconds": 5400.0,
+      "cost_sum": 56355.37346028189,
+      "mean_cost_per_s": 10.436180270422572,
+      "physical_return": -56355.37346028189,
+      "holding_task_s": 276340.9999999999,
+      "energy_j": {
+        "cpu": 1245622.6755551426,
+        "propulsion": 3155167.8090227623,
+        "u2u": 3807.5125488292474,
+        "upload": 3257.6873131991338
+      },
+      "priority": [
+        {
+          "arrived": 33852,
+          "completed": 33848,
+          "unfinished": 4,
+          "completion_rate": 0.999881838591516,
+          "delay_sum_s": 16211.000000001473,
+          "mean_delay_ms": 478.9352398960492
+        },
+        {
+          "arrived": 92057,
+          "completed": 91943,
+          "unfinished": 114,
+          "completion_rate": 0.9987616368119752,
+          "delay_sum_s": 114089.50000000055,
+          "mean_delay_ms": 1240.872062038443
+        }
+      ],
+      "weighted_delay_ms": 641.6931716009955
+    },
+    {
+      "episode": 300,
+      "report_path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_fresh_sac_lr1e5_20260924\\training\\evaluations\\episode-0300\\report.json",
+      "report_sha256": "16edffa956c4ce2783f81b2835b23a102ff711b759c694a5a765d45d9e9fd7b9",
+      "checkpoint": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_fresh_sac_lr1e5_20260924\\training\\checkpoints\\episode-0300\\pretrain_final.pt",
+      "checkpoint_sha256": "6c5f03143b142b3b95619b30d77b6774e1a5f12aa8a4bc5c24e5f737c47a30ab",
+      "quality_passed": true,
+      "seconds": 5400.0,
+      "cost_sum": 56682.39920629311,
+      "mean_cost_per_s": 10.496740593757982,
+      "physical_return": -56682.39920629311,
+      "holding_task_s": 279199.19999999943,
+      "energy_j": {
+        "cpu": 1256818.6673524044,
+        "propulsion": 3155167.8090227623,
+        "u2u": 2381.805193139858,
+        "upload": 3257.6873131991338
+      },
+      "priority": [
+        {
+          "arrived": 33852,
+          "completed": 33848,
+          "unfinished": 4,
+          "completion_rate": 0.999881838591516,
+          "delay_sum_s": 15985.200000001449,
+          "mean_delay_ms": 472.2642401323992
+        },
+        {
+          "arrived": 92057,
+          "completed": 91942,
+          "unfinished": 115,
+          "completion_rate": 0.9987507739769925,
+          "delay_sum_s": 119206.70000000071,
+          "mean_delay_ms": 1296.542385416901
+        }
+      ],
+      "weighted_delay_ms": 648.337445576702
+    }
+  ],
+  "selected": {
+    "episode": 250,
+    "report_path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_fresh_sac_lr1e5_20260924\\training\\evaluations\\episode-0250\\report.json",
+    "report_sha256": "49542b91ac669acf47787dbb448851f49cc94057b919eb6595ccaf195aa4507b",
+    "checkpoint": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_fresh_sac_lr1e5_20260924\\training\\checkpoints\\episode-0250\\pretrain_final.pt",
+    "checkpoint_sha256": "1f23ed9d3423e92ccdc0827d1ebe7f1692a3332e218c336a23890830addec22a",
+    "quality_passed": true,
+    "seconds": 5400.0,
+    "cost_sum": 56355.37346028189,
+    "mean_cost_per_s": 10.436180270422572,
+    "physical_return": -56355.37346028189,
+    "holding_task_s": 276340.9999999999,
+    "energy_j": {
+      "cpu": 1245622.6755551426,
+      "propulsion": 3155167.8090227623,
+      "u2u": 3807.5125488292474,
+      "upload": 3257.6873131991338
+    },
+    "priority": [
+      {
+        "arrived": 33852,
+        "completed": 33848,
+        "unfinished": 4,
+        "completion_rate": 0.999881838591516,
+        "delay_sum_s": 16211.000000001473,
+        "mean_delay_ms": 478.9352398960492
+      },
+      {
+        "arrived": 92057,
+        "completed": 91943,
+        "unfinished": 114,
+        "completion_rate": 0.9987616368119752,
+        "delay_sum_s": 114089.50000000055,
+        "mean_delay_ms": 1240.872062038443
+      }
+    ],
+    "weighted_delay_ms": 641.6931716009955
+  }
+}

@@ -1,0 +1,129 @@
+{
+  "status": "complete",
+  "contract": {
+    "schema": "fresh_joint_continuation_50_to_400_v1",
+    "source_checkpoint": {
+      "path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_fresh_sac_lr1e5_20260924\\joint50\\checkpoints\\rolling\\checkpoint-1790284220485207600-edcda2c1c2804eb49df30083d1b72b77.pt",
+      "sha256": "ef2e9913e4d6840937dc185379e6670a94d32118e25d8eed9691f8821a1688cc"
+    },
+    "start_episode": 50,
+    "target_episode": 400,
+    "extra_training_physical_steps": 3150000,
+    "extra_evaluation_physical_steps": 756000,
+    "episode_seconds": 900,
+    "evaluation_nodes": [
+      100,
+      150,
+      200,
+      250,
+      300,
+      350,
+      400
+    ],
+    "wall_seconds": 21600,
+    "task_flow": "Continue existing joint runner seed indices 50..399 without reseeding learner RNG",
+    "automatic_extension": false,
+    "automatic_retry": false,
+    "inherited_protocol_sha256": "e335ab3b0da75314b2b80aaa109e85f9317fd83bbef1e1f4fb5ab39f7950d26a",
+    "runner_sha256": {
+      "__init__.py": "d11fade914f3c74a2d1668b3ede9e930e39bbf06473f2ccda3b8cf9f9aefdf15",
+      "experiment.py": "b54e595e47a0b77042bd35af4fce5fffd964dbc29d25994488137081a1ee5eb5",
+      "evaluation.py": "e5e819e8d53688def52d6226fcc3596ee402a7ff3d6f81c4d377a65db46afe1c",
+      "continue50.py": "9333ac7b8430e54ac5322ca8a65eb0b949f3c0360e0a2b9999b23de41d6aa909",
+      "continue400.py": "a6ab1b65acbd7f02a515a88960cf2656146410ad8420c7408357641e31c1c51a"
+    }
+  },
+  "identity": {
+    "method": "ppo_sac",
+    "training_seed": 1,
+    "source_sha256": {
+      "hrl_uav/industrial_scene.py": "58e4cc1ea0d6cf993757fac51a6edf5eaa234a956d7f381c577a3d797454d312",
+      "hrl_uav/industrial_env.py": "4573a1c5c10fe505b015afec76c5850d94ed66c8369db57afac3bcf32a279eb0",
+      "hrl_uav/industrial_mdp.py": "0deb29636ae73b20f4ed1bdf2de0ba71a517ac8bb45bfd61babde4a68813ed4a",
+      "hrl_uav/industrial_observation.py": "0945a55b40ddfe6a2ec41c6818ded3ee55cdbc7c0c9297c9e60f41f6927ee964",
+      "hrl_uav/industrial_rollout.py": "90b850ec035d541d20d2354d9dd061da2737b32accfca608016e74ec5d0353f1",
+      "hrl_uav/industrial_baselines.py": "a39029f9427dcb911a0da9e29a2a5374fcaa00edcff459065facc40ce824bc7e",
+      "hrl_uav/industrial_experiment.py": "5157de3088c62907b0c87cd90870814f62726935819a9038624805ce3dee2419",
+      "hrl_uav/env.py": "ff6dbee5c0e643695c6f9f9fb36e9040ae0b4abb84bcb1faef521c605421569e",
+      "hrl_uav/mdp.py": "a8af6af4b94108eef253668ca5abc89027a3733c0b132eb64fe243ea9ff80cf3",
+      "hrl_uav/geometry.py": "93a32babbb42d6df2676b274a57673afa4e6896e717f56988369726d254241af",
+      "hrl_uav/load_switching.py": "8649cb491b127ea79f0fd0b7402678f4b36dd36761fc12bd3760fb7eed2fbe11",
+      "hrl_uav/routing.py": "5e45b645b8eb97bb5b1ee6fe8f943631adfd235d37c304d3cf6f8b171c56ddde",
+      "hrl_uav/learning.py": "8d4051cf19cdd2bfa60e7b29737c4a20a9c60005e19e64038a40c887416f5489",
+      "hrl_uav/xu_cvx_r.py": "8beea2a0e083133c7c311dcb35ec1f3ba133454c9df0ccbb3eb1be088692fa26",
+      "hrl_uav/agents/ppo_agent.py": "d9193fd36fb47c283974daae6b0256c806c1ab9a21610f72baa017ec5e7889e6",
+      "hrl_uav/agents/sac_agent.py": "e0dd62ffa39d3045f568ab5c4712b04ed1cf4acd0e8396b35f6a0a12941147a8",
+      "hrl_uav/agents/tqc.py": "e9946af3c5b180e8338d8e48ac82ee78ccf80a2f3d48de54b7906b17e28eb1bb",
+      "hrl_uav/industrial_deployment_scene.py": "4512d8630245047185f50c525319d2d33aaf5752ed6d1ad4eeccc59d1c6f0cb1",
+      "hrl_uav/industrial_deployment_env.py": "c6edb15118d6157d5b022c59077630952dffb6b60788e6bec7aa0ae7a007df0e",
+      "hrl_uav/industrial_deployment_observation.py": "789c12eadce5472bef0a91e2e4d33319b1c733006bac4b5a41e485484d056ea0",
+      "hrl_uav/industrial_deployment_mdp.py": "6349cbf271af8a944e4ef28d064343a1541e689d61fc199343371d153ead3b3c",
+      "hrl_uav/industrial_deployment_learning.py": "b602da88019a54c0a465bb291fecbdecd0ed68d803ba753eba6f7390d2915599",
+      "hrl_uav/industrial_deployment_training.py": "cdb084a472d412331d10efafc3d775cc492fc75da21c2c4d8926854cc3335172",
+      "hrl_uav/industrial_deployment_checkpoint.py": "81d14e67b6bebc7922493244d108f6c357b3210b90fdbd359a891ec356856530",
+      "hrl_uav/industrial_deployment_experiment.py": "9f932836c9a34e4aed73b666df8db91d5d3006d2bc31c276bcf089fb5cd39979",
+      "scripts/run_industrial_deployment.py": "fc5a991a17d1756e64dca8739539b9365ca668a29ac6c9e919bfc697229d8532",
+      "hrl_uav/industrial_hotspot_scene.py": "59764df467f85cfc68c8d0cb6888e3d3c358ff2acd4a6f32b91070e6f28befca",
+      "hrl_uav/industrial_hotspot_env.py": "2484eb2e7b990a3e6827ead6a92bbe59c853a5dd7d0b7ed6395041770c9951f0",
+      "hrl_uav/industrial_hotspot_mdp.py": "d703fd752d7c0beaec4ac1079493af1c3d48e358f0f1a1cbc1d44a62fbc92261",
+      "hrl_uav/industrial_hotspot_gate.py": "dab3cb3b8d1873ac0009e246199148437c434519f268ff9f8efb2a6b1682cf7e",
+      "hrl_uav/industrial_hotspot_evaluation.py": "92c56d14b91510f617bfdcf0c289b12f05ca9c8df902ece6196370910e36c891",
+      "hrl_uav/industrial_hotspot_checkpoint.py": "2a50c13eaeb623d18accb4039bd97e1fa86f995b1ab331dbfd3a9911c02cc96c",
+      "hrl_uav/industrial_hotspot_experiment.py": "51501126ee10435afec3f3b2b4c26a2c761f0cc33fe3563cd6559951ba8ee4b9",
+      "scripts/run_industrial_hotspot.py": "676e3f7d7468577b9c0caf1eb177723648459d0c161d00280b51d6a31dd1b64c",
+      "scripts/validate_industrial_hotspot.py": "8b3160f8a1a0cd3461ede75431f1decda04aceb7815d77bed39cc1e203d2d340",
+      "industrial_hotspot_analysis/load24725_pilot_20260923/pilot.py": "319a22663e0edd368b4cd6e4f9ab1e54cfc74fd7ceb50bc91dcfaa173bde8e33",
+      "industrial_device_pilot/__init__.py": "c8c5a85ad4fdc67705882571aa053259b8d8685719e6692139857ef60f59f006",
+      "industrial_device_pilot/observation.py": "49862e7196b814560c5804b166747c9976c97dcfedbe175675b017000373e406",
+      "industrial_device_pilot/networks.py": "cc1936b14c9878c99bd145a4632a068efb3baa32c4d8cb7ba8a53b30e3d78b81",
+      "industrial_device_pilot/experiment.py": "d4b2f4594bba18c05bdc7b2c9ebaedc6232df3e52c9daa0238ef60cd84960a4f",
+      "industrial_device_pilot/evaluation.py": "5e3bd1a9267a3e87c958a8679b7513c1a4adcbffaeb98398dd4eeba821c1159d",
+      "industrial_device_sac_pretrain/__init__.py": "d5f463680c180af0a1eb309782581e5691ad905547fa7cc9553fed2062c5232d",
+      "industrial_device_sac_pretrain/experiment.py": "88dc7f5a9ef6050aa532ddca0f0061b78ac18fc38f2d0fe765dc285b6b3705a1",
+      "industrial_device_sac_pretrain/evaluation.py": "24899452e2069f76c0525df5f71e368402227371730b25eb8ce44357dba80f36",
+      "industrial_device_sac_pretrain/validate.py": "f0edded6fe10078e3fecce5eb0822359cb09f3ab23bf915a3d5db90627c5f999"
+    }
+  },
+  "started_utc": "2026-09-24T22:03:54.250770+00:00",
+  "committed_episodes": 400,
+  "latest_checkpoint": {
+    "path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_fresh_sac_lr1e5_20260924\\joint400\\checkpoints\\rolling\\checkpoint-1790295023370105700-11ccdb5d5320477faa74398285ad1b7c.pt",
+    "sha256": "ae35fd82bff6687007115947115e1db58cd127d579c4e4e4d1b2ab59e0644463",
+    "index": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_fresh_sac_lr1e5_20260924\\joint400\\checkpoints\\rolling\\latest.json",
+    "latest": {
+      "filename": "checkpoint-1790295023370105700-11ccdb5d5320477faa74398285ad1b7c.pt",
+      "sha256": "ae35fd82bff6687007115947115e1db58cd127d579c4e4e4d1b2ab59e0644463"
+    },
+    "previous": {
+      "filename": "checkpoint-1790295022511549400-56fd3580f40f4f17bb2b6aa80c95ed39.pt",
+      "sha256": "ae35fd82bff6687007115947115e1db58cd127d579c4e4e4d1b2ab59e0644463"
+    },
+    "persistent_path": null
+  },
+  "updates": {
+    "ppo": 240,
+    "ppo_actor_gradient_steps": 2295,
+    "sac": 58451,
+    "sac_actor": 29175,
+    "sac_critic_fits": 116902,
+    "replay_writes": 1170000
+  },
+  "actual_optimizer_lrs": [
+    [
+      1e-05
+    ],
+    [
+      0.0003
+    ],
+    [
+      3e-05
+    ],
+    [
+      0.0003
+    ],
+    [
+      0.001
+    ]
+  ],
+  "elapsed_seconds": 7589.7777581
+}

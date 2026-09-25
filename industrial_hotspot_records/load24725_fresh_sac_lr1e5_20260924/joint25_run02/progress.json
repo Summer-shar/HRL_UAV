@@ -1,0 +1,45 @@
+{
+  "status": "complete",
+  "committed_episodes": 25,
+  "target_episodes": 25,
+  "updates": {
+    "ppo": 15,
+    "ppo_actor_gradient_steps": 150,
+    "sac": 24701,
+    "sac_actor": 12300,
+    "sac_critic_fits": 49402,
+    "replay_writes": 495000
+  },
+  "latest_checkpoint": {
+    "path": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_fresh_sac_lr1e5_20260924\\joint25_run02\\checkpoints\\rolling\\checkpoint-1790268594858475300-49d474342234431ea0319359d19ed507.pt",
+    "sha256": "556dd1c805fccc8b3bb067a3daa520e9afab220e66a8d09bd71349c1faeb74e1",
+    "index": "C:\\Users\\PC\\Desktop\\HRL_UAV\\industrial_hotspot_records\\load24725_fresh_sac_lr1e5_20260924\\joint25_run02\\checkpoints\\rolling\\latest.json",
+    "latest": {
+      "filename": "checkpoint-1790268594858475300-49d474342234431ea0319359d19ed507.pt",
+      "sha256": "556dd1c805fccc8b3bb067a3daa520e9afab220e66a8d09bd71349c1faeb74e1"
+    },
+    "previous": {
+      "filename": "checkpoint-1790268430199740200-84c03e92041a458f8e3c46688e573071.pt",
+      "sha256": "90a204c0d29d45a380e7dee526a6f7912af71a1f4e11de79f58a3e5223ad0661"
+    },
+    "persistent_path": null
+  },
+  "actual_optimizer_lrs": [
+    [
+      1e-05
+    ],
+    [
+      0.0003
+    ],
+    [
+      3e-05
+    ],
+    [
+      0.0003
+    ],
+    [
+      0.001
+    ]
+  ],
+  "elapsed_seconds": 622.3726152
+}
