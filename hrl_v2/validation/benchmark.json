@@ -1,0 +1,64 @@
+{
+  "median_fragment_count": {
+    "physical_tick": 1140,
+    "parents": 86,
+    "fragments": 94,
+    "history_frames": 229,
+    "report_bytes": 40710,
+    "samples": 30,
+    "p50_seconds": 0.051203450000002704,
+    "p95_seconds": 0.0586631549999975,
+    "p99_seconds": 0.059164107999999944
+  },
+  "max_fragment_count": {
+    "physical_tick": 4910,
+    "parents": 545,
+    "fragments": 639,
+    "history_frames": 983,
+    "report_bytes": 195161,
+    "samples": 30,
+    "p50_seconds": 0.10710345000000032,
+    "p95_seconds": 0.11376320499999579,
+    "p99_seconds": 0.20130454999999817
+  },
+  "training_batch": {
+    "batch_size": 128,
+    "microbatch_size": 16,
+    "critic_fit_seconds": 12.313641899999993,
+    "actor_update_seconds": 6.705314000000001,
+    "cuda_peak_allocated_bytes": 988823040,
+    "cuda_peak_reserved_bytes": 1247805440,
+    "critic": {
+      "residual_mean": [
+        0.026367819829864313,
+        1.5180803548628667
+      ],
+      "residual_mse": [
+        0.14191755979807702,
+        2.4381738153040438
+      ],
+      "gradient_norm": [
+        5.863502025604248,
+        98.03533935546875
+      ],
+      "target_mean": -0.7494865473909508,
+      "target_variance": 0.08895750936616054
+    },
+    "actor": {
+      "objective": 2.7128371045097284,
+      "surrogate": 16.235151238972026,
+      "gradient_norm": 0.14303165674209595
+    },
+    "process_working_set_bytes": 2428477440,
+    "process_peak_working_set_bytes": 2442174464,
+    "note": "One measured critic fit and actor update on scripted-trajectory replay; no research training"
+  },
+  "episode_storage_bytes": 16599853,
+  "network_parameter_counts": {
+    "lower_actor": 1390691,
+    "q1": 1394370,
+    "q2": 1394370,
+    "upper_actor": 1204549,
+    "value": 1204418
+  }
+}
