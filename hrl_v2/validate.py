@@ -74,12 +74,17 @@ def main():
     args=parser.parse_args()
     root=Path(__file__).absolute().parents[1]
     output=args.output if args.output.is_absolute() else root/args.output
-    from .tests.test_math import MathTests
     from .tests.test_physics import PhysicsTests
-    from .tests.test_learning import LearningTests
-    from .tests.test_ppo import PPOTests
-    suites=unittest.TestSuite(unittest.defaultTestLoader.loadTestsFromTestCase(c)
-                              for c in (MathTests,PhysicsTests,LearningTests,PPOTests))
+    discovered=unittest.defaultTestLoader.discover(str(root/"hrl_v2/tests"),top_level_dir=str(root))
+    def cases(suite):
+        for item in suite:
+            if isinstance(item,unittest.TestSuite): yield from cases(item)
+            else: yield item
+    # Keep the full physical replay fixture available to the checkpoint test,
+    # while automatically including new integration/optimization test modules.
+    order={name:i for i,name in enumerate(("MathTests","PhysicsTests","LearningTests","PPOTests"))}
+    suites=unittest.TestSuite(sorted(cases(discovered),
+        key=lambda test:(order.get(type(test).__name__,4),test.id())))
     output.mkdir(parents=True,exist_ok=True)
     start=time.perf_counter()
     with (output/"tests.txt").open("w",encoding="utf-8") as f:

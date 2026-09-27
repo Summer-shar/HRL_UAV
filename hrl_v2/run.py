@@ -29,11 +29,17 @@ def append(path,value):
         f.write(json.dumps(value,ensure_ascii=False,allow_nan=False)+"\n")
 
 
+def collection_policy(learner,streams,phase):
+    from .policy import Policy
+    return Policy(learner.sac.actor,learner.ppo.actor,
+                  learner.ppo.value if phase.layer=="upper" else None,streams,
+                  mode="hover" if phase.stage==1 else "moving")
+
+
 def train(root,config_path,seed,output,resume=None):
     from .runtime import configure,Learner,parameter_hash
     from .physics_adapter import PhysicsAdapter
     from .collector import collect
-    from .policy import Policy
     from .evaluate import manifest,panel
     root,output=Path(root),Path(output)
     config=read_config(config_path,root); binding=identity(root,config_path)
@@ -134,8 +140,7 @@ def train(root,config_path,seed,output,resume=None):
         adapter.reset(**external)
         version="hover-0" if p.stage==1 else f"ppo-{learner.ppo.version}-stochastic"
         if p.layer=="lower": replay.set_upper_version(version)
-        policy=Policy(learner.sac.actor,learner.ppo.actor,learner.ppo.value,streams,
-                      mode="hover" if p.stage==1 else "moving")
+        policy=collection_policy(learner,streams,p)
         started=time.perf_counter()
         def event():
             row=learner.sac.event(replay,p.alpha,p.actor_enabled,streams)

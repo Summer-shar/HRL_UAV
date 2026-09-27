@@ -1,20 +1,37 @@
 """Fixed data owned by one sampled batch; never caches learned encodings."""
 from collections import OrderedDict
 from contextlib import contextmanager
+from functools import lru_cache
 import numpy as np
 import torch
 from .features import build, arrival_array
 
 
+@lru_cache(maxsize=256)
+def fixed_graph(report):
+    """Preserve the baseline's bounded cache of immutable CPU graph features.
+
+    Batch-local identity lookup avoids repeating the structural report hash
+    for every independent encoder. Neither cache contains learned tensors.
+    """
+    return build(report)
+
+
 class PreparedBatch:
     def __init__(self, states, *, owner=None, indices=None):
         self.states=list(states)
-        self.owner=owner if owner is not None else self
-        self.indices=tuple(range(len(states))) if indices is None else tuple(indices)
+        self._owner=owner
+        self.indices=tuple(range(len(self.states))) if indices is None else tuple(indices)
         if owner is None:
             self.graphs={}
             self.inputs={}
             self.tensors=OrderedDict()
+
+    @property
+    def owner(self):
+        # A root batch must not own itself: that cycle retains its device
+        # tensors until cyclic GC, across otherwise completed optimizer steps.
+        return self if self._owner is None else self._owner
 
     def __len__(self): return len(self.states)
     def __iter__(self): return iter(self.states)
@@ -28,14 +45,20 @@ class PreparedBatch:
 
     def graph(self, report):
         key=id(report)
-        if key not in self.owner.graphs: self.owner.graphs[key]=build(report)
+        if key not in self.owner.graphs: self.owner.graphs[key]=fixed_graph(report)
         return self.owner.graphs[key]
 
     def arrivals(self, history, cursor, device):
+        if cursor < 0 or cursor > len(history):
+            raise ValueError("History cursor outside observed arrivals")
         key=(id(history),str(device))
         cached=self.owner.inputs.get(key)
         if cached is None or len(cached)<cursor:
-            cached=arrival_array(history,cursor,device)
+            # A successor may extend an already normalized prefix by one frame.
+            # Normalize/transfer only that suffix; raw inputs carry no gradients.
+            begin=0 if cached is None else len(cached)
+            delta=arrival_array(history[begin:cursor],cursor-begin,device)
+            cached=delta if cached is None else torch.cat((cached,delta))
             self.owner.inputs[key]=cached
         return cached[:cursor]
 
@@ -64,6 +87,7 @@ class HistoryTape:
     def __init__(self,encoder,states):
         if not isinstance(states,PreparedBatch): states=PreparedBatch(states)
         self.encoder=encoder; self.outputs={}; self.leaves={}; self.closed=False
+        self.versions=tuple((id(p),p._version) for p in encoder.arrival.parameters())
         self.train=torch.is_grad_enabled() and any(p.requires_grad for p in encoder.arrival.parameters())
         device=next(encoder.parameters()).device
         groups={}
@@ -79,10 +103,16 @@ class HistoryTape:
 
     def get(self,states):
         if self.closed: raise RuntimeError("History tape already consumed")
+        for r,h in states:
+            if r.history_cursor < 0 or (r.history_cursor and
+                (id(h) not in self.leaves or r.history_cursor > len(self.leaves[id(h)]))):
+                raise ValueError("State is outside this optimizer-step history tape")
         return [self.leaves[id(h)][r.history_cursor-1] if r.history_cursor else self.zero for r,h in states]
 
     def backward(self):
         if self.closed: raise RuntimeError("History tape may be backpropagated only once")
+        if self.versions != tuple((id(p),p._version) for p in self.encoder.arrival.parameters()):
+            raise RuntimeError("Arrival parameters changed within a history tape")
         outputs=[]; adjoints=[]
         if self.train:
             for key,leaf in self.leaves.items():
@@ -100,6 +130,7 @@ def history_scope(encoder,states):
     try: yield tape
     finally:
         encoder._history_tape=None
+        tape.closed=True
         tape.outputs.clear(); tape.leaves.clear()
 
 
@@ -116,7 +147,7 @@ class IncrementalHistory:
         # in-place edits. Include every encoder parameter, not only GRU weights.
         signature=(str(parameter.device),parameter.dtype,tuple((id(p),p._version) for p in encoder.parameters()))
         cursor=report.history_cursor
-        if cursor>len(history): raise ValueError("Future history cursor")
+        if cursor<0 or cursor>len(history): raise ValueError("History cursor outside observed arrivals")
         if (episode is not self.episode or history is not self.history or signature!=self.signature
                 or cursor<self.cursor):
             self.clear(); self.episode=episode; self.history=history; self.signature=signature

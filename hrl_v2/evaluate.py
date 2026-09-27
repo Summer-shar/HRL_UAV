@@ -7,8 +7,8 @@ from .checkpoint import atomic_json,json_digest,identity,load,digest
 from .randomness import derive,Streams
 from .physics_adapter import PhysicsAdapter
 from .policy import Policy
-from .collector import collect
-from .metrics import pool
+from .collector import collect_metrics
+from .metrics import PooledMetrics
 
 
 def manifest(split):
@@ -26,7 +26,7 @@ def panel(learner,scene,master,panel_manifest,output,checkpoint_id,*,modes=("mov
     output=Path(output); output.mkdir(parents=True,exist_ok=True)
     policy_label="stochastic" if stochastic else "deterministic"
     key=dict(checkpoint=checkpoint_id,manifest=json_digest(panel_manifest),policy=policy_label)
-    results={mode:[] for mode in modes}
+    results={mode:PooledMetrics() for mode in modes}
     # All training random states are restored, including unused global states.
     devices=list(range(torch.cuda.device_count()))
     with torch.random.fork_rng(devices=devices):
@@ -38,17 +38,17 @@ def panel(learner,scene,master,panel_manifest,output,checkpoint_id,*,modes=("mov
                     if path.exists():
                         saved=json.loads(path.read_text(encoding="utf-8"))
                         if saved["identity"]!=item: raise ValueError("Existing evaluation belongs to another contract")
-                        results[mode].append(saved["metrics"]); continue
+                        results[mode].add(saved["metrics"]); continue
                     streams=Streams(master,episode=scenario["scenario"],split=split,policy_stream=stream)
                     adapter=PhysicsAdapter(scene)
                     adapter.reset(**{k:v for k,v in scenario.items() if k.endswith("_seed")})
                     policy=Policy(learner.sac.actor,learner.ppo.actor,None,streams,mode=mode,stochastic=stochastic)
-                    episode=collect(adapter,policy,upper_version="evaluation",lower_version=learner.sac.version,identity=item)
-                    episode.metrics.update(split=split,policy=policy_label,mode=mode,training_seed=master,
-                                           learning_updates=0,replay_writes=0)
-                    atomic_json(path,dict(identity=item,metrics=episode.metrics))
-                    results[mode].append(episode.metrics)
-    summary=dict(identity=key,by_mode={k:pool(v) for k,v in results.items()},learning_updates=0,replay_writes=0)
+                    metrics=collect_metrics(adapter,policy,identity=item)
+                    metrics.update(split=split,policy=policy_label,mode=mode,training_seed=master,
+                                   learning_updates=0,replay_writes=0)
+                    atomic_json(path,dict(identity=item,metrics=metrics))
+                    results[mode].add(metrics)
+    summary=dict(identity=key,by_mode={k:v.result() for k,v in results.items()},learning_updates=0,replay_writes=0)
     atomic_json(output/f"summary_{policy_label}.json",summary)
     return summary
 

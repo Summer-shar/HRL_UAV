@@ -1,0 +1,13 @@
+{
+  "file_bytes": 72485148,
+  "seconds": 0.0694814000000008,
+  "samples_seconds": [
+    0.0686431999999968,
+    0.0694814000000008,
+    0.07158009999999138,
+    0.07008409999998833,
+    0.06889459999999303
+  ],
+  "sha256": "d4ed747c5a9398d3544965f1fe522b63eec9afcbd85c5580149f6621d973729f",
+  "scope": "Production SHA256 read_bytes digest on a bounded fixture after one warmup; used for the additional checkpoint identity reads, not serialization"
+}

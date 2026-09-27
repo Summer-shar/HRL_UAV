@@ -10,24 +10,38 @@ def collect(adapter,policy,*,upper_version,lower_version,identity,on_event=None,
     The adapter must already be reset. on_event samples *previous completed*
     episodes; the caller admits this episode only after collect returns.
     """
-    if adapter.env.step_index!=0: raise ValueError("Collector requires reset")
     episode=Episode(upper_version,lower_version,identity)
+    metrics=_collect(adapter,policy,identity=identity,episode=episode,on_event=on_event,on_tick=on_tick)
+    episode.seal(adapter.arrivals,metrics)
+    return episode
+
+
+def collect_metrics(adapter,policy,*,identity,on_tick=None):
+    """Frozen evaluation through the same decisions, without replay storage."""
+    return _collect(adapter,policy,identity=identity,on_tick=on_tick)
+
+
+def _collect(adapter,policy,*,identity,episode=None,on_event=None,on_tick=None):
+    if adapter.env.step_index!=0: raise ValueError("Collector requires reset")
+    if hasattr(policy,"begin_episode"): policy.begin_episode(identity)
     pending=False
     sealed=0
     max_report_bytes=0
+    total_reward=0.
     for macro in range(180):
         report=adapter.report()
-        high_id=episode.add_report(report)
+        high_id=episode.add_report(report) if episode is not None else None
         request,aux=policy.upper(report,adapter.arrivals)
         motion=adapter.start_macro(request)
-        high=dict(aux,report=high_id,reward=0.,request=np.asarray(request).copy(),
-                  displacement=np.asarray(motion["displacement_m"]).copy())
+        if episode is not None:
+            high=dict(aux,report=high_id,reward=0.,request=np.asarray(request).copy(),
+                      displacement=np.asarray(motion["displacement_m"]).copy())
         for frame in range(10):
             report=adapter.prepare()
-            report_id=episode.add_report(report)
+            report_id=episode.add_report(report) if episode is not None else None
             max_report_bytes=max(max_report_bytes,adapter.report_bytes(report))
             if pending:
-                episode.successors.append(report_id)
+                if episode is not None: episode.successors.append(report_id)
                 sealed+=1
                 if on_event is not None and sealed%20==0: on_event()
             route,support=policy.lower(report,adapter.arrivals)
@@ -42,20 +56,24 @@ def collect(adapter,policy,*,upper_version,lower_version,identity,on_event=None,
                 readings.append(adapter.step(route))
                 if on_tick is not None: on_tick(adapter,readings[-1])
             reward=-sum(x["cost"] for x in readings)/100
-            episode.observations.append(report_id)
-            episode.actions.append(route.copy())
-            episode.supports.append(np.asarray(support,dtype=np.int64).copy())
-            episode.rewards.append(reward)
-            episode.terminated.append(adapter.env.step_index==9000)
-            episode.severe.append(report.severe)
-            high["reward"]+=reward
+            total_reward+=reward
+            if episode is not None:
+                episode.observations.append(report_id)
+                episode.actions.append(route.copy())
+                episode.supports.append(np.asarray(support,dtype=np.int64).copy())
+                episode.rewards.append(reward)
+                episode.terminated.append(adapter.env.step_index==9000)
+                episode.severe.append(report.severe)
+                high["reward"]+=reward
             pending=True
-        episode.high.append(high)
-    terminal=adapter.report()
-    episode.successors.append(episode.add_report(terminal))
+        if episode is not None: episode.high.append(high)
+    if episode is not None:
+        terminal=adapter.report()
+        episode.successors.append(episode.add_report(terminal))
     sealed+=1
     if on_event is not None and sealed%20==0: on_event()
     metrics=finish(adapter)
     metrics["max_report_bytes"]=max_report_bytes
-    episode.seal(adapter.arrivals,metrics)
-    return episode
+    if not np.isclose(total_reward,-metrics["cost_sum"]/100,rtol=1e-11,atol=1e-9):
+        raise ValueError("Micro reward / physical cost identity failed")
+    return metrics

@@ -33,15 +33,32 @@ def finish(adapter):
     return result
 
 
+class PooledMetrics:
+    """Retain additive panel totals, not all per-parent episode ledgers."""
+    def __init__(self):
+        self.episodes=0
+        self.cost_sum=0
+        self.seconds=0
+        self.priorities=[dict(arrived=0,completed=0,unfinished=0,delay_sum_s=0) for _ in range(2)]
+
+    def add(self,result):
+        self.cost_sum+=result["cost_sum"]
+        self.seconds+=result["seconds"]
+        for total,row in zip(self.priorities,result["priority"]):
+            for key in total: total[key]+=row[key]
+        self.episodes+=1
+
+    def result(self):
+        if not self.episodes: raise ValueError("Cannot pool an empty panel")
+        priorities=[dict(row,unfinished_rate=row["unfinished"]/row["arrived"] if row["arrived"] else None)
+                    for row in self.priorities]
+        denominator=sum(w*p["completed"] for w,p in zip((10,1),priorities))
+        return dict(cost_per_s=self.cost_sum/self.seconds,
+            pooled_delay_ms=1000*sum(w*p["delay_sum_s"] for w,p in zip((10,1),priorities))/denominator if denominator else None,
+            priority=priorities,episodes=self.episodes)
+
+
 def pool(results):
-    if not results: raise ValueError("Cannot pool an empty panel")
-    priorities=[]
-    for p in range(2):
-        rows=[r["priority"][p] for r in results]
-        row={k:sum(x[k] for x in rows) for k in ("arrived","completed","unfinished","delay_sum_s")}
-        row["unfinished_rate"]=row["unfinished"]/row["arrived"] if row["arrived"] else None
-        priorities.append(row)
-    denominator=sum(w*p["completed"] for w,p in zip((10,1),priorities))
-    return dict(cost_per_s=sum(r["cost_sum"] for r in results)/sum(r["seconds"] for r in results),
-        pooled_delay_ms=1000*sum(w*p["delay_sum_s"] for w,p in zip((10,1),priorities))/denominator if denominator else None,
-        priority=priorities,episodes=len(results))
+    accumulator=PooledMetrics()
+    for result in results: accumulator.add(result)
+    return accumulator.result()

@@ -22,11 +22,16 @@ def sample(logits, concentration, streams, stream=0):
 
 
 def action_features(actions, device):
-    a = actions.to(device=device, dtype=torch.float32)
-    error = (a.to(device="cpu",dtype=torch.float64)-actions.to("cpu")).abs().max()
-    if error.item() > 1e-7 or ((actions > 0) & (a.to("cpu") == 0)).any():
+    # The reference distribution and replay routes are CPU float64. Validate
+    # the cast there before one feature transfer; preserve the action gradient
+    # through both the float32 conversion and device copy.
+    source = actions.to("cpu")
+    a = source.to(dtype=torch.float32)
+    error = (a.detach().to(dtype=torch.float64)-source.detach()).abs().max().item()
+    if error > 1e-7 or ((source.detach() > 0) & (a.detach() == 0)).any():
         raise FloatingPointError("Execution action loses support or precision in Q")
-    return torch.cat((a.flatten(-2), (a.detach()>0).float().flatten(-2)), -1), error.item()
+    features = torch.cat((a.flatten(-2), (a.detach()>0).float().flatten(-2)), -1)
+    return features.to(device), error
 
 
 def surrogate(logits, concentration, critic, alpha, streams, weights=None):

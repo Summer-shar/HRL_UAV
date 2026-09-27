@@ -1,0 +1,97 @@
+{
+  "baseline": "137d2f1",
+  "device": "cpu",
+  "passed": true,
+  "tests_run": 4,
+  "elapsed_seconds": 43.494762099999996,
+  "scope": "Temporary real V2 networks; 17 SAC samples with microbatch 16; 3 PPO samples with microbatch 2; no research training",
+  "tolerances": {
+    "parameters": {
+      "atol": 3e-05,
+      "rtol": 2e-05
+    },
+    "clipped_gradients": {
+      "atol": 2e-06,
+      "rtol": 0.002
+    },
+    "adam_state": {
+      "atol": 2e-07,
+      "rtol": 0.002
+    },
+    "graph_outputs": {
+      "atol": 2e-05,
+      "rtol": 2e-05
+    },
+    "graph_gradients": {
+      "atol": 2e-05,
+      "rtol": 0.0002
+    }
+  },
+  "note": "Float32 summation and Q decomposition are not bitwise identical. First-step Adam with eps=1e-8 can amplify differences in near-zero gradients; exact parameter positions and gradients are recorded.",
+  "measurements": {
+    "test_actor_matches_pinned_baseline_and_keeps_independent_q_encoders": {
+      "actor_parameter_max_abs": 2.2230651666177437e-05,
+      "actor_gradient_max_abs": 1.387670636177063e-07,
+      "actor_largest_parameter_difference": {
+        "name": "support.2.bias",
+        "flat_index": 0,
+        "actual": -6.528882295242511e-06,
+        "reference": 1.5701769370934926e-05,
+        "actual_clipped_gradient": 6.984919309616089e-10,
+        "reference_clipped_gradient": -1.862645149230957e-09
+      },
+      "actor_optimizer_state_max_abs": 1.3853423297405243e-08
+    },
+    "test_critic_matches_pinned_baseline_and_backpropagates_history_once": {
+      "q1_parameter_max_abs": 4.340002760727657e-06,
+      "q1_gradient_max_abs": 2.7939677238464355e-08,
+      "q1_largest_parameter_difference": {
+        "name": "encoder.readouts.0.k.bias",
+        "flat_index": 52,
+        "actual": 6.460921895268257e-07,
+        "reference": -3.6939104575139936e-06,
+        "actual_clipped_gradient": -2.1582886519655453e-11,
+        "reference_clipped_gradient": 1.2466536136734874e-10
+      },
+      "q2_parameter_max_abs": 1.016953228827333e-05,
+      "q2_gradient_max_abs": 3.585591912269592e-08,
+      "q2_largest_parameter_difference": {
+        "name": "encoder.geo_bias.2.bias",
+        "flat_index": 0,
+        "actual": -5.329918167262804e-06,
+        "reference": 4.839614121010527e-06,
+        "actual_clipped_gradient": 1.8087747966077927e-10,
+        "reference_clipped_gradient": -1.6396556334896673e-10
+      },
+      "critic_optimizer_state_max_abs": 3.550667315721512e-09
+    },
+    "test_graph_preprocessing_matches_pinned_outputs_and_all_gradients": {
+      "output_max_abs": 0.0,
+      "gradient_max_abs": 0.0
+    },
+    "test_real_ppo_minibatch_matches_unshared_full_history": {
+      "actor_parameter_max_abs": 1.9371509552001953e-06,
+      "actor_gradient_max_abs": 1.1175870895385742e-07,
+      "actor_largest_parameter_difference": {
+        "name": "encoder.graph.1.values.1.weight",
+        "flat_index": 3997,
+        "actual": -0.07345391809940338,
+        "reference": -0.07345585525035858,
+        "actual_clipped_gradient": -6.465813440215129e-10,
+        "reference_clipped_gradient": -4.3105422009581673e-10
+      },
+      "actor_optimizer_state_max_abs": 1.1175870895385742e-08,
+      "value_parameter_max_abs": 3.102421760559082e-05,
+      "value_gradient_max_abs": 6.332993507385254e-08,
+      "value_largest_parameter_difference": {
+        "name": "encoder.graph.0.ff.0.weight",
+        "flat_index": 7709,
+        "actual": -0.23013533651828766,
+        "reference": -0.23016636073589325,
+        "actual_clipped_gradient": -1.23917098804327e-09,
+        "reference_clipped_gradient": -6.884284808883478e-11
+      },
+      "value_optimizer_state_max_abs": 6.28642737865448e-09
+    }
+  }
+}

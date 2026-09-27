@@ -1,10 +1,17 @@
 """Undiscounted episodic PPO with epoch-atomic actor/Adam KL rollback."""
 import copy
+from contextlib import ExitStack, nullcontext
 import math
 import numpy as np
 import torch
 from torch import nn
 from .replay import unpack
+from .prepared import PreparedBatch, history_scope
+
+
+def network_history_scope(network,states):
+    # Also support the small duck-typed policies used by protocol unit tests.
+    return history_scope(network.encoder,states) if hasattr(network,"encoder") else nullcontext()
 
 
 def logprob(z,mean,logstd):
@@ -29,6 +36,48 @@ class PPO:
         self.value_optimizer=torch.optim.Adam(value.parameters(),lr=3e-4,betas=(.9,.999),eps=1e-8)
         self.counts=dict(batches=0,actor_steps_attempted=0,actor_steps_accepted=0,value_steps=0,rollbacks=0)
         self.version=0
+        self.microbatch_size=16
+
+    def _minibatch(self,states,rows,advantages,active):
+        """One unchanged effective minibatch, independent full-history tapes."""
+        if active: self.actor_optimizer.zero_grad(set_to_none=True)
+        self.value_optimizer.zero_grad(set_to_none=True)
+        with ExitStack() as scopes:
+            actor_tape=scopes.enter_context(network_history_scope(self.actor,states)) if active else None
+            value_tape=scopes.enter_context(network_history_scope(self.value,states))
+            for offset in range(0,len(states),self.microbatch_size):
+                selected=rows[offset:offset+self.microbatch_size]
+                current=states[offset:offset+len(selected)]
+                if active:
+                    mean,std=self.actor.batch(current)
+                    z=mean.new_tensor(np.asarray([h["pre_tanh"] for _,h,_ in selected]))
+                    old=mean.new_tensor([h["logprob"] for _,h,_ in selected])
+                    ratio=(logprob(z,mean,std)-old).exp()
+                    advantage=mean.new_tensor(advantages[offset:offset+len(selected)])
+                    actor_loss=-torch.minimum(ratio*advantage,ratio.clamp(.85,1.15)*advantage).sum()/len(states)
+                    actor_loss.backward()
+                value=self.value.batch(current)
+                target=value.new_tensor([G for _,_,G in selected])
+                (.5*(value-target).square().sum()/len(states)).backward()
+            for tape in (actor_tape,value_tape):
+                if tape is not None: tape.backward()
+        if active:
+            nn.utils.clip_grad_norm_(self.actor.parameters(),1.,error_if_nonfinite=True)
+            self.actor_optimizer.step(); self.counts["actor_steps_attempted"]+=1
+        nn.utils.clip_grad_norm_(self.value.parameters(),1.,error_if_nonfinite=True)
+        self.value_optimizer.step(); self.counts["value_steps"]+=1
+
+    def _kl(self,states,rows):
+        """Exact epoch KL, sharing only a no-gradient arrival prefix."""
+        divergences=[]
+        with torch.no_grad(),network_history_scope(self.actor,states):
+            for start in range(0,len(rows),self.microbatch_size):
+                selected=rows[start:start+self.microbatch_size]
+                mean,std=self.actor.batch(states[start:start+len(selected)])
+                old_mean=mean.new_tensor(np.asarray([h["mean"] for _,h,_ in selected]))
+                old_std=mean.new_tensor(np.asarray([h["logstd"] for _,h,_ in selected]))
+                divergences.append(gaussian_kl(old_mean,old_std,mean,std).reshape(-1))
+        return torch.cat(divergences).double().mean().item()
 
     def update(self,episodes,streams):
         if len(episodes)!=5 or any(not e.complete for e in episodes):
@@ -40,11 +89,18 @@ class PPO:
         for e in episodes:
             for h,G in zip(e.high,returns([x["reward"] for x in e.high])):
                 rows.append((e,h,float(G)))
+        if len(rows)!=900: raise ValueError("PPO needs exactly 900 macro transitions")
+        reports={}
+        states=[]
+        for e,h,_ in rows:
+            key=(id(e),h["report"])
+            if key not in reports: reports[key]=e.report(h["report"])
+            states.append((reports[key],histories[id(e)]))
+        states=PreparedBatch(states)
         advantages=np.asarray([G-h["value"] for _,h,G in rows])
         advantages=(advantages-advantages.mean())/(advantages.std()+1e-8)
         active=True
         logs=[]
-        device=next(self.actor.parameters()).device
         for epoch in range(6):
             actor_start=copy.deepcopy(self.actor.state_dict()) if active else None
             optimizer_start=copy.deepcopy(self.actor_optimizer.state_dict()) if active else None
@@ -52,39 +108,10 @@ class PPO:
             accepted=0
             for start in range(0,900,150):
                 ids=order[start:start+150]
-                if active: self.actor_optimizer.zero_grad(set_to_none=True)
-                self.value_optimizer.zero_grad(set_to_none=True)
-                for offset in range(0,150,16):
-                    chosen=ids[offset:offset+16]; selected=[rows[index] for index in chosen]
-                    states=[(e.report(h["report"]),histories[id(e)]) for e,h,_ in selected]
-                    if active:
-                        mean,std=self.actor.batch(states)
-                        z=mean.new_tensor(np.asarray([h["pre_tanh"] for _,h,_ in selected]))
-                        old=mean.new_tensor([h["logprob"] for _,h,_ in selected])
-                        ratio=(logprob(z,mean,std)-old).exp()
-                        advantage=mean.new_tensor(advantages[chosen])
-                        actor_loss=-torch.minimum(ratio*advantage,ratio.clamp(.85,1.15)*advantage).sum()/150
-                        actor_loss.backward()
-                    value=self.value.batch(states)
-                    target=value.new_tensor([G for _,_,G in selected])
-                    (.5*(value-target).square().sum()/150).backward()
-                if active:
-                    nn.utils.clip_grad_norm_(self.actor.parameters(),1.,error_if_nonfinite=True)
-                    self.actor_optimizer.step(); accepted+=1
-                    self.counts["actor_steps_attempted"]+=1
-                nn.utils.clip_grad_norm_(self.value.parameters(),1.,error_if_nonfinite=True)
-                self.value_optimizer.step(); self.counts["value_steps"]+=1
+                self._minibatch(states.select(ids),[rows[index] for index in ids],advantages[ids],active)
+                if active: accepted+=1
             if active:
-                divergences=[]
-                with torch.no_grad():
-                    for start in range(0,900,16):
-                        selected=rows[start:start+16]
-                        states=[(e.report(h["report"]),histories[id(e)]) for e,h,_ in selected]
-                        mean,std=self.actor.batch(states)
-                        old_mean=mean.new_tensor(np.asarray([h["mean"] for _,h,_ in selected]))
-                        old_std=mean.new_tensor(np.asarray([h["logstd"] for _,h,_ in selected]))
-                        divergences.extend(gaussian_kl(old_mean,old_std,mean,std).cpu().reshape(-1).tolist())
-                divergence=float(np.mean(divergences))
+                divergence=self._kl(states,rows)
                 if not math.isfinite(divergence): raise FloatingPointError("Nonfinite PPO KL")
                 if divergence>.02:
                     self.actor.load_state_dict(actor_start); self.actor_optimizer.load_state_dict(optimizer_start)

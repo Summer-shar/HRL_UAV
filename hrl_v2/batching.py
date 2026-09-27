@@ -4,11 +4,11 @@ from types import SimpleNamespace
 import torch
 from torch.nn.utils.rnn import pad_sequence
 from .features import build,RELATIONS
-from .prepared import PreparedBatch
+from .prepared import PreparedBatch, fixed_graph
 
 
 def graph_for(report):
-    return build(report)
+    return fixed_graph(report)
 
 
 def prepare(states,device):
