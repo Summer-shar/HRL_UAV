@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "panel_runs": 24,
+  "mechanism_runs": 9,
+  "physical_steps": 17250,
+  "elapsed_s": 19.4728259,
+  "training_started": false,
+  "priority_followup_runs": 4,
+  "priority_followup_elapsed_s": 3.0228265000000003
+}

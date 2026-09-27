@@ -1,0 +1,1495 @@
+[
+  {
+    "condition": "idle",
+    "action": "local",
+    "allocation": [
+      1.0,
+      0.0,
+      0.0
+    ],
+    "window_seconds": 5.0,
+    "physical_steps": 50,
+    "initial_state": "Already-uploaded parents; birth=0 is the observation origin",
+    "excluded_prehistory": "Upload delay and upload energy before this controlled ready state",
+    "task_size_profile": "Production low-priority vision size; background priority explicitly set high",
+    "future_arrival_tape": [],
+    "target_id": 0,
+    "background_ids": [],
+    "task_bits": 1400000.0,
+    "task_cycles": 2100000000.0,
+    "initial_uav_positions_m": [
+      [
+        350,
+        350
+      ],
+      [
+        350,
+        650
+      ],
+      [
+        650,
+        500
+      ]
+    ],
+    "initial_cpu_cycles_by_priority_destination": [
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "target_completed": true,
+    "target_censored": false,
+    "target_finish_s": 0.30000000000000004,
+    "target_ready_to_complete_s": 0.30000000000000004,
+    "target_cutoff_age_s": null,
+    "target_holding_task_s": 0.30000000000000004,
+    "target_tail_fragment_ids": [
+      0
+    ],
+    "target_tail_destinations": [
+      0
+    ],
+    "target_first_child_finish_s": 0.30000000000000004,
+    "target_tail_gap_s": 0.0,
+    "children": [
+      {
+        "fragment_id": 0,
+        "parent_id": 0,
+        "source": 0,
+        "destination": 0,
+        "ratio": 1.0,
+        "bits": 1400000.0,
+        "cycles": 2100000000.0,
+        "finish_s": 0.30000000000000004,
+        "censored": false,
+        "transfer_complete_s": null,
+        "transfer_service_complete_s": null,
+        "transfer_first_service_s": null,
+        "transfer_wait_to_first_service_s": null,
+        "transfer_stage_elapsed_s": 0.0,
+        "transfer_service_duration_s": 0,
+        "cpu_enter_s": 0.0,
+        "cpu_first_service_s": 0.0,
+        "cpu_wait_to_first_service_s": 0.0,
+        "cpu_stage_elapsed_s": 0.30000000000000004,
+        "cpu_service_duration_s": 0.30000000000000004,
+        "cpu_nonservice_elapsed_s": 0.0,
+        "cpu_nonservice_note": "Includes any grid rounding and service gaps; not pure FIFO wait",
+        "remaining_transfer_bits": 0.0,
+        "remaining_compute_cycles": 0.0,
+        "cpu_energy_j": 20.01,
+        "u2u_energy_j": 0
+      }
+    ],
+    "holding_task_s": 0.30000000000000004,
+    "holding_identity_error": 0.0,
+    "energy_j": {
+      "upload": 0.0,
+      "u2u": 0.0,
+      "cpu": 20.01,
+      "propulsion": 2921.4516750206335
+    },
+    "cost_sum": 21.037440535861695,
+    "cost_per_s": 4.207488107172339,
+    "target_cpu_energy_j": 20.01,
+    "target_u2u_energy_j": 0,
+    "target_energy_note": "Ledger allocation at actual aggregate CPU frequency; not marginal counterfactual energy",
+    "completed_parents": 1,
+    "unfinished_parents": 0,
+    "parent_completion_event_counts": {
+      "0": 1
+    },
+    "initial_conservation_errors": {
+      "upload_error_bits": 0.0,
+      "compute_error_cycles": 0.0,
+      "routing_error_bits": 0.0,
+      "transfer_error_bits": 0.0
+    },
+    "conservation_errors": {
+      "upload_error_bits": 0.0,
+      "compute_error_cycles": 0.0,
+      "routing_error_bits": 0.0,
+      "transfer_error_bits": 0.0
+    },
+    "maximum_absolute_conservation_errors": {
+      "upload_error_bits": 0.0,
+      "compute_error_cycles": 0.0,
+      "routing_error_bits": 0.0,
+      "transfer_error_bits": 0.0
+    },
+    "generated_bits": 1400000.0,
+    "initial_uploaded_bits": 1400000.0,
+    "generated_cycles": 2100000000.0,
+    "cpu_served_cycles": 2100000000.0,
+    "u2u_served_bits": 0.0,
+    "terminated": false,
+    "truncated": true,
+    "research_training_updates": 0
+  },
+  {
+    "condition": "idle",
+    "action": "equal",
+    "allocation": [
+      0.3333333333333333,
+      0.3333333333333333,
+      0.3333333333333333
+    ],
+    "window_seconds": 5.0,
+    "physical_steps": 50,
+    "initial_state": "Already-uploaded parents; birth=0 is the observation origin",
+    "excluded_prehistory": "Upload delay and upload energy before this controlled ready state",
+    "task_size_profile": "Production low-priority vision size; background priority explicitly set high",
+    "future_arrival_tape": [],
+    "target_id": 0,
+    "background_ids": [],
+    "task_bits": 1400000.0,
+    "task_cycles": 2100000000.0,
+    "initial_uav_positions_m": [
+      [
+        350,
+        350
+      ],
+      [
+        350,
+        650
+      ],
+      [
+        650,
+        500
+      ]
+    ],
+    "initial_cpu_cycles_by_priority_destination": [
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "target_completed": true,
+    "target_censored": false,
+    "target_finish_s": 0.2,
+    "target_ready_to_complete_s": 0.2,
+    "target_cutoff_age_s": null,
+    "target_holding_task_s": 0.2,
+    "target_tail_fragment_ids": [
+      1,
+      2
+    ],
+    "target_tail_destinations": [
+      1,
+      2
+    ],
+    "target_first_child_finish_s": 0.1,
+    "target_tail_gap_s": 0.1,
+    "children": [
+      {
+        "fragment_id": 0,
+        "parent_id": 0,
+        "source": 0,
+        "destination": 0,
+        "ratio": 0.3333333333333333,
+        "bits": 466666.6666666666,
+        "cycles": 700000000.0,
+        "finish_s": 0.1,
+        "censored": false,
+        "transfer_complete_s": null,
+        "transfer_service_complete_s": null,
+        "transfer_first_service_s": null,
+        "transfer_wait_to_first_service_s": null,
+        "transfer_stage_elapsed_s": 0.0,
+        "transfer_service_duration_s": 0,
+        "cpu_enter_s": 0.0,
+        "cpu_first_service_s": 0.0,
+        "cpu_wait_to_first_service_s": 0.0,
+        "cpu_stage_elapsed_s": 0.1,
+        "cpu_service_duration_s": 0.1,
+        "cpu_nonservice_elapsed_s": 0.0,
+        "cpu_nonservice_note": "Includes any grid rounding and service gaps; not pure FIFO wait",
+        "remaining_transfer_bits": 0.0,
+        "remaining_compute_cycles": 0.0,
+        "cpu_energy_j": 3.43,
+        "u2u_energy_j": 0
+      },
+      {
+        "fragment_id": 1,
+        "parent_id": 0,
+        "source": 0,
+        "destination": 1,
+        "ratio": 0.3333333333333333,
+        "bits": 466666.6666666666,
+        "cycles": 700000000.0,
+        "finish_s": 0.2,
+        "censored": false,
+        "transfer_complete_s": 0.1,
+        "transfer_service_complete_s": 0.04586142276790556,
+        "transfer_first_service_s": 0.0,
+        "transfer_wait_to_first_service_s": 0.0,
+        "transfer_stage_elapsed_s": 0.1,
+        "transfer_service_duration_s": 0.04586142276790556,
+        "cpu_enter_s": 0.1,
+        "cpu_first_service_s": 0.1,
+        "cpu_wait_to_first_service_s": 0.0,
+        "cpu_stage_elapsed_s": 0.1,
+        "cpu_service_duration_s": 0.1,
+        "cpu_nonservice_elapsed_s": 0.0,
+        "cpu_nonservice_note": "Includes any grid rounding and service gaps; not pure FIFO wait",
+        "remaining_transfer_bits": 0.0,
+        "remaining_compute_cycles": 0.0,
+        "cpu_energy_j": 3.43,
+        "u2u_energy_j": 0.02293071138395278
+      },
+      {
+        "fragment_id": 2,
+        "parent_id": 0,
+        "source": 0,
+        "destination": 2,
+        "ratio": 0.3333333333333333,
+        "bits": 466666.6666666666,
+        "cycles": 700000000.0,
+        "finish_s": 0.2,
+        "censored": false,
+        "transfer_complete_s": 0.1,
+        "transfer_service_complete_s": 0.05011631520242023,
+        "transfer_first_service_s": 0.0,
+        "transfer_wait_to_first_service_s": 0.0,
+        "transfer_stage_elapsed_s": 0.1,
+        "transfer_service_duration_s": 0.05011631520242023,
+        "cpu_enter_s": 0.1,
+        "cpu_first_service_s": 0.1,
+        "cpu_wait_to_first_service_s": 0.0,
+        "cpu_stage_elapsed_s": 0.1,
+        "cpu_service_duration_s": 0.1,
+        "cpu_nonservice_elapsed_s": 0.0,
+        "cpu_nonservice_note": "Includes any grid rounding and service gaps; not pure FIFO wait",
+        "remaining_transfer_bits": 0.0,
+        "remaining_compute_cycles": 0.0,
+        "cpu_energy_j": 3.43,
+        "u2u_energy_j": 0.025058157601210114
+      }
+    ],
+    "holding_task_s": 0.2,
+    "holding_identity_error": 0.0,
+    "energy_j": {
+      "upload": 0.0,
+      "u2u": 0.04798886898516289,
+      "cpu": 10.29,
+      "propulsion": 2921.4516750206335
+    },
+    "cost_sum": 20.95935474206873,
+    "cost_per_s": 4.1918709484137455,
+    "target_cpu_energy_j": 10.290000000000001,
+    "target_u2u_energy_j": 0.04798886898516289,
+    "target_energy_note": "Ledger allocation at actual aggregate CPU frequency; not marginal counterfactual energy",
+    "completed_parents": 1,
+    "unfinished_parents": 0,
+    "parent_completion_event_counts": {
+      "0": 1
+    },
+    "initial_conservation_errors": {
+      "upload_error_bits": 0.0,
+      "compute_error_cycles": 0.0,
+      "routing_error_bits": 0.0,
+      "transfer_error_bits": 0.0
+    },
+    "conservation_errors": {
+      "upload_error_bits": 0.0,
+      "compute_error_cycles": 0.0,
+      "routing_error_bits": 0.0,
+      "transfer_error_bits": 0.0
+    },
+    "maximum_absolute_conservation_errors": {
+      "upload_error_bits": 0.0,
+      "compute_error_cycles": 0.0,
+      "routing_error_bits": 0.0,
+      "transfer_error_bits": 0.0
+    },
+    "generated_bits": 1400000.0,
+    "initial_uploaded_bits": 1400000.0,
+    "generated_cycles": 2100000000.0,
+    "cpu_served_cycles": 2100000000.0,
+    "u2u_served_bits": 933333.3333333333,
+    "terminated": false,
+    "truncated": true,
+    "research_training_updates": 0
+  },
+  {
+    "condition": "idle",
+    "action": "remote1",
+    "allocation": [
+      0.0,
+      1.0,
+      0.0
+    ],
+    "window_seconds": 5.0,
+    "physical_steps": 50,
+    "initial_state": "Already-uploaded parents; birth=0 is the observation origin",
+    "excluded_prehistory": "Upload delay and upload energy before this controlled ready state",
+    "task_size_profile": "Production low-priority vision size; background priority explicitly set high",
+    "future_arrival_tape": [],
+    "target_id": 0,
+    "background_ids": [],
+    "task_bits": 1400000.0,
+    "task_cycles": 2100000000.0,
+    "initial_uav_positions_m": [
+      [
+        350,
+        350
+      ],
+      [
+        350,
+        650
+      ],
+      [
+        650,
+        500
+      ]
+    ],
+    "initial_cpu_cycles_by_priority_destination": [
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "target_completed": true,
+    "target_censored": false,
+    "target_finish_s": 0.4,
+    "target_ready_to_complete_s": 0.4,
+    "target_cutoff_age_s": null,
+    "target_holding_task_s": 0.4,
+    "target_tail_fragment_ids": [
+      0
+    ],
+    "target_tail_destinations": [
+      1
+    ],
+    "target_first_child_finish_s": 0.4,
+    "target_tail_gap_s": 0.0,
+    "children": [
+      {
+        "fragment_id": 0,
+        "parent_id": 0,
+        "source": 0,
+        "destination": 1,
+        "ratio": 1.0,
+        "bits": 1400000.0,
+        "cycles": 2100000000.0,
+        "finish_s": 0.4,
+        "censored": false,
+        "transfer_complete_s": 0.1,
+        "transfer_service_complete_s": 0.06879213415185834,
+        "transfer_first_service_s": 0.0,
+        "transfer_wait_to_first_service_s": 0.0,
+        "transfer_stage_elapsed_s": 0.1,
+        "transfer_service_duration_s": 0.06879213415185834,
+        "cpu_enter_s": 0.1,
+        "cpu_first_service_s": 0.1,
+        "cpu_wait_to_first_service_s": 0.0,
+        "cpu_stage_elapsed_s": 0.30000000000000004,
+        "cpu_service_duration_s": 0.30000000000000004,
+        "cpu_nonservice_elapsed_s": 0.0,
+        "cpu_nonservice_note": "Includes any grid rounding and service gaps; not pure FIFO wait",
+        "remaining_transfer_bits": 0.0,
+        "remaining_compute_cycles": 0.0,
+        "cpu_energy_j": 20.01,
+        "u2u_energy_j": 0.06879213415185834
+      }
+    ],
+    "holding_task_s": 0.4,
+    "holding_identity_error": 0.0,
+    "energy_j": {
+      "upload": 0.0,
+      "u2u": 0.06879213415185834,
+      "cpu": 20.01,
+      "propulsion": 2921.4516750206335
+    },
+    "cost_sum": 21.046931908248492,
+    "cost_per_s": 4.209386381649699,
+    "target_cpu_energy_j": 20.01,
+    "target_u2u_energy_j": 0.06879213415185834,
+    "target_energy_note": "Ledger allocation at actual aggregate CPU frequency; not marginal counterfactual energy",
+    "completed_parents": 1,
+    "unfinished_parents": 0,
+    "parent_completion_event_counts": {
+      "0": 1
+    },
+    "initial_conservation_errors": {
+      "upload_error_bits": 0.0,
+      "compute_error_cycles": 0.0,
+      "routing_error_bits": 0.0,
+      "transfer_error_bits": 0.0
+    },
+    "conservation_errors": {
+      "upload_error_bits": 0.0,
+      "compute_error_cycles": 0.0,
+      "routing_error_bits": 0.0,
+      "transfer_error_bits": 0.0
+    },
+    "maximum_absolute_conservation_errors": {
+      "upload_error_bits": 0.0,
+      "compute_error_cycles": 0.0,
+      "routing_error_bits": 0.0,
+      "transfer_error_bits": 0.0
+    },
+    "generated_bits": 1400000.0,
+    "initial_uploaded_bits": 1400000.0,
+    "generated_cycles": 2100000000.0,
+    "cpu_served_cycles": 2100000000.0,
+    "u2u_served_bits": 1400000.0,
+    "terminated": false,
+    "truncated": true,
+    "research_training_updates": 0
+  },
+  {
+    "condition": "source_busy",
+    "action": "local",
+    "allocation": [
+      1.0,
+      0.0,
+      0.0
+    ],
+    "window_seconds": 5.0,
+    "physical_steps": 50,
+    "initial_state": "Already-uploaded parents; birth=0 is the observation origin",
+    "excluded_prehistory": "Upload delay and upload energy before this controlled ready state",
+    "task_size_profile": "Production low-priority vision size; background priority explicitly set high",
+    "future_arrival_tape": [],
+    "target_id": 10,
+    "background_ids": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "task_bits": 1400000.0,
+    "task_cycles": 2100000000.0,
+    "initial_uav_positions_m": [
+      [
+        350,
+        350
+      ],
+      [
+        350,
+        650
+      ],
+      [
+        650,
+        500
+      ]
+    ],
+    "initial_cpu_cycles_by_priority_destination": [
+      [
+        21000000000.0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "target_completed": true,
+    "target_censored": false,
+    "target_finish_s": 2.4000000000000004,
+    "target_ready_to_complete_s": 2.4000000000000004,
+    "target_cutoff_age_s": null,
+    "target_holding_task_s": 2.4000000000000004,
+    "target_tail_fragment_ids": [
+      10
+    ],
+    "target_tail_destinations": [
+      0
+    ],
+    "target_first_child_finish_s": 2.4000000000000004,
+    "target_tail_gap_s": 0.0,
+    "children": [
+      {
+        "fragment_id": 10,
+        "parent_id": 10,
+        "source": 0,
+        "destination": 0,
+        "ratio": 1.0,
+        "bits": 1400000.0,
+        "cycles": 2100000000.0,
+        "finish_s": 2.4000000000000004,
+        "censored": false,
+        "transfer_complete_s": null,
+        "transfer_service_complete_s": null,
+        "transfer_first_service_s": null,
+        "transfer_wait_to_first_service_s": null,
+        "transfer_stage_elapsed_s": 0.0,
+        "transfer_service_duration_s": 0,
+        "cpu_enter_s": 0.0,
+        "cpu_first_service_s": 2.1,
+        "cpu_wait_to_first_service_s": 2.1,
+        "cpu_stage_elapsed_s": 2.4000000000000004,
+        "cpu_service_duration_s": 0.30000000000000004,
+        "cpu_nonservice_elapsed_s": 2.1000000000000005,
+        "cpu_nonservice_note": "Includes any grid rounding and service gaps; not pure FIFO wait",
+        "remaining_transfer_bits": 0.0,
+        "remaining_compute_cycles": 0.0,
+        "cpu_energy_j": 20.01,
+        "u2u_energy_j": 0
+      }
+    ],
+    "holding_task_s": 122.3999999999999,
+    "holding_identity_error": 9.947598300641403e-14,
+    "energy_j": {
+      "upload": 0.0,
+      "u2u": 0.0,
+      "cpu": 230.01,
+      "propulsion": 2921.4516750206335
+    },
+    "cost_sum": 33.52644053586167,
+    "cost_per_s": 6.705288107172334,
+    "target_cpu_energy_j": 20.01,
+    "target_u2u_energy_j": 0,
+    "target_energy_note": "Ledger allocation at actual aggregate CPU frequency; not marginal counterfactual energy",
+    "completed_parents": 11,
+    "unfinished_parents": 0,
+    "parent_completion_event_counts": {
+      "0": 1,
+      "1": 1,
+      "2": 1,
+      "3": 1,
+      "4": 1,
+      "5": 1,
+      "6": 1,
+      "7": 1,
+      "8": 1,
+      "9": 1,
+      "10": 1
+    },
+    "initial_conservation_errors": {
+      "upload_error_bits": 0.0,
+      "compute_error_cycles": 0.0,
+      "routing_error_bits": 0.0,
+      "transfer_error_bits": 0.0
+    },
+    "conservation_errors": {
+      "upload_error_bits": 0.0,
+      "compute_error_cycles": 0.0,
+      "routing_error_bits": 0.0,
+      "transfer_error_bits": 0.0
+    },
+    "maximum_absolute_conservation_errors": {
+      "upload_error_bits": 0.0,
+      "compute_error_cycles": 0.0,
+      "routing_error_bits": 0.0,
+      "transfer_error_bits": 0.0
+    },
+    "generated_bits": 15400000.0,
+    "initial_uploaded_bits": 15400000.0,
+    "generated_cycles": 23100000000.0,
+    "cpu_served_cycles": 23100000000.0,
+    "u2u_served_bits": 0.0,
+    "terminated": false,
+    "truncated": true,
+    "research_training_updates": 0
+  },
+  {
+    "condition": "source_busy",
+    "action": "equal",
+    "allocation": [
+      0.3333333333333333,
+      0.3333333333333333,
+      0.3333333333333333
+    ],
+    "window_seconds": 5.0,
+    "physical_steps": 50,
+    "initial_state": "Already-uploaded parents; birth=0 is the observation origin",
+    "excluded_prehistory": "Upload delay and upload energy before this controlled ready state",
+    "task_size_profile": "Production low-priority vision size; background priority explicitly set high",
+    "future_arrival_tape": [],
+    "target_id": 10,
+    "background_ids": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "task_bits": 1400000.0,
+    "task_cycles": 2100000000.0,
+    "initial_uav_positions_m": [
+      [
+        350,
+        350
+      ],
+      [
+        350,
+        650
+      ],
+      [
+        650,
+        500
+      ]
+    ],
+    "initial_cpu_cycles_by_priority_destination": [
+      [
+        21000000000.0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "target_completed": true,
+    "target_censored": false,
+    "target_finish_s": 2.2,
+    "target_ready_to_complete_s": 2.2,
+    "target_cutoff_age_s": null,
+    "target_holding_task_s": 2.2,
+    "target_tail_fragment_ids": [
+      10
+    ],
+    "target_tail_destinations": [
+      0
+    ],
+    "target_first_child_finish_s": 0.2,
+    "target_tail_gap_s": 2.0,
+    "children": [
+      {
+        "fragment_id": 10,
+        "parent_id": 10,
+        "source": 0,
+        "destination": 0,
+        "ratio": 0.3333333333333333,
+        "bits": 466666.6666666666,
+        "cycles": 700000000.0,
+        "finish_s": 2.2,
+        "censored": false,
+        "transfer_complete_s": null,
+        "transfer_service_complete_s": null,
+        "transfer_first_service_s": null,
+        "transfer_wait_to_first_service_s": null,
+        "transfer_stage_elapsed_s": 0.0,
+        "transfer_service_duration_s": 0,
+        "cpu_enter_s": 0.0,
+        "cpu_first_service_s": 2.1,
+        "cpu_wait_to_first_service_s": 2.1,
+        "cpu_stage_elapsed_s": 2.2,
+        "cpu_service_duration_s": 0.1,
+        "cpu_nonservice_elapsed_s": 2.1,
+        "cpu_nonservice_note": "Includes any grid rounding and service gaps; not pure FIFO wait",
+        "remaining_transfer_bits": 0.0,
+        "remaining_compute_cycles": 0.0,
+        "cpu_energy_j": 3.43,
+        "u2u_energy_j": 0
+      },
+      {
+        "fragment_id": 11,
+        "parent_id": 10,
+        "source": 0,
+        "destination": 1,
+        "ratio": 0.3333333333333333,
+        "bits": 466666.6666666666,
+        "cycles": 700000000.0,
+        "finish_s": 0.2,
+        "censored": false,
+        "transfer_complete_s": 0.1,
+        "transfer_service_complete_s": 0.04586142276790556,
+        "transfer_first_service_s": 0.0,
+        "transfer_wait_to_first_service_s": 0.0,
+        "transfer_stage_elapsed_s": 0.1,
+        "transfer_service_duration_s": 0.04586142276790556,
+        "cpu_enter_s": 0.1,
+        "cpu_first_service_s": 0.1,
+        "cpu_wait_to_first_service_s": 0.0,
+        "cpu_stage_elapsed_s": 0.1,
+        "cpu_service_duration_s": 0.1,
+        "cpu_nonservice_elapsed_s": 0.0,
+        "cpu_nonservice_note": "Includes any grid rounding and service gaps; not pure FIFO wait",
+        "remaining_transfer_bits": 0.0,
+        "remaining_compute_cycles": 0.0,
+        "cpu_energy_j": 3.43,
+        "u2u_energy_j": 0.02293071138395278
+      },
+      {
+        "fragment_id": 12,
+        "parent_id": 10,
+        "source": 0,
+        "destination": 2,
+        "ratio": 0.3333333333333333,
+        "bits": 466666.6666666666,
+        "cycles": 700000000.0,
+        "finish_s": 0.2,
+        "censored": false,
+        "transfer_complete_s": 0.1,
+        "transfer_service_complete_s": 0.05011631520242023,
+        "transfer_first_service_s": 0.0,
+        "transfer_wait_to_first_service_s": 0.0,
+        "transfer_stage_elapsed_s": 0.1,
+        "transfer_service_duration_s": 0.05011631520242023,
+        "cpu_enter_s": 0.1,
+        "cpu_first_service_s": 0.1,
+        "cpu_wait_to_first_service_s": 0.0,
+        "cpu_stage_elapsed_s": 0.1,
+        "cpu_service_duration_s": 0.1,
+        "cpu_nonservice_elapsed_s": 0.0,
+        "cpu_nonservice_note": "Includes any grid rounding and service gaps; not pure FIFO wait",
+        "remaining_transfer_bits": 0.0,
+        "remaining_compute_cycles": 0.0,
+        "cpu_energy_j": 3.43,
+        "u2u_energy_j": 0.025058157601210114
+      }
+    ],
+    "holding_task_s": 122.19999999999992,
+    "holding_identity_error": 8.526512829121202e-14,
+    "energy_j": {
+      "upload": 0.0,
+      "u2u": 0.04798886898516289,
+      "cpu": 220.29000000000002,
+      "propulsion": 2921.4516750206335
+    },
+    "cost_sum": 33.43935474206871,
+    "cost_per_s": 6.6878709484137415,
+    "target_cpu_energy_j": 10.290000000000001,
+    "target_u2u_energy_j": 0.04798886898516289,
+    "target_energy_note": "Ledger allocation at actual aggregate CPU frequency; not marginal counterfactual energy",
+    "completed_parents": 11,
+    "unfinished_parents": 0,
+    "parent_completion_event_counts": {
+      "0": 1,
+      "1": 1,
+      "2": 1,
+      "3": 1,
+      "4": 1,
+      "5": 1,
+      "6": 1,
+      "7": 1,
+      "8": 1,
+      "9": 1,
+      "10": 1
+    },
+    "initial_conservation_errors": {
+      "upload_error_bits": 0.0,
+      "compute_error_cycles": 0.0,
+      "routing_error_bits": 0.0,
+      "transfer_error_bits": 0.0
+    },
+    "conservation_errors": {
+      "upload_error_bits": 0.0,
+      "compute_error_cycles": 0.0,
+      "routing_error_bits": 1.862645149230957e-09,
+      "transfer_error_bits": 0.0
+    },
+    "maximum_absolute_conservation_errors": {
+      "upload_error_bits": 0.0,
+      "compute_error_cycles": 0.0,
+      "routing_error_bits": 1.862645149230957e-09,
+      "transfer_error_bits": 0.0
+    },
+    "generated_bits": 15400000.0,
+    "initial_uploaded_bits": 15400000.0,
+    "generated_cycles": 23100000000.0,
+    "cpu_served_cycles": 23100000000.0,
+    "u2u_served_bits": 933333.3333333333,
+    "terminated": false,
+    "truncated": true,
+    "research_training_updates": 0
+  },
+  {
+    "condition": "source_busy",
+    "action": "remote1",
+    "allocation": [
+      0.0,
+      1.0,
+      0.0
+    ],
+    "window_seconds": 5.0,
+    "physical_steps": 50,
+    "initial_state": "Already-uploaded parents; birth=0 is the observation origin",
+    "excluded_prehistory": "Upload delay and upload energy before this controlled ready state",
+    "task_size_profile": "Production low-priority vision size; background priority explicitly set high",
+    "future_arrival_tape": [],
+    "target_id": 10,
+    "background_ids": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "task_bits": 1400000.0,
+    "task_cycles": 2100000000.0,
+    "initial_uav_positions_m": [
+      [
+        350,
+        350
+      ],
+      [
+        350,
+        650
+      ],
+      [
+        650,
+        500
+      ]
+    ],
+    "initial_cpu_cycles_by_priority_destination": [
+      [
+        21000000000.0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "target_completed": true,
+    "target_censored": false,
+    "target_finish_s": 0.4,
+    "target_ready_to_complete_s": 0.4,
+    "target_cutoff_age_s": null,
+    "target_holding_task_s": 0.4,
+    "target_tail_fragment_ids": [
+      10
+    ],
+    "target_tail_destinations": [
+      1
+    ],
+    "target_first_child_finish_s": 0.4,
+    "target_tail_gap_s": 0.0,
+    "children": [
+      {
+        "fragment_id": 10,
+        "parent_id": 10,
+        "source": 0,
+        "destination": 1,
+        "ratio": 1.0,
+        "bits": 1400000.0,
+        "cycles": 2100000000.0,
+        "finish_s": 0.4,
+        "censored": false,
+        "transfer_complete_s": 0.1,
+        "transfer_service_complete_s": 0.06879213415185834,
+        "transfer_first_service_s": 0.0,
+        "transfer_wait_to_first_service_s": 0.0,
+        "transfer_stage_elapsed_s": 0.1,
+        "transfer_service_duration_s": 0.06879213415185834,
+        "cpu_enter_s": 0.1,
+        "cpu_first_service_s": 0.1,
+        "cpu_wait_to_first_service_s": 0.0,
+        "cpu_stage_elapsed_s": 0.30000000000000004,
+        "cpu_service_duration_s": 0.30000000000000004,
+        "cpu_nonservice_elapsed_s": 0.0,
+        "cpu_nonservice_note": "Includes any grid rounding and service gaps; not pure FIFO wait",
+        "remaining_transfer_bits": 0.0,
+        "remaining_compute_cycles": 0.0,
+        "cpu_energy_j": 20.01,
+        "u2u_energy_j": 0.06879213415185834
+      }
+    ],
+    "holding_task_s": 120.4,
+    "holding_identity_error": 0.0,
+    "energy_j": {
+      "upload": 0.0,
+      "u2u": 0.06879213415185834,
+      "cpu": 230.01,
+      "propulsion": 2921.4516750206335
+    },
+    "cost_sum": 33.346931908248486,
+    "cost_per_s": 6.669386381649697,
+    "target_cpu_energy_j": 20.01,
+    "target_u2u_energy_j": 0.06879213415185834,
+    "target_energy_note": "Ledger allocation at actual aggregate CPU frequency; not marginal counterfactual energy",
+    "completed_parents": 11,
+    "unfinished_parents": 0,
+    "parent_completion_event_counts": {
+      "0": 1,
+      "1": 1,
+      "2": 1,
+      "3": 1,
+      "4": 1,
+      "5": 1,
+      "6": 1,
+      "7": 1,
+      "8": 1,
+      "9": 1,
+      "10": 1
+    },
+    "initial_conservation_errors": {
+      "upload_error_bits": 0.0,
+      "compute_error_cycles": 0.0,
+      "routing_error_bits": 0.0,
+      "transfer_error_bits": 0.0
+    },
+    "conservation_errors": {
+      "upload_error_bits": 0.0,
+      "compute_error_cycles": 0.0,
+      "routing_error_bits": 0.0,
+      "transfer_error_bits": 0.0
+    },
+    "maximum_absolute_conservation_errors": {
+      "upload_error_bits": 0.0,
+      "compute_error_cycles": 0.0,
+      "routing_error_bits": 0.0,
+      "transfer_error_bits": 0.0
+    },
+    "generated_bits": 15400000.0,
+    "initial_uploaded_bits": 15400000.0,
+    "generated_cycles": 23100000000.0,
+    "cpu_served_cycles": 23100000000.0,
+    "u2u_served_bits": 1400000.0,
+    "terminated": false,
+    "truncated": true,
+    "research_training_updates": 0
+  },
+  {
+    "condition": "destination_busy",
+    "action": "local",
+    "allocation": [
+      1.0,
+      0.0,
+      0.0
+    ],
+    "window_seconds": 5.0,
+    "physical_steps": 50,
+    "initial_state": "Already-uploaded parents; birth=0 is the observation origin",
+    "excluded_prehistory": "Upload delay and upload energy before this controlled ready state",
+    "task_size_profile": "Production low-priority vision size; background priority explicitly set high",
+    "future_arrival_tape": [],
+    "target_id": 10,
+    "background_ids": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "task_bits": 1400000.0,
+    "task_cycles": 2100000000.0,
+    "initial_uav_positions_m": [
+      [
+        350,
+        350
+      ],
+      [
+        350,
+        650
+      ],
+      [
+        650,
+        500
+      ]
+    ],
+    "initial_cpu_cycles_by_priority_destination": [
+      [
+        0,
+        21000000000.0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "target_completed": true,
+    "target_censored": false,
+    "target_finish_s": 0.30000000000000004,
+    "target_ready_to_complete_s": 0.30000000000000004,
+    "target_cutoff_age_s": null,
+    "target_holding_task_s": 0.30000000000000004,
+    "target_tail_fragment_ids": [
+      10
+    ],
+    "target_tail_destinations": [
+      0
+    ],
+    "target_first_child_finish_s": 0.30000000000000004,
+    "target_tail_gap_s": 0.0,
+    "children": [
+      {
+        "fragment_id": 10,
+        "parent_id": 10,
+        "source": 0,
+        "destination": 0,
+        "ratio": 1.0,
+        "bits": 1400000.0,
+        "cycles": 2100000000.0,
+        "finish_s": 0.30000000000000004,
+        "censored": false,
+        "transfer_complete_s": null,
+        "transfer_service_complete_s": null,
+        "transfer_first_service_s": null,
+        "transfer_wait_to_first_service_s": null,
+        "transfer_stage_elapsed_s": 0.0,
+        "transfer_service_duration_s": 0,
+        "cpu_enter_s": 0.0,
+        "cpu_first_service_s": 0.0,
+        "cpu_wait_to_first_service_s": 0.0,
+        "cpu_stage_elapsed_s": 0.30000000000000004,
+        "cpu_service_duration_s": 0.30000000000000004,
+        "cpu_nonservice_elapsed_s": 0.0,
+        "cpu_nonservice_note": "Includes any grid rounding and service gaps; not pure FIFO wait",
+        "remaining_transfer_bits": 0.0,
+        "remaining_compute_cycles": 0.0,
+        "cpu_energy_j": 20.01,
+        "u2u_energy_j": 0
+      }
+    ],
+    "holding_task_s": 120.30000000000001,
+    "holding_identity_error": -1.4210854715202004e-14,
+    "energy_j": {
+      "upload": 0.0,
+      "u2u": 0.0,
+      "cpu": 230.01,
+      "propulsion": 2921.4516750206335
+    },
+    "cost_sum": 33.33744053586169,
+    "cost_per_s": 6.667488107172337,
+    "target_cpu_energy_j": 20.01,
+    "target_u2u_energy_j": 0,
+    "target_energy_note": "Ledger allocation at actual aggregate CPU frequency; not marginal counterfactual energy",
+    "completed_parents": 11,
+    "unfinished_parents": 0,
+    "parent_completion_event_counts": {
+      "0": 1,
+      "1": 1,
+      "2": 1,
+      "3": 1,
+      "4": 1,
+      "5": 1,
+      "6": 1,
+      "7": 1,
+      "8": 1,
+      "9": 1,
+      "10": 1
+    },
+    "initial_conservation_errors": {
+      "upload_error_bits": 0.0,
+      "compute_error_cycles": 0.0,
+      "routing_error_bits": 0.0,
+      "transfer_error_bits": 0.0
+    },
+    "conservation_errors": {
+      "upload_error_bits": 0.0,
+      "compute_error_cycles": 0.0,
+      "routing_error_bits": 0.0,
+      "transfer_error_bits": 0.0
+    },
+    "maximum_absolute_conservation_errors": {
+      "upload_error_bits": 0.0,
+      "compute_error_cycles": 0.0,
+      "routing_error_bits": 0.0,
+      "transfer_error_bits": 0.0
+    },
+    "generated_bits": 15400000.0,
+    "initial_uploaded_bits": 15400000.0,
+    "generated_cycles": 23100000000.0,
+    "cpu_served_cycles": 23100000000.0,
+    "u2u_served_bits": 0.0,
+    "terminated": false,
+    "truncated": true,
+    "research_training_updates": 0
+  },
+  {
+    "condition": "destination_busy",
+    "action": "equal",
+    "allocation": [
+      0.3333333333333333,
+      0.3333333333333333,
+      0.3333333333333333
+    ],
+    "window_seconds": 5.0,
+    "physical_steps": 50,
+    "initial_state": "Already-uploaded parents; birth=0 is the observation origin",
+    "excluded_prehistory": "Upload delay and upload energy before this controlled ready state",
+    "task_size_profile": "Production low-priority vision size; background priority explicitly set high",
+    "future_arrival_tape": [],
+    "target_id": 10,
+    "background_ids": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "task_bits": 1400000.0,
+    "task_cycles": 2100000000.0,
+    "initial_uav_positions_m": [
+      [
+        350,
+        350
+      ],
+      [
+        350,
+        650
+      ],
+      [
+        650,
+        500
+      ]
+    ],
+    "initial_cpu_cycles_by_priority_destination": [
+      [
+        0,
+        21000000000.0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "target_completed": true,
+    "target_censored": false,
+    "target_finish_s": 2.2,
+    "target_ready_to_complete_s": 2.2,
+    "target_cutoff_age_s": null,
+    "target_holding_task_s": 2.2,
+    "target_tail_fragment_ids": [
+      11
+    ],
+    "target_tail_destinations": [
+      1
+    ],
+    "target_first_child_finish_s": 0.1,
+    "target_tail_gap_s": 2.1,
+    "children": [
+      {
+        "fragment_id": 10,
+        "parent_id": 10,
+        "source": 0,
+        "destination": 0,
+        "ratio": 0.3333333333333333,
+        "bits": 466666.6666666666,
+        "cycles": 700000000.0,
+        "finish_s": 0.1,
+        "censored": false,
+        "transfer_complete_s": null,
+        "transfer_service_complete_s": null,
+        "transfer_first_service_s": null,
+        "transfer_wait_to_first_service_s": null,
+        "transfer_stage_elapsed_s": 0.0,
+        "transfer_service_duration_s": 0,
+        "cpu_enter_s": 0.0,
+        "cpu_first_service_s": 0.0,
+        "cpu_wait_to_first_service_s": 0.0,
+        "cpu_stage_elapsed_s": 0.1,
+        "cpu_service_duration_s": 0.1,
+        "cpu_nonservice_elapsed_s": 0.0,
+        "cpu_nonservice_note": "Includes any grid rounding and service gaps; not pure FIFO wait",
+        "remaining_transfer_bits": 0.0,
+        "remaining_compute_cycles": 0.0,
+        "cpu_energy_j": 3.43,
+        "u2u_energy_j": 0
+      },
+      {
+        "fragment_id": 11,
+        "parent_id": 10,
+        "source": 0,
+        "destination": 1,
+        "ratio": 0.3333333333333333,
+        "bits": 466666.6666666666,
+        "cycles": 700000000.0,
+        "finish_s": 2.2,
+        "censored": false,
+        "transfer_complete_s": 0.1,
+        "transfer_service_complete_s": 0.04586142276790556,
+        "transfer_first_service_s": 0.0,
+        "transfer_wait_to_first_service_s": 0.0,
+        "transfer_stage_elapsed_s": 0.1,
+        "transfer_service_duration_s": 0.04586142276790556,
+        "cpu_enter_s": 0.1,
+        "cpu_first_service_s": 2.1,
+        "cpu_wait_to_first_service_s": 2.0,
+        "cpu_stage_elapsed_s": 2.1,
+        "cpu_service_duration_s": 0.1,
+        "cpu_nonservice_elapsed_s": 2.0,
+        "cpu_nonservice_note": "Includes any grid rounding and service gaps; not pure FIFO wait",
+        "remaining_transfer_bits": 0.0,
+        "remaining_compute_cycles": 0.0,
+        "cpu_energy_j": 3.43,
+        "u2u_energy_j": 0.02293071138395278
+      },
+      {
+        "fragment_id": 12,
+        "parent_id": 10,
+        "source": 0,
+        "destination": 2,
+        "ratio": 0.3333333333333333,
+        "bits": 466666.6666666666,
+        "cycles": 700000000.0,
+        "finish_s": 0.2,
+        "censored": false,
+        "transfer_complete_s": 0.1,
+        "transfer_service_complete_s": 0.05011631520242023,
+        "transfer_first_service_s": 0.0,
+        "transfer_wait_to_first_service_s": 0.0,
+        "transfer_stage_elapsed_s": 0.1,
+        "transfer_service_duration_s": 0.05011631520242023,
+        "cpu_enter_s": 0.1,
+        "cpu_first_service_s": 0.1,
+        "cpu_wait_to_first_service_s": 0.0,
+        "cpu_stage_elapsed_s": 0.1,
+        "cpu_service_duration_s": 0.1,
+        "cpu_nonservice_elapsed_s": 0.0,
+        "cpu_nonservice_note": "Includes any grid rounding and service gaps; not pure FIFO wait",
+        "remaining_transfer_bits": 0.0,
+        "remaining_compute_cycles": 0.0,
+        "cpu_energy_j": 3.43,
+        "u2u_energy_j": 0.025058157601210114
+      }
+    ],
+    "holding_task_s": 122.19999999999992,
+    "holding_identity_error": 8.526512829121202e-14,
+    "energy_j": {
+      "upload": 0.0,
+      "u2u": 0.04798886898516289,
+      "cpu": 220.29000000000002,
+      "propulsion": 2921.4516750206335
+    },
+    "cost_sum": 33.43935474206871,
+    "cost_per_s": 6.6878709484137415,
+    "target_cpu_energy_j": 10.290000000000001,
+    "target_u2u_energy_j": 0.04798886898516289,
+    "target_energy_note": "Ledger allocation at actual aggregate CPU frequency; not marginal counterfactual energy",
+    "completed_parents": 11,
+    "unfinished_parents": 0,
+    "parent_completion_event_counts": {
+      "0": 1,
+      "1": 1,
+      "2": 1,
+      "3": 1,
+      "4": 1,
+      "5": 1,
+      "6": 1,
+      "7": 1,
+      "8": 1,
+      "9": 1,
+      "10": 1
+    },
+    "initial_conservation_errors": {
+      "upload_error_bits": 0.0,
+      "compute_error_cycles": 0.0,
+      "routing_error_bits": 0.0,
+      "transfer_error_bits": 0.0
+    },
+    "conservation_errors": {
+      "upload_error_bits": 0.0,
+      "compute_error_cycles": 0.0,
+      "routing_error_bits": 1.862645149230957e-09,
+      "transfer_error_bits": 0.0
+    },
+    "maximum_absolute_conservation_errors": {
+      "upload_error_bits": 0.0,
+      "compute_error_cycles": 0.0,
+      "routing_error_bits": 1.862645149230957e-09,
+      "transfer_error_bits": 0.0
+    },
+    "generated_bits": 15400000.0,
+    "initial_uploaded_bits": 15400000.0,
+    "generated_cycles": 23100000000.0,
+    "cpu_served_cycles": 23100000000.0,
+    "u2u_served_bits": 933333.3333333333,
+    "terminated": false,
+    "truncated": true,
+    "research_training_updates": 0
+  },
+  {
+    "condition": "destination_busy",
+    "action": "remote1",
+    "allocation": [
+      0.0,
+      1.0,
+      0.0
+    ],
+    "window_seconds": 5.0,
+    "physical_steps": 50,
+    "initial_state": "Already-uploaded parents; birth=0 is the observation origin",
+    "excluded_prehistory": "Upload delay and upload energy before this controlled ready state",
+    "task_size_profile": "Production low-priority vision size; background priority explicitly set high",
+    "future_arrival_tape": [],
+    "target_id": 10,
+    "background_ids": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "task_bits": 1400000.0,
+    "task_cycles": 2100000000.0,
+    "initial_uav_positions_m": [
+      [
+        350,
+        350
+      ],
+      [
+        350,
+        650
+      ],
+      [
+        650,
+        500
+      ]
+    ],
+    "initial_cpu_cycles_by_priority_destination": [
+      [
+        0,
+        21000000000.0,
+        0
+      ],
+      [
+        0,
+        0,
+        0
+      ]
+    ],
+    "target_completed": true,
+    "target_censored": false,
+    "target_finish_s": 2.4000000000000004,
+    "target_ready_to_complete_s": 2.4000000000000004,
+    "target_cutoff_age_s": null,
+    "target_holding_task_s": 2.4000000000000004,
+    "target_tail_fragment_ids": [
+      10
+    ],
+    "target_tail_destinations": [
+      1
+    ],
+    "target_first_child_finish_s": 2.4000000000000004,
+    "target_tail_gap_s": 0.0,
+    "children": [
+      {
+        "fragment_id": 10,
+        "parent_id": 10,
+        "source": 0,
+        "destination": 1,
+        "ratio": 1.0,
+        "bits": 1400000.0,
+        "cycles": 2100000000.0,
+        "finish_s": 2.4000000000000004,
+        "censored": false,
+        "transfer_complete_s": 0.1,
+        "transfer_service_complete_s": 0.06879213415185834,
+        "transfer_first_service_s": 0.0,
+        "transfer_wait_to_first_service_s": 0.0,
+        "transfer_stage_elapsed_s": 0.1,
+        "transfer_service_duration_s": 0.06879213415185834,
+        "cpu_enter_s": 0.1,
+        "cpu_first_service_s": 2.1,
+        "cpu_wait_to_first_service_s": 2.0,
+        "cpu_stage_elapsed_s": 2.3000000000000003,
+        "cpu_service_duration_s": 0.30000000000000004,
+        "cpu_nonservice_elapsed_s": 2.0,
+        "cpu_nonservice_note": "Includes any grid rounding and service gaps; not pure FIFO wait",
+        "remaining_transfer_bits": 0.0,
+        "remaining_compute_cycles": 0.0,
+        "cpu_energy_j": 20.01,
+        "u2u_energy_j": 0.06879213415185834
+      }
+    ],
+    "holding_task_s": 122.3999999999999,
+    "holding_identity_error": 9.947598300641403e-14,
+    "energy_j": {
+      "upload": 0.0,
+      "u2u": 0.06879213415185834,
+      "cpu": 230.01,
+      "propulsion": 2921.4516750206335
+    },
+    "cost_sum": 33.526931908248464,
+    "cost_per_s": 6.705386381649693,
+    "target_cpu_energy_j": 20.01,
+    "target_u2u_energy_j": 0.06879213415185834,
+    "target_energy_note": "Ledger allocation at actual aggregate CPU frequency; not marginal counterfactual energy",
+    "completed_parents": 11,
+    "unfinished_parents": 0,
+    "parent_completion_event_counts": {
+      "0": 1,
+      "1": 1,
+      "2": 1,
+      "3": 1,
+      "4": 1,
+      "5": 1,
+      "6": 1,
+      "7": 1,
+      "8": 1,
+      "9": 1,
+      "10": 1
+    },
+    "initial_conservation_errors": {
+      "upload_error_bits": 0.0,
+      "compute_error_cycles": 0.0,
+      "routing_error_bits": 0.0,
+      "transfer_error_bits": 0.0
+    },
+    "conservation_errors": {
+      "upload_error_bits": 0.0,
+      "compute_error_cycles": 0.0,
+      "routing_error_bits": 0.0,
+      "transfer_error_bits": 0.0
+    },
+    "maximum_absolute_conservation_errors": {
+      "upload_error_bits": 0.0,
+      "compute_error_cycles": 0.0,
+      "routing_error_bits": 0.0,
+      "transfer_error_bits": 0.0
+    },
+    "generated_bits": 15400000.0,
+    "initial_uploaded_bits": 15400000.0,
+    "generated_cycles": 23100000000.0,
+    "cpu_served_cycles": 23100000000.0,
+    "u2u_served_bits": 1400000.0,
+    "terminated": false,
+    "truncated": true,
+    "research_training_updates": 0
+  }
+]

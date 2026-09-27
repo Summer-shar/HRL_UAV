@@ -1,0 +1,20 @@
+{
+  "base_commit": "13c0040f3957a35929bbb18bbefbf58cbb8bf1e3",
+  "final_source_sha256": {
+    "src/hrl_v2/control_diagnostics.py": "e2febf7fff7cb3699129861c74d891a56f4fa086d22b5b9d0e5c7b56d79efd65",
+    "src/hrl_v2/control_mechanisms.py": "c34c9d2095b3f79afdbfcb72d55c034b915863ef2ae64fa0e93fd301fd31d97d",
+    "src/hrl_v2/plot_control_diagnostics.py": "8c05ea4d745aced235b0b31af9f449cf73dfe0685ae250bf74e306a9f6b50468",
+    "src/hrl_uav/industrial_env.py": "44fa5f11df4f5350274ad8aff209edcbda813071288fabca2cf5bb23786baaf9",
+    "src/hrl_uav/industrial_deployment_env.py": "c6edb15118d6157d5b022c59077630952dffb6b60788e6bec7aa0ae7a007df0e",
+    "src/hrl_uav/industrial_hotspot_env.py": "2484eb2e7b990a3e6827ead6a92bbe59c853a5dd7d0b7ed6395041770c9951f0",
+    "src/hrl_uav/env.py": "ff6dbee5c0e643695c6f9f9fb36e9040ae0b4abb84bcb1faef521c605421569e",
+    "src/hrl_v2/physics_adapter.py": "8d522021bee997c6984fef2873ee2b6b6a70818ec6c6714ab0949a28895b8928",
+    "src/hrl_v2/collector.py": "2715311761b571dd81fa2850f7d2333d51869b4e8af6379578b30d2b739ae269",
+    "src/hrl_v2/metrics.py": "c26e99acf7c38b9f6409670e918a8524e47bb69885c90a06f80bb14ce5766e6f",
+    "src/hrl_v2/configs/physical_scene.json": "daea8771a2cb06754724c2af373704c279c080c7216d55ad990c86f0918b6136",
+    "src/hrl_v2/run.py": "14791bb74c8780b6f5aaf3b31bd77e706249a203acc5d0045600b1231765992e"
+  },
+  "no_production_changes": true,
+  "no_training": true,
+  "physical_steps": 17250
+}

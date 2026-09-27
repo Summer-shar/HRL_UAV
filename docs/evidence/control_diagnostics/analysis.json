@@ -1,0 +1,101 @@
+{
+  "comparisons": [
+    {
+      "layout_seed": 92,
+      "pattern": "staggered_busy",
+      "local_cost": 18.872409250849863,
+      "equal_cost": 9.041247868285815,
+      "hybrid_cost": 9.297305145125703,
+      "equal_improvement_pct": 52.09277338091495,
+      "hybrid_change_vs_equal_pct": 2.8321010613818753,
+      "toward_change_vs_hover_pct": -1.8230963112432663,
+      "equal_minus_local_high_delay_ms": 82.92682926829269,
+      "unfinished": {
+        "local": 89,
+        "equal": 5,
+        "high_local_low_equal": 5
+      },
+      "toward_minus_away_cost": -0.10829700594337055,
+      "toward_minus_away_stage_holding": {
+        "upload": -77.2999999999779,
+        "ready": -0.7999999999998977,
+        "has_transfer": 5.800000000000068,
+        "cpu_only": -4.600000000000591
+      }
+    },
+    {
+      "layout_seed": 92,
+      "pattern": "synchronous_busy",
+      "local_cost": 17.81520283656414,
+      "equal_cost": 16.217280122837153,
+      "hybrid_cost": 17.30332150556434,
+      "equal_improvement_pct": 8.969433176743802,
+      "hybrid_change_vs_equal_pct": 6.696815831637681,
+      "toward_change_vs_hover_pct": -0.9689627588034155,
+      "equal_minus_local_high_delay_ms": 84.28184281842823,
+      "unfinished": {
+        "local": 145,
+        "equal": 5,
+        "high_local_low_equal": 46
+      },
+      "toward_minus_away_cost": -0.002092905083522112,
+      "toward_minus_away_stage_holding": {
+        "upload": -93.29999999997699,
+        "ready": -0.7999999999999545,
+        "has_transfer": -217.10000000004925,
+        "cpu_only": 305.8000000010825
+      }
+    },
+    {
+      "layout_seed": 102,
+      "pattern": "staggered_busy",
+      "local_cost": 14.404681175372266,
+      "equal_cost": 9.056422747225287,
+      "hybrid_cost": 9.2167869799634,
+      "equal_improvement_pct": 37.128613698794766,
+      "hybrid_change_vs_equal_pct": 1.7707237969566414,
+      "toward_change_vs_hover_pct": -1.3648343674096952,
+      "equal_minus_local_high_delay_ms": 86.92098092643062,
+      "unfinished": {
+        "local": 199,
+        "equal": 6,
+        "high_local_low_equal": 49
+      },
+      "toward_minus_away_cost": -0.12445927407580726,
+      "toward_minus_away_stage_holding": {
+        "upload": -78.8999999999819,
+        "ready": 0.10000000000002274,
+        "has_transfer": 10.700000000000166,
+        "cpu_only": -14.800000000002001
+      }
+    },
+    {
+      "layout_seed": 102,
+      "pattern": "synchronous_busy",
+      "local_cost": 17.819097908705615,
+      "equal_cost": 16.104598980098775,
+      "hybrid_cost": 17.30390042867134,
+      "equal_improvement_pct": 9.621693182174006,
+      "hybrid_change_vs_equal_pct": 7.446950092048854,
+      "toward_change_vs_hover_pct": 0.5793820195838517,
+      "equal_minus_local_high_delay_ms": 88.01089918256133,
+      "unfinished": {
+        "local": 143,
+        "equal": 2,
+        "high_local_low_equal": 50
+      },
+      "toward_minus_away_cost": 0.17566691711900617,
+      "toward_minus_away_stage_holding": {
+        "upload": -83.89999999997508,
+        "ready": 0.0,
+        "has_transfer": 244.30000000003602,
+        "cpu_only": -51.90000000019518
+      }
+    }
+  ],
+  "current_physical_steps": 17250,
+  "previous_reference_steps": 1451,
+  "combined_physical_steps": 18701,
+  "hybrid_improved_in_cases": 0,
+  "interpretation": "Finite fixed workloads; completed delays must be read alongside censored counts. Stage has_transfer may overlap computation on other fragments."
+}
