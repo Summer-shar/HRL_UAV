@@ -27,7 +27,9 @@ def shared_action_features(actions,networks,device):
 
 
 class SAC:
-    def __init__(self,actor,q1,q2,*,gamma=None):
+    def __init__(self,actor,q1,q2,*,gamma=None,critic_microbatch_size=16):
+        if isinstance(critic_microbatch_size,bool) or not isinstance(critic_microbatch_size,(int,np.integer)) or critic_microbatch_size<=0:
+            raise ValueError("Critic microbatch size must be a positive integer")
         self.actor,self.q1,self.q2=actor,q1,q2
         if gamma is None:
             from .paths import default_config
@@ -43,34 +45,46 @@ class SAC:
         self.critic_optimizer=torch.optim.Adam(list(q1.parameters())+list(q2.parameters()),lr=3e-4,betas=(.9,.999),eps=1e-8)
         self.counts=dict(triggers=0,skipped=0,events=0,critic_fits=0,actor_updates=0,target_updates=0)
         self.version=0
-        # Execution chunk only: replay remains 128 samples and updates unchanged.
+        # Keep target sampling and actor RNG calls on their original boundaries.
         self.microbatch_size=16
+        # Only current Q computation changes; replay and optimizer steps do not.
+        self.critic_microbatch_size=int(critic_microbatch_size)
+
+    @torch.no_grad()
+    def _critic_targets(self,samples,successors,alpha,streams,device):
+        """Sample targets in original replay slots, including terminal holes."""
+        targets=[]
+        for start in range(0,len(samples),self.microbatch_size):
+            batch=samples[start:start+self.microbatch_size]
+            target=torch.tensor([s.episode.rewards[s.index] for s in batch],device=device,dtype=torch.float64)
+            live=[i for i,s in enumerate(batch) if not s.episode.terminated[s.index]]
+            if live:
+                following=successors.select([start+i for i in live])
+                logits,kappa=actor_batch(self.actor,following)
+                actions,_,ell=sample(logits,kappa,streams,200)
+                features=shared_action_features(actions,(self.target1,self.target2),device)
+                a=self.target1.value_features(encode_batch(self.target1,following),features)
+                b=self.target2.value_features(encode_batch(self.target2,following),features)
+                target[live]+=self.gamma*(torch.minimum(a,b).double()-alpha*ell.sum(-1).to(device))
+            targets.append(target)
+        return torch.cat(targets)
 
     def _critic_fit(self,samples,alpha,streams):
         self.critic_optimizer.zero_grad(set_to_none=True)
         device=next(self.q1.parameters()).device
         states,successors=PreparedBatch.replay(samples)
         live_states=successors.select([i for i,s in enumerate(samples) if not s.episode.terminated[s.index]])
-        residuals=[[],[]]; target_values=[]
+        residuals=[[],[]]
         with ExitStack() as scopes:
             tapes=[scopes.enter_context(history_scope(q.encoder,states)) for q in (self.q1,self.q2)]
             with torch.no_grad():
                 for network in (self.actor,self.target1,self.target2):
                     scopes.enter_context(history_scope(network.encoder,live_states))
-            for start in range(0,len(samples),self.microbatch_size):
-                batch=samples[start:start+self.microbatch_size]
+            target_values=self._critic_targets(samples,successors,alpha,streams,device)
+            for start in range(0,len(samples),self.critic_microbatch_size):
+                batch=samples[start:start+self.critic_microbatch_size]
                 current=states[start:start+len(batch)]
-                target=torch.tensor([s.episode.rewards[s.index] for s in batch],device=device,dtype=torch.float64)
-                live=[i for i,s in enumerate(batch) if not s.episode.terminated[s.index]]
-                with torch.no_grad():
-                    if live:
-                        following=successors.select([start+i for i in live])
-                        logits,kappa=actor_batch(self.actor,following)
-                        actions,_,ell=sample(logits,kappa,streams,200)
-                        features=shared_action_features(actions,(self.target1,self.target2),device)
-                        a=self.target1.value_features(encode_batch(self.target1,following),features)
-                        b=self.target2.value_features(encode_batch(self.target2,following),features)
-                        target[live]+=self.gamma*(torch.minimum(a,b).double()-alpha*ell.sum(-1).to(device))
+                target=target_values[start:start+len(batch)]
                 actions=torch.as_tensor(np.asarray([s.episode.actions[s.index] for s in batch]).reshape(-1,6,3))
                 features=shared_action_features(actions,(self.q1,self.q2),device)
                 weights=target.new_tensor([s.weight for s in batch])
@@ -80,10 +94,8 @@ class SAC:
                     loss=loss+(weights*error.square()).sum()/len(samples)
                     residuals[j].append(error.detach())
                 loss.backward()
-                target_values.append(target)
             for tape in tapes:
                 if tape is not None: tape.backward()
-        target_values=torch.cat(target_values)
         if not torch.isfinite(target_values).all(): raise FloatingPointError("Invalid Bellman target")
         residuals=[torch.cat(values) for values in residuals]
         norms=[torch.linalg.vector_norm(torch.stack([p.grad.norm() for p in q.parameters() if p.grad is not None]))

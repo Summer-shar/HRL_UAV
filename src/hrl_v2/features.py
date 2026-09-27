@@ -11,7 +11,14 @@ EDGE_WIDTHS = (4,4,0,0,0,0,0,0,0,0,0,0,0,0,9,0)
 
 def L(x, scale=1.):
     a = np.asarray(x,dtype=np.float64)
-    if not np.isfinite(a).all() or (a<0).any():
+    if a.ndim == 0:
+        # Keep the float64 array conversion and log1p operands identical;
+        # scalar validation does not need two temporary array reductions.
+        value = a.item()
+        invalid = not math.isfinite(value) or value < 0
+    else:
+        invalid = not np.isfinite(a).all() or (a<0).any()
+    if invalid:
         raise ValueError("Features contain negative or nonfinite physical values")
     return np.log1p(a/scale)
 
