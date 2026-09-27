@@ -1,0 +1,23 @@
+{
+  "run": 2,
+  "utc": "2026-09-27T07:52:10.638189+00:00",
+  "python": "3.9.25",
+  "tests": 1,
+  "successful": true,
+  "failures": 0,
+  "errors": 0,
+  "physical_steps": 7,
+  "rejected_step_calls": 0,
+  "fixture_or_class_setup_steps": 0,
+  "tests_detail": [
+    {
+      "test": "hrl_v2.tests.test_reference_parents.ReferenceParentTests.test_deliberately_late_fragment_blocks_parent_without_double_completion",
+      "physical_steps": 7
+    }
+  ],
+  "modules": [
+    "hrl_v2.tests.test_reference_parents.ReferenceParentTests.test_deliberately_late_fragment_blocks_parent_without_double_completion"
+  ],
+  "budget_limit": 20000,
+  "cumulative_physical_steps": 1451
+}
