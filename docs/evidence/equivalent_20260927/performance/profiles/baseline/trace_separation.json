@@ -1,0 +1,28 @@
+{
+  "reason": "Isolate profiler allocation lifetime from subsequent wall-clock and RAM measurements",
+  "excluded_post_trace_wall_cases": [
+    "actor.e2.h1800.backlog",
+    "critic.e4.h1800.backlog",
+    "inference.lower.h1.rebuild",
+    "inference.lower.h120.cached",
+    "inference.lower.h120.rebuild",
+    "inference.lower.h600.cached",
+    "inference.lower.h600.rebuild",
+    "inference.lower.h1800.cached",
+    "inference.lower.h1800.rebuild",
+    "inference.upper.h0.rebuild",
+    "inference.upper_value.h0.rebuild",
+    "inference.upper.h120.cached",
+    "inference.upper.h120.rebuild",
+    "inference.upper_value.h120.cached",
+    "inference.upper_value.h120.rebuild",
+    "inference.upper.h600.cached",
+    "inference.upper.h600.rebuild",
+    "inference.upper_value.h600.cached",
+    "inference.upper_value.h600.rebuild",
+    "inference.upper.h1800.cached",
+    "inference.upper.h1800.rebuild",
+    "inference.upper_value.h1800.cached"
+  ],
+  "physical_steps": 0
+}

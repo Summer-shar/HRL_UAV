@@ -1,0 +1,13 @@
+{
+  "status": "complete",
+  "cases": [
+    "critic.e2.h120.normal",
+    "critic.e2.h120.backlog",
+    "critic.e2.h600.normal",
+    "critic.e2.h600.backlog",
+    "critic.e2.h1800.normal",
+    "critic.e2.h1800.backlog"
+  ],
+  "physical_steps_this_run": 0,
+  "fixture_sha256": "e6e203f92da25c4688424c3552b0e7373f745df72664d7d0b1a1401cb5f55887"
+}

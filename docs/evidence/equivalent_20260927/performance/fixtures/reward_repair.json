@@ -1,0 +1,22 @@
+{
+  "before_sha256": "a4db1c4d64122b13ac095321e1d2bda63e48b0b1c9ff8ea205d26a9d88618933",
+  "after_sha256": "e6e203f92da25c4688424c3552b0e7373f745df72664d7d0b1a1401cb5f55887",
+  "episodes": [
+    {
+      "episode": 0,
+      "from_gamma": 1.0,
+      "to_gamma": 0.99,
+      "resealed": true,
+      "physical_steps": 0
+    },
+    {
+      "episode": 1,
+      "from_gamma": 1.0,
+      "to_gamma": 0.99,
+      "resealed": true,
+      "physical_steps": 0
+    }
+  ],
+  "physical_steps": 0,
+  "method": "Recompute both upper reward fields from preserved lower rewards and re-run Episode.seal"
+}
