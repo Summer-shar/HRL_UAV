@@ -23,7 +23,7 @@ def read_config(path,root):
     if digest(source_root()/"hrl_v2/configs/physical_scene.json")!=SCENE_SHA:
         raise ValueError("Physical scene differs from the reviewed physical parameters")
     config=json.loads(Path(path).read_text(encoding="utf-8"))
-    if config.get("schema")!="hrl_uav_continuing_service_1_0":
+    if config.get("schema")!=SCHEMA:
         raise ValueError("Expected continuing-service configuration")
     clocks=ClockConfig.from_config(config)
     scene=json.loads((source_root()/"hrl_v2/configs/physical_scene.json").read_text(encoding="utf-8"))
@@ -41,16 +41,51 @@ def read_config(path,root):
         raise ValueError("Artificial rollout boundaries must truncate, never terminate")
     if not isinstance(objective["reward_scale"],(float,int)) or not 0<objective["reward_scale"]<float("inf"):
         raise ValueError("reward_scale must be finite and positive")
+    validate_discounts(config,clocks)
     return config
 
 
+def validate_discounts(config,clocks):
+    """Both layers discount the same physical time: gamma_macro = gamma_micro ** lower_per_upper."""
+    import math
+    objective,ppo=config["objective"],config["ppo"]
+    micro,macro=objective["gamma_micro"],objective["gamma_macro"]
+    if not math.isclose(ppo["gamma"],macro,rel_tol=0.,abs_tol=1e-12):
+        raise ValueError("ppo.gamma must equal objective.gamma_macro")
+    if not math.isclose(macro,micro**clocks.lower_per_upper,rel_tol=0.,abs_tol=1e-9):
+        raise ValueError("gamma_macro must equal gamma_micro ** lower_per_upper (same physical horizon)")
+    if not 0<=ppo["gae_lambda"]<=1:
+        raise ValueError("gae_lambda must lie in [0, 1]")
+
+
 def require_research_protocol(config):
-    # This change validates the environment only. Merely flipping a JSON flag
-    # must not silently approve the retained orchestration or reset queues at
-    # each old training episode boundary.
-    raise RuntimeError("Research training is disabled: continuing-service discounts, training schedule, "
-                       "and persistent environment/checkpoint protocol require researcher review. "
-                       "Use dry-run, fixture, or bounded validation; no training was started.")
+    # Continuing service needs a strict discount: with gamma=1 the bootstrapped
+    # truncation target is an unbounded sum of costs.
+    research=config.get("research",{})
+    objective=config.get("objective",{})
+    missing=[k for k in ("training_enabled","discounts_confirmed","schedule_confirmed")
+             if research.get(k) is not True]
+    if missing:
+        raise RuntimeError("Research training is disabled: config research flags not confirmed: "+", ".join(missing))
+    if not (0<objective.get("gamma_micro",1.)<1 and 0<objective.get("gamma_macro",1.)<1):
+        raise RuntimeError("Continuing-service training requires 0 < gamma < 1 for both layers")
+
+
+def technical_status(root,config_path,config):
+    """Readiness is a technical report, never authorization to launch a run."""
+    try:
+        require_research_protocol(config)
+        confirmed=True
+    except RuntimeError:
+        confirmed=False
+    path=Path(root)/"validation/validation.json"
+    validation=json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+    ready=(validation.get("status")=="passed" and
+           validation.get("identity")==identity(root,config_path) and
+           runtime_signature(validation.get("runtime",{}))==runtime_signature(runtime_record()))
+    return dict(validation_ready=ready,research_protocol_confirmed=confirmed,
+                training_ready=bool(ready and confirmed),training_authorized=False,
+                training_started=False)
 
 
 def append(path,value):
@@ -181,7 +216,7 @@ def train(root,config_path,seed,output,resume=None):
                 physical_tick=adapter.env.step_index,event=learner.sac.counts["triggers"],**row))
         episode=collect(adapter,policy,upper_version=version,lower_version=learner.sac.version,
                         identity=dict(global_episode=number,external=external),on_event=event if p.layer=="lower" else None,
-                        reward_scale=config["objective"]["reward_scale"])
+                        reward_scale=config["objective"]["reward_scale"],gamma_lower=config["objective"]["gamma_micro"])
         if p.layer=="lower": replay.add(episode)
         else:
             ppo_batch.append(episode)
@@ -223,8 +258,10 @@ def main():
     config_path=rooted(args.config); config=read_config(config_path,root)
     binding=identity(root,config_path)
     if not args.fresh and args.resume is None:
-        print(json.dumps(dict(status="dry_run",training_started=False,physical_steps=0,updates=0,
-            research_training_enabled=False,rollout=ClockConfig.from_config(config).counts(),
+        from .runtime import configure
+        configure(test_cpu=True)
+        print(json.dumps(dict(status="dry_run",physical_steps=0,updates=0,
+            **technical_status(root,config_path,config),rollout=ClockConfig.from_config(config).counts(),
             rollout_seconds=config["task"]["rollout_seconds"],
             config_sha256=digest(config_path),expected_counts=expected_counts(config)),indent=2)); return
     require_research_protocol(config)

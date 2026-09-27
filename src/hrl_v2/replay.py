@@ -34,6 +34,7 @@ class Episode:
     expected_lower_steps: int = None
     expected_upper_steps: int = None
     reward_scale: float = 100.
+    gamma_lower: float = 1.
 
     def report(self,index):
         return unpack(self.reports[index])
@@ -43,6 +44,10 @@ class Episode:
         return len(self.reports)-1
 
     def seal(self,history,metrics):
+        if not np.isfinite(self.reward_scale) or self.reward_scale<=0:
+            raise ValueError("Reward scale must be finite and positive")
+        if not np.isfinite(self.gamma_lower) or not 0<=self.gamma_lower<=1:
+            raise ValueError("Lower reward discount must be finite and lie in [0, 1]")
         count=len(self.rewards)
         fields=(self.observations,self.successors,self.actions,self.supports,
                 self.terminated,self.truncated,self.severe)
@@ -86,8 +91,20 @@ class Episode:
                 raise ValueError("Upper successor differs from the next decision report")
         if not np.isclose(sum(self.rewards),-metrics["cost_sum"]/self.reward_scale,rtol=1e-11,atol=1e-9):
             raise ValueError("Micro reward / physical cost identity failed")
-        if not np.isclose(sum(h["reward"] for h in self.high),sum(self.rewards),rtol=1e-11,atol=1e-9):
-            raise ValueError("Macro / micro reward identity failed")
+        if count%len(self.high):
+            raise ValueError("Each upper transition must contain the same number of lower transitions")
+        lower_per_upper=count//len(self.high)
+        discounts=self.gamma_lower**np.arange(lower_per_upper,dtype=np.float64)
+        for index,high in enumerate(self.high):
+            begin=index*lower_per_upper
+            lower=np.asarray(self.rewards[begin:begin+lower_per_upper],dtype=np.float64)
+            if (read(high["report"]).tick!=read(self.observations[begin]).tick or
+                read(high["successor"]).tick!=read(self.successors[begin+lower_per_upper-1]).tick):
+                raise ValueError("Upper reward span differs from its lower transitions")
+            if not np.isclose(high.get("reward_physical",np.nan),lower.sum(),rtol=1e-11,atol=1e-9):
+                raise ValueError("Macro physical / micro reward identity failed")
+            if not np.isclose(high.get("reward_learning",np.nan),discounts@lower,rtol=1e-11,atol=1e-9):
+                raise ValueError("Macro learning reward differs from discounted lower rewards")
         self.history=pack(np.asarray(history,dtype=np.float64))
         self.metrics=metrics
         self.complete=True

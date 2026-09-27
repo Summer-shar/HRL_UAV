@@ -5,18 +5,24 @@ from .metrics import finish, snapshot
 
 
 def collect(adapter,policy,*,upper_version,lower_version,identity,on_event=None,on_tick=None,
-            reward_scale=100.):
+            reward_scale=100.,gamma_lower=1.):
     """Collect a window without resetting the physical system.
 
     The final lower successor includes the actual next upper decision and the
     observed arrivals at that decision time. That already committed decision
     is retained on the adapter and consumed by the next call, never resampled.
+
+    Upper records keep the undiscounted physical reward separately from the
+    within-macro discounted learning reward. Production callers pass the
+    configured lower discount explicitly; 1 preserves scripted-call defaults.
     """
     episode=Episode(upper_version,lower_version,identity,
                     expected_lower_steps=adapter.timing.lower_steps,
-                    expected_upper_steps=adapter.timing.upper_steps,reward_scale=reward_scale)
+                    expected_upper_steps=adapter.timing.upper_steps,reward_scale=reward_scale,
+                    gamma_lower=gamma_lower)
     metrics=_collect(adapter,policy,identity=identity,episode=episode,on_event=on_event,
-                     on_tick=on_tick,reward_scale=reward_scale,upper_version=upper_version)
+                     on_tick=on_tick,reward_scale=reward_scale,upper_version=upper_version,
+                     gamma_lower=gamma_lower)
     episode.seal(adapter.arrivals,metrics)
     return episode
 
@@ -36,10 +42,12 @@ def _commit_macro(adapter,policy):
 
 
 def _collect(adapter,policy,*,identity,episode=None,on_event=None,on_tick=None,
-             reward_scale=100.,upper_version=None):
+             reward_scale=100.,upper_version=None,gamma_lower=1.):
     timing=adapter.timing
     if not np.isfinite(reward_scale) or reward_scale<=0:
         raise ValueError("Reward scale must be finite and positive")
+    if not np.isfinite(gamma_lower) or not 0<=gamma_lower<=1:
+        raise ValueError("Lower reward discount must be finite and lie in [0, 1]")
     continuation=getattr(adapter,"_continuation",None)
     if continuation is None:
         if adapter.env.step_index % timing.physical_per_upper:
@@ -71,7 +79,8 @@ def _collect(adapter,policy,*,identity,episode=None,on_event=None,on_tick=None,
 
     for macro in range(timing.upper_steps):
         if episode is not None:
-            high=dict(block["aux"],report=episode.add_report(block["upper_report"]),reward=0.,
+            high=dict(block["aux"],report=episode.add_report(block["upper_report"]),
+                      reward_physical=0.,reward_learning=0.,
                       request=block["request"],displacement=block["displacement"])
         for frame in range(timing.lower_per_upper):
             report=block["lower_report"] if frame==0 else adapter.prepare()
@@ -100,7 +109,8 @@ def _collect(adapter,policy,*,identity,episode=None,on_event=None,on_tick=None,
                 episode.terminated.append(False)
                 episode.truncated.append(macro==timing.upper_steps-1 and frame==timing.lower_per_upper-1)
                 episode.severe.append(report.severe)
-                high["reward"]+=reward
+                high["reward_physical"]+=reward
+                high["reward_learning"]+=gamma_lower**frame*reward
             pending=True
         final=macro==timing.upper_steps-1
         if final:

@@ -258,7 +258,7 @@ class ReferenceContinuationTests(unittest.TestCase):
                 1-objective["holding_weight"])*sum(energy.values())/objective["energy_reference_j"]
             np.testing.assert_allclose(metrics["cost_sum"],cost,rtol=1e-12,atol=1e-8)
             np.testing.assert_allclose(sum(episode.rewards),-cost/episode.reward_scale,rtol=1e-12,atol=1e-8)
-            np.testing.assert_allclose(sum(row["reward"] for row in episode.high),
+            np.testing.assert_allclose(sum(row["reward_physical"] for row in episode.high),
                                        -cost/episode.reward_scale,rtol=1e-12,atol=1e-8)
         np.testing.assert_allclose(self.first.metrics["cost_sum"]+self.second.metrics["cost_sum"],
                                    self.full.metrics["cost_sum"],rtol=1e-12,atol=1e-8)

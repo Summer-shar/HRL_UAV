@@ -112,14 +112,20 @@ class PPO:
     def update(self,episodes,streams):
         if len(episodes)!=5 or any(not e.complete for e in episodes):
             raise ValueError("PPO needs five complete episodes")
-        if len({e.lower_version for e in episodes})!=1:
-            raise ValueError("PPO batch crosses lower policy versions")
+        # Versions belong to the sampled episodes, never the learner's live
+        # counters: PPO must use one frozen pair of behavior policies.
+        for field,label in (("lower_version","lower policy"),("upper_version","upper behavior policy")):
+            versions=[getattr(e,field,None) for e in episodes]
+            if any(version is None or (isinstance(version,str) and not version.strip()) for version in versions):
+                raise ValueError("PPO batch is missing "+label+" versions")
+            if any(version!=versions[0] for version in versions[1:]):
+                raise ValueError("PPO batch crosses "+label+" versions")
         histories={id(e):unpack(e.history) for e in episodes}
         rows=[]
         raw_advantages=[]
         for e in episodes:
             advantage,targets=generalized_advantage(
-                [h["reward"] for h in e.high],[h["value"] for h in e.high],
+                [h["reward_learning"] for h in e.high],[h["value"] for h in e.high],
                 [h["next_value"] for h in e.high],[h["terminated"] for h in e.high],
                 [h["truncated"] for h in e.high],gamma=self.gamma,gae_lambda=self.gae_lambda)
             raw_advantages.extend(advantage)

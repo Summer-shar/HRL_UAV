@@ -88,7 +88,8 @@ def make_fixture(path,timing=None):
     adapter.reset(arrival_seed=1, layout_seed=2, load_seed=3)
     start = time.perf_counter()
     episode = collect(adapter, Scripted(adapter.timing), upper_version="benchmark-script", lower_version=0,
-                      identity=dict(bounded_fixture=True, arrival_seed=1, layout_seed=2, load_seed=3))
+                      identity=dict(bounded_fixture=True, arrival_seed=1, layout_seed=2, load_seed=3),
+                      gamma_lower=json.loads((ROOT/"hrl_v2/configs/v2_1_0.json").read_text())["objective"]["gamma_micro"])
     elapsed = time.perf_counter() - start
     payload = dict(episode=episode, seconds=elapsed, physics_steps=adapter.timing.physical_steps, learning_updates=0,
                    description="One continuing-service scripted rollout with a real truncated successor; no research training")
@@ -122,7 +123,7 @@ def episodes_for(mod, fixture, count):
         episode = mod("replay").Episode(source.upper_version, source.lower_version,
                                         dict(source.identity, replica=index),
                                         expected_lower_steps=clock.lower_steps,expected_upper_steps=clock.upper_steps,
-                                        reward_scale=source.reward_scale)
+                                        reward_scale=source.reward_scale,gamma_lower=source.gamma_lower)
         # Bytes can be shared; resolve must still produce a different raw
         # history object for every episode identity in the optimizer step.
         for key in ("reports", "observations", "successors", "actions", "supports", "rewards", "terminated", "truncated", "severe", "high"):
@@ -364,7 +365,7 @@ def measure(args):
         rows=[]
         for e in episodes:
             _,targets=mod("ppo").generalized_advantage(
-                [h["reward"] for h in e.high],[h["value"] for h in e.high],
+                [h["reward_learning"] for h in e.high],[h["value"] for h in e.high],
                 [h["next_value"] for h in e.high],[h["terminated"] for h in e.high],
                 [h["truncated"] for h in e.high],gamma=temporary.ppo.gamma,gae_lambda=temporary.ppo.gae_lambda)
             rows.extend((e,h,float(target)) for h,target in zip(e.high,targets))
@@ -425,7 +426,7 @@ def measure(args):
                 continue
             adapter = mod("physics_adapter").PhysicsAdapter(scene,timing=clock)
             adapter.reset(arrival_seed=1, layout_seed=2, load_seed=3)
-            kwargs = dict(upper_version="benchmark", lower_version=0, identity={})
+            kwargs = dict(upper_version="benchmark", lower_version=0, identity={},gamma_lower=episode.gamma_lower)
             fn = (lambda: mod("collector").collect(adapter, Scripted(clock), **kwargs)) if store else (
                 lambda: mod("collector").collect_metrics(adapter, Scripted(clock), identity={}))
             t, result = timing(fn, repeats=1, warmup=0)

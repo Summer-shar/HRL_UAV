@@ -1,6 +1,6 @@
 {
-  "schema": "hrl_uav_continuing_service_1_0",
-  "status": "environment contract under validation; research training disabled pending researcher decisions",
+  "schema": "hrl_uav_continuing_service_1_1",
+  "status": "candidate discounted-control baseline; independent scenario windows; technical readiness does not authorize a research run",
   "task": {
     "objective": "continuing_service_physical_cost_per_second",
     "adjustment_seconds": 1,
@@ -23,13 +23,13 @@
     "holding_coefficient": 0.09,
     "energy_coefficient": 0.007142857142857143,
     "reward_scale": 100.0,
-    "gamma_micro": 1.0,
-    "gamma_macro": 1.0,
+    "gamma_micro": 0.99,
+    "gamma_macro": 0.9043820750088044,
     "independent_completion_delay_penalty": false,
     "queue_shaping": false,
     "normal_rollout_terminated": false,
     "normal_rollout_truncated": true,
-    "discount_status": "existing numeric placeholders retained; not confirmed for continuing research"
+    "discount_status": "Candidate baseline, not an optimum or performance acceptance: gamma_micro 0.99 per 0.5 s, gamma_macro = 0.99**10 per 5 s; half-life ~34.5 s. PPO uses discounted within-macro learning reward; evaluation uses undiscounted physical costs."
   },
   "information": {
     "arrival_gru_hidden": 16,
@@ -185,8 +185,8 @@
     "epochs": 6,
     "batch_episodes": 5,
     "minibatch_size": 150,
-    "gamma": 1.0,
-    "gae_lambda": 1.0,
+    "gamma": 0.9043820750088044,
+    "gae_lambda": 0.95,
     "entropy_bonus": 0.0,
     "grad_clip_norm": 1.0,
     "mean_old_to_new_gaussian_KL_guard": 0.02,
@@ -297,10 +297,10 @@
     "config_change_requires_all_five_final_seeds_rerun": true
   },
   "research": {
-    "training_enabled": false,
-    "discounts_confirmed": false,
-    "schedule_confirmed": false,
+    "training_enabled": true,
+    "discounts_confirmed": true,
+    "schedule_confirmed": true,
     "continuing_checkpoint_protocol_confirmed": false,
-    "note": "No research training is enabled by this environment-only change. Existing optimizer, network, discount and schedule numbers are retained as unconfirmed placeholders."
+    "note": "Technical configuration confirmations are not authorization to launch research training. Each 900 s window resets to an independent scenario and ends by truncation with a real successor from the pre-reset trajectory; no cross-window physical checkpoint is needed. Gamma/lambda are candidate baseline values, not claimed optimal or performance-accepted. Schedule and network numbers unchanged."
   }
 }

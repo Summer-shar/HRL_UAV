@@ -47,11 +47,24 @@ class ReferenceParentTests(unittest.TestCase):
         self.assertAlmostEqual(reading["cost"], .09 * 3 +
             (sum(expected.values()) + reading["energy_j"]["propulsion"]) / 140)
 
-    def test_unconfirmed_training_remains_blocked_even_if_config_flag_changes(self):
-        from hrl_v2.run import require_research_protocol
-        for config in ({}, {"research_protocol_confirmed": True}):
+    def test_training_requires_confirmed_flags_and_strict_discounts(self):
+        from hrl_v2.run import require_research_protocol, validate_discounts
+        from hrl_v2.timing import ClockConfig
+        flags = dict(training_enabled=True, discounts_confirmed=True, schedule_confirmed=True)
+        for config in ({}, {"research_protocol_confirmed": True},
+                       {"research": dict(flags, schedule_confirmed=False)}):
             with self.assertRaisesRegex(RuntimeError, "Research training is disabled"):
                 require_research_protocol(config)
+        with self.assertRaisesRegex(RuntimeError, "0 < gamma < 1"):
+            require_research_protocol(dict(research=flags, objective=dict(gamma_micro=1., gamma_macro=1.)))
+        require_research_protocol(dict(research=flags, objective=dict(gamma_micro=.99, gamma_macro=.99**10)))
+        clocks = ClockConfig(.1, .5, 5., 900.)
+        good = dict(objective=dict(gamma_micro=.99, gamma_macro=.99**10), ppo=dict(gamma=.99**10, gae_lambda=.95))
+        validate_discounts(good, clocks)
+        for bad in (dict(good, ppo=dict(gamma=.99, gae_lambda=.95)),
+                    dict(good, objective=dict(gamma_micro=.99, gamma_macro=.99), ppo=dict(gamma=.99, gae_lambda=.95))):
+            with self.assertRaises(ValueError):
+                validate_discounts(bad, clocks)
 
     def test_forward_keeps_identity_birth_and_waits_for_destination_cpu(self):
         env = fixed_environment()

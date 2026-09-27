@@ -11,18 +11,22 @@ from hrl_v2.checkpoint import identity,runtime_signature
 
 
 class PackagingTests(unittest.TestCase):
-    def test_environment_change_preserves_algorithm_numeric_choices(self):
+    def test_candidate_discounts_preserve_other_algorithm_numeric_choices(self):
         current=json.loads(default_config().read_text(encoding="utf-8"))
         baseline=json.loads((source_root()/"hrl_v2/_reference/hrl_v2/configs/v2_1_0.json").read_text(encoding="utf-8"))
         baseline["runtime"].pop("preserve_local_python")
         for key in ("runtime","network","action","sac","information"):
             self.assertEqual(current[key],baseline[key],key)
-        for key in ("gamma_micro","gamma_macro","holding_coefficient","energy_coefficient","reward_scale"):
+        for key in ("holding_coefficient","energy_coefficient","reward_scale"):
             self.assertEqual(current["objective"][key],baseline["objective"][key])
         for key,value in baseline["ppo"].items():
-            if key not in ("macro_samples_per_batch","advantage_normalization"):
+            if key not in ("macro_samples_per_batch","advantage_normalization","gamma","gae_lambda"):
                 self.assertEqual(current["ppo"][key],value,key)
-        self.assertFalse(current["research"]["training_enabled"])
+        self.assertEqual(current["objective"]["gamma_micro"],.99)
+        self.assertAlmostEqual(current["objective"]["gamma_macro"],.99**10)
+        self.assertEqual(current["ppo"]["gamma"],current["objective"]["gamma_macro"])
+        self.assertEqual(current["ppo"]["gae_lambda"],.95)
+        self.assertTrue(current["research"]["training_enabled"])
 
     def test_identity_does_not_depend_on_workspace(self):
         with tempfile.TemporaryDirectory() as directory:

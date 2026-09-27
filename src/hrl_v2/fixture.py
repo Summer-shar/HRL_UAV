@@ -26,7 +26,7 @@ def main():
         adapter=PhysicsAdapter(scene,timing=timing); adapter.reset(**seeds)
         start=time.perf_counter()
         episodes.append(collect(adapter,Scripted(),upper_version="benchmark-script",lower_version=0,identity=seeds,
-                                reward_scale=config["objective"]["reward_scale"]))
+                                reward_scale=config["objective"]["reward_scale"],gamma_lower=config["objective"]["gamma_micro"]))
         durations.append(time.perf_counter()-start)
     steps=len(episodes)*timing.physical_steps
     payload=dict(episode=episodes[0],episodes=episodes,seconds=durations[0],collection_seconds=durations,learning_updates=0,physics_steps=steps)

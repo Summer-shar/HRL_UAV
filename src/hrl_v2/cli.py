@@ -28,17 +28,12 @@ def main():
         import torch
         from .paths import default_config
         from .runtime import configure
-        from .checkpoint import identity,runtime_record,runtime_signature
-        from .run import read_config
+        from .run import read_config,technical_status
         configure(test_cpu=True)
-        read_config(default_config(),workspace)
-        path=workspace/"validation/validation.json"
-        validation=json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
-        ready=(validation.get("status")=="passed" and validation.get("identity")==identity(workspace,default_config())
-               and runtime_signature(validation.get("runtime",{}))==runtime_signature(runtime_record()))
+        config=read_config(default_config(),workspace)
         print(json.dumps(dict(version="2.1.0",python=sys.executable,torch=torch.__version__,cuda=torch.version.cuda,
-            cuda_available=torch.cuda.is_available(),workspace=str(workspace),validation_ready=ready,
-            training_ready=False,research_protocol_confirmed=False,training_started=False,updates=0),indent=2))
+            cuda_available=torch.cuda.is_available(),workspace=str(workspace),
+            **technical_status(workspace,default_config(),config),updates=0),indent=2))
     elif args.command in ("dry-run","train","resume"):
         extra=[]
         if args.command=="train": extra=["--fresh"]

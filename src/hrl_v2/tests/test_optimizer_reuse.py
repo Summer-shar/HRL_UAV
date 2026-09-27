@@ -148,6 +148,9 @@ class OptimizerReuseTests(unittest.TestCase):
 
     def test_critic_matches_pinned_baseline_and_backpropagates_history_once(self):
         reference=self.baseline_sac(); actual=copy.deepcopy(self.seed_sac)
+        # The pinned baseline predates the explicit discount (implicit gamma=1).
+        # This test checks computational equivalence, so match its discount.
+        actual.gamma=1.
         expected=reference._critic_fit(self.samples,.005,Streams(4101))
         forward={name:0 for name in ("actor","q1","q2","target1","target2")}
         backward={name:0 for name in ("q1","q2")}

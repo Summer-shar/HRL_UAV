@@ -7,7 +7,7 @@ import tempfile
 import unittest
 
 from hrl_v2.paths import default_config
-from hrl_v2.run import read_config, train
+from hrl_v2.run import read_config, train, technical_status
 from hrl_v2.schedule import expected_counts
 from hrl_v2.timing import ClockConfig
 
@@ -42,13 +42,39 @@ class ConfigurationTests(unittest.TestCase):
             data=json.loads(result.stdout)
             self.assertEqual(data["rollout"],dict(physical_steps=600,lower_steps=120,upper_steps=12))
             self.assertFalse(data["training_started"])
+            self.assertFalse(data["training_authorized"])
+            self.assertTrue(data["research_protocol_confirmed"])
 
     def test_training_fails_before_outputs_or_learning(self):
         with tempfile.TemporaryDirectory() as directory:
             output=Path(directory)/"no_run"
+            config=self.config(); config["research"]["training_enabled"]=False
+            path=Path(directory)/"unconfirmed.json"; path.write_text(json.dumps(config),encoding="utf-8")
             with self.assertRaisesRegex(RuntimeError,"Research training is disabled"):
+                train(Path(directory),path,4101,output)
+            self.assertFalse(output.exists())
+
+    def test_confirmed_configuration_still_requires_matching_validation(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output=Path(directory)/"no_run"
+            with self.assertRaisesRegex(ValueError,"same --workspace"):
                 train(Path(directory),default_config(),4101,output)
             self.assertFalse(output.exists())
+
+    def test_readiness_is_not_authorization_and_identity_is_checked(self):
+        from hrl_v2.checkpoint import identity,runtime_record
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory); path=root/"validation/validation.json"
+            path.parent.mkdir()
+            record=dict(status="passed",identity=identity(root,default_config()),runtime=runtime_record())
+            path.write_text(json.dumps(record),encoding="utf-8")
+            status=technical_status(root,default_config(),self.config())
+            self.assertTrue(status["training_ready"])
+            self.assertFalse(status["training_authorized"])
+            self.assertFalse(status["training_started"])
+            record["identity"]["config_sha256"]="stale"
+            path.write_text(json.dumps(record),encoding="utf-8")
+            self.assertFalse(technical_status(root,default_config(),self.config())["validation_ready"])
 
     def test_objective_units_cannot_silently_disagree_with_physics(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -58,7 +84,10 @@ class ConfigurationTests(unittest.TestCase):
                 read_config(path,directory)
 
     def test_resume_fails_before_loading_any_checkpoint(self):
-        result=subprocess.run([sys.executable,"-I","-B","-m","hrl_v2","resume","absent.pt"],capture_output=True,text=True)
+        with tempfile.TemporaryDirectory() as directory:
+            config=self.config(); config["research"]["training_enabled"]=False
+            path=Path(directory)/"unconfirmed.json"; path.write_text(json.dumps(config),encoding="utf-8")
+            result=subprocess.run([sys.executable,"-I","-B","-m","hrl_v2","resume","absent.pt","--config",str(path)],capture_output=True,text=True)
         self.assertNotEqual(result.returncode,0)
         self.assertIn("Research training is disabled",result.stderr)
         self.assertNotIn("FileNotFoundError",result.stderr)
