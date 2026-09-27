@@ -21,6 +21,16 @@ from hrl_v2.runtime import configure
 
 
 class PreparedOptimizationTests(unittest.TestCase):
+    def setUp(self):
+        # Random ReLU fixtures must not depend on other tests consuming RNG.
+        # Near a kink, two float32 algebra orders can have matching outputs
+        # but different derivatives. Keep this regression reproducible without
+        # changing production precision or relaxing its gradient tolerances.
+        scope=torch.random.fork_rng(devices=list(range(torch.cuda.device_count())))
+        scope.__enter__()
+        self.addCleanup(scope.__exit__,None,None,None)
+        torch.manual_seed(927)
+
     @classmethod
     def setUpClass(cls):
         cls.device=configure()

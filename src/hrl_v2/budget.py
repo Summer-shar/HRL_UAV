@@ -1,10 +1,27 @@
-"""Reproducible extrapolation from bounded measurements, never runs training."""
+"""Archive-only finite-window timing extrapolation, never current research.
+
+The constants below describe the archived measurement protocol. Explicit
+opt-in and matching historical fixture metadata are required. Continuing-
+service benchmark records cannot be used in this old budget model.
+"""
 import argparse
 import json
 from pathlib import Path
 
 
-def budget(measurement, microbatch=16, extra_io=None):
+def require_archived_measurement(measurement, *, archived_finite_window=False):
+    if not archived_finite_window:
+        raise ValueError("This budget is archive-only; explicitly opt in to archived finite-window extrapolation")
+    fixture=measurement.get("fixture",{})
+    if (measurement.get("schema") is not None or measurement.get("status")!="complete" or
+            measurement.get("baseline_commit")!="137d2f1" or
+            fixture.get("physical_steps")!=9000 or fixture.get("history_frames")!=1800 or
+            "ppo_kl900" not in measurement.get("measurements",{})):
+        raise ValueError("Budget accepts only archived finite-window measurements, never current continuing-service results")
+
+
+def budget(measurement, microbatch=16, extra_io=None, *, archived_finite_window=False):
+    require_archived_measurement(measurement,archived_finite_window=archived_finite_window)
     m = measurement["measurements"]
     t = lambda key: m[key]["seconds"]
     optimized = measurement["variant"] == "optimized"
@@ -112,8 +129,9 @@ def budget(measurement, microbatch=16, extra_io=None):
         if full_ppo:
             measured=(train_total + dev_total - 40*ppo_batch + 40*full_ppo["seconds"])/3600
             envelopes[label]["hours_using_measured_fixture_PPO_KL_behavior"]=measured
-    return dict(variant=measurement["variant"], sac_microbatch=microbatch,
-        unchanged_research_counts=dict(episodes=600, physical_steps=5400000, sac_events=35010,
+    return dict(scope="archived_finite_window_extrapolation_only",applies_to_current_research=False,
+        variant=measurement["variant"], sac_microbatch=microbatch,
+        archived_protocol_counts=dict(episodes=600, physical_steps=5400000, sac_events=35010,
             critic_fits=70020, actor_updates=17010, ppo_batches=40, ppo_effective_batch=900,
             ppo_minibatch=150, maximum_ppo_actor_steps=1440, ppo_value_steps=1440,
             maximum_ppo_kl_scans=240, lower_sampling=1080000, upper_sampling=54000,
@@ -152,14 +170,18 @@ def main():
     parser.add_argument("--optimized", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--extra-io", type=Path)
+    parser.add_argument("--archived-finite-window",action="store_true",
+                        help="Explicitly reproduce only the archived finite-window timing model")
     args = parser.parse_args()
     before = json.loads(args.baseline.read_text())
     after = json.loads(args.optimized.read_text())
     if before.get("status") != "complete" or after.get("status") != "complete":
         raise ValueError("Only completed measurements can be extrapolated")
     extra_io=json.loads(args.extra_io.read_text()) if args.extra_io else None
-    result = dict(baseline=budget(before, extra_io=extra_io), optimized_micro16=budget(after, extra_io=extra_io),
-                  optimized_micro32=budget(after, 32, extra_io) if "critic128_micro32" in after["measurements"] else None)
+    result = dict(baseline=budget(before, extra_io=extra_io,archived_finite_window=args.archived_finite_window),
+                  optimized_micro16=budget(after, extra_io=extra_io,archived_finite_window=args.archived_finite_window),
+                  optimized_micro32=budget(after,32,extra_io,archived_finite_window=args.archived_finite_window)
+                    if "critic128_micro32" in after["measurements"] else None)
     args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n")
     print(json.dumps({k: None if v is None else {e: d["training_plus_development_hours"] for e, d in v["envelopes"].items()}
                       for k, v in result.items()}, ensure_ascii=False))

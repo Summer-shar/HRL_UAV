@@ -1,19 +1,23 @@
-"""Causal exports around the unchanged industrial physical service kernel."""
+"""Causal exports around the continuing industrial physical service kernel."""
 from collections import deque
 import pickle
 import numpy as np
 
 from hrl_uav.industrial_hotspot_env import HotspotIndustrialEnv
 from .reports import ReportV2, Terminal, Parent, Fragment, Queue, UAV, Link
+from .timing import ClockConfig
 
 
 class PhysicsAdapter:
-    def __init__(self, scene, *, ledger=False):
+    def __init__(self, scene, *, ledger=False, timing=None):
+        self.timing = ClockConfig.from_scene(scene) if timing is None else timing
         self.env = HotspotIndustrialEnv(scene, ledger_enabled=ledger)
         c = self.env.config
         o = c["objective"]
-        if (self.env.dt, self.env.frame_steps, self.env.macro_steps, self.env.adjustment_steps) != (0.1, 5, 50, 10):
-            raise ValueError("Physical clocks differ from V2 contract")
+        if (self.env.dt, self.env.frame_steps, self.env.macro_steps) != (
+                self.timing.physical_dt, self.timing.physical_per_lower,
+                self.timing.physical_per_upper):
+            raise ValueError("Physical scene and configured control clocks disagree")
         if not (np.allclose(o["priority_weights"], [10, 1], atol=0, rtol=0)
                 and np.isclose(o["holding_weight"] / o["holding_reference_task_s"], .09)
                 and np.isclose((1-o["holding_weight"]) / o["energy_reference_j"], 1/140)):
@@ -21,8 +25,9 @@ class PhysicsAdapter:
         self._reset_reporting()
 
     def _reset_reporting(self):
+        self._continuation = None
         self.arrivals = []
-        self._recent_cpu = deque(maxlen=50)
+        self._recent_cpu = deque(maxlen=self.timing.physical_per_upper)
         self.queue_integrals = dict(upload_bits=0., ready_cycles=0., cpu_cycles=0., transfer_bits=0.)
         self.assigned_cycles = np.zeros((2, 3, 3))
         self._ratios = {}
@@ -33,15 +38,11 @@ class PhysicsAdapter:
         return self.report()
 
     def start_macro(self, request):
-        if self.env.step_index >= 9000:
-            raise RuntimeError("No macro action at the terminal time")
         return self.env.start_motion(request)
 
     def prepare(self):
         e = self.env
-        if e.step_index >= 9000:
-            raise RuntimeError("No new arrivals at terminal time")
-        if e.step_index // 5 == e._prepared_frame:
+        if e.step_index // e.frame_steps == e._prepared_frame:
             return self.report()
         first = len(e.parents)
         e.prepare_frame()
@@ -55,8 +56,6 @@ class PhysicsAdapter:
 
     def step(self, route):
         e = self.env
-        if e.step_index >= 9000:
-            raise RuntimeError("Physical service beyond terminal time")
         route = np.asarray(route)
         if route.dtype != np.float64:
             raise TypeError("Execution routes must preserve float64")
@@ -144,7 +143,7 @@ class PhysicsAdapter:
             for i in range(3) for j in range(3) if i != j)
         remaining = max(0, e._macro_end_tick-e.step_index)*e.dt
         phase = "uncommitted" if remaining == 0 else "adjustment" if e.motion_ticks else "hold"
-        return ReportV2(e.step_index, 9000-e.step_index, phase, remaining, e.motion_ticks*e.dt,
+        return ReportV2(e.step_index, e.dt, phase, remaining, e.motion_ticks*e.dt,
             len(self.arrivals), e.config["map_size_m"], e.config["motion"]["max_speed_mps"],
             terminals, parents, fragments, uavs, links, tuple(queues))
 

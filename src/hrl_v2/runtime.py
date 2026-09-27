@@ -3,6 +3,7 @@ import os
 os.environ.setdefault("CUBLAS_WORKSPACE_CONFIG",":4096:8")
 import torch
 import hashlib
+import json
 from .randomness import derive,initialization
 from .networks import LowerActor,QNetwork,UpperActor,ValueNetwork
 from .sac import SAC
@@ -30,14 +31,18 @@ def parameter_hash(module):
 
 
 class Learner:
-    def __init__(self,seed,device):
+    def __init__(self,seed,device,config=None):
+        if config is None:
+            from .paths import default_config
+            config=json.loads(default_config().read_text(encoding="utf-8"))
         networks=[]
         for purpose,cls in (("actor",LowerActor),("q1",QNetwork),("q2",QNetwork),
                             ("upper_init",UpperActor),("value",ValueNetwork)):
             with initialization(derive(seed,purpose=purpose)): network=cls()
             networks.append(network.to(device))
         lower,q1,q2,upper,value=networks
-        self.sac=SAC(lower,q1,q2); self.ppo=PPO(upper,value)
+        self.sac=SAC(lower,q1,q2,gamma=config["objective"]["gamma_micro"])
+        self.ppo=PPO(upper,value,gamma=config["ppo"]["gamma"],gae_lambda=config["ppo"]["gae_lambda"])
 
     def state_dict(self):
         result={}
@@ -45,9 +50,13 @@ class Learner:
                                   ("ppo",self.ppo,("actor","value","actor_optimizer","value_optimizer"))):
             result[prefix]={name:getattr(obj,name).state_dict() for name in names}
             result[prefix].update(counts=dict(obj.counts),version=obj.version)
+        result["discounts"]=dict(sac=self.sac.gamma,ppo=self.ppo.gamma,gae_lambda=self.ppo.gae_lambda)
         return result
 
     def load_state_dict(self,state):
+        expected=dict(sac=self.sac.gamma,ppo=self.ppo.gamma,gae_lambda=self.ppo.gae_lambda)
+        if state.get("discounts")!=expected:
+            raise ValueError("Checkpoint discounts differ from the explicit learner configuration")
         for prefix in ("sac","ppo"):
             obj=getattr(self,prefix)
             for name,value in state[prefix].items():

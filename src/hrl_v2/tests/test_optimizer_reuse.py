@@ -52,6 +52,12 @@ def pinned_baseline():
         module.__file__=f"137d2f1:{path}"
         sys.modules[module.__name__]=module
         exec(compile(source,module.__file__,"exec"),module.__dict__)
+        if leaf=="features":
+            # Compare optimizer execution on the SAME current causal inputs.
+            # The archived report clock intentionally has different semantics;
+            # it is not a source of the current environment specification.
+            from hrl_v2.features import build
+            module.build=build
         setattr(package,leaf,module)
     return package
 
@@ -83,7 +89,7 @@ class OptimizerReuseTests(unittest.TestCase):
         # Distinct prefixes share one real episode, including a zero cursor.
         cls.states=PreparedBatch([(replace(first,history_cursor=0),history),(first,history),(second,history)])
         episode=Episode("bounded",0,{})
-        episode.reports=[pack(first),pack(second),pack(replace(second,tick=9000,remaining_ticks=0))]
+        episode.reports=[pack(first),pack(second),pack(replace(second,tick=10))]
         episode.observations=[0,1]
         episode.successors=[1,2]
         episode.rewards=[-.2,-.3]

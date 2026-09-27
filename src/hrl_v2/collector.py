@@ -1,49 +1,83 @@
-"""Single owner of pending successors, committing the real next macro action."""
+"""Continuing-service rollout windows with committed, real successors."""
 import numpy as np
 from .replay import Episode
-from .metrics import finish
+from .metrics import finish, snapshot
 
 
-def collect(adapter,policy,*,upper_version,lower_version,identity,on_event=None,on_tick=None):
-    """Policy methods receive immutable reports and observed arrival arrays only.
+def collect(adapter,policy,*,upper_version,lower_version,identity,on_event=None,on_tick=None,
+            reward_scale=100.):
+    """Collect a window without resetting the physical system.
 
-    The adapter must already be reset. on_event samples *previous completed*
-    episodes; the caller admits this episode only after collect returns.
+    The final lower successor includes the actual next upper decision and the
+    observed arrivals at that decision time. That already committed decision
+    is retained on the adapter and consumed by the next call, never resampled.
     """
-    episode=Episode(upper_version,lower_version,identity)
-    metrics=_collect(adapter,policy,identity=identity,episode=episode,on_event=on_event,on_tick=on_tick)
+    episode=Episode(upper_version,lower_version,identity,
+                    expected_lower_steps=adapter.timing.lower_steps,
+                    expected_upper_steps=adapter.timing.upper_steps,reward_scale=reward_scale)
+    metrics=_collect(adapter,policy,identity=identity,episode=episode,on_event=on_event,
+                     on_tick=on_tick,reward_scale=reward_scale,upper_version=upper_version)
     episode.seal(adapter.arrivals,metrics)
     return episode
 
 
-def collect_metrics(adapter,policy,*,identity,on_tick=None):
-    """Frozen evaluation through the same decisions, without replay storage."""
-    return _collect(adapter,policy,identity=identity,on_tick=on_tick)
+def collect_metrics(adapter,policy,*,identity,on_tick=None,reward_scale=100.):
+    """Frozen evaluation uses the same transitions without replay allocation."""
+    return _collect(adapter,policy,identity=identity,on_tick=on_tick,reward_scale=reward_scale)
 
 
-def _collect(adapter,policy,*,identity,episode=None,on_event=None,on_tick=None):
-    if adapter.env.step_index!=0: raise ValueError("Collector requires reset")
-    if hasattr(policy,"begin_episode"): policy.begin_episode(identity)
-    pending=False
+def _commit_macro(adapter,policy):
+    upper_report=adapter.report()
+    request,aux=policy.upper(upper_report,adapter.arrivals)
+    motion=adapter.start_macro(request)
+    return dict(upper_report=upper_report,request=np.asarray(request).copy(),aux=dict(aux),
+                displacement=np.asarray(motion["displacement_m"]).copy(),
+                lower_report=adapter.prepare())
+
+
+def _collect(adapter,policy,*,identity,episode=None,on_event=None,on_tick=None,
+             reward_scale=100.,upper_version=None):
+    timing=adapter.timing
+    if not np.isfinite(reward_scale) or reward_scale<=0:
+        raise ValueError("Reward scale must be finite and positive")
+    continuation=getattr(adapter,"_continuation",None)
+    if continuation is None:
+        if adapter.env.step_index % timing.physical_per_upper:
+            raise ValueError("A rollout must start at an upper decision boundary")
+        if hasattr(policy,"begin_episode"): policy.begin_episode(identity)
+        start=snapshot(adapter)
+        block=_commit_macro(adapter,policy)
+    else:
+        if adapter.report()!=continuation["lower_report"]:
+            raise ValueError("Physical state changed after the saved continuation")
+        if upper_version is not None and continuation["upper_version"]!=upper_version:
+            raise ValueError("A committed successor cannot change upper policy version")
+        start=continuation["metrics_start"]
+        block=continuation
+        adapter._continuation=None
     sealed=0
+    pending=False
     max_report_bytes=0
     total_reward=0.
-    for macro in range(180):
-        report=adapter.report()
-        high_id=episode.add_report(report) if episode is not None else None
-        request,aux=policy.upper(report,adapter.arrivals)
-        motion=adapter.start_macro(request)
+
+    def seal_successor(report):
+        nonlocal sealed
+        if episode is not None: episode.successors.append(episode.add_report(report))
+        sealed+=1
+        # Keep the existing every-20-lower-decisions trigger on the physical
+        # timeline; changing window length must not restart that counter.
+        completed_lower=adapter.env.step_index//timing.physical_per_lower
+        if on_event is not None and completed_lower%20==0: on_event()
+
+    for macro in range(timing.upper_steps):
         if episode is not None:
-            high=dict(aux,report=high_id,reward=0.,request=np.asarray(request).copy(),
-                      displacement=np.asarray(motion["displacement_m"]).copy())
-        for frame in range(10):
-            report=adapter.prepare()
-            report_id=episode.add_report(report) if episode is not None else None
+            high=dict(block["aux"],report=episode.add_report(block["upper_report"]),reward=0.,
+                      request=block["request"],displacement=block["displacement"])
+        for frame in range(timing.lower_per_upper):
+            report=block["lower_report"] if frame==0 else adapter.prepare()
             max_report_bytes=max(max_report_bytes,adapter.report_bytes(report))
-            if pending:
-                if episode is not None: episode.successors.append(report_id)
-                sealed+=1
-                if on_event is not None and sealed%20==0: on_event()
+            if pending: seal_successor(report)
+            report_id=episode.add_report(report) if episode is not None else None
             route,support=policy.lower(report,adapter.arrivals)
             route=np.asarray(route,dtype=np.float64).reshape(2,3,3)
             from .hybrid_simplex import SUPPORTS
@@ -51,29 +85,38 @@ def _collect(adapter,policy,*,identity,episode=None,on_event=None,on_tick=None):
             if any(not 0<=int(k)<7 or SUPPORTS[int(k)]!=tuple(np.flatnonzero(row>0))
                    for row,k in zip(route.reshape(6,3),ids)):
                 raise ValueError("Recorded support differs from execution action")
-            readings=[]
-            for _ in range(5):
-                readings.append(adapter.step(route))
-                if on_tick is not None: on_tick(adapter,readings[-1])
-            reward=-sum(x["cost"] for x in readings)/100
+            cost=0.
+            for _ in range(timing.physical_per_lower):
+                reading=adapter.step(route)
+                cost+=reading["cost"]
+                if on_tick is not None: on_tick(adapter,reading)
+            reward=-cost/reward_scale
             total_reward+=reward
             if episode is not None:
                 episode.observations.append(report_id)
                 episode.actions.append(route.copy())
                 episode.supports.append(np.asarray(support,dtype=np.int64).copy())
                 episode.rewards.append(reward)
-                episode.terminated.append(adapter.env.step_index==9000)
+                episode.terminated.append(False)
+                episode.truncated.append(macro==timing.upper_steps-1 and frame==timing.lower_per_upper-1)
                 episode.severe.append(report.severe)
                 high["reward"]+=reward
             pending=True
-        if episode is not None: episode.high.append(high)
-    if episode is not None:
-        terminal=adapter.report()
-        episode.successors.append(episode.add_report(terminal))
-    sealed+=1
-    if on_event is not None and sealed%20==0: on_event()
-    metrics=finish(adapter)
+        final=macro==timing.upper_steps-1
+        if final:
+            # The evaluation cutoff precedes arrivals prepared for the next
+            # window. No queue is cleared and no physical time is advanced.
+            metrics=finish(adapter,start)
+            next_start=snapshot(adapter)
+        following=_commit_macro(adapter,policy)
+        if episode is not None:
+            high.update(successor=episode.add_report(following["upper_report"]),
+                        next_value=following["aux"].get("value"),terminated=False,truncated=final)
+            episode.high.append(high)
+        block=following
+    seal_successor(block["lower_report"])
+    adapter._continuation=dict(block,metrics_start=next_start,upper_version=upper_version)
     metrics["max_report_bytes"]=max_report_bytes
-    if not np.isclose(total_reward,-metrics["cost_sum"]/100,rtol=1e-11,atol=1e-9):
-        raise ValueError("Micro reward / physical cost identity failed")
+    if not np.isclose(total_reward,-metrics["cost_sum"]/reward_scale,rtol=1e-11,atol=1e-9):
+        raise ValueError("Lower reward / physical cost identity failed")
     return metrics

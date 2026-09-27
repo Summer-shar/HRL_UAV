@@ -243,7 +243,7 @@ class IndustrialEnv:
         for user, rate in enumerate(self.physics.compute_u2g_rate_bps()):
             budget, elapsed = rate*self.dt, 0.
             queue = self.upload[user]
-            while queue and budget > 1e-9:
+            while queue and budget > 0:
                 p = self.parents[queue[0]]
                 amount = min(p.upload_remaining, budget)
                 duration = amount/rate
@@ -254,7 +254,7 @@ class IndustrialEnv:
                 budget -= amount
                 elapsed += duration
                 energy += duration*self.physics.p_gt
-                if p.upload_remaining <= 1e-8:
+                if p.upload_remaining == 0:
                     p.upload_remaining = 0.
                     p.upload_finish_s = self.time_s+elapsed
                     self.ready.append(queue.popleft())
@@ -286,7 +286,9 @@ class IndustrialEnv:
             for priority, frequency in enumerate(frequencies):
                 budget, elapsed = frequency*self.dt, 0.
                 queue = self.compute[priority][node]
-                while queue and budget > 1e-6:
+                # Every positive fragment must receive service, even when its
+                # allocation is much smaller than an absolute epsilon.
+                while queue and budget > 0:
                     f = self.fragments[queue[0]]
                     amount = min(f.compute_remaining, budget)
                     duration = amount/frequency
@@ -298,7 +300,7 @@ class IndustrialEnv:
                     f.compute_remaining = max(0., f.compute_remaining-amount)
                     elapsed += duration
                     budget -= amount
-                    if f.compute_remaining <= 1e-5:
+                    if f.compute_remaining == 0:
                         f.compute_remaining = 0.
                         queue.popleft()
                         self._complete(f)
@@ -318,7 +320,7 @@ class IndustrialEnv:
             budget, elapsed = rate*self.dt, 0.
             for priority in range(2):
                 queue = self.transfer[priority][source][destination]
-                while queue and budget > 1e-9:
+                while queue and budget > 0:
                     f = self.fragments[queue[0]]
                     amount = min(f.transfer_remaining, budget)
                     duration = amount/rate
@@ -330,7 +332,7 @@ class IndustrialEnv:
                     budget -= amount
                     elapsed += duration
                     energy += duration*power
-                    if f.transfer_remaining <= 1e-8:
+                    if f.transfer_remaining == 0:
                         f.transfer_remaining = 0.
                         queue.popleft()
                         f.stage, f.entered_s = "cpu", (self.step_index+1)*self.dt

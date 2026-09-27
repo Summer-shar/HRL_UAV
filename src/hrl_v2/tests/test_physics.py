@@ -8,18 +8,20 @@ from hrl_v2.physics_adapter import PhysicsAdapter
 from hrl_v2.collector import collect
 from hrl_v2.features import build
 from hrl_v2.replay import Replay,unpack,resolve
+from hrl_v2.timing import ClockConfig
 
 SCENE=json.loads((Path(__file__).parents[1]/"configs/physical_scene.json").read_text())
+CLOCK=ClockConfig.from_scene(SCENE)
 
 
 def request(tick):
-    return .2*np.sin(np.arange(6)+tick/50)
+    return .2*np.sin(np.arange(6)+tick/CLOCK.physical_per_upper)
 
 
 def routes(tick):
     # Rotate exact-zero faces, vertices and interior actions every 0.5 seconds.
     values=np.asarray([[.3,.5,.2],[.6,.4,0],[0,1,0],[.4,0,.6],[0,.3,.7],[1,0,0]],dtype=np.float64)
-    return np.roll(values,tick//5,axis=0).reshape(2,3,3)
+    return np.roll(values,tick//CLOCK.physical_per_lower,axis=0).reshape(2,3,3)
 
 
 class Scripted:
@@ -41,9 +43,9 @@ class PhysicsTests(unittest.TestCase):
         def on_event(): cls.events+=1
         def on_tick(adapter,actual):
             e=cls.legacy; tick=e.step_index
-            if tick%50==0: e.start_motion(request(tick))
-            if tick%5==0: e.prepare_frame()
-            expected=e.micro_step(routes(tick//5*5))
+            if tick%CLOCK.physical_per_upper==0: e.start_motion(request(tick))
+            if tick%CLOCK.physical_per_lower==0: e.prepare_frame()
+            expected=e.micro_step(routes(tick//CLOCK.physical_per_lower*CLOCK.physical_per_lower))
             if actual!=expected: raise AssertionError(f"Physical reading mismatch at tick {tick}")
             np.testing.assert_array_equal(e.physics.uav_coords,adapter.env.physics.uav_coords)
             if e.ready!=adapter.env.ready or e.upload!=adapter.env.upload or e.compute!=adapter.env.compute or e.transfer!=adapter.env.transfer:
@@ -52,26 +54,40 @@ class PhysicsTests(unittest.TestCase):
                 raise AssertionError(f"Active per-task residual mismatch at tick {tick}")
             for name in ("generated_bits","generated_cycles","upload_served_bits","tx_served_bits","cpu_served_cycles"):
                 if getattr(e,name)!=getattr(adapter.env,name): raise AssertionError(f"Conservation ledger mismatch: {name}")
+            if e.step_index==CLOCK.physical_steps:
+                cls.cutoff_metrics=e.metrics()
         cls.episode=collect(cls.adapter,Scripted(),upper_version="script",lower_version=0,identity={},
                             on_event=on_event,on_tick=on_tick)
+        # The lower successor includes the next upper commitment and arrivals,
+        # while evaluation metrics were captured just before this boundary.
+        cls.legacy.start_motion(request(cls.legacy.step_index))
+        cls.legacy.prepare_frame()
 
-    def test_T01_900_second_physics_identity(self):
+    def test_T01_configured_window_physics_identity(self):
         a,b=self.adapter.env,self.legacy
         self.assertEqual(a.metrics(),b.metrics())
         self.assertEqual({k:asdict(v) for k,v in a.parents.items()},{k:asdict(v) for k,v in b.parents.items()})
         self.assertEqual({k:asdict(v) for k,v in a.fragments.items()},{k:asdict(v) for k,v in b.fragments.items()})
 
-    def test_T06_true_macro_successors_and_no_terminal_arrivals(self):
+    def test_T06_true_successors_and_continuing_cutoff(self):
         e=self.episode
-        self.assertEqual(len(self.adapter.arrivals),1800); self.assertEqual(self.events,90)
-        self.assertEqual(self.adapter.env._scene._frame,1799)
-        for i in (0,8,9,10,1798):
+        self.assertEqual(len(self.adapter.arrivals),CLOCK.lower_steps+1)
+        self.assertEqual(self.events,CLOCK.lower_steps//20)
+        self.assertEqual(self.adapter.env._scene._frame,CLOCK.lower_steps)
+        for i in sorted({i for i in (0, CLOCK.lower_per_upper-1, CLOCK.lower_steps-2)
+                         if 0 <= i < CLOCK.lower_steps-1}):
             r=e.report(e.successors[i]); nxt=e.report(e.observations[i+1])
-            self.assertEqual(r,nxt); self.assertEqual(r.tick,(i+1)*5)
-            if i%10==9: self.assertEqual(r.phase,"adjustment")
-        self.assertEqual(e.report(e.successors[-1]).tick,9000)
-        with self.assertRaises(RuntimeError): self.adapter.prepare()
-        with self.assertRaises(RuntimeError): self.adapter.start_macro(np.zeros(6))
+            self.assertEqual(r,nxt); self.assertEqual(r.tick,(i+1)*CLOCK.physical_per_lower)
+            if (i+1)%CLOCK.lower_per_upper==0: self.assertEqual(r.phase,"adjustment")
+        final=e.report(e.successors[-1])
+        self.assertEqual(final.tick,CLOCK.physical_steps)
+        self.assertEqual(final.phase,"adjustment")
+        self.assertEqual(final,self.adapter.prepare())
+        self.assertFalse(any(e.terminated))
+        self.assertEqual(e.truncated,[False]*(CLOCK.lower_steps-1)+[True])
+        self.assertEqual(e.metrics["cost_sum"],self.cutoff_metrics["cost_sum"])
+        self.assertEqual(sum(row["arrived"] for row in e.metrics["priority"]),
+                         sum(row["arrived"] for row in self.cutoff_metrics["priority"]))
 
     def test_T02_reports_detached_from_hidden_generator(self):
         e=self.adapter.env; report=self.adapter.report()

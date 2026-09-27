@@ -38,7 +38,7 @@ def main():
                and runtime_signature(validation.get("runtime",{}))==runtime_signature(runtime_record()))
         print(json.dumps(dict(version="2.1.0",python=sys.executable,torch=torch.__version__,cuda=torch.version.cuda,
             cuda_available=torch.cuda.is_available(),workspace=str(workspace),validation_ready=ready,
-            training_ready=bool(ready and torch.cuda.is_available()),training_started=False,updates=0),indent=2))
+            training_ready=False,research_protocol_confirmed=False,training_started=False,updates=0),indent=2))
     elif args.command in ("dry-run","train","resume"):
         extra=[]
         if args.command=="train": extra=["--fresh"]

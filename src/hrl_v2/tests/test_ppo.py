@@ -33,7 +33,8 @@ class ToyEpisode:
         self.high=[]
         for i in range(180):
             z=torch.full((6,),(i%7-3)*.03)
-            self.high.append(dict(report=0,reward=-1.,value=0.,pre_tanh=z.numpy(),
+            self.high.append(dict(report=0,reward=-1.,value=0.,next_value=0.,
+                terminated=False,truncated=i==179,successor=0,pre_tanh=z.numpy(),
                 logprob=logprob(z,mean,std).item(),mean=mean.detach().numpy().copy(),logstd=std.detach().numpy().copy()))
     def report(self,index): return None
 
@@ -61,3 +62,14 @@ class PPOTests(unittest.TestCase):
         self.assertEqual(ppo.counts["value_steps"],36)
         batch[-1].lower_version=8
         with self.assertRaises(ValueError): ppo.update(batch,Streams(4101))
+
+    def test_short_rollouts_use_actual_macro_count(self):
+        ppo=PPO(TinyActor(),TinyValue(),gamma=.8,gae_lambda=.6)
+        batch=[ToyEpisode(ppo.actor) for _ in range(5)]
+        for episode in batch:
+            episode.high=episode.high[:2]
+            episode.high[-1].update(truncated=True,next_value=7.)
+        with patch("hrl_v2.ppo.gaussian_kl",return_value=torch.tensor(0.)):
+            ppo.update(batch,Streams(4101))
+        self.assertEqual(ppo.counts["actor_steps_accepted"],6)
+        self.assertEqual(ppo.counts["value_steps"],6)

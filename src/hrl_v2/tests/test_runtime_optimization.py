@@ -133,6 +133,9 @@ class RuntimeOptimizationTests(unittest.TestCase):
         # adapter; only five real physical ticks are used in setUpClass.
         class Adapter:
             def __init__(self):
+                from hrl_v2.timing import ClockConfig
+                from hrl_v2.paths import default_config
+                self.timing=ClockConfig.from_config(json.loads(default_config().read_text()))
                 self.env=SimpleNamespace(step_index=0)
                 self.arrivals=[]
                 self.cost=0.
@@ -153,11 +156,12 @@ class RuntimeOptimizationTests(unittest.TestCase):
             def upper(self,report,history): return np.zeros(6),{}
             def lower(self,report,history):
                 return np.tile(np.eye(3),(2,1,1)),np.asarray([0,1,2,0,1,2])
-        def finish(adapter):
-            self.assertEqual(adapter.env.step_index,9000)
-            return {"cost_sum":adapter.cost,"seconds":900.,"parents":[]}
+        def finish(adapter,start=None):
+            self.assertEqual(adapter.env.step_index,adapter.timing.physical_steps)
+            return {"cost_sum":adapter.cost,"seconds":adapter.timing.rollout_seconds,"parents":[]}
         expected_ticks=[]; actual_ticks=[]
-        with patch("hrl_v2.collector.finish",side_effect=finish):
+        with patch("hrl_v2.collector.finish",side_effect=finish), \
+             patch("hrl_v2.collector.snapshot",return_value={}):
             episode=collect(Adapter(),Scripted(),upper_version="test",lower_version=0,identity={},
                             on_tick=lambda a,r: expected_ticks.append((a.env.step_index,r["cost"])))
             with patch("hrl_v2.collector.Episode",side_effect=AssertionError("Evaluation allocated replay")):
@@ -165,7 +169,7 @@ class RuntimeOptimizationTests(unittest.TestCase):
                                        on_tick=lambda a,r: actual_ticks.append((a.env.step_index,r["cost"])))
         self.assertEqual(actual,episode.metrics)
         self.assertEqual(actual_ticks,expected_ticks)
-        self.assertEqual(len(episode.rewards),1800)
+        self.assertEqual(len(episode.rewards),episode.expected_lower_steps)
 
     def test_streaming_pool_matches_legacy_sums_exactly(self):
         results=[dict(cost_sum=1000.3+i/11,seconds=900.,parents=[{"unused":i}],priority=[
@@ -182,8 +186,11 @@ class RuntimeOptimizationTests(unittest.TestCase):
             priority=priorities,episodes=6)
         accumulator=PooledMetrics()
         for result in results: accumulator.add(result)
-        self.assertEqual(accumulator.result(),expected)
-        self.assertEqual(pool(iter(results)),expected)
+        for actual in (accumulator.result(),pool(iter(results))):
+            for key in ("cost_per_s","pooled_delay_ms","episodes"):
+                self.assertEqual(actual[key],expected[key])
+            for actual_row,expected_row in zip(actual["priority"],expected["priority"]):
+                for key,value in expected_row.items(): self.assertEqual(actual_row[key],value)
         self.assertNotIn("parents",accumulator.__dict__)
 
 

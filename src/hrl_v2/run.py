@@ -14,16 +14,43 @@ from .randomness import derive,Streams
 from .replay import Replay
 from .paths import source_root, default_config
 from .checkpoint import runtime_signature
+from .timing import ClockConfig
 
-CONFIG_SHA="0330ad30431f8bf3add87f21152ab5a2aeb889be7b6c372796df48eb64b180dc"
 SCENE_SHA="daea8771a2cb06754724c2af373704c279c080c7216d55ad990c86f0918b6136"
 
 
 def read_config(path,root):
-    if digest(path)!=CONFIG_SHA: raise ValueError("V2 1.0 config changed: create an explicitly versioned protocol")
     if digest(source_root()/"hrl_v2/configs/physical_scene.json")!=SCENE_SHA:
-        raise ValueError("Physical scene differs from the documented source")
-    return json.loads(Path(path).read_text(encoding="utf-8"))
+        raise ValueError("Physical scene differs from the reviewed physical parameters")
+    config=json.loads(Path(path).read_text(encoding="utf-8"))
+    if config.get("schema")!="hrl_uav_continuing_service_1_0":
+        raise ValueError("Expected continuing-service configuration")
+    clocks=ClockConfig.from_config(config)
+    scene=json.loads((source_root()/"hrl_v2/configs/physical_scene.json").read_text(encoding="utf-8"))
+    if clocks!=ClockConfig.from_scene(scene,rollout_seconds=clocks.rollout_seconds):
+        raise ValueError("Control and physical clocks must match the physical scene")
+    objective=config["objective"]
+    physical=scene["base_scene"]["objective"]
+    import math
+    if (objective["priority_weights"]!=physical["priority_weights"] or
+        not math.isclose(objective["holding_coefficient"],physical["holding_weight"]/physical["holding_reference_task_s"],rel_tol=0.,abs_tol=1e-12) or
+        not math.isclose(objective["energy_coefficient"],(1-physical["holding_weight"])/physical["energy_reference_j"],rel_tol=0.,abs_tol=1e-12)):
+        raise ValueError("Configured costs must match the reviewed physical objective and units")
+    if (objective.get("normal_rollout_terminated") is not False or
+            objective.get("normal_rollout_truncated") is not True):
+        raise ValueError("Artificial rollout boundaries must truncate, never terminate")
+    if not isinstance(objective["reward_scale"],(float,int)) or not 0<objective["reward_scale"]<float("inf"):
+        raise ValueError("reward_scale must be finite and positive")
+    return config
+
+
+def require_research_protocol(config):
+    # This change validates the environment only. Merely flipping a JSON flag
+    # must not silently approve the retained orchestration or reset queues at
+    # each old training episode boundary.
+    raise RuntimeError("Research training is disabled: continuing-service discounts, training schedule, "
+                       "and persistent environment/checkpoint protocol require researcher review. "
+                       "Use dry-run, fixture, or bounded validation; no training was started.")
 
 
 def append(path,value):
@@ -39,12 +66,14 @@ def collection_policy(learner,streams,phase):
 
 
 def train(root,config_path,seed,output,resume=None):
+    require_research_protocol(read_config(config_path,root))
     from .runtime import configure,Learner,parameter_hash
     from .physics_adapter import PhysicsAdapter
     from .collector import collect
     from .evaluate import manifest,panel
     root,output=Path(root),Path(output)
     config=read_config(config_path,root); binding=identity(root,config_path)
+    clocks=ClockConfig.from_config(config)
     validation_path=root/"validation/validation.json"
     if not validation_path.exists():
         raise ValueError("Run hrl-v2 validate with the same --workspace before research training")
@@ -65,7 +94,7 @@ def train(root,config_path,seed,output,resume=None):
     device=configure()
     if runtime_signature(validation.get("runtime",{}))!=runtime_signature(runtime_record()):
         raise ValueError("Run local validation in the current Python/PyTorch/CUDA environment")
-    learner=Learner(seed,device)
+    learner=Learner(seed,device,config=config)
     if saved is not None and runtime_signature(saved.get("runtime",{}))!=runtime_signature(runtime_record()):
         raise ValueError("Resume runtime differs from the saved Python/PyTorch/CUDA/device contract")
     scene=json.loads((source_root()/"hrl_v2/configs/physical_scene.json").read_text(encoding="utf-8"))
@@ -89,7 +118,7 @@ def train(root,config_path,seed,output,resume=None):
         atomic_json(output/"development_manifest.json",manifest("dev"))
         atomic_json(output/"test_manifest.json",manifest("test"))
         atomic_json(output/"contract.json",dict(identity=binding,config=config,seed=seed,
-            runtime=runtime_record(),expected_counts=expected_counts(),
+            runtime=runtime_record(),expected_counts=expected_counts(config),
             initial_parameters={name:parameter_hash(module) for name,module in
                 (("lower_actor",learner.sac.actor),("q1",learner.sac.q1),("q2",learner.sac.q2),
                  ("upper_actor",learner.ppo.actor),("value",learner.ppo.value))},
@@ -123,7 +152,8 @@ def train(root,config_path,seed,output,resume=None):
         nonlocal pending
         result=panel(learner,scene,seed,manifest("dev"),output/"evaluations"/f"episode-{pending:04d}",
                      checkpoint_id=digest(checkpoint_path),
-                     modes=("hover",) if pending==300 else ("moving","hover"))
+                     modes=("hover",) if pending==300 else ("moving","hover"),
+                     timing=clocks,reward_scale=config["objective"]["reward_scale"])
         dev_results[str(pending)]=result
         pending=None
         return persist("evaluated")
@@ -137,7 +167,7 @@ def train(root,config_path,seed,output,resume=None):
         if identity(root,config_path)!=binding: raise RuntimeError("Source changed during training")
         p=phase(number)
         streams=Streams(seed,p.stage,p.cycle,p.block_episode)
-        adapter=PhysicsAdapter(scene)
+        adapter=PhysicsAdapter(scene,timing=clocks)
         external={k+"_seed":derive(seed,p.stage,p.cycle,p.block_episode,purpose=k)
                   for k in ("arrival","layout","load")}
         adapter.reset(**external)
@@ -150,7 +180,8 @@ def train(root,config_path,seed,output,resume=None):
             append(output/"learning.jsonl",dict(attempt_id=attempt_id,global_episode=number,
                 physical_tick=adapter.env.step_index,event=learner.sac.counts["triggers"],**row))
         episode=collect(adapter,policy,upper_version=version,lower_version=learner.sac.version,
-                        identity=dict(global_episode=number,external=external),on_event=event if p.layer=="lower" else None)
+                        identity=dict(global_episode=number,external=external),on_event=event if p.layer=="lower" else None,
+                        reward_scale=config["objective"]["reward_scale"])
         if p.layer=="lower": replay.add(episode)
         else:
             ppo_batch.append(episode)
@@ -167,10 +198,10 @@ def train(root,config_path,seed,output,resume=None):
         if pending is not None: checkpoint_path=evaluate_pending(checkpoint_path)
         atomic_json(output/"progress.json",dict(status="complete" if number==600 else "running",
             completed_episode=number,sac=learner.sac.counts,ppo=learner.ppo.counts,latest=str(checkpoint_path.relative_to(root))))
-    actual=dict(episodes=completed,physics_steps=completed*9000,sac_events=learner.sac.counts["events"],
+    actual=dict(episodes=completed,physics_steps=completed*clocks.physical_steps,sac_events=learner.sac.counts["events"],
                 critic_fits=learner.sac.counts["critic_fits"],sac_actor_updates=learner.sac.counts["actor_updates"],
                 ppo_batches=learner.ppo.counts["batches"])
-    if actual!=expected_counts(): raise RuntimeError(f"Budget mismatch: {actual}")
+    if actual!=expected_counts(config): raise RuntimeError(f"Budget mismatch: {actual}")
     eligible=[(int(k),v["by_mode"]["moving"]["cost_per_s"]) for k,v in dev_results.items() if k!="300"]
     best=min(eligible,key=lambda x:(x[1],x[0]))[0]
     result=dict(status="training_complete_performance_not_yet_accepted",actual_counts=actual,
@@ -189,11 +220,14 @@ def main():
     parser.add_argument("--output",type=Path)
     args=parser.parse_args(); root=args.project_root.resolve()
     rooted=lambda p:p if p.is_absolute() else root/p
-    config_path=rooted(args.config); read_config(config_path,root)
+    config_path=rooted(args.config); config=read_config(config_path,root)
     binding=identity(root,config_path)
     if not args.fresh and args.resume is None:
         print(json.dumps(dict(status="dry_run",training_started=False,physical_steps=0,updates=0,
-            config_sha256=digest(config_path),expected_counts=expected_counts()),indent=2)); return
+            research_training_enabled=False,rollout=ClockConfig.from_config(config).counts(),
+            rollout_seconds=config["task"]["rollout_seconds"],
+            config_sha256=digest(config_path),expected_counts=expected_counts(config)),indent=2)); return
+    require_research_protocol(config)
     if args.fresh and args.seed is None: parser.error("--fresh requires --seed")
     if args.resume is not None:
         if args.seed is not None: parser.error("--resume reads the saved training seed")

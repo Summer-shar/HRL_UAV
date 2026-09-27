@@ -78,9 +78,10 @@ class LearningTests(unittest.TestCase):
     def test_03_sac_update_terminal_mask_and_upper_freeze(self):
         l=self.learner
         episode=Episode("unit",0,{})
-        episode.reports=[pack(self.report),pack(self.successor),pack(replace(self.successor,tick=9000,remaining_ticks=0))]
+        episode.reports=[pack(self.report),pack(self.successor),pack(replace(self.successor,tick=1000000))]
         episode.observations=[0,0]; episode.successors=[1,2]
         episode.rewards=[-.2,-.3]; episode.terminated=[False,True]
+        episode.truncated=[True,False]
         episode.actions=[np.full((2,3,3),1/3,dtype=np.float64)]*2
         episode.history=pack(self.history)
         samples=[Sample(episode,i%2,1.) for i in range(4)]
@@ -91,7 +92,7 @@ class LearningTests(unittest.TestCase):
         old=copy.deepcopy(l.sac.target1.state_dict())
         original=l.sac.actor.batch
         def reject_terminal(states):
-            if any(r.remaining_ticks==0 for r,_ in states): raise AssertionError("Terminal actor was evaluated")
+            if any(r.tick==1000000 for r,_ in states): raise AssertionError("Terminal actor was evaluated")
             return original(states)
         l.sac.counts["events"]=1
         before=dict(l.sac.counts)
@@ -103,6 +104,31 @@ class LearningTests(unittest.TestCase):
         self.assertEqual(upper,fingerprint(l.ppo.actor.state_dict())); self.assertEqual(upper_opt,fingerprint(l.ppo.actor_optimizer.state_dict()))
         for key,value in l.sac.target1.state_dict().items():
             torch.testing.assert_close(value,old[key].lerp(l.sac.q1.state_dict()[key],.005),atol=0,rtol=0)
+
+    def test_03b_sac_explicit_discount_bootstraps_truncation(self):
+        sac=self.learner.sac
+        episode=Episode("unit",0,{})
+        episode.reports=[pack(self.report),pack(self.successor)]
+        episode.observations=[0,0]; episode.successors=[1,1]
+        episode.rewards=[1.,2.]; episode.terminated=[False,True]
+        episode.truncated=[True,False]
+        episode.actions=[np.full((2,3,3),1/3,dtype=np.float64)]*2
+        episode.history=pack(self.history)
+        samples=[Sample(episode,i,1.) for i in range(2)]
+        original=sac.gamma
+        sac.gamma=.25  # A formula test value, not a research recommendation.
+        def constant(value):
+            return lambda encoded,features: encoded.new_full((len(encoded),),value)
+        try:
+            with patch.object(sac.target1,"value_features",side_effect=constant(4.)), \
+                 patch.object(sac.target2,"value_features",side_effect=constant(6.)), \
+                 patch.object(sac.actor,"batch",wraps=sac.actor.batch) as actor:
+                result=sac._critic_fit(samples,0.,Streams(4101))
+            self.assertEqual(result["target_mean"],2.)
+            self.assertEqual(result["target_variance"],0.)
+            self.assertEqual(sum(len(call.args[0]) for call in actor.call_args_list),1)
+        finally:
+            sac.gamma=original
 
     def test_04_complete_checkpoint_restore_and_rng(self):
         l=self.learner; streams=Streams(4101); replay=Replay(); replay.set_upper_version("unit")

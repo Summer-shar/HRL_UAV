@@ -1,4 +1,4 @@
-"""Losslessly compressed whole episodes; sampling returns exact IS weights."""
+"""Losslessly compressed rollout windows; sampling returns exact IS weights."""
 from dataclasses import dataclass, field
 import pickle
 import zlib
@@ -25,11 +25,15 @@ class Episode:
     supports: list = field(default_factory=list)
     rewards: list = field(default_factory=list)
     terminated: list = field(default_factory=list)
+    truncated: list = field(default_factory=list)
     severe: list = field(default_factory=list)
     high: list = field(default_factory=list)
     history: bytes = b""
     metrics: dict = field(default_factory=dict)
     complete: bool = False
+    expected_lower_steps: int = None
+    expected_upper_steps: int = None
+    reward_scale: float = 100.
 
     def report(self,index):
         return unpack(self.reports[index])
@@ -39,11 +43,48 @@ class Episode:
         return len(self.reports)-1
 
     def seal(self,history,metrics):
-        if len(self.rewards)!=1800 or len(self.high)!=180 or len(self.successors)!=1800:
-            raise ValueError("Only full 900-second episodes can enter replay")
-        if sum(self.terminated)!=1 or not self.terminated[-1]:
-            raise ValueError("Episode must terminate exactly at its final transition")
-        if not np.isclose(sum(self.rewards),-metrics["cost_sum"]/100,rtol=1e-11,atol=1e-9):
+        count=len(self.rewards)
+        fields=(self.observations,self.successors,self.actions,self.supports,
+                self.terminated,self.truncated,self.severe)
+        if not count or any(len(field)!=count for field in fields):
+            raise ValueError("A sealed rollout requires every transition and its real successor")
+        if ((self.expected_lower_steps is not None and count!=self.expected_lower_steps) or
+            (self.expected_upper_steps is not None and len(self.high)!=self.expected_upper_steps)):
+            raise ValueError("Rollout counts differ from the configured clocks")
+        indices=self.observations+self.successors+[h["report"] for h in self.high]+[h["successor"] for h in self.high]
+        if any(not isinstance(i,(int,np.integer)) or not 0<=i<len(self.reports) for i in indices):
+            raise ValueError("Rollout contains an invalid observation or successor reference")
+        if any(self.terminated) or sum(self.truncated)!=1 or not self.truncated[-1]:
+            raise ValueError("Continuing service truncates only the final transition; it never terminates")
+        if not self.high or any(h["terminated"] for h in self.high) or \
+            sum(h["truncated"] for h in self.high)!=1 or not self.high[-1]["truncated"]:
+            raise ValueError("Upper rollout boundaries must match continuing-service semantics")
+        # Validate the stored data, not just the collector's intent. In
+        # particular a reset report must never become a truncated successor.
+        cached={}
+        def read(index):
+            if not isinstance(index,(int,np.integer)) or not 0<=index<len(self.reports):
+                raise ValueError("Invalid rollout report reference")
+            if index not in cached: cached[index]=self.report(index)
+            return cached[index]
+        stride=None
+        for index,(source,target) in enumerate(zip(self.observations,self.successors)):
+            before,after=read(source),read(target)
+            delta=after.tick-before.tick
+            if delta<=0 or (stride is not None and delta!=stride):
+                raise ValueError("A successor must advance the same physical timeline, never reset")
+            stride=delta
+            if hasattr(before,"history_cursor") and not (0<=before.history_cursor<=after.history_cursor<=len(history)):
+                raise ValueError("Successor history must be a causal continuation")
+            if index+1<count and after!=read(self.observations[index+1]):
+                raise ValueError("Stored successor differs from the next actual observation")
+        for index,high in enumerate(self.high):
+            before,after=read(high["report"]),read(high["successor"])
+            if after.tick<=before.tick:
+                raise ValueError("Upper successor must advance the physical timeline")
+            if index+1<len(self.high) and after!=read(self.high[index+1]["report"]):
+                raise ValueError("Upper successor differs from the next decision report")
+        if not np.isclose(sum(self.rewards),-metrics["cost_sum"]/self.reward_scale,rtol=1e-11,atol=1e-9):
             raise ValueError("Micro reward / physical cost identity failed")
         if not np.isclose(sum(h["reward"] for h in self.high),sum(self.rewards),rtol=1e-11,atol=1e-9):
             raise ValueError("Macro / micro reward identity failed")
@@ -88,7 +129,7 @@ class Replay:
             raise ValueError("Incomplete episode or upper policy version mismatch")
         self.episodes.append(episode)
         if len(self.episodes)>55: self.episodes.pop(0)
-        self.writes+=1800
+        self.writes+=len(episode.rewards)
 
     def sample(self,rng):
         if not self.episodes: raise ValueError("No completed episode to sample")
@@ -96,8 +137,9 @@ class Replay:
         for e in rng.integers(len(self.episodes),size=4):
             episode=self.episodes[int(e)]
             q=probabilities(episode.severe)
-            for i in rng.choice(1800,size=32,replace=True,p=q):
-                result.append(Sample(episode,int(i),float((1/1800)/q[i])))
+            count=len(episode.rewards)
+            for i in rng.choice(count,size=32,replace=True,p=q):
+                result.append(Sample(episode,int(i),float((1/count)/q[i])))
         return result
 
 

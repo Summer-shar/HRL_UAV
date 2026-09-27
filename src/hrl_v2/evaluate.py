@@ -21,12 +21,15 @@ def manifest(split):
         policy_streams=[1,2] if split=="dev" else [1,2,3,4])
 
 
-def panel(learner,scene,master,panel_manifest,output,checkpoint_id,*,modes=("moving","hover"),stochastic=True):
+def panel(learner,scene,master,panel_manifest,output,checkpoint_id,*,modes=("moving","hover"),stochastic=True,timing=None,reward_scale=100.):
+    from .timing import ClockConfig
+    timing=ClockConfig.from_scene(scene) if timing is None else timing
     split=panel_manifest["split"]
     if panel_manifest!=manifest(split): raise ValueError("Evaluation manifest differs from sealed seed contract")
     output=Path(output); output.mkdir(parents=True,exist_ok=True)
     policy_label="stochastic" if stochastic else "deterministic"
-    key=dict(checkpoint=checkpoint_id,manifest=json_digest(panel_manifest),policy=policy_label)
+    key=dict(checkpoint=checkpoint_id,manifest=json_digest(panel_manifest),policy=policy_label,
+             rollout_seconds=timing.rollout_seconds,reward_scale=reward_scale)
     results={mode:PooledMetrics() for mode in modes}
     # All training random states are restored, including unused global states.
     devices=list(range(torch.cuda.device_count()))
@@ -41,10 +44,10 @@ def panel(learner,scene,master,panel_manifest,output,checkpoint_id,*,modes=("mov
                         if saved["identity"]!=item: raise ValueError("Existing evaluation belongs to another contract")
                         results[mode].add(saved["metrics"]); continue
                     streams=Streams(master,episode=scenario["scenario"],split=split,policy_stream=stream)
-                    adapter=PhysicsAdapter(scene)
+                    adapter=PhysicsAdapter(scene,timing=timing)
                     adapter.reset(**{k:v for k,v in scenario.items() if k.endswith("_seed")})
                     policy=Policy(learner.sac.actor,learner.ppo.actor,None,streams,mode=mode,stochastic=stochastic)
-                    metrics=collect_metrics(adapter,policy,identity=item)
+                    metrics=collect_metrics(adapter,policy,identity=item,reward_scale=reward_scale)
                     metrics.update(split=split,policy=policy_label,mode=mode,training_seed=master,
                                    learning_updates=0,replay_writes=0)
                     atomic_json(path,dict(identity=item,metrics=metrics))
@@ -68,17 +71,19 @@ def main():
     rooted=lambda p:p if p.is_absolute() else root/p
     from .runtime import configure,Learner
     from .run import read_config
+    from .timing import ClockConfig
     config=read_config(rooted(args.config),root)
     binding=identity(root,rooted(args.config))
     saved=load(rooted(args.checkpoint),binding)
     m=json.loads(rooted(args.manifest).read_text(encoding="utf-8"))
     if m["split"]=="test" and (saved["completed_episode"]!=600 or saved["pending_evaluation"] is not None):
         raise ValueError("Final test requires the completed 600-episode endpoint")
-    learner=Learner(saved["seed"],configure()); learner.load_state_dict(saved["learner"])
+    learner=Learner(saved["seed"],configure(),config=config); learner.load_state_dict(saved["learner"])
     modes=("moving","hover") if args.mode=="paired" else (args.mode,)
     scene=json.loads((source_root()/"hrl_v2/configs/physical_scene.json").read_text(encoding="utf-8"))
     result=panel(learner,scene,saved["seed"],m,rooted(args.output),digest(rooted(args.checkpoint)),
-                 modes=modes,stochastic=args.policy=="stochastic")
+                 modes=modes,stochastic=args.policy=="stochastic",timing=ClockConfig.from_config(config),
+                 reward_scale=config["objective"]["reward_scale"])
     print(json.dumps(result,ensure_ascii=False,allow_nan=False))
 
 

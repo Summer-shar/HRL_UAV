@@ -1,5 +1,6 @@
-"""Hybrid SAC with finite terminal targets and two independent critic fits."""
+"""Hybrid SAC: only true termination suppresses successor bootstrapping."""
 import copy
+import json
 from contextlib import ExitStack
 import numpy as np
 import torch
@@ -26,8 +27,13 @@ def shared_action_features(actions,networks,device):
 
 
 class SAC:
-    def __init__(self,actor,q1,q2):
+    def __init__(self,actor,q1,q2,*,gamma=None):
         self.actor,self.q1,self.q2=actor,q1,q2
+        if gamma is None:
+            from .paths import default_config
+            gamma=json.loads(default_config().read_text(encoding="utf-8"))["objective"]["gamma_micro"]
+        self.gamma=float(gamma)
+        if not 0<=self.gamma<=1: raise ValueError("SAC discount must lie in [0, 1]")
         self.target1,self.target2=copy.deepcopy(q1),copy.deepcopy(q2)
         for target in (self.target1,self.target2):
             for module in target.modules():
@@ -64,7 +70,7 @@ class SAC:
                         features=shared_action_features(actions,(self.target1,self.target2),device)
                         a=self.target1.value_features(encode_batch(self.target1,following),features)
                         b=self.target2.value_features(encode_batch(self.target2,following),features)
-                        target[live]+=torch.minimum(a,b).double()-alpha*ell.sum(-1).to(device)
+                        target[live]+=self.gamma*(torch.minimum(a,b).double()-alpha*ell.sum(-1).to(device))
                 actions=torch.as_tensor(np.asarray([s.episode.actions[s.index] for s in batch]).reshape(-1,6,3))
                 features=shared_action_features(actions,(self.q1,self.q2),device)
                 weights=target.new_tensor([s.weight for s in batch])

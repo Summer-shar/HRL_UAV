@@ -1,3 +1,5 @@
+> 归档说明：以下内容是当前仓库自带的先前工程记录，不定义本轮持续服务合同，也不代表本轮测试或训练结果。当前说明见 [场景与控制合同](design_specification.md) 和 [本轮验证](CONTINUING_SERVICE_VALIDATION.md)。
+
 # 有界工程基准
 
 原吞吐测量见 `docs/evidence/throughput/throughput_report.md`，其路径是历史来源，不是运行依赖。普通用户无需下载或携带约92MB的本机fixture。

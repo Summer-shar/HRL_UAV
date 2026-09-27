@@ -16,8 +16,8 @@ def benchmark(episode):
     from .policy import Policy
     from .tests.test_learning import fingerprint
     device=configure(); learner=Learner(4101,device); history=unpack(episode.history)
-    indices=sorted(range(1800),key=lambda i:len(episode.report(episode.observations[i]).fragments))
-    states={"median_fragment_count":episode.report(episode.observations[indices[900]]),
+    indices=sorted(range(len(episode.rewards)),key=lambda i:len(episode.report(episode.observations[i]).fragments))
+    states={"median_fragment_count":episode.report(episode.observations[indices[len(indices)//2]]),
             "max_fragment_count":episode.report(episode.observations[indices[-1]])}
     policy=Policy(learner.sac.actor,learner.ppo.actor,None,Streams(4101))
     results={}

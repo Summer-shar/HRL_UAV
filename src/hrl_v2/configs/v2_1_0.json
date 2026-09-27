@@ -1,19 +1,19 @@
 {
-  "schema": "hrl_uav_v2_design_1_0",
-  "status": "proposed design; no integrated training or performance claim",
+  "schema": "hrl_uav_continuing_service_1_0",
+  "status": "environment contract under validation; research training disabled pending researcher decisions",
   "task": {
-    "objective": "finite_900s_undiscounted_original_physical_cost",
-    "episode_seconds": 900,
-    "physical_seconds": 0.1,
-    "routing_seconds": 0.5,
-    "macro_seconds": 5,
+    "objective": "continuing_service_physical_cost_per_second",
     "adjustment_seconds": 1,
     "hold_seconds": 4,
     "num_uavs": 3,
     "num_terminals": 39,
     "num_priorities": 2,
     "parent_completion": "all_positive_allocation_fragments_complete",
-    "control_telemetry": "synchronous causal full service reports; overhead uncharged, as explicit idealized assumption"
+    "control_telemetry": "synchronous causal full service reports; overhead uncharged, as explicit idealized assumption",
+    "rollout_seconds": 900,
+    "physical_dt": 0.1,
+    "lower_interval": 0.5,
+    "upper_interval": 5
   },
   "objective": {
     "priority_weights": [
@@ -25,10 +25,11 @@
     "reward_scale": 100.0,
     "gamma_micro": 1.0,
     "gamma_macro": 1.0,
-    "terminal_at_900": true,
-    "emit_future_arrivals_after_terminal": false,
     "independent_completion_delay_penalty": false,
-    "queue_shaping": false
+    "queue_shaping": false,
+    "normal_rollout_terminated": false,
+    "normal_rollout_truncated": true,
+    "discount_status": "existing numeric placeholders retained; not confirmed for continuing research"
   },
   "information": {
     "arrival_gru_hidden": 16,
@@ -162,9 +163,8 @@
     }
   },
   "replay": {
-    "unit": "completed_episode_raw_reports_and_arrivals",
+    "unit": "completed_collection_window_with_true_successors_and_causal_history",
     "max_completed_episodes": 55,
-    "transitions_per_episode": 1800,
     "flush_on_upper_policy_version_change": true,
     "include_current_incomplete_episode": false,
     "stratified_mixture_rho": 0.1,
@@ -184,7 +184,6 @@
     "clip_epsilon": 0.15,
     "epochs": 6,
     "batch_episodes": 5,
-    "macro_samples_per_batch": 900,
     "minibatch_size": 150,
     "gamma": 1.0,
     "gae_lambda": 1.0,
@@ -192,7 +191,7 @@
     "grad_clip_norm": 1.0,
     "mean_old_to_new_gaussian_KL_guard": 0.02,
     "KL_guard_action": "restore_actor_and_actor_optimizer_to_epoch_start; stop_actor_epochs; value_training_continues",
-    "advantage_normalization": "entire_900_sample_batch_once; epsilon_1e-8"
+    "advantage_normalization": "entire_collected_batch_once; epsilon_1e-8"
   },
   "schedule": {
     "sac_pretrain_episodes": 300,
@@ -207,7 +206,6 @@
     "first_lower_episodes_actor_frozen": 2,
     "stage_transitions_use": "fixed_budget_final_state; never development_best",
     "total_episodes_per_seed": 600,
-    "physics_steps_per_seed": 5400000,
     "development_global_episodes": [
       300,
       400,
@@ -266,7 +264,7 @@
     "torch_cpu_threads": 10,
     "automatic_device_fallback": false
   },
-  "implementation_is_not_available_yet": true,
+  "implementation_is_not_available_yet": false,
   "randomness": {
     "seed_sequence_fields": [
       "experiment_id",
@@ -297,5 +295,12 @@
     ],
     "stream_schedules": "explicitly specified in section17; CPU Dirichlet uses fork_rng and persistent dedicated states",
     "config_change_requires_all_five_final_seeds_rerun": true
+  },
+  "research": {
+    "training_enabled": false,
+    "discounts_confirmed": false,
+    "schedule_confirmed": false,
+    "continuing_checkpoint_protocol_confirmed": false,
+    "note": "No research training is enabled by this environment-only change. Existing optimizer, network, discount and schedule numbers are retained as unconfirmed placeholders."
   }
 }

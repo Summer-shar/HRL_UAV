@@ -1,3 +1,5 @@
+> 归档说明：以下内容是当前仓库自带的先前工程记录，不定义本轮持续服务合同，也不代表本轮测试或训练结果。当前说明见 [场景与控制合同](design_specification.md) 和 [本轮验证](CONTINUING_SERVICE_VALIDATION.md)。
+
 # 来源与本轮改动
 
 算法基线：137d2f1。吞吐优化来源：dbf2b977b35a14b5cb560d649cf3c22f976e9584，原仓库 https://github.com/Summer-shar/HRL_UAV ，分支codex/report_ledger_v1。

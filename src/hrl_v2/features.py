@@ -90,7 +90,7 @@ def build(report):
             float(len(p.children)==1)])
     for u in r.uavs:
         features["uav"].append([*np.asarray(u.position)/r.map_size,*np.asarray(u.velocity)/r.max_speed,
-            *np.asarray(u.target)/r.map_size,r.remaining_macro/5,r.remaining_adjustment,
+            *np.asarray(u.target)/r.map_size,L(r.remaining_macro).item(),L(r.remaining_adjustment).item(),
             L(u.cpu_hz,1e9).item(),*L(np.asarray(u.compute)/u.cpu_hz,10),
             *L(np.asarray(u.in_transit)/u.cpu_hz,10),*L(u.recent_service,1e9),
             *L([u.ready[p][0] for p in range(2)],1e6),*L([u.ready[p][1] for p in range(2)],1e9),
@@ -135,11 +135,14 @@ def build(report):
         geometry.append(rows)
     ready = [[L(u.ready[p][0],1e6).item(),L(u.ready[p][1],1e9).item(),L(u.ready[p][2]).item()]
              for p in range(2) for u in r.uavs]
-    return Graph(features,queues,edges,neighbors,u_index,pools,geometry,ready,[r.tick/9000,r.remaining_ticks/9000])
+    # These two inputs describe the current physical commitment, independent
+    # of where an external experience collector chooses to cut its window.
+    clock = [L(r.remaining_macro).item(), L(r.remaining_adjustment).item()]
+    return Graph(features,queues,edges,neighbors,u_index,pools,geometry,ready,clock)
 
 
 def arrival_array(history, cursor, device):
-    if cursor>len(history):
+    if cursor < 0 or cursor>len(history):
         raise ValueError("History cursor extends beyond observed arrivals")
     data = np.asarray(history[:cursor],dtype=np.float64).reshape(cursor,39,6)
     data = L(data,np.asarray([1e6,1e9,1,1e6,1e9,1]))

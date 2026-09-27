@@ -1,10 +1,10 @@
 """Bounded production-path throughput measurements; never starts research training.
 
-One scripted finite episode supplies immutable reports and complete 1800-frame
-histories. SAC keeps 128 samples / four episode identities. PPO invokes update
-on all 900 rows and stops after one complete 150-row optimizer step; its full
-six-epoch budget is an explicitly labelled extrapolation. Run variants in
-separate processes, with no concurrent GPU work.
+Scripted continuing-service windows supply immutable reports and observed
+arrival prefixes. Window sizes come from the fixture's physical clocks. SAC
+keeps its existing 128 samples / four identities; PPO measures a bounded
+optimizer step on temporary models. Archived finite-window baseline timings
+are not comparable with this schema.
 """
 from __future__ import annotations
 
@@ -13,13 +13,10 @@ import contextlib
 import copy
 import hashlib
 import importlib
-import importlib.util
 import json
 import pickle
 from pathlib import Path
 import statistics
-import subprocess
-import sys
 import tempfile
 import time
 from unittest.mock import patch
@@ -42,13 +39,9 @@ def verify_baseline():
 
 def package(variant):
     if variant == "baseline":
-        name = "v2_benchmark_baseline"
-        spec = importlib.util.spec_from_file_location(name, BASELINE / "__init__.py", submodule_search_locations=[str(BASELINE)])
-        module = importlib.util.module_from_spec(spec)
-        sys.modules[name] = module
-        spec.loader.exec_module(module)
-    else:
-        name = "hrl_v2"
+        raise ValueError("Frozen finite-window baseline is incompatible with continuing-service reports; use archived measurements only")
+    if variant != "optimized": raise ValueError("Unknown benchmark variant")
+    name = "hrl_v2"
     return lambda suffix: importlib.import_module(name + "." + suffix)
 
 
@@ -73,42 +66,66 @@ def timing(fn, repeats=3, warmup=1):
 
 
 class Scripted:
+    def __init__(self,clock=None):
+        from .timing import ClockConfig
+        self.clock=ClockConfig.from_config() if clock is None else clock
+
     def upper(self, report, history):
-        return .2 * np.sin(np.arange(6) + report.tick / 50), {}
+        return .2 * np.sin(np.arange(6) + report.time / self.clock.upper_interval), {}
 
     def lower(self, report, history):
         from hrl_v2.hybrid_simplex import SUPPORTS
         values = np.asarray([[.3, .5, .2], [.6, .4, 0], [0, 1, 0], [.4, 0, .6], [0, .3, .7], [1, 0, 0]], dtype=np.float64)
-        actions = np.roll(values, report.tick // 5, axis=0).reshape(2, 3, 3)
+        actions = np.roll(values, report.tick // self.clock.physical_per_lower, axis=0).reshape(2, 3, 3)
         return actions, np.asarray([SUPPORTS.index(tuple(np.flatnonzero(row))) for row in actions.reshape(6, 3)])
 
 
-def make_fixture(path):
+def make_fixture(path,timing=None):
     from hrl_v2.physics_adapter import PhysicsAdapter
     from hrl_v2.collector import collect
     scene = json.loads((ROOT / "hrl_v2/configs/physical_scene.json").read_text())
-    adapter = PhysicsAdapter(scene)
+    adapter = PhysicsAdapter(scene,timing=timing)
     adapter.reset(arrival_seed=1, layout_seed=2, load_seed=3)
     start = time.perf_counter()
-    episode = collect(adapter, Scripted(), upper_version="benchmark-script", lower_version=0,
+    episode = collect(adapter, Scripted(adapter.timing), upper_version="benchmark-script", lower_version=0,
                       identity=dict(bounded_fixture=True, arrival_seed=1, layout_seed=2, load_seed=3))
     elapsed = time.perf_counter() - start
-    payload = dict(episode=episode, seconds=elapsed, physics_steps=9000, learning_updates=0,
-                   description="One complete scripted physical trajectory, no learned policy, no research episode")
+    payload = dict(episode=episode, seconds=elapsed, physics_steps=adapter.timing.physical_steps, learning_updates=0,
+                   description="One continuing-service scripted rollout with a real truncated successor; no research training")
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(pickle.dumps(payload, protocol=5))
     return payload
+
+
+def fixture_clock(episode):
+    """Infer and validate collection clocks from this fixture, not defaults."""
+    from .timing import ClockConfig
+    if (not getattr(episode,"truncated",None) or any(episode.terminated) or
+            not episode.truncated[-1] or not episode.high):
+        raise ValueError("Benchmark requires a current continuing-service rollout fixture")
+    first=episode.report(episode.observations[0])
+    lower=episode.report(episode.successors[0])
+    high=episode.high[0]
+    upper_seconds=(episode.report(high["successor"]).tick-episode.report(high["report"]).tick)*first.physical_dt
+    clock=ClockConfig(first.physical_dt,(lower.tick-first.tick)*first.physical_dt,
+                      upper_seconds,episode.metrics["seconds"])
+    if (len(episode.rewards),len(episode.high))!=(clock.lower_steps,clock.upper_steps):
+        raise ValueError("Fixture transition counts disagree with its physical clocks")
+    return clock
 
 
 def episodes_for(mod, fixture, count):
     result = []
     for index in range(count):
         source = fixture["episodes"][index] if "episodes" in fixture else fixture["episode"]
+        clock=fixture_clock(source)
         episode = mod("replay").Episode(source.upper_version, source.lower_version,
-                                        dict(source.identity, replica=index))
+                                        dict(source.identity, replica=index),
+                                        expected_lower_steps=clock.lower_steps,expected_upper_steps=clock.upper_steps,
+                                        reward_scale=source.reward_scale)
         # Bytes can be shared; resolve must still produce a different raw
         # history object for every episode identity in the optimizer step.
-        for key in ("reports", "observations", "successors", "actions", "supports", "rewards", "terminated", "severe", "high"):
+        for key in ("reports", "observations", "successors", "actions", "supports", "rewards", "terminated", "truncated", "severe", "high"):
             setattr(episode, key, copy.deepcopy(getattr(source, key)))
         episode.reports = [memoryview(value).tobytes() for value in source.reports]
         episode.history = memoryview(source.history).tobytes()
@@ -123,30 +140,46 @@ def fixed_samples(mod, episodes, seed=71027):
     result = []
     for episode in episodes[:4]:
         probability = mod("replay").probabilities(episode.severe)
-        for index in rng.choice(1800, size=32, replace=True, p=probability):
-            result.append(mod("replay").Sample(episode, int(index), float((1 / 1800) / probability[index])))
+        count=len(episode.rewards)
+        for index in rng.choice(count, size=32, replace=True, p=probability):
+            result.append(mod("replay").Sample(episode, int(index), float((1 / count) / probability[index])))
     return result
 
 
+def upper_auxiliary_rows(episode,history,policy,value):
+    """Synthetic timing auxiliaries evaluated on each real upper successor."""
+    rows=[]
+    for row in episode.high:
+        _,aux=policy.upper(episode.report(row["report"]),history)
+        with torch.no_grad():
+            next_value=value(episode.report(row["successor"]),history,
+                             episode=policy._episode).item()
+        rows.append(dict(row,**aux,next_value=next_value))
+    return rows
+
+
 def measure(args):
-    baseline_hashes = verify_baseline()
     mod = package(args.variant)
     device = mod("runtime").configure()
     fixture = pickle.loads(args.fixture.read_bytes())
     episode = fixture["episode"]
+    clock=fixture_clock(episode)
     history = mod("replay").unpack(episode.history)
     reports = [episode.report(i) for i in episode.observations]
-    sorted_indices = sorted(range(1800), key=lambda i: len(reports[i].fragments))
-    selected = dict(ordinary=sorted_indices[900], congested=sorted_indices[-1])
-    record = dict(variant=args.variant, baseline_commit="137d2f1", baseline_source_hashes=baseline_hashes,
+    sorted_indices = sorted(range(len(reports)), key=lambda i: len(reports[i].fragments))
+    selected = dict(ordinary=sorted_indices[len(sorted_indices)//2], congested=sorted_indices[-1])
+    record = dict(schema="continuing_service_benchmark_v1",variant=args.variant,
+                  comparable_to_archived_finite_window=False,
                   runtime=mod("checkpoint").runtime_record(), measurement_unix=time.time(),
-                  fixture=dict(physical_steps=9000, history_frames=len(history), episode_storage_bytes=episode.storage_bytes,
+                  fixture=dict(physical_steps=clock.physical_steps,lower_steps=clock.lower_steps,
+                               upper_steps=clock.upper_steps,rollout_seconds=clock.rollout_seconds,
+                               history_frames=len(history), episode_storage_bytes=episode.storage_bytes,
                                scripted_collection_seconds=fixture["seconds"],
                                independent_scripted_episodes=len(fixture.get("episodes",[])),
                                replicas_are_not_independent_scenarios="episodes" not in fixture),
                   fixture_sha256=hashlib.sha256(args.fixture.read_bytes()).hexdigest(),
                   measured_source_hashes={str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
-                    for p in sorted((BASELINE if args.variant == "baseline" else ROOT / "hrl_v2").glob("*.py"))},
+                    for p in sorted((ROOT / "hrl_v2").glob("*.py"))},
                   research_training_episodes=0, distribution_backend="cpu/float64 unchanged", measurements={})
     args.output.parent.mkdir(parents=True, exist_ok=True)
 
@@ -171,8 +204,8 @@ def measure(args):
         t, _ = timing(lambda: [mod("features").build(reports[selected[k]]) for k in selected])
         write("fixed_graph_features_two_reports", t)
         histories = [mod("replay").unpack(e.history) for e in episodes[:4]]
-        from dataclasses import replace
-        long_states = [(replace(reports[-1], history_cursor=1800), h) for h in histories]
+        last_successor=episode.report(episode.successors[-1])
+        long_states = [(last_successor, h) for h in histories]
         encoder = learner.sac.actor.encoder
 
         def history_grad():
@@ -180,10 +213,10 @@ def measure(args):
             result = encoder.histories(long_states)
             sum(x.square().mean() for x in result).backward()
         t, _ = timing(history_grad)
-        write("four_full_1800_history_forward_backward", t)
-        t, _ = timing(lambda: mod("features").arrival_array(history, 1800, device))
+        write("four_full_history_forward_backward", dict(t,history_frames=len(history)))
+        t, _ = timing(lambda: mod("features").arrival_array(history, len(history), device))
         write("history_normalize_and_h2d", t)
-        cpu = torch.randn(1800, 39, 6, dtype=torch.float32)
+        cpu = torch.randn(len(history), 39, 6, dtype=torch.float32)
         t, _ = timing(lambda: cpu.to(device))
         write("history_h2d_only", t)
         gpu_logits = torch.randn(16, 6, 7, device=device)
@@ -217,12 +250,12 @@ def measure(args):
 
     if enabled("inference"):
         for label, index in selected.items():
-            begin = max(0, min(index - 8, 1784))
-            chosen = list(range(begin, begin + 16))
             def infer_window(value=False, upper=False):
                 data = [episode.report(row["report"]) for row in episode.high] if upper else reports
-                first = max(0, min(index // 10 - 8, 164)) if upper else begin
-                chosen = list(range(first, first + 16))
+                count=min(16,len(data))
+                center=index//clock.lower_per_upper if upper else index
+                first=max(0,min(center-count//2,len(data)-count))
+                chosen = list(range(first, first + count))
                 policy = mod("policy").Policy(learner.sac.actor, learner.ppo.actor,
                     learner.ppo.value if value else None, streams())
                 # A single policy holds the same episode identity and immutable
@@ -238,10 +271,10 @@ def measure(args):
             for purpose, kwargs in (("lower", {}), ("upper", dict(upper=True)), ("upper_with_value", dict(upper=True, value=True))):
                 times = [infer_window(**kwargs) for _ in range(3)]
                 write(f"{label}_{purpose}_inference", dict(seconds=statistics.median(times), samples_seconds=times,
-                    frames_per_sample=16, representative_tick=reports[index].tick,
+                    frames_per_sample=min(16,len(episode.high) if kwargs.get("upper") else len(reports)), representative_tick=reports[index].tick,
                     parents=len(reports[index].parents), fragments=len(reports[index].fragments),
                     history_cursor=reports[index].history_cursor, incremental_cache_primed=True))
-        rebuild_indices = list(range(40, 1800, 40))
+        rebuild_indices = list(range(40, len(reports)-1, 40))
         rebuild_times, warm_times = [], []
         for index in rebuild_indices:
             policy = mod("policy").Policy(learner.sac.actor, learner.ppo.actor, None, streams())
@@ -249,17 +282,17 @@ def measure(args):
             rebuild_times.append(t["seconds"])
             t, _ = timing(lambda: policy.lower(reports[index + 1], history), repeats=1, warmup=0)
             warm_times.append(t["seconds"])
-        write("lower_post_update_rebuild", dict(seconds=float(np.mean(rebuild_times)), samples_seconds=rebuild_times,
-            warm_next_mean_seconds=float(np.mean(warm_times)), cursors=[reports[i].history_cursor for i in rebuild_indices],
-            note="44 interior actor-update boundaries per eligible episode; terminal update has no following inference"))
+        write("lower_post_update_rebuild", dict(seconds=float(np.mean(rebuild_times)) if rebuild_times else None,
+            samples_seconds=rebuild_times,skipped=not rebuild_times,
+            warm_next_mean_seconds=float(np.mean(warm_times)) if warm_times else None,
+            cursors=[reports[i].history_cursor for i in rebuild_indices],
+            note="Interior every-40-lower-step computational probes; window truncation does not terminate the service"))
         start_policy = mod("policy").Policy(learner.sac.actor, learner.ppo.actor, None, streams())
         t, _ = timing(lambda: start_policy.lower(reports[0], history), repeats=1, warmup=0)
         write("lower_episode_start", t)
 
     if enabled("sac"):
         for microbatch in args.microbatches:
-            if args.variant == "baseline" and microbatch != 16:
-                continue
             temporary = mod("runtime").Learner(4101, device)
             if hasattr(temporary.sac, "microbatch_size"):
                 temporary.sac.microbatch_size = microbatch
@@ -285,11 +318,9 @@ def measure(args):
         for e in episodes:
             policy = mod("policy").Policy(learner.sac.actor, learner.ppo.actor, learner.ppo.value, streams())
             e_history=mod("replay").unpack(e.history)
-            source_rows=[]
-            for row in e.high:
-                _,aux=policy.upper(e.report(row["report"]),e_history)
-                source_rows.append(dict(row,**aux))
-            e.high=source_rows
+            # Evaluate the actual cutoff successor, never a reset or a
+            # hardcoded zero-valued terminal state.
+            e.high=upper_auxiliary_rows(e,e_history,policy,learner.ppo.value)
         temporary = mod("runtime").Learner(4101, device)
         starts = []
         ended = []
@@ -325,31 +356,24 @@ def measure(args):
                 pass
         if len(ended) != 1 or not starts:
             raise RuntimeError("Expected exactly one completed PPO value optimizer step")
-        write("ppo150_actual_first_minibatch", dict(seconds=ended[0] - starts[0],
-            update_setup_seconds=starts[0] - before, effective_batch=900, optimizer_minibatch=150,
+        macro_count=sum(len(e.high) for e in episodes)
+        write("ppo_actual_first_minibatch", dict(seconds=ended[0] - starts[0],
+            update_setup_seconds=starts[0] - before, effective_batch=macro_count, optimizer_minibatch=min(150,macro_count),
             epochs_in_protocol=6, stopped_after="one complete actor and value optimizer step",
             caveat="Only a temporary model; production PPO loop and original minibatch denominator are unchanged"))
-        rows = [(e, h, float(G)) for e in episodes for h, G in zip(e.high, mod("ppo").returns([x["reward"] for x in e.high]))]
+        rows=[]
+        for e in episodes:
+            _,targets=mod("ppo").generalized_advantage(
+                [h["reward"] for h in e.high],[h["value"] for h in e.high],
+                [h["next_value"] for h in e.high],[h["terminated"] for h in e.high],
+                [h["truncated"] for h in e.high],gamma=temporary.ppo.gamma,gae_lambda=temporary.ppo.gae_lambda)
+            rows.extend((e,h,float(target)) for h,target in zip(e.high,targets))
         histories = {id(e): mod("replay").unpack(e.history) for e in episodes}
         kl_states = [(e.report(h["report"]), histories[id(e)]) for e, h, _ in rows]
-        if hasattr(temporary.ppo, "_kl"):
-            kl_states = mod("prepared").PreparedBatch(kl_states)
-        def kl900():
-            if hasattr(temporary.ppo, "_kl"):
-                return temporary.ppo._kl(kl_states, rows)
-            result = []
-            with torch.no_grad():
-                for start in range(0, 900, 16):
-                    chosen = rows[start:start + 16]
-                    states = [(e.report(h["report"]), histories[id(e)]) for e, h, _ in chosen]
-                    mean, std = temporary.ppo.actor.batch(states)
-                    old_mean = mean.new_tensor(np.asarray([h["mean"] for _, h, _ in chosen]))
-                    old_std = std.new_tensor(np.asarray([h["logstd"] for _, h, _ in chosen]))
-                    result.extend(mod("ppo").gaussian_kl(old_mean, old_std, mean, std).cpu().tolist())
-            return float(np.mean(result))
-        t, kl = timing(kl900, repeats=1, warmup=0)
-        write("ppo_kl900", dict(t, kl=kl, production_method=hasattr(temporary.ppo, "_kl"),
-            caveat="Production shared KL method when available; baseline reproduces exact original traversal and expression."))
+        kl_states = mod("prepared").PreparedBatch(kl_states)
+        t, kl = timing(lambda:temporary.ppo._kl(kl_states,rows), repeats=1, warmup=0)
+        write("ppo_kl", dict(t, kl=kl,effective_batch=len(rows),production_method=True,
+            caveat="Current production KL method on the fixture's actual macro transition count."))
         learner.ppo = temporary.ppo
         del temporary
         torch.cuda.empty_cache()
@@ -358,8 +382,8 @@ def measure(args):
             # rollback/early stopping, on a disposable model only.
             full=mod("runtime").Learner(4101,device)
             t,logs=timing(lambda: full.ppo.update(episodes,streams()),repeats=1,warmup=0)
-            write("ppo900_complete_batch",dict(t,counts=dict(full.ppo.counts),epoch_logs=logs,
-                effective_batch=900,optimizer_minibatch=150,epochs=6,
+            write("ppo_complete_batch",dict(t,counts=dict(full.ppo.counts),epoch_logs=logs,
+                effective_batch=macro_count,optimizer_minibatch=min(150,macro_count),epochs=6,
                 caveat="Five scripted trajectories with synthetic current-policy auxiliary values; computation fixture, not an on-policy research batch"))
             del full
             torch.cuda.empty_cache()
@@ -371,11 +395,11 @@ def measure(args):
             replay.add(e)
         t, _ = timing(lambda: replay.sample(streams().numpy), repeats=5)
         write("replay_sample128", t)
-        t, _ = timing(lambda: [mod("replay").pack(reports[i]) for i in np.linspace(0, 1799, 32, dtype=int)])
+        t, _ = timing(lambda: [mod("replay").pack(reports[i]) for i in np.linspace(0, len(reports)-1, 32, dtype=int)])
         write("report_compression32", t)
         with tempfile.TemporaryDirectory(prefix="bounded-checkpoint-", dir=args.output.parent) as directory:
             path = Path(directory) / "checkpoint.pt"
-            binding = dict(benchmark=True, baseline="137d2f1", variant=args.variant)
+            binding = dict(benchmark=True,schema=record["schema"],variant=args.variant)
             payload = dict(schema=importlib.import_module(mod("checkpoint").__package__).SCHEMA,
                 safe_episode_boundary=True, completed_episode=1, pending_evaluation=None, identity=binding,
                 learner=learner.state_dict(), replay=replay, ppo_batch=[], streams=streams().state_dict())
@@ -399,13 +423,13 @@ def measure(args):
         for store in (True, False):
             if not store and not hasattr(mod("collector"), "collect_metrics"):
                 continue
-            adapter = mod("physics_adapter").PhysicsAdapter(scene)
+            adapter = mod("physics_adapter").PhysicsAdapter(scene,timing=clock)
             adapter.reset(arrival_seed=1, layout_seed=2, load_seed=3)
             kwargs = dict(upper_version="benchmark", lower_version=0, identity={})
-            fn = (lambda: mod("collector").collect(adapter, Scripted(), **kwargs)) if store else (
-                lambda: mod("collector").collect_metrics(adapter, Scripted(), identity={}))
+            fn = (lambda: mod("collector").collect(adapter, Scripted(clock), **kwargs)) if store else (
+                lambda: mod("collector").collect_metrics(adapter, Scripted(clock), identity={}))
             t, result = timing(fn, repeats=1, warmup=0)
-            write("scripted_collection_9000" if store else "streaming_evaluation_9000", dict(t, physics_steps=9000,
+            write("scripted_collection" if store else "streaming_evaluation", dict(t, physics_steps=clock.physical_steps,
                 includes="physics, reports, policy interface, metrics and requested episode serialization; no neural work",
                 cost_sum=(result.metrics if store else result)["cost_sum"]))
 
@@ -417,6 +441,8 @@ def measure(args):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--make-fixture", action="store_true")
+    from .paths import default_config
+    parser.add_argument("--config",type=Path,default=default_config(),help="Timing config for --make-fixture; measurements use fixture clocks")
     parser.add_argument("--fixture", type=Path, default=Path.cwd() / "data/fixtures/independent_fixture.pkl")
     parser.add_argument("--variant", choices=("baseline", "optimized"), default="optimized")
     parser.add_argument("--output", type=Path, default=Path.cwd() / "outputs/benchmark.json")
@@ -424,8 +450,11 @@ def main():
     parser.add_argument("--microbatches", type=int, nargs="+", default=[16])
     parser.add_argument("--full-ppo",action="store_true")
     args = parser.parse_args()
+    if args.variant=="baseline": package(args.variant)
     if args.make_fixture:
-        value = make_fixture(args.fixture)
+        from .run import read_config
+        from .timing import ClockConfig
+        value = make_fixture(args.fixture,timing=ClockConfig.from_config(read_config(args.config,None)))
         print(json.dumps({k: v for k, v in value.items() if k != "episode"}, ensure_ascii=False))
     else:
         measure(args)

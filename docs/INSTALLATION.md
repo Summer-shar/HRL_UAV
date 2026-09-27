@@ -8,8 +8,8 @@
 4. 在项目根目录执行 `python -m pip install .`；开发使用 `python -m pip install -e ".[dev,baselines]"`。
 5. `hrl-v2 check` 应能报告CUDA；再执行 `hrl-v2 validate`、`hrl-v2 validate-cuda`。
 
-CPU环境支持安装、帮助、dry-run和 `python -m unittest discover -s tests -v`。完整研究训练与实现套件要求CUDA，不自动退回CPU。
+CPU环境支持安装、帮助、dry-run和 `python -m unittest discover -s tests -v`。当前完整实现套件含CUDA测试，不自动退回CPU。正式 train/resume 入口禁用，需另行确认持续服务研究协议。
 
-无需Git参与运行。wheel包含固定配置、物理代码、参考源码和有界测试。它不包含训练权重、私有数据、完整Python环境或大型fixture。
+无需Git参与运行。wheel包含默认配置、物理代码、参考源码和有界测试。rollout_seconds可配置；参考源码不定义当前持续服务语义。它不包含训练权重、私有数据、完整Python环境或大型fixture。
 
 构建方式采用 [setuptools的src布局](https://setuptools.pypa.io/en/latest/userguide/package_discovery.html)，防止误从当前目录导入未安装源码。安装包可以放在只读位置，所有可写输出使用 `--workspace` 指定。

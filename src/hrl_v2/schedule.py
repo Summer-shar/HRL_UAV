@@ -29,6 +29,27 @@ def phase(episode):
                  "upper" if upper else "lower", .0005 if cycle < 5 else 0.)
 
 
-def expected_counts():
-    return dict(episodes=600, physics_steps=5400000, sac_events=35010,
-                critic_fits=70020, sac_actor_updates=17010, ppo_batches=40)
+def expected_counts(config=None):
+    """Audit retained, unconfirmed schedule numbers; never launch training."""
+    from .timing import ClockConfig, default_protocol
+    config=default_protocol() if config is None else config
+    clocks=ClockConfig.from_config(config)
+    episodes=config["schedule"]["total_episodes_per_seed"]
+    events=actors=ppo_batches=pending=0
+    previous=None
+    for number in range(1,episodes+1):
+        current=phase(number)
+        block=(current.stage,current.cycle,current.layer)
+        if current.layer=="lower" and block==previous:
+            for _ in range(clocks.lower_steps//config["sac"]["learn_every_routing_frames"]):
+                events+=1
+                if current.actor_enabled and events%config["sac"]["actor_every_events"]==0:
+                    actors+=1
+        if current.layer=="upper":
+            pending+=1
+            if pending==config["ppo"]["batch_episodes"]:
+                ppo_batches+=1; pending=0
+        previous=block
+    return dict(episodes=episodes, physics_steps=episodes*clocks.physical_steps,
+                sac_events=events,critic_fits=events*config["sac"]["critic_fits_per_event"],
+                sac_actor_updates=actors,ppo_batches=ppo_batches)
