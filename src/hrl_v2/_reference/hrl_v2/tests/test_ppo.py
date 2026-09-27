@@ -1,0 +1,63 @@
+import copy
+import unittest
+from unittest.mock import patch
+import numpy as np
+import torch
+from torch import nn
+from hrl_v2.ppo import PPO,logprob
+from hrl_v2.randomness import Streams
+from hrl_v2.replay import pack
+from hrl_v2.tests.test_learning import fingerprint
+
+
+class TinyActor(nn.Module):
+    def __init__(self):
+        super().__init__(); self.mean=nn.Parameter(torch.zeros(6)); self.std=nn.Parameter(torch.full((6,),-1.9))
+    def forward(self,report,history): return self.mean,self.std
+    def batch(self,states): return self.mean.expand(len(states),-1),self.std.expand(len(states),-1)
+
+
+class TinyValue(nn.Module):
+    def __init__(self):
+        super().__init__(); self.bias=nn.Parameter(torch.tensor(0.))
+    def forward(self,report,history): return self.bias
+    def batch(self,states): return self.bias.expand(len(states))
+
+
+class ToyEpisode:
+    complete=True
+    lower_version=7
+    history=pack(np.zeros((1,39,6)))
+    def __init__(self,actor):
+        mean,std=actor(None,None)
+        self.high=[]
+        for i in range(180):
+            z=torch.full((6,),(i%7-3)*.03)
+            self.high.append(dict(report=0,reward=-1.,value=0.,pre_tanh=z.numpy(),
+                logprob=logprob(z,mean,std).item(),mean=mean.detach().numpy().copy(),logstd=std.detach().numpy().copy()))
+    def report(self,index): return None
+
+
+class PPOTests(unittest.TestCase):
+    def test_epoch_rollback_restores_adam_and_value_continues(self):
+        ppo=PPO(TinyActor(),TinyValue()); batch=[ToyEpisode(ppo.actor) for _ in range(5)]
+        actor=fingerprint(ppo.actor.state_dict()); optimizer=fingerprint(ppo.actor_optimizer.state_dict())
+        with patch("hrl_v2.ppo.gaussian_kl",return_value=torch.tensor(1.)):
+            result=ppo.update(batch,Streams(4101))
+        self.assertEqual(fingerprint(ppo.actor.state_dict()),actor)
+        self.assertEqual(fingerprint(ppo.actor_optimizer.state_dict()),optimizer)
+        self.assertEqual(ppo.counts["actor_steps_accepted"],0)
+        self.assertEqual(ppo.counts["actor_steps_attempted"],6)
+        self.assertEqual(ppo.counts["rollbacks"],1)
+        self.assertEqual(ppo.counts["value_steps"],36)
+        self.assertNotEqual(ppo.value.bias.item(),0.)
+        self.assertFalse(result[0]["accepted"])
+
+    def test_accepted_epochs_and_lower_version_rejection(self):
+        ppo=PPO(TinyActor(),TinyValue()); batch=[ToyEpisode(ppo.actor) for _ in range(5)]
+        with patch("hrl_v2.ppo.gaussian_kl",return_value=torch.tensor(0.)):
+            ppo.update(batch,Streams(4101))
+        self.assertEqual(ppo.counts["actor_steps_accepted"],36)
+        self.assertEqual(ppo.counts["value_steps"],36)
+        batch[-1].lower_version=8
+        with self.assertRaises(ValueError): ppo.update(batch,Streams(4101))

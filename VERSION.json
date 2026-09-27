@@ -1,0 +1,9 @@
+{
+  "version": "2.1.0",
+  "source_commit": "dbf2b977b35a14b5cb560d649cf3c22f976e9584",
+  "numerical_backend_changed": false,
+  "research_budget_changed": false,
+  "portable_config_sha256": "0330ad30431f8bf3add87f21152ab5a2aeb889be7b6c372796df48eb64b180dc",
+  "config_change": "Removed only runtime.preserve_local_python; all other values unchanged",
+  "original_package_preserved_locally": ".local_backup/standalone_v1 (excluded from distribution)"
+}

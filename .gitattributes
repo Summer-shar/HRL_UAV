@@ -1,0 +1,5 @@
+* text=auto eol=lf
+src/hrl_uav/** -text
+src/hrl_v2/_reference/** -text
+*.pkl binary
+*.pt binary

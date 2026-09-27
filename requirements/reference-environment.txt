@@ -1,0 +1,6 @@
+# Historical validation environment, not a portable installation command.
+# Python 3.9.25; Windows; NVIDIA RTX 5060; CUDA 12.8.
+numpy==1.26.4
+torch==2.7.0.dev20250227+cu128
+scipy==1.13.1
+cvxpy==1.7.1

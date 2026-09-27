@@ -1,0 +1,301 @@
+{
+  "schema": "hrl_uav_v2_design_1_0",
+  "status": "proposed design; no integrated training or performance claim",
+  "task": {
+    "objective": "finite_900s_undiscounted_original_physical_cost",
+    "episode_seconds": 900,
+    "physical_seconds": 0.1,
+    "routing_seconds": 0.5,
+    "macro_seconds": 5,
+    "adjustment_seconds": 1,
+    "hold_seconds": 4,
+    "num_uavs": 3,
+    "num_terminals": 39,
+    "num_priorities": 2,
+    "parent_completion": "all_positive_allocation_fragments_complete",
+    "control_telemetry": "synchronous causal full service reports; overhead uncharged, as explicit idealized assumption"
+  },
+  "objective": {
+    "priority_weights": [
+      10,
+      1
+    ],
+    "holding_coefficient": 0.09,
+    "energy_coefficient": 0.007142857142857143,
+    "reward_scale": 100.0,
+    "gamma_micro": 1.0,
+    "gamma_macro": 1.0,
+    "terminal_at_900": true,
+    "emit_future_arrivals_after_terminal": false,
+    "independent_completion_delay_penalty": false,
+    "queue_shaping": false
+  },
+  "information": {
+    "arrival_gru_hidden": 16,
+    "arrival_gru_layers": 1,
+    "arrival_features_per_priority": [
+      "new_bits",
+      "new_cycles",
+      "new_count"
+    ],
+    "history_initial": "zero_at_reset",
+    "history_training": "full_prefix_recomputation_and_full_BPTT_of_observed_arrivals; no cached old learned hidden states",
+    "raw_report_truncation": false,
+    "task_ids_as_numeric_features": false
+  },
+  "network": {
+    "token_width": 64,
+    "graph_layers": 3,
+    "graph_attention_heads": 4,
+    "graph_ff_width": 128,
+    "queue_gru_width": 64,
+    "queue_gru_types": [
+      "upload",
+      "ready",
+      "transfer",
+      "cpu"
+    ],
+    "uav_latent_width": 128,
+    "upper_uav_self_attention_layers": 2,
+    "upper_heads": 4,
+    "upper_ff_width": 256,
+    "decoder_hidden": 128,
+    "q_hidden": [
+      256,
+      256
+    ],
+    "activation": "relu",
+    "normalization": "layernorm_eps_1e-5",
+    "dropout": 0.0,
+    "separate_actor_critic_encoders": true,
+    "initialization": {
+      "linears": "orthogonal_gain_sqrt2_bias0; output heads follow specification",
+      "gru_gate_order": "reset,update,new",
+      "gru_input": "xavier_uniform_gain1_per_gate",
+      "gru_hidden": "orthogonal_gain1_per_gate",
+      "gru_bias": 0.0,
+      "priority_embedding_std": 0.02
+    }
+  },
+  "action": {
+    "lower": "categorical_support_times_conditional_dirichlet",
+    "support_order": [
+      [
+        0
+      ],
+      [
+        1
+      ],
+      [
+        2
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        0,
+        2
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        0,
+        1,
+        2
+      ]
+    ],
+    "concentration": "1+softplus(raw)",
+    "initial_concentration": 2.0,
+    "reference_measure": "uniform_over_7_supports_times_Dirichlet_ones_on_each_face",
+    "policy_rows_factorized_given_report": true,
+    "executed_route_shape": [
+      2,
+      3,
+      3
+    ],
+    "row_order": "priority,source,destination",
+    "zeroing_threshold": null,
+    "euclidean_projection_for_lower": false,
+    "upper": "six_tanh_gaussian_scores_into_unchanged_motion_safety_mapping",
+    "upper_initial_std": 0.15,
+    "upper_logstd_bounds": [
+      -5.0,
+      0.0
+    ],
+    "upper_initial_mean": 0.0
+  },
+  "sac": {
+    "actor_lr": 0.0001,
+    "critic_lr": 0.0003,
+    "adam_betas": [
+      0.9,
+      0.999
+    ],
+    "adam_eps": 1e-08,
+    "grad_clip_norm": 1.0,
+    "critic_heads": 2,
+    "target_tau": 0.005,
+    "learn_every_routing_frames": 20,
+    "critic_fits_per_event": 2,
+    "resample_batch_and_target_between_fits": true,
+    "actor_every_events": 2,
+    "batch_size": 128,
+    "episodes_per_batch": 4,
+    "transitions_per_episode": 32,
+    "microbatch_size": 16,
+    "actor_support_gradient": "sum_six_row_enumerated_surrogates; other five rows detached",
+    "target_action_samples": 1,
+    "reuse_frozen_Q_state_encodings_for_42_action_heads": true,
+    "no_reward_clipping": true,
+    "no_Q_clipping": true,
+    "no_fixed_checkpoint_anchor": true,
+    "temperature": {
+      "type": "prespecified_relative_entropy_coefficient; not autotuned",
+      "pretrain_1_100": 0.005,
+      "pretrain_101_200": 0.0025,
+      "pretrain_201_300": 0.0005,
+      "alternating_cycles_1_5": 0.0005,
+      "alternating_cycles_6_10": 0.0
+    }
+  },
+  "replay": {
+    "unit": "completed_episode_raw_reports_and_arrivals",
+    "max_completed_episodes": 55,
+    "transitions_per_episode": 1800,
+    "flush_on_upper_policy_version_change": true,
+    "include_current_incomplete_episode": false,
+    "stratified_mixture_rho": 0.1,
+    "severe_nominal_low_backlog_seconds": 5.0,
+    "severe_requires_any_low_ready": true,
+    "importance_weighting_for_both_actor_and_critic": true,
+    "self_normalize_weights": false
+  },
+  "ppo": {
+    "actor_lr": 0.0001,
+    "value_lr": 0.0003,
+    "adam_betas": [
+      0.9,
+      0.999
+    ],
+    "adam_eps": 1e-08,
+    "clip_epsilon": 0.15,
+    "epochs": 6,
+    "batch_episodes": 5,
+    "macro_samples_per_batch": 900,
+    "minibatch_size": 150,
+    "gamma": 1.0,
+    "gae_lambda": 1.0,
+    "entropy_bonus": 0.0,
+    "grad_clip_norm": 1.0,
+    "mean_old_to_new_gaussian_KL_guard": 0.02,
+    "KL_guard_action": "restore_actor_and_actor_optimizer_to_epoch_start; stop_actor_epochs; value_training_continues",
+    "advantage_normalization": "entire_900_sample_batch_once; epsilon_1e-8"
+  },
+  "schedule": {
+    "sac_pretrain_episodes": 300,
+    "ppo_only_episodes": 100,
+    "alternating_cycles": 10,
+    "upper_episodes_per_cycle": 10,
+    "lower_episodes_per_cycle": 10,
+    "cycle_order": [
+      "upper",
+      "lower"
+    ],
+    "first_lower_episodes_actor_frozen": 2,
+    "stage_transitions_use": "fixed_budget_final_state; never development_best",
+    "total_episodes_per_seed": 600,
+    "physics_steps_per_seed": 5400000,
+    "development_global_episodes": [
+      300,
+      400,
+      440,
+      480,
+      520,
+      560,
+      600
+    ],
+    "automatic_extensions": false
+  },
+  "evaluation": {
+    "primary_execution": "stochastic_policy_identical_to_training_family_with_frozen_parameters",
+    "secondary_execution": "PPO_tanh_mean; SAC_argmax_support_then_Dirichlet_mean; never mixed_with_primary",
+    "development_scenarios": 6,
+    "development_policy_streams": 2,
+    "test_scenarios": 20,
+    "test_policy_streams": 4,
+    "training_seeds": [
+      4101,
+      4102,
+      4103,
+      4104,
+      4105
+    ],
+    "pilot_seed": 4101,
+    "main_checkpoint": "fixed_global_episode_600",
+    "secondary_checkpoint": "predeclared_development_best_among_400_440_480_520_560_600; tie_earlier",
+    "replay_writes": 0,
+    "learning_updates": 0,
+    "paired_exogenous_events": true,
+    "automatic_test_reselection": false
+  },
+  "acceptance": {
+    "physics_and_interfaces": "all_assertions_pass",
+    "mean_physical_cost_gain_target": 0.03,
+    "mean_pooled_delay_gain_target": 0.03,
+    "observed_seed_success_target": "5_of_5_nonworse_cost_vs_strongest_preregistered_baseline_and_same_SAC_hover",
+    "high_unfinished_rate_increase_max": 0.0001,
+    "low_unfinished_rate_increase_max": 0.0005,
+    "absolute_delay_stretch_ms": 600,
+    "claims": "targets_not_guaranteed_results; failure_is_not_relabelled_as_success"
+  },
+  "runtime": {
+    "record_exact_versions": true,
+    "auto_install_or_upgrade": false,
+    "physics_dtype": "float64",
+    "network_dtype": "float32",
+    "distribution_dtype": "float64",
+    "deterministic_algorithms": true,
+    "tf32": false,
+    "cublas_workspace_config": ":4096:8",
+    "allow_silent_precision_or_feature_change": false,
+    "distribution_device": "cpu",
+    "network_device": "cuda:0",
+    "torch_cpu_threads": 10,
+    "automatic_device_fallback": false
+  },
+  "implementation_is_not_available_yet": true,
+  "randomness": {
+    "seed_sequence_fields": [
+      "experiment_id",
+      "split_code",
+      "master_seed_component",
+      "stage",
+      "cycle_field",
+      "episode_or_scenario",
+      "purpose",
+      "stream_id"
+    ],
+    "experiment_id": 2026092602,
+    "split_codes": {
+      "train": 10,
+      "dev": 20,
+      "test": 30
+    },
+    "shared_dev_test_exogenous_master_component": 0,
+    "dev_policy_streams": [
+      1,
+      2
+    ],
+    "test_policy_streams": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "stream_schedules": "explicitly specified in section17; CPU Dirichlet uses fork_rng and persistent dedicated states",
+    "config_change_requires_all_five_final_seeds_rerun": true
+  }
+}

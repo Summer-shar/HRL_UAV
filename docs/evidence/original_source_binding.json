@@ -1,0 +1,27 @@
+{
+  "status": "local binding reconstructed from named project source; supplied binding file absent",
+  "supplied_binding_available": false,
+  "original_scene_path": "industrial_hotspot_records/load24725_seed1_20260923/training/scene.json",
+  "source_document": "HANDOVER_20260925.md:77",
+  "scene_sha256": "daea8771a2cb06754724c2af373704c279c080c7216d55ad990c86f0918b6136",
+  "physical_source_hashes": {
+    "hrl_uav/env.py": "ff6dbee5c0e643695c6f9f9fb36e9040ae0b4abb84bcb1faef521c605421569e",
+    "hrl_uav/industrial_env.py": "4573a1c5c10fe505b015afec76c5850d94ed66c8369db57afac3bcf32a279eb0",
+    "hrl_uav/industrial_scene.py": "58e4cc1ea0d6cf993757fac51a6edf5eaa234a956d7f381c577a3d797454d312",
+    "hrl_uav/industrial_hotspot_env.py": "2484eb2e7b990a3e6827ead6a92bbe59c853a5dd7d0b7ed6395041770c9951f0",
+    "hrl_uav/industrial_hotspot_scene.py": "59764df467f85cfc68c8d0cb6888e3d3c358ff2acd4a6f32b91070e6f28befca",
+    "hrl_uav/industrial_deployment_env.py": "c6edb15118d6157d5b022c59077630952dffb6b60788e6bec7aa0ae7a007df0e",
+    "hrl_uav/industrial_deployment_scene.py": "4512d8630245047185f50c525319d2d33aaf5752ed6d1ad4eeccc59d1c6f0cb1",
+    "hrl_uav/industrial_observation.py": "0945a55b40ddfe6a2ec41c6818ded3ee55cdbc7c0c9297c9e60f41f6927ee964",
+    "hrl_uav/industrial_deployment_observation.py": "789c12eadce5472bef0a91e2e4d33319b1c733006bac4b5a41e485484d056ea0",
+    "hrl_uav/industrial_baselines.py": "a39029f9427dcb911a0da9e29a2a5374fcaa00edcff459065facc40ce824bc7e",
+    "hrl_uav/xu_cvx_r.py": "8beea2a0e083133c7c311dcb35ec1f3ba133454c9df0ccbb3eb1be088692fa26",
+    "hrl_uav/routing.py": "5e45b645b8eb97bb5b1ee6fe8f943631adfd235d37c304d3cf6f8b171c56ddde"
+  },
+  "supplied_material_hashes": {
+    "design/HRL_UAV_V2_Implementation_Spec_CN.md": "348839c56b3b7f3ae9fbff3234f3a1b840f137914c44acdf8ae9165f67f27cc1",
+    "design/reference_hybrid_simplex.py": "2cebf741d67b6e1e08d84c09ac69bbb90b8d263ea8e952f6770f80e7600ce0b7",
+    "design/reference_tests_supplied.txt": "321c6a7bc218e9989d8db39dbddba64390ea2b2bd837c39bed461ff876c6647c",
+    "configs/v2_1_0.json": "bd72f535b125acee3e0019cb60b33831995db0b90593eb621392f65f8307d45a"
+  }
+}
