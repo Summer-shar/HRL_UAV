@@ -102,11 +102,22 @@ class Replay:
 
 
 def resolve(samples, *, next_state=False):
+    """Materialize a sample as a PreparedBatch.
+
+    The batch owns decompressed episode histories and report graph caches for
+    the duration of an optimizer step, so current/next encoders can reuse the
+    same immutable Python objects and fixed graph tensors.
+    """
+    from .prepared import PreparedBatch
     histories={}
+    reports={}
     result=[]
     for s in samples:
         key=id(s.episode)
         if key not in histories: histories[key]=unpack(s.episode.history)
         indices=s.episode.successors if next_state else s.episode.observations
-        result.append((s.episode.report(indices[s.index]),histories[key]))
-    return result
+        report_key=(key, indices[s.index])
+        if report_key not in reports:
+            reports[report_key]=s.episode.report(indices[s.index])
+        result.append((reports[report_key],histories[key]))
+    return PreparedBatch(result)

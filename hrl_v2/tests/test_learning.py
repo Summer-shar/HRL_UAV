@@ -173,5 +173,32 @@ class LearningTests(unittest.TestCase):
         torch.testing.assert_close(logits,torch.stack([x[0] for x in sequential]),atol=2e-6,rtol=2e-5)
         torch.testing.assert_close(kappa,torch.stack([x[1] for x in sequential]),atol=2e-6,rtol=2e-5)
 
+    def test_08_incremental_arrival_cache_matches_full_and_invalidates(self):
+        from types import SimpleNamespace
+        encoder=self.learner.sac.actor.encoder
+        episode=object(); encoder.reset_inference()
+        first=encoder.infer(self.report,self.history,episode)
+        full_first=encoder(self.report,self.history)
+        for a,b in zip(first,full_first): torch.testing.assert_close(a,b,atol=2e-6,rtol=2e-5)
+        second=encoder.infer(self.successor,self.history,episode)
+        full_second=encoder(self.successor,self.history)
+        for a,b in zip(second,full_second): torch.testing.assert_close(a,b,atol=2e-6,rtol=2e-5)
+        # A new episode and an in-place parameter update must both invalidate.
+        encoder.infer(self.successor,self.history,object())
+        with torch.no_grad(): next(encoder.parameters()).add_(1e-4)
+        cached=encoder.infer(self.successor,self.history,episode)
+        fresh=encoder(self.successor,self.history)
+        for a,b in zip(cached,fresh): torch.testing.assert_close(a,b,atol=2e-5,rtol=2e-4)
+
+    def test_09_q_state_action_factorization_matches_original_head(self):
+        q=self.learner.sac.q1
+        states=[(self.report,self.history),(self.successor,self.history)]
+        encoded=q.encode_batch(states)
+        actions=torch.zeros(2,6,3,dtype=torch.float64)
+        features,_=__import__('hrl_v2.hybrid_simplex',fromlist=['action_features']).action_features(actions,encoded.device)
+        expected=q.head(torch.cat((encoded,features),-1)).squeeze(-1)
+        actual=q.value_features(encoded,features)
+        torch.testing.assert_close(actual,expected,atol=2e-6,rtol=2e-5)
+
 
 if __name__=="__main__": unittest.main()

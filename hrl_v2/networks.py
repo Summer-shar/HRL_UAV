@@ -5,6 +5,7 @@ from torch import nn
 from torch.nn.utils.rnn import pad_sequence
 from .features import build, arrival_array, RELATIONS, EDGE_WIDTHS
 from .hybrid_simplex import SUPPORTS, concentration_from_raw, action_features
+from .prepared import IncrementalHistory
 
 
 def mlp(*widths):
@@ -47,34 +48,26 @@ class TypedAttention(nn.Module):
         self.ff=mlp(64,128,64)
 
     def forward(self,h,graph):
+        from .batching import prepare_attention
+        if not hasattr(graph,"relations"):
+            graph=prepare_attention(graph.edges,graph.neighbors,h.device)
         keys,values,biases=[],[],[]
-        for i,kind in enumerate(RELATIONS):
-            rows=graph.edges[kind]
-            if not rows: continue
-            source=torch.tensor([x[0] for x in rows],device=h.device)
+        for i,(source,edge_values) in enumerate(graph.relations):
+            if source.numel()==0: continue
             k=self.keys[i](h[source])
-            if str(i) in self.edge:
-                k=k+self.edge[str(i)](h.new_tensor([x[2] for x in rows]))
+            if str(i) in self.edge: k=k+self.edge[str(i)](edge_values)
             keys.append(k); values.append(self.values[i](h[source]))
-            biases.append(self.bias[i].expand(len(rows),-1))
+            biases.append(self.bias[i].expand(source.numel(),-1))
         keys=torch.cat(keys).view(-1,4,16)
         values=torch.cat(values).view(-1,4,16)
         biases=torch.cat(biases)
         query=self.query(h).view(-1,4,16)
-        buckets={}
-        for i,neighbors in enumerate(graph.neighbors):
-            width=1<<(len(neighbors)-1).bit_length()
-            buckets.setdefault(width,[]).append(i)
-        outputs,order=[],[]
-        for width,nodes in buckets.items():
-            ids=h.new_tensor([graph.neighbors[n]+[0]*(width-len(graph.neighbors[n])) for n in nodes],dtype=torch.long)
-            mask=torch.arange(width,device=h.device)[None,:] < h.new_tensor([len(graph.neighbors[n]) for n in nodes])[:,None]
+        outputs=[]
+        for nodes,ids,mask in graph.buckets:
             score=(query[nodes,None]*keys[ids]).sum(-1)/4 + biases[ids]
             probability=score.masked_fill(~mask[:,:,None],-torch.inf).softmax(1)
             outputs.append((probability[:,:,:,None]*values[ids]).sum(1).reshape(-1,64))
-            order.extend(nodes)
-        inverse=torch.tensor(order,device=h.device).argsort()
-        output=torch.cat(outputs)[inverse]
+        output=torch.cat(outputs)[graph.inverse]
         h=self.norm1(h+self.output(output))
         return self.norm2(h+self.ff(h))
 
@@ -119,9 +112,14 @@ class Encoder(nn.Module):
         self.geo_bias=mlp(6,32,1); self.geo_merge=mlp(256,128,128)
         self.uav_attention=nn.ModuleList(UAVAttention() for _ in range(2))
         self.global_projection=mlp(258,256,128)
+        # Inference-only state.  It is deliberately per encoder: independently
+        # trainable actor/critic encoders must never share hidden tensors.
+        self._incremental_history = IncrementalHistory()
 
     def histories(self,states):
         """Recompute each observed prefix once per microbatch, with full BPTT."""
+        tape=getattr(self,"_history_tape",None)
+        if tape is not None: return tape.get(states)
         device=next(self.parameters()).device
         groups={}
         for r,h in states: groups.setdefault(id(h),[]).append((r,h))
@@ -134,47 +132,18 @@ class Encoder(nn.Module):
         return [outputs[id(h)][r.history_cursor-1] if r.history_cursor else zero for r,h in states]
 
     def forward(self,report,history,arrival_hidden=None):
-        device=next(self.parameters()).device
-        graph=build(report)
-        if arrival_hidden is None:
-            arrival_hidden=self.histories([(report,history)])[0]
-        tensors=[]
-        for kind,width in dict(terminal=11,parent=14,fragment=16,uav=24).items():
-            x=torch.tensor(graph.features[kind],device=device,dtype=torch.float32).reshape(-1,width)
-            if kind=="terminal": x=torch.cat((x,arrival_hidden),-1)
-            tensors.append(self.nodes[kind](x))
-        h=torch.cat(tensors)
-        contexts={}
-        for kind,rows in graph.queues.items():
-            nonempty=[q for q in rows if q]
-            if not nonempty: continue
-            padded=pad_sequence([h[q] for q in nonempty])
-            output,_=self.queues["queue_"+kind](padded)
-            for j,ids in enumerate(nonempty):
-                for i,node in enumerate(ids): contexts[node]=output[i,j]
-        # Every node occurs in at most one physical queue. Out-of-queue parent,
-        # terminal and UAV nodes are not assigned synthetic queue positions.
-        if contexts:
-            ids=list(contexts)
-            ctx=torch.stack([contexts[i] for i in ids])
-            updated=self.queue_norm(self.queue_projection(torch.cat((h[ids],ctx),-1)))
-            h=h.index_copy(0,torch.tensor(ids,device=device),updated)
-        for layer in self.graph: h=layer(h,graph)
-        us=[]
-        for i,node in enumerate(graph.uavs):
-            pools=graph.pools[i]
-            read=[self.readouts[k](h[node],h[pool]) for k,pool in enumerate(pools)]
-            counts=h.new_tensor([math.log1p(len(pool)) for pool in pools]+graph.clock)
-            u=self.uav_projection(torch.cat((h[node],*read,counts)))
-            terminal=h[pools[0]]
-            scores=(self.geo_k(terminal)*self.geo_q(u)).sum(-1)/math.sqrt(128)
-            scores=scores+self.geo_bias(h.new_tensor(graph.geometry[i])).squeeze(-1)
-            context=(scores.softmax(0)[:,None]*self.geo_v(terminal)).sum(0)
-            us.append(self.geo_merge(torch.cat((u,context))))
-        v=torch.stack(us)
-        for layer in self.uav_attention: v=layer(v)
-        g=self.global_projection(torch.cat((v.mean(0),v.max(0).values,v.new_tensor(graph.clock))))
-        return v,g,v.new_tensor(graph.ready)
+        from .batching import encode
+        v,g,ready=encode(self,[(report,history)],None if arrival_hidden is None else [arrival_hidden])
+        return v[0],g[0],ready[0]
+
+    @torch.no_grad()
+    def infer(self, report, history, episode):
+        """Run one online observation, extending the arrival GRU by its delta."""
+        hidden = self._incremental_history.get(self, report, history, episode)
+        return self.forward(report, history, hidden)
+
+    def reset_inference(self):
+        self._incremental_history.clear()
 
 
 class LowerActor(nn.Module):
@@ -187,8 +156,9 @@ class LowerActor(nn.Module):
         nn.init.zeros_(self.concentration[-1].weight)
         nn.init.constant_(self.concentration[-1].bias,math.log(math.expm1(1)))
 
-    def forward(self,report,history,arrival_hidden=None):
-        v,g,ready=self.encoder(report,history,arrival_hidden)
+    def forward(self,report,history,arrival_hidden=None,episode=None):
+        v,g,ready=(self.encoder.infer(report,history,episode) if episode is not None and arrival_hidden is None
+                   else self.encoder(report,history,arrival_hidden))
         logits,kappa=self.decode(v[None],g[None],ready[None])
         return logits[0],kappa[0]
 
@@ -236,8 +206,16 @@ class QNetwork(nn.Module):
     def value(self,encoded,actions):
         features,error=action_features(actions,encoded.device)
         self.last_action_cast_error=max(self.last_action_cast_error,error)
-        if features.ndim==3: encoded=encoded[:,None].expand(-1,features.shape[1],-1)
-        return self.head(torch.cat((encoded,features),-1)).squeeze(-1)
+        return self.value_features(encoded,features)
+
+    def state_projection(self,encoded):
+        return torch.nn.functional.linear(encoded,self.head[0].weight[:,:512],self.head[0].bias)
+
+    def value_features(self,encoded,features,projected=None):
+        projected=self.state_projection(encoded) if projected is None else projected
+        if features.ndim==3: projected=projected[:,None]
+        action=torch.nn.functional.linear(features,self.head[0].weight[:,512:])
+        return self.head[1:](projected+action).squeeze(-1)
 
 
 class UpperActor(nn.Module):
@@ -248,8 +226,9 @@ class UpperActor(nn.Module):
         nn.init.zeros_(self.std[-1].weight)
         nn.init.constant_(self.std[-1].bias,math.atanh((math.log(.15)+2.5)/2.5))
 
-    def forward(self,report,history):
-        v,_,_=self.encoder(report,history)
+    def forward(self,report,history,arrival_hidden=None,episode=None):
+        v,_,_= (self.encoder.infer(report,history,episode) if episode is not None and arrival_hidden is None
+                else self.encoder(report,history,arrival_hidden))
         return self.mean(v).flatten(),(-2.5+2.5*self.std(v).tanh()).flatten()
 
     def batch(self,states):
@@ -263,8 +242,9 @@ class ValueNetwork(nn.Module):
         super().__init__(); self.encoder=Encoder(); self.head=mlp(128,128,1)
         initialize(self); nn.init.orthogonal_(self.head[-1].weight,1.)
 
-    def forward(self,report,history):
-        _,g,_=self.encoder(report,history)
+    def forward(self,report,history,arrival_hidden=None,episode=None):
+        _,g,_=(self.encoder.infer(report,history,episode) if episode is not None and arrival_hidden is None
+               else self.encoder(report,history,arrival_hidden))
         return self.head(g).squeeze(-1)
 
     def batch(self,states):

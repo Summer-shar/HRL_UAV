@@ -6,9 +6,9 @@
     "history_frames": 229,
     "report_bytes": 40710,
     "samples": 30,
-    "p50_seconds": 0.051203450000002704,
-    "p95_seconds": 0.0586631549999975,
-    "p99_seconds": 0.059164107999999944
+    "p50_seconds": 0.04205404999999729,
+    "p95_seconds": 0.04547423999999793,
+    "p99_seconds": 0.04926162799999723
   },
   "max_fragment_count": {
     "physical_tick": 4910,
@@ -17,40 +17,40 @@
     "history_frames": 983,
     "report_bytes": 195161,
     "samples": 30,
-    "p50_seconds": 0.10710345000000032,
-    "p95_seconds": 0.11376320499999579,
-    "p99_seconds": 0.20130454999999817
+    "p50_seconds": 0.09151204999999862,
+    "p95_seconds": 0.09832005499999887,
+    "p99_seconds": 0.20886550399999948
   },
   "training_batch": {
     "batch_size": 128,
     "microbatch_size": 16,
-    "critic_fit_seconds": 12.313641899999993,
-    "actor_update_seconds": 6.705314000000001,
-    "cuda_peak_allocated_bytes": 988823040,
-    "cuda_peak_reserved_bytes": 1247805440,
+    "critic_fit_seconds": 9.483198899999998,
+    "actor_update_seconds": 5.006391900000004,
+    "cuda_peak_allocated_bytes": 985674240,
+    "cuda_peak_reserved_bytes": 1254096896,
     "critic": {
       "residual_mean": [
-        0.026367819829864313,
-        1.5180803548628667
+        0.026367815522497406,
+        1.5180802765153552
       ],
       "residual_mse": [
-        0.14191755979807702,
-        2.4381738153040438
+        0.1419175702049877,
+        2.438173567612993
       ],
       "gradient_norm": [
         5.863502025604248,
-        98.03533935546875
+        98.03533172607422
       ],
-      "target_mean": -0.7494865473909508,
-      "target_variance": 0.08895750936616054
+      "target_mean": -0.7494865106037091,
+      "target_variance": 0.08895752146602955
     },
     "actor": {
-      "objective": 2.7128371045097284,
-      "surrogate": 16.235151238972026,
-      "gradient_norm": 0.14303165674209595
+      "objective": 2.712837438733901,
+      "surrogate": 16.235152610122572,
+      "gradient_norm": 0.14303158223628998
     },
-    "process_working_set_bytes": 2428477440,
-    "process_peak_working_set_bytes": 2442174464,
+    "process_working_set_bytes": 2247852032,
+    "process_peak_working_set_bytes": 2309718016,
     "note": "One measured critic fit and actor update on scripted-trajectory replay; no research training"
   },
   "episode_storage_bytes": 16599853,

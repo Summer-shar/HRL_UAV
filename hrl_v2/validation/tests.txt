@@ -26,10 +26,12 @@ test_04_complete_checkpoint_restore_and_rng (hrl_v2.tests.test_learning.Learning
 test_05_evaluation_policy_zero_updates_and_isolated_rng (hrl_v2.tests.test_learning.LearningTests) ... ok
 test_06_history_prefix_recompute_preserves_gradient (hrl_v2.tests.test_learning.LearningTests) ... ok
 test_07_disjoint_graph_batch_matches_independent_outputs_and_gradients (hrl_v2.tests.test_learning.LearningTests) ... ok
+test_08_incremental_arrival_cache_matches_full_and_invalidates (hrl_v2.tests.test_learning.LearningTests) ... ok
+test_09_q_state_action_factorization_matches_original_head (hrl_v2.tests.test_learning.LearningTests) ... ok
 test_accepted_epochs_and_lower_version_rejection (hrl_v2.tests.test_ppo.PPOTests) ... ok
 test_epoch_rollback_restores_adam_and_value_continues (hrl_v2.tests.test_ppo.PPOTests) ... ok
 
 ----------------------------------------------------------------------
-Ran 30 tests in 31.074s
+Ran 32 tests in 31.546s
 
 OK
