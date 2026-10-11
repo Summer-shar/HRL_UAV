@@ -1,0 +1,582 @@
+{
+  "variant": "baseline",
+  "baseline_commit": "137d2f1",
+  "baseline_source_hashes": {
+    "hrl_v2/__init__.py": "8be3e5776c0f09ab8b22b4f7af0dc5a249bd7de3e4c83f2ab0222f5c49d69bf5",
+    "hrl_v2/baselines.py": "0891fa8ded172997d0e3f4241d7aec74b6ef1984ce65469fc0e8c7a88f467d04",
+    "hrl_v2/batching.py": "b96acc8ba69264050eb7f29ff4200d1fec0f078911f92f26d1e3ba8e7e399ff1",
+    "hrl_v2/checkpoint.py": "879e1c7e18c738efc7eedf1d059c22c28c62d43b4a755eba3655913bd7e18aa8",
+    "hrl_v2/collector.py": "fd22fec8eac3f482bd716d2dee13b5b6aa443ed84b6335e40c6f35e2ffc42d01",
+    "hrl_v2/configs/physical_scene.json": "daea8771a2cb06754724c2af373704c279c080c7216d55ad990c86f0918b6136",
+    "hrl_v2/configs/v2_1_0.json": "bd72f535b125acee3e0019cb60b33831995db0b90593eb621392f65f8307d45a",
+    "hrl_v2/design/reference_hybrid_simplex.py": "2cebf741d67b6e1e08d84c09ac69bbb90b8d263ea8e952f6770f80e7600ce0b7",
+    "hrl_v2/evaluate.py": "97e849b17489762e4454a941d2407a745da12caf66cc453cebf3c59a5cdd30da",
+    "hrl_v2/features.py": "ef8e7b1501db73b71fd862441f553c14a0547dcb44ac5aaf41c491a0821eec5d",
+    "hrl_v2/hybrid_simplex.py": "5810e554bf2be3ff508da9a8f80cb506bdacad155905071f2f568706e1d17166",
+    "hrl_v2/metrics.py": "4213bbe861c4dc7f80fc8936d847026b8963a646695e3bbe4079d211801368ef",
+    "hrl_v2/networks.py": "9e7f63948266350d9bbc716b2a3ddd0ded81c9ff975f1d50da76ada0bba919b7",
+    "hrl_v2/physics_adapter.py": "878dff2e29770afed1ae069cadae5927cf0c766ce6dbfbbc9c683f70c9a815c2",
+    "hrl_v2/policy.py": "298e784de465875d0bc5af2b81847d522e2e2bf25ac2993c475873ca2ec4802c",
+    "hrl_v2/ppo.py": "4387c82329ea957b811a1560330151674029274069633f30ca1b9ff2d5172c5d",
+    "hrl_v2/randomness.py": "b2f673ba7012f46e3512f51ec8ad554701f1ab5d72546dc94887ca264d6b3214",
+    "hrl_v2/replay.py": "a5438626d318df9850aabbc46b008bdca6b1ac48d76873f0cc5dafa06b983487",
+    "hrl_v2/reports.py": "3e383c0e3435cbd476e7518a8d52fd2810cba88867df02255a536bd683ac4b37",
+    "hrl_v2/run.py": "e29758637184421dddc9b3704438727de29089fc7c69426d90baf2ed0ff47b0a",
+    "hrl_v2/runtime.py": "c8c59a7fb688b087d7e7408373b912ca9239c2d7502ab0f6eeb77edb4ceecb2a",
+    "hrl_v2/sac.py": "bad77e1d0ed46380aa12b8074279cab76d0782234e7f2b0a70da1a0078a5c771",
+    "hrl_v2/schedule.py": "a3ffbf6e106b8eaba70bf715c9d4b8a8d7617657eefabd6e533f8a2f57b63993",
+    "hrl_v2/tests/__init__.py": "a75198a2d6c8211a3c7cd9fcdc2227ee0d1a4045f11b92dbd0cf1aaf058b7ff5",
+    "hrl_v2/tests/test_learning.py": "813a1b7907dc718861d596693b6ff5a06f09f4b60b14a2b7001762474a18a904",
+    "hrl_v2/tests/test_math.py": "fc4feae23abfbbc3b11cb40fe1fb0eb982f7f1d04ff47260094c42e61fe665bc",
+    "hrl_v2/tests/test_physics.py": "055eab051b5f700558a9104e64d06d7e0549feefebab271aa0b61fb6ac1391c4",
+    "hrl_v2/tests/test_ppo.py": "36c0666b40e282bbb8f1106e5af358bd99332e90c09f58ae14ddf461d3d35f59",
+    "hrl_v2/validate.py": "9a2ae7f50208f518ffbde429a06ed7c6284bccc722b331ce3a5ee048e37032ba"
+  },
+  "runtime": {
+    "python": "3.9.25 (main, Nov  3 2025, 22:44:01) [MSC v.1929 64 bit (AMD64)]",
+    "executable": "D:\\Anaconda3\\envs\\pytorch-gpu\\python.exe",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "torch": "2.7.0.dev20250227+cu128",
+    "numpy": "1.26.4",
+    "cuda": "12.8",
+    "device": "NVIDIA GeForce RTX 5060",
+    "deterministic": true
+  },
+  "measurement_unix": 1790480661.9020753,
+  "fixture": {
+    "physical_steps": 9000,
+    "history_frames": 1800,
+    "episode_storage_bytes": 16599853,
+    "scripted_collection_seconds": 15.8837817,
+    "independent_scripted_episodes": 5,
+    "replicas_are_not_independent_scenarios": false
+  },
+  "fixture_sha256": "d4ed747c5a9398d3544965f1fe522b63eec9afcbd85c5580149f6621d973729f",
+  "measured_source_hashes": {
+    "v2_optimization\\baseline\\hrl_v2\\__init__.py": "8be3e5776c0f09ab8b22b4f7af0dc5a249bd7de3e4c83f2ab0222f5c49d69bf5",
+    "v2_optimization\\baseline\\hrl_v2\\baselines.py": "0891fa8ded172997d0e3f4241d7aec74b6ef1984ce65469fc0e8c7a88f467d04",
+    "v2_optimization\\baseline\\hrl_v2\\batching.py": "b96acc8ba69264050eb7f29ff4200d1fec0f078911f92f26d1e3ba8e7e399ff1",
+    "v2_optimization\\baseline\\hrl_v2\\checkpoint.py": "879e1c7e18c738efc7eedf1d059c22c28c62d43b4a755eba3655913bd7e18aa8",
+    "v2_optimization\\baseline\\hrl_v2\\collector.py": "fd22fec8eac3f482bd716d2dee13b5b6aa443ed84b6335e40c6f35e2ffc42d01",
+    "v2_optimization\\baseline\\hrl_v2\\evaluate.py": "97e849b17489762e4454a941d2407a745da12caf66cc453cebf3c59a5cdd30da",
+    "v2_optimization\\baseline\\hrl_v2\\features.py": "ef8e7b1501db73b71fd862441f553c14a0547dcb44ac5aaf41c491a0821eec5d",
+    "v2_optimization\\baseline\\hrl_v2\\hybrid_simplex.py": "5810e554bf2be3ff508da9a8f80cb506bdacad155905071f2f568706e1d17166",
+    "v2_optimization\\baseline\\hrl_v2\\metrics.py": "4213bbe861c4dc7f80fc8936d847026b8963a646695e3bbe4079d211801368ef",
+    "v2_optimization\\baseline\\hrl_v2\\networks.py": "9e7f63948266350d9bbc716b2a3ddd0ded81c9ff975f1d50da76ada0bba919b7",
+    "v2_optimization\\baseline\\hrl_v2\\physics_adapter.py": "878dff2e29770afed1ae069cadae5927cf0c766ce6dbfbbc9c683f70c9a815c2",
+    "v2_optimization\\baseline\\hrl_v2\\policy.py": "298e784de465875d0bc5af2b81847d522e2e2bf25ac2993c475873ca2ec4802c",
+    "v2_optimization\\baseline\\hrl_v2\\ppo.py": "4387c82329ea957b811a1560330151674029274069633f30ca1b9ff2d5172c5d",
+    "v2_optimization\\baseline\\hrl_v2\\randomness.py": "b2f673ba7012f46e3512f51ec8ad554701f1ab5d72546dc94887ca264d6b3214",
+    "v2_optimization\\baseline\\hrl_v2\\replay.py": "a5438626d318df9850aabbc46b008bdca6b1ac48d76873f0cc5dafa06b983487",
+    "v2_optimization\\baseline\\hrl_v2\\reports.py": "3e383c0e3435cbd476e7518a8d52fd2810cba88867df02255a536bd683ac4b37",
+    "v2_optimization\\baseline\\hrl_v2\\run.py": "e29758637184421dddc9b3704438727de29089fc7c69426d90baf2ed0ff47b0a",
+    "v2_optimization\\baseline\\hrl_v2\\runtime.py": "c8c59a7fb688b087d7e7408373b912ca9239c2d7502ab0f6eeb77edb4ceecb2a",
+    "v2_optimization\\baseline\\hrl_v2\\sac.py": "bad77e1d0ed46380aa12b8074279cab76d0782234e7f2b0a70da1a0078a5c771",
+    "v2_optimization\\baseline\\hrl_v2\\schedule.py": "a3ffbf6e106b8eaba70bf715c9d4b8a8d7617657eefabd6e533f8a2f57b63993",
+    "v2_optimization\\baseline\\hrl_v2\\validate.py": "9a2ae7f50208f518ffbde429a06ed7c6284bccc722b331ce3a5ee048e37032ba"
+  },
+  "research_training_episodes": 0,
+  "distribution_backend": "cpu/float64 unchanged",
+  "measurements": {
+    "resolve_128": {
+      "seconds": 0.10675260000000009,
+      "samples_seconds": [
+        0.09108980000000066,
+        0.10744519999999902,
+        0.10675260000000009
+      ],
+      "repeats": 3,
+      "warmup": 1
+    },
+    "decompress_full_history": {
+      "seconds": 0.004260500000000889,
+      "samples_seconds": [
+        0.004260500000000889,
+        0.004016099999999412,
+        0.0048397999999991725
+      ],
+      "repeats": 3,
+      "warmup": 1
+    },
+    "fixed_graph_features_two_reports": {
+      "seconds": 0.07852320000000113,
+      "samples_seconds": [
+        0.07741880000000023,
+        0.07867519999999928,
+        0.07852320000000113
+      ],
+      "repeats": 3,
+      "warmup": 1
+    },
+    "four_full_1800_history_forward_backward": {
+      "seconds": 0.03431479999999887,
+      "samples_seconds": [
+        0.03219870000000036,
+        0.03431479999999887,
+        0.034578200000000336
+      ],
+      "repeats": 3,
+      "warmup": 1
+    },
+    "history_normalize_and_h2d": {
+      "seconds": 0.004517800000000349,
+      "samples_seconds": [
+        0.004517800000000349,
+        0.004602000000000217,
+        0.004172000000000509
+      ],
+      "repeats": 3,
+      "warmup": 1
+    },
+    "history_h2d_only": {
+      "seconds": 0.00029079999999837014,
+      "samples_seconds": [
+        0.00029830000000075074,
+        0.0002579999999987592,
+        0.00029079999999837014
+      ],
+      "repeats": 3,
+      "warmup": 1
+    },
+    "distribution_logits_d2h16": {
+      "seconds": 4.699999999857596e-05,
+      "samples_seconds": [
+        5.62999999988989e-05,
+        4.699999999857596e-05,
+        4.619999999988522e-05
+      ],
+      "repeats": 3,
+      "warmup": 1
+    },
+    "cpu_float64_distribution_sample16": {
+      "seconds": 0.0017910000000007642,
+      "samples_seconds": [
+        0.0017910000000007642,
+        0.0017638000000008702,
+        0.0018015999999985155,
+        0.001780099999999507,
+        0.0017969000000004343
+      ],
+      "repeats": 5,
+      "warmup": 1
+    },
+    "cpu_float64_surrogate16_without_network": {
+      "seconds": 0.00380439999999993,
+      "samples_seconds": [
+        0.0038268999999999664,
+        0.004147399999999024,
+        0.0035463000000000022,
+        0.00380439999999993,
+        0.0035832999999989568
+      ],
+      "repeats": 5,
+      "warmup": 1
+    },
+    "graph_and_actor16_history_precomputed": {
+      "seconds": 0.12616219999999956,
+      "samples_seconds": [
+        0.12616219999999956,
+        0.34931740000000033,
+        0.12017990000000012
+      ],
+      "repeats": 3,
+      "warmup": 1
+    },
+    "ordinary_lower_inference": {
+      "seconds": 0.061004524999999976,
+      "samples_seconds": [
+        0.061004524999999976,
+        0.06323694375,
+        0.06033517499999996
+      ],
+      "frames_per_sample": 16,
+      "representative_tick": 1140,
+      "parents": 86,
+      "fragments": 94,
+      "history_cursor": 229,
+      "incremental_cache_primed": true
+    },
+    "ordinary_upper_inference": {
+      "seconds": 0.050120349999999925,
+      "samples_seconds": [
+        0.050120349999999925,
+        0.052420825000000004,
+        0.05009705625000005
+      ],
+      "frames_per_sample": 16,
+      "representative_tick": 1140,
+      "parents": 86,
+      "fragments": 94,
+      "history_cursor": 229,
+      "incremental_cache_primed": true
+    },
+    "ordinary_upper_with_value_inference": {
+      "seconds": 0.09934125625000001,
+      "samples_seconds": [
+        0.1042703937499998,
+        0.09934125625000001,
+        0.09791999374999993
+      ],
+      "frames_per_sample": 16,
+      "representative_tick": 1140,
+      "parents": 86,
+      "fragments": 94,
+      "history_cursor": 229,
+      "incremental_cache_primed": true
+    },
+    "congested_lower_inference": {
+      "seconds": 0.12696138125000012,
+      "samples_seconds": [
+        0.12696138125000012,
+        0.12428422500000003,
+        0.13775934374999999
+      ],
+      "frames_per_sample": 16,
+      "representative_tick": 4910,
+      "parents": 545,
+      "fragments": 639,
+      "history_cursor": 983,
+      "incremental_cache_primed": true
+    },
+    "congested_upper_inference": {
+      "seconds": 0.10822470000000006,
+      "samples_seconds": [
+        0.11670093125000003,
+        0.10822470000000006,
+        0.1081665812499999
+      ],
+      "frames_per_sample": 16,
+      "representative_tick": 4910,
+      "parents": 545,
+      "fragments": 639,
+      "history_cursor": 983,
+      "incremental_cache_primed": true
+    },
+    "congested_upper_with_value_inference": {
+      "seconds": 0.21595755000000016,
+      "samples_seconds": [
+        0.21636865000000016,
+        0.21595755000000016,
+        0.21445682499999963
+      ],
+      "frames_per_sample": 16,
+      "representative_tick": 4910,
+      "parents": 545,
+      "fragments": 639,
+      "history_cursor": 983,
+      "incremental_cache_primed": true
+    },
+    "lower_post_update_rebuild": {
+      "seconds": 0.0693774272727279,
+      "samples_seconds": [
+        0.05046490000000148,
+        0.0483693000000045,
+        0.0491849000000002,
+        0.05693370000000186,
+        0.06109179999999981,
+        0.058903100000001984,
+        0.04727969999999715,
+        0.044191699999998946,
+        0.05253720000000328,
+        0.04720530000000167,
+        0.06425430000000176,
+        0.0742030999999983,
+        0.08118319999999812,
+        0.08850440000000503,
+        0.08324809999999871,
+        0.0844330000000042,
+        0.085524300000003,
+        0.08073549999999585,
+        0.06667439999999658,
+        0.06258940000000024,
+        0.07907670000000167,
+        0.08007800000000032,
+        0.10216009999999898,
+        0.1229559000000009,
+        0.12302499999999839,
+        0.1156928999999991,
+        0.1169778000000008,
+        0.10993770000000325,
+        0.09097799999999978,
+        0.0772716000000031,
+        0.07221780000000422,
+        0.06275949999999852,
+        0.05568219999999968,
+        0.05067189999999755,
+        0.05064150000000467,
+        0.048696599999999535,
+        0.049427800000003685,
+        0.04579400000000078,
+        0.05068419999999918,
+        0.04922520000000219,
+        0.050613299999994865,
+        0.055582400000005805,
+        0.052937099999994075,
+        0.052008300000004226
+      ],
+      "warm_next_mean_seconds": 0.07025062045454546,
+      "cursors": [
+        41,
+        81,
+        121,
+        161,
+        201,
+        241,
+        281,
+        321,
+        361,
+        401,
+        441,
+        481,
+        521,
+        561,
+        601,
+        641,
+        681,
+        721,
+        761,
+        801,
+        841,
+        881,
+        921,
+        961,
+        1001,
+        1041,
+        1081,
+        1121,
+        1161,
+        1201,
+        1241,
+        1281,
+        1321,
+        1361,
+        1401,
+        1441,
+        1481,
+        1521,
+        1561,
+        1601,
+        1641,
+        1681,
+        1721,
+        1761
+      ],
+      "note": "44 interior actor-update boundaries per eligible episode; terminal update has no following inference"
+    },
+    "lower_episode_start": {
+      "seconds": 0.03536359999999661,
+      "samples_seconds": [
+        0.03536359999999661
+      ],
+      "repeats": 1,
+      "warmup": 0
+    },
+    "critic128_micro16": {
+      "seconds": 11.267296400000006,
+      "samples_seconds": [
+        11.267296400000006,
+        10.778602899999996,
+        11.469414900000004
+      ],
+      "repeats": 3,
+      "warmup": 1,
+      "logs": {
+        "residual_mean": [
+          1.1165988854593343,
+          -0.01463118112927987
+        ],
+        "residual_mse": [
+          1.3688011702311755,
+          0.11422129628344663
+        ],
+        "gradient_norm": [
+          57.24598693847656,
+          2.739664316177368
+        ],
+        "target_mean": -0.8595549938147633,
+        "target_variance": 0.08953900824578051
+      },
+      "effective_batch": 128,
+      "episode_identities": 4,
+      "microbatch": 16,
+      "peak_allocated_bytes": 907132928
+    },
+    "actor128_micro16": {
+      "seconds": 6.494643400000001,
+      "samples_seconds": [
+        5.601607900000005,
+        6.494643400000001,
+        6.567047700000003
+      ],
+      "repeats": 3,
+      "warmup": 1,
+      "logs": {
+        "objective": 0.5897590923503665,
+        "surrogate": 3.463900114044114,
+        "gradient_norm": 0.1480342149734497
+      },
+      "effective_batch": 128,
+      "episode_identities": 4,
+      "microbatch": 16,
+      "peak_allocated_bytes": 548495872
+    },
+    "ppo150_actual_first_minibatch": {
+      "seconds": 7.455898000000019,
+      "update_setup_seconds": 0.04840289999998504,
+      "effective_batch": 900,
+      "optimizer_minibatch": 150,
+      "epochs_in_protocol": 6,
+      "stopped_after": "one complete actor and value optimizer step",
+      "caveat": "Only a temporary model; production PPO loop and original minibatch denominator are unchanged"
+    },
+    "ppo_kl900": {
+      "seconds": 17.255127699999974,
+      "samples_seconds": [
+        17.255127699999974
+      ],
+      "repeats": 1,
+      "warmup": 0,
+      "kl": 0.0011422170533074273,
+      "production_method": false,
+      "caveat": "Production shared KL method when available; baseline reproduces exact original traversal and expression."
+    },
+    "ppo900_complete_batch": {
+      "seconds": 369.3434896,
+      "samples_seconds": [
+        369.3434896
+      ],
+      "repeats": 1,
+      "warmup": 0,
+      "counts": {
+        "batches": 1,
+        "actor_steps_attempted": 36,
+        "actor_steps_accepted": 36,
+        "value_steps": 36,
+        "rollbacks": 0
+      },
+      "epoch_logs": [
+        {
+          "epoch": 1,
+          "kl": 0.017935996188057794,
+          "accepted": true
+        },
+        {
+          "epoch": 2,
+          "kl": 0.010503821571667989,
+          "accepted": true
+        },
+        {
+          "epoch": 3,
+          "kl": 0.014497259855270386,
+          "accepted": true
+        },
+        {
+          "epoch": 4,
+          "kl": 0.01018198721938663,
+          "accepted": true
+        },
+        {
+          "epoch": 5,
+          "kl": 0.014229191144307455,
+          "accepted": true
+        },
+        {
+          "epoch": 6,
+          "kl": 0.015686062309477063,
+          "accepted": true
+        }
+      ],
+      "effective_batch": 900,
+      "optimizer_minibatch": 150,
+      "epochs": 6,
+      "caveat": "Five scripted trajectories with synthetic current-policy auxiliary values; computation fixture, not an on-policy research batch"
+    },
+    "replay_sample128": {
+      "seconds": 0.0006609000000707965,
+      "samples_seconds": [
+        0.0007044999999834545,
+        0.0006609000000707965,
+        0.0006260000000111177,
+        0.0006499000000985689,
+        0.0007300000000896034
+      ],
+      "repeats": 5,
+      "warmup": 1
+    },
+    "report_compression32": {
+      "seconds": 0.05212540000002264,
+      "samples_seconds": [
+        0.050610799999958545,
+        0.05212540000002264,
+        0.0553904999999304
+      ],
+      "repeats": 3,
+      "warmup": 1
+    },
+    "checkpoint_empty_replay_save": {
+      "seconds": 0.6250003000000106,
+      "samples_seconds": [
+        0.6250003000000106
+      ],
+      "repeats": 1,
+      "warmup": 0,
+      "bytes": 91206556,
+      "optimizer_parameter_slots": {
+        "sac_actor": 266,
+        "sac_critic": 518,
+        "ppo_actor": 257,
+        "ppo_value": 257
+      }
+    },
+    "checkpoint_four_episodes_save": {
+      "seconds": 1.857255699999996,
+      "samples_seconds": [
+        1.857255699999996
+      ],
+      "repeats": 1,
+      "warmup": 0,
+      "bytes": 177531484,
+      "includes_fsync_and_hash": true
+    },
+    "checkpoint_four_episodes_load": {
+      "seconds": 0.7938007000000198,
+      "samples_seconds": [
+        0.7938007000000198
+      ],
+      "repeats": 1,
+      "warmup": 0
+    },
+    "episode_metrics_json": {
+      "seconds": 0.20456000000001495,
+      "samples_seconds": [
+        0.20456000000001495,
+        0.18950570000004063,
+        0.22860190000005787
+      ],
+      "repeats": 3,
+      "warmup": 1
+    },
+    "learning_jsonl_append": {
+      "seconds": 0.00032829999997829873,
+      "samples_seconds": [
+        0.0004275000000006912,
+        0.00032829999997829873,
+        0.0002687000001060369
+      ],
+      "repeats": 3,
+      "warmup": 1
+    },
+    "scripted_collection_9000": {
+      "seconds": 16.92056219999995,
+      "samples_seconds": [
+        16.92056219999995
+      ],
+      "repeats": 1,
+      "warmup": 0,
+      "physics_steps": 9000,
+      "includes": "physics, reports, policy interface, metrics and requested episode serialization; no neural work",
+      "cost_sum": 19282.974493132446
+    }
+  },
+  "status": "complete"
+}

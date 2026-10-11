@@ -1,0 +1,16 @@
+name: CPU package checks
+on: [push, pull_request]
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - run: python -m pip install -e .
+      - run: python -m unittest discover -s tests -v
+      - run: python -m unittest hrl_v2.tests.test_physical_contract hrl_v2.tests.test_observation_metrics hrl_v2.tests.test_rollout_semantics -v
+      - run: hrl-v2 dry-run
+      - run: python -m pip wheel . --no-deps --wheel-dir dist

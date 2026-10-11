@@ -1,0 +1,9 @@
+test_actor_matches_pinned_baseline_and_keeps_independent_q_encoders (hrl_v2.tests.test_optimizer_reuse.OptimizerReuseTests) ... ok
+test_critic_matches_pinned_baseline_and_backpropagates_history_once (hrl_v2.tests.test_optimizer_reuse.OptimizerReuseTests) ... ok
+test_graph_preprocessing_matches_pinned_outputs_and_all_gradients (hrl_v2.tests.test_optimizer_reuse.OptimizerReuseTests) ... ok
+test_real_ppo_minibatch_matches_unshared_full_history (hrl_v2.tests.test_optimizer_reuse.OptimizerReuseTests) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 10.920s
+
+OK

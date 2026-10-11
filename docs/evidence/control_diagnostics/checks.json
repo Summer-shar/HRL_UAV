@@ -1,0 +1,74 @@
+[
+  {
+    "layout_seed": 92,
+    "pattern": "staggered_busy",
+    "route": "local",
+    "same_arrivals": true,
+    "matched_speed": true,
+    "same_propulsion_energy": true,
+    "safety_projection_inactive": true
+  },
+  {
+    "layout_seed": 92,
+    "pattern": "staggered_busy",
+    "route": "equal",
+    "same_arrivals": true,
+    "matched_speed": true,
+    "same_propulsion_energy": true,
+    "safety_projection_inactive": true
+  },
+  {
+    "layout_seed": 92,
+    "pattern": "synchronous_busy",
+    "route": "local",
+    "same_arrivals": true,
+    "matched_speed": true,
+    "same_propulsion_energy": true,
+    "safety_projection_inactive": true
+  },
+  {
+    "layout_seed": 92,
+    "pattern": "synchronous_busy",
+    "route": "equal",
+    "same_arrivals": true,
+    "matched_speed": true,
+    "same_propulsion_energy": true,
+    "safety_projection_inactive": true
+  },
+  {
+    "layout_seed": 102,
+    "pattern": "staggered_busy",
+    "route": "local",
+    "same_arrivals": true,
+    "matched_speed": true,
+    "same_propulsion_energy": true,
+    "safety_projection_inactive": true
+  },
+  {
+    "layout_seed": 102,
+    "pattern": "staggered_busy",
+    "route": "equal",
+    "same_arrivals": true,
+    "matched_speed": true,
+    "same_propulsion_energy": true,
+    "safety_projection_inactive": true
+  },
+  {
+    "layout_seed": 102,
+    "pattern": "synchronous_busy",
+    "route": "local",
+    "same_arrivals": true,
+    "matched_speed": true,
+    "same_propulsion_energy": true,
+    "safety_projection_inactive": true
+  },
+  {
+    "layout_seed": 102,
+    "pattern": "synchronous_busy",
+    "route": "equal",
+    "same_arrivals": true,
+    "matched_speed": true,
+    "same_propulsion_energy": true,
+    "safety_projection_inactive": true
+  }
+]

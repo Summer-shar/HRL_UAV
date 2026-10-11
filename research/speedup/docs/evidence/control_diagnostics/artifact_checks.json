@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "physical_steps_added": 0,
+  "panel_rows": 24,
+  "followup_rows": 4,
+  "mechanism_rows": 9,
+  "cpu_communication_cost_identity": true,
+  "all_budget_reservations_completed": true,
+  "matched_motion_across_routing": true,
+  "matched_upload_work_and_energy_across_routing": true,
+  "all_local_document_links_resolve": true,
+  "python": "3.9.25"
+}

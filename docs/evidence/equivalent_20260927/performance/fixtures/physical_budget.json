@@ -1,0 +1,30 @@
+{
+  "limit": 18000,
+  "reserved_steps": 18000,
+  "physical_steps": 18000,
+  "status": "complete",
+  "cases": [
+    {
+      "number": 1,
+      "route": "local",
+      "seeds": {
+        "arrival_seed": 2321142434111606186,
+        "layout_seed": 3054186175476030268,
+        "load_seed": 2696676451263822082
+      },
+      "reserved_steps": 9000,
+      "physical_steps": 9000
+    },
+    {
+      "number": 2,
+      "route": "equal",
+      "seeds": {
+        "arrival_seed": 3930574058028024581,
+        "layout_seed": 4529235978229882568,
+        "load_seed": 1312857083657965380
+      },
+      "reserved_steps": 9000,
+      "physical_steps": 9000
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "status": "dry_run",
+  "physical_steps": 0,
+  "updates": 0,
+  "validation_ready": true,
+  "research_protocol_confirmed": true,
+  "training_ready": true,
+  "training_authorized": false,
+  "training_started": false,
+  "rollout": {
+    "physical_steps": 9000,
+    "lower_steps": 1800,
+    "upper_steps": 180
+  },
+  "rollout_seconds": 900,
+  "config_sha256": "7966b4de8e03ddba346d070819c265599e9ae192736a8aaba1fdfd85088076e4",
+  "expected_counts": {
+    "episodes": 600,
+    "physics_steps": 5400000,
+    "sac_events": 35010,
+    "critic_fits": 70020,
+    "sac_actor_updates": 17010,
+    "ppo_batches": 40
+  }
+}

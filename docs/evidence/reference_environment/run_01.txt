@@ -1,0 +1,31 @@
+test_capacity_and_energy_are_physical_and_cannot_be_bypassed (hrl_v2.tests.test_physical_contract.PhysicalContractTests) ... ok
+test_exact_zero_creates_no_fragment_and_tiny_positive_gets_service (hrl_v2.tests.test_physical_contract.PhysicalContractTests) ... ok
+test_invalid_simplex_is_rejected_before_any_service (hrl_v2.tests.test_physical_contract.PhysicalContractTests) ... ok
+test_motion_enforces_displacement_speed_map_and_continuous_separation (hrl_v2.tests.test_physical_contract.PhysicalContractTests) ... ok
+test_queues_survive_lower_upper_and_rollout_boundaries (hrl_v2.tests.test_physical_contract.PhysicalContractTests) ... ok
+test_ready_at_upper_boundary_waits_for_next_physical_step (hrl_v2.tests.test_physical_contract.PhysicalContractTests) ... ok
+test_small_cpu_and_transfer_residuals_are_not_forgiven (hrl_v2.tests.test_physical_contract.PhysicalContractTests) ... ok
+test_small_upload_residual_is_not_forgiven (hrl_v2.tests.test_physical_contract.PhysicalContractTests) ... ok
+test_split_conservation_and_parent_waits_for_last_positive_fragment (hrl_v2.tests.test_physical_contract.PhysicalContractTests) ... ok
+test_upload_fifo_and_cpu_strict_priority_then_fifo (hrl_v2.tests.test_physical_contract.PhysicalContractTests) ... ok
+test_deliberately_late_fragment_blocks_parent_without_double_completion (hrl_v2.tests.test_reference_parents.ReferenceParentTests) ... ok
+test_forward_keeps_identity_birth_and_waits_for_destination_cpu (hrl_v2.tests.test_reference_parents.ReferenceParentTests) ... ok
+test_service_energy_uses_actual_work_below_each_budget (hrl_v2.tests.test_reference_parents.ReferenceParentTests) ... ok
+test_u2u_preempts_low_priority_but_preserves_fifo_within_priority (hrl_v2.tests.test_reference_parents.ReferenceParentTests) ... ok
+test_unconfirmed_training_remains_blocked_even_if_config_flag_changes (hrl_v2.tests.test_reference_parents.ReferenceParentTests) ... ok
+test_multiple_links_share_bandwidth_source_power_and_each_link_service (hrl_v2.tests.test_reference_physics.ReferenceCapacityTests) ... ok
+test_u2u_position_changes_shannon_rate_under_the_same_active_mask (hrl_v2.tests.test_reference_physics.ReferenceCapacityTests) ... ok
+test_upload_position_changes_shannon_rate_and_actual_service (hrl_v2.tests.test_reference_physics.ReferenceCapacityTests) ... ok
+test_zero_service_preserves_all_backlogs_until_capacity_returns (hrl_v2.tests.test_reference_physics.ReferenceCapacityTests) ... ok
+test_cutoff_statistics_precede_next_arrival_and_survivors_persist (hrl_v2.tests.test_reference_continuation.ReferenceContinuationTests) ... ok
+test_each_physical_step_matches_without_reset (hrl_v2.tests.test_reference_continuation.ReferenceContinuationTests) ... ok
+test_holding_cost_and_censoring_from_independent_birth_completion_ledger (hrl_v2.tests.test_reference_continuation.ReferenceContinuationTests) ... ok
+test_no_duplicate_prepare_macro_commit_or_hidden_rng_draws (hrl_v2.tests.test_reference_continuation.ReferenceContinuationTests) ... ok
+test_real_successor_and_independent_reset (hrl_v2.tests.test_reference_continuation.ReferenceContinuationTests) ... ok
+test_report_never_reads_hidden_generator_or_future_streams (hrl_v2.tests.test_observation_metrics.ObservationTests) ... ok
+test_arrival_features_read_observed_prefix_only (hrl_v2.tests.test_observation_metrics.ObservationTests) ... ok
+
+----------------------------------------------------------------------
+Ran 26 tests in 1.858s
+
+OK

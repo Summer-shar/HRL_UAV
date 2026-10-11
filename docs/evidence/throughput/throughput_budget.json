@@ -1,0 +1,539 @@
+{
+  "baseline": {
+    "variant": "baseline",
+    "sac_microbatch": 16,
+    "unchanged_research_counts": {
+      "episodes": 600,
+      "physical_steps": 5400000,
+      "sac_events": 35010,
+      "critic_fits": 70020,
+      "actor_updates": 17010,
+      "ppo_batches": 40,
+      "ppo_effective_batch": 900,
+      "ppo_minibatch": 150,
+      "maximum_ppo_actor_steps": 1440,
+      "ppo_value_steps": 1440,
+      "maximum_ppo_kl_scans": 240,
+      "lower_sampling": 1080000,
+      "upper_sampling": 54000,
+      "upper_value_sampling": 54000,
+      "actor_update_internal_cache_rebuilds": 16632,
+      "development_episodes": 156,
+      "development_moving": 72,
+      "development_hover": 84,
+      "optional_primary_test_episodes": 160,
+      "checkpoints": 608,
+      "checkpoint_replay_episode_records": 22675,
+      "checkpoint_pending_ppo_episode_records": 400,
+      "replay_samples": 87030,
+      "learning_logs": 36040
+    },
+    "measured_coefficients": {
+      "critic128_seconds": 11.267296400000006,
+      "actor128_seconds": 6.494643400000001,
+      "ppo150_seconds": 7.455898000000019,
+      "ppo900_batch_seconds_extrapolated": 371.9914971000005,
+      "ppo900_complete_fixture": {
+        "seconds": 369.3434896,
+        "samples_seconds": [
+          369.3434896
+        ],
+        "repeats": 1,
+        "warmup": 0,
+        "counts": {
+          "batches": 1,
+          "actor_steps_attempted": 36,
+          "actor_steps_accepted": 36,
+          "value_steps": 36,
+          "rollbacks": 0
+        },
+        "epoch_logs": [
+          {
+            "epoch": 1,
+            "kl": 0.017935996188057794,
+            "accepted": true
+          },
+          {
+            "epoch": 2,
+            "kl": 0.010503821571667989,
+            "accepted": true
+          },
+          {
+            "epoch": 3,
+            "kl": 0.014497259855270386,
+            "accepted": true
+          },
+          {
+            "epoch": 4,
+            "kl": 0.01018198721938663,
+            "accepted": true
+          },
+          {
+            "epoch": 5,
+            "kl": 0.014229191144307455,
+            "accepted": true
+          },
+          {
+            "epoch": 6,
+            "kl": 0.015686062309477063,
+            "accepted": true
+          }
+        ],
+        "effective_batch": 900,
+        "optimizer_minibatch": 150,
+        "epochs": 6,
+        "caveat": "Five scripted trajectories with synthetic current-policy auxiliary values; computation fixture, not an on-policy research batch"
+      },
+      "lower_average_seconds": 0.07025062045454546,
+      "lower_rebuild_seconds": 0.0693774272727279,
+      "checkpoint_full55_seconds_extrapolated": 17.56851204999981,
+      "checkpoint_full55_bytes_extrapolated": 1278174316.0,
+      "cumulative_checkpoint_write_bytes_extrapolated": 553440514448.0,
+      "additional_checkpoint_hash_reads": 615,
+      "additional_checkpoint_hash_bytes_extrapolated": 557531957460.0,
+      "additional_hash_measured": true
+    },
+    "envelopes": {
+      "ordinary_upper_workload": {
+        "training_seconds": {
+          "critic_updates": 788936.0939280004,
+          "actor_updates": 110473.88423400001,
+          "ppo_batches_no_KL_early_stop": 14879.65988400002,
+          "replay_sampling": 57.51812700616142,
+          "scripted_physics_reports_compression_and_metrics": 10152.33731999997,
+          "checkpoint_serialization_fsync_hash": 7488.573521149922,
+          "additional_checkpoint_identity_hashes": 534.4281141436269,
+          "learning_log_appends": 11.831931999217886,
+          "other_json_writes": 404.21056000002955,
+          "lower_neural_sampling": 75849.73787863637,
+          "upper_neural_sampling": 2706.498899999996,
+          "upper_value_sampling": 2657.9289375000044
+        },
+        "development_seconds": {
+          "physics_reports_metrics": 2639.607703199992,
+          "lower_neural_sampling": 19720.931848445456,
+          "upper_neural_sampling": 649.559735999999
+        },
+        "optional_primary_test_seconds": {
+          "physics_reports_metrics": 2707.289951999992,
+          "lower_neural_sampling": 20226.596767636365,
+          "upper_neural_sampling": 721.7330399999989,
+          "metrics_json": 32.93416000000241
+        },
+        "training_plus_development_hours": 288.10077850668915,
+        "optional_primary_test_hours": 6.580153866565655,
+        "training_development_primary_test_hours": 294.68093237325485,
+        "planning_hours_with_5_to_15_percent_reserve": [
+          302.5058174320236,
+          331.3158952826925
+        ],
+        "hours_using_measured_fixture_PPO_KL_behavior": 288.0713562011336
+      },
+      "congested_upper_workload": {
+        "training_seconds": {
+          "critic_updates": 788936.0939280004,
+          "actor_updates": 110473.88423400001,
+          "ppo_batches_no_KL_early_stop": 14879.65988400002,
+          "replay_sampling": 57.51812700616142,
+          "scripted_physics_reports_compression_and_metrics": 10152.33731999997,
+          "checkpoint_serialization_fsync_hash": 7488.573521149922,
+          "additional_checkpoint_identity_hashes": 534.4281141436269,
+          "learning_log_appends": 11.831931999217886,
+          "other_json_writes": 404.21056000002955,
+          "lower_neural_sampling": 75849.73787863637,
+          "upper_neural_sampling": 5844.133800000003,
+          "upper_value_sampling": 5817.573900000006
+        },
+        "development_seconds": {
+          "physics_reports_metrics": 2639.607703199992,
+          "lower_neural_sampling": 19720.931848445456,
+          "upper_neural_sampling": 1402.5921120000007
+        },
+        "optional_primary_test_seconds": {
+          "physics_reports_metrics": 2707.289951999992,
+          "lower_neural_sampling": 20226.596767636365,
+          "upper_neural_sampling": 1558.435680000001,
+          "metrics_json": 32.93416000000241
+        },
+        "training_plus_development_hours": 290.0591985729392,
+        "optional_primary_test_hours": 6.812571266565656,
+        "training_development_primary_test_hours": 296.87176983950485,
+        "planning_hours_with_5_to_15_percent_reserve": [
+          304.56215850158617,
+          333.56807835888003
+        ],
+        "hours_using_measured_fixture_PPO_KL_behavior": 290.0297762673836
+      }
+    },
+    "limitations": [
+      "All full-seed values are conditional extrapolations, not training results. SAC/PPO use five independent scripted physical trajectories; inference/component timing uses the first trajectory.",
+      "PPO data use real scripted reports with synthetic current-policy auxiliary values; they are a computational fixture, not an on-policy research batch.",
+      "SAC repeats perform bounded updates only on temporary learners; timing uses the median of three after one warmup.",
+      "Ordinary/congested upper workload bounds are sensitivity cases, not probability or confidence bounds.",
+      "Replay occupancy counts are exact for the schedule; checkpoint cost is affine extrapolation from 0/4 episodes to 55, including Adam states.",
+      "Physical collection already includes compression/report generation; standalone component timings are not added again.",
+      "The main PPO envelope assumes all 36 actor/value minibatches and six KL scans. The complete measured fixture also reports its actual KL behavior; its alternate budget does not change the research protocol. Later epoch snapshot overhead is included in the complete measurement, but not isolated in the no-early-stop extrapolation.",
+      "Additional checkpoint identity hashing uses measured production read_bytes SHA256 throughput when supplied. Target Polyak updates, source-identity hashing, startup, garbage collection and filesystem latency variation use the explicit 5-15% planning reserve.",
+      "Primary stochastic test is shown separately; optional secondary-checkpoint and deterministic-policy tests are excluded and each requires its own declared panel budget.",
+      "No research batch reduction, history truncation, queue deletion, encoder sharing or distribution backend change is used."
+    ]
+  },
+  "optimized_micro16": {
+    "variant": "optimized",
+    "sac_microbatch": 16,
+    "unchanged_research_counts": {
+      "episodes": 600,
+      "physical_steps": 5400000,
+      "sac_events": 35010,
+      "critic_fits": 70020,
+      "actor_updates": 17010,
+      "ppo_batches": 40,
+      "ppo_effective_batch": 900,
+      "ppo_minibatch": 150,
+      "maximum_ppo_actor_steps": 1440,
+      "ppo_value_steps": 1440,
+      "maximum_ppo_kl_scans": 240,
+      "lower_sampling": 1080000,
+      "upper_sampling": 54000,
+      "upper_value_sampling": 36000,
+      "actor_update_internal_cache_rebuilds": 16632,
+      "development_episodes": 156,
+      "development_moving": 72,
+      "development_hover": 84,
+      "optional_primary_test_episodes": 160,
+      "checkpoints": 608,
+      "checkpoint_replay_episode_records": 22675,
+      "checkpoint_pending_ppo_episode_records": 400,
+      "replay_samples": 87030,
+      "learning_logs": 36040
+    },
+    "measured_coefficients": {
+      "critic128_seconds": 7.444515699999997,
+      "actor128_seconds": 4.037304599999999,
+      "ppo150_seconds": 4.839162299999998,
+      "ppo900_batch_seconds_extrapolated": 260.47984199999996,
+      "ppo900_complete_fixture": {
+        "seconds": 138.90437930000002,
+        "samples_seconds": [
+          138.90437930000002
+        ],
+        "repeats": 1,
+        "warmup": 0,
+        "counts": {
+          "batches": 1,
+          "actor_steps_attempted": 36,
+          "actor_steps_accepted": 36,
+          "value_steps": 36,
+          "rollbacks": 0
+        },
+        "epoch_logs": [
+          {
+            "epoch": 1,
+            "kl": 0.01793753226598104,
+            "accepted": true
+          },
+          {
+            "epoch": 2,
+            "kl": 0.010459876590304904,
+            "accepted": true
+          },
+          {
+            "epoch": 3,
+            "kl": 0.014351938234435188,
+            "accepted": true
+          },
+          {
+            "epoch": 4,
+            "kl": 0.010337460703319973,
+            "accepted": true
+          },
+          {
+            "epoch": 5,
+            "kl": 0.015796458390023974,
+            "accepted": true
+          },
+          {
+            "epoch": 6,
+            "kl": 0.015921550989151,
+            "accepted": true
+          }
+        ],
+        "effective_batch": 900,
+        "optimizer_minibatch": 150,
+        "epochs": 6,
+        "caveat": "Five scripted trajectories with synthetic current-policy auxiliary values; computation fixture, not an on-policy research batch"
+      },
+      "lower_average_seconds": 0.053458620454545684,
+      "lower_rebuild_seconds": 0.05582135909090875,
+      "checkpoint_full55_seconds_extrapolated": 18.065468925000772,
+      "checkpoint_full55_bytes_extrapolated": 1278173436.0,
+      "cumulative_checkpoint_write_bytes_extrapolated": 553440145248.0,
+      "additional_checkpoint_hash_reads": 615,
+      "additional_checkpoint_hash_bytes_extrapolated": 557531585700.0,
+      "additional_hash_measured": true
+    },
+    "envelopes": {
+      "ordinary_upper_workload": {
+        "training_seconds": {
+          "critic_updates": 521264.9893139998,
+          "actor_updates": 68674.55124599997,
+          "ppo_batches_no_KL_early_stop": 10419.193679999998,
+          "replay_sampling": 69.54567299954078,
+          "scripted_physics_reports_compression_and_metrics": 10491.138179999973,
+          "checkpoint_serialization_fsync_hash": 7699.02803302532,
+          "additional_checkpoint_identity_hashes": 534.4277577891739,
+          "learning_log_appends": 15.389080000070408,
+          "other_json_writes": 374.17140799994104,
+          "lower_neural_sampling": 57759.06696763661,
+          "upper_neural_sampling": 2073.022537500026,
+          "upper_value_sampling": 1045.2237749999736
+        },
+        "development_seconds": {
+          "physics_reports_metrics": 2131.4479367999975,
+          "lower_neural_sampling": 15007.14017364552,
+          "upper_neural_sampling": 497.52540900000616
+        },
+        "optional_primary_test_seconds": {
+          "physics_reports_metrics": 2186.1004479999974,
+          "lower_neural_sampling": 15391.93863963643,
+          "upper_neural_sampling": 552.8060100000068,
+          "metrics_json": 30.486637999995196
+        },
+        "training_plus_development_hours": 193.90440588094333,
+        "optional_primary_test_hours": 5.044814371010119,
+        "training_development_primary_test_hours": 198.94922025195345,
+        "planning_hours_with_5_to_15_percent_reserve": [
+          203.5996261749905,
+          222.9900667630848
+        ],
+        "hours_using_measured_fixture_PPO_KL_behavior": 192.55356740649887
+      },
+      "congested_upper_workload": {
+        "training_seconds": {
+          "critic_updates": 521264.9893139998,
+          "actor_updates": 68674.55124599997,
+          "ppo_batches_no_KL_early_stop": 10419.193679999998,
+          "replay_sampling": 69.54567299954078,
+          "scripted_physics_reports_compression_and_metrics": 10491.138179999973,
+          "checkpoint_serialization_fsync_hash": 7699.02803302532,
+          "additional_checkpoint_identity_hashes": 534.4277577891739,
+          "learning_log_appends": 15.389080000070408,
+          "other_json_writes": 374.17140799994104,
+          "lower_neural_sampling": 57759.06696763661,
+          "upper_neural_sampling": 4621.4394750000165,
+          "upper_value_sampling": 1637.2617749999777
+        },
+        "development_seconds": {
+          "physics_reports_metrics": 2131.4479367999975,
+          "lower_neural_sampling": 15007.14017364552,
+          "upper_neural_sampling": 1109.145474000004
+        },
+        "optional_primary_test_seconds": {
+          "physics_reports_metrics": 2186.1004479999974,
+          "lower_neural_sampling": 15391.93863963643,
+          "upper_neural_sampling": 1232.3838600000045,
+          "metrics_json": 30.486637999995196
+        },
+        "training_plus_development_hours": 194.94664893719334,
+        "optional_primary_test_hours": 5.2335859960101185,
+        "training_development_primary_test_hours": 200.18023493320348,
+        "planning_hours_with_5_to_15_percent_reserve": [
+          204.69398138405302,
+          224.18864627777234
+        ],
+        "hours_using_measured_fixture_PPO_KL_behavior": 193.5958104627489
+      }
+    },
+    "limitations": [
+      "All full-seed values are conditional extrapolations, not training results. SAC/PPO use five independent scripted physical trajectories; inference/component timing uses the first trajectory.",
+      "PPO data use real scripted reports with synthetic current-policy auxiliary values; they are a computational fixture, not an on-policy research batch.",
+      "SAC repeats perform bounded updates only on temporary learners; timing uses the median of three after one warmup.",
+      "Ordinary/congested upper workload bounds are sensitivity cases, not probability or confidence bounds.",
+      "Replay occupancy counts are exact for the schedule; checkpoint cost is affine extrapolation from 0/4 episodes to 55, including Adam states.",
+      "Physical collection already includes compression/report generation; standalone component timings are not added again.",
+      "The main PPO envelope assumes all 36 actor/value minibatches and six KL scans. The complete measured fixture also reports its actual KL behavior; its alternate budget does not change the research protocol. Later epoch snapshot overhead is included in the complete measurement, but not isolated in the no-early-stop extrapolation.",
+      "Additional checkpoint identity hashing uses measured production read_bytes SHA256 throughput when supplied. Target Polyak updates, source-identity hashing, startup, garbage collection and filesystem latency variation use the explicit 5-15% planning reserve.",
+      "Primary stochastic test is shown separately; optional secondary-checkpoint and deterministic-policy tests are excluded and each requires its own declared panel budget.",
+      "No research batch reduction, history truncation, queue deletion, encoder sharing or distribution backend change is used."
+    ]
+  },
+  "optimized_micro32": {
+    "variant": "optimized",
+    "sac_microbatch": 32,
+    "unchanged_research_counts": {
+      "episodes": 600,
+      "physical_steps": 5400000,
+      "sac_events": 35010,
+      "critic_fits": 70020,
+      "actor_updates": 17010,
+      "ppo_batches": 40,
+      "ppo_effective_batch": 900,
+      "ppo_minibatch": 150,
+      "maximum_ppo_actor_steps": 1440,
+      "ppo_value_steps": 1440,
+      "maximum_ppo_kl_scans": 240,
+      "lower_sampling": 1080000,
+      "upper_sampling": 54000,
+      "upper_value_sampling": 36000,
+      "actor_update_internal_cache_rebuilds": 16632,
+      "development_episodes": 156,
+      "development_moving": 72,
+      "development_hover": 84,
+      "optional_primary_test_episodes": 160,
+      "checkpoints": 608,
+      "checkpoint_replay_episode_records": 22675,
+      "checkpoint_pending_ppo_episode_records": 400,
+      "replay_samples": 87030,
+      "learning_logs": 36040
+    },
+    "measured_coefficients": {
+      "critic128_seconds": 6.744746500000005,
+      "actor128_seconds": 3.486587700000001,
+      "ppo150_seconds": 4.839162299999998,
+      "ppo900_batch_seconds_extrapolated": 260.47984199999996,
+      "ppo900_complete_fixture": {
+        "seconds": 138.90437930000002,
+        "samples_seconds": [
+          138.90437930000002
+        ],
+        "repeats": 1,
+        "warmup": 0,
+        "counts": {
+          "batches": 1,
+          "actor_steps_attempted": 36,
+          "actor_steps_accepted": 36,
+          "value_steps": 36,
+          "rollbacks": 0
+        },
+        "epoch_logs": [
+          {
+            "epoch": 1,
+            "kl": 0.01793753226598104,
+            "accepted": true
+          },
+          {
+            "epoch": 2,
+            "kl": 0.010459876590304904,
+            "accepted": true
+          },
+          {
+            "epoch": 3,
+            "kl": 0.014351938234435188,
+            "accepted": true
+          },
+          {
+            "epoch": 4,
+            "kl": 0.010337460703319973,
+            "accepted": true
+          },
+          {
+            "epoch": 5,
+            "kl": 0.015796458390023974,
+            "accepted": true
+          },
+          {
+            "epoch": 6,
+            "kl": 0.015921550989151,
+            "accepted": true
+          }
+        ],
+        "effective_batch": 900,
+        "optimizer_minibatch": 150,
+        "epochs": 6,
+        "caveat": "Five scripted trajectories with synthetic current-policy auxiliary values; computation fixture, not an on-policy research batch"
+      },
+      "lower_average_seconds": 0.053458620454545684,
+      "lower_rebuild_seconds": 0.05582135909090875,
+      "checkpoint_full55_seconds_extrapolated": 18.065468925000772,
+      "checkpoint_full55_bytes_extrapolated": 1278173436.0,
+      "cumulative_checkpoint_write_bytes_extrapolated": 553440145248.0,
+      "additional_checkpoint_hash_reads": 615,
+      "additional_checkpoint_hash_bytes_extrapolated": 557531585700.0,
+      "additional_hash_measured": true
+    },
+    "envelopes": {
+      "ordinary_upper_workload": {
+        "training_seconds": {
+          "critic_updates": 472267.14993000036,
+          "actor_updates": 59306.85677700002,
+          "ppo_batches_no_KL_early_stop": 10419.193679999998,
+          "replay_sampling": 69.54567299954078,
+          "scripted_physics_reports_compression_and_metrics": 10491.138179999973,
+          "checkpoint_serialization_fsync_hash": 7699.02803302532,
+          "additional_checkpoint_identity_hashes": 534.4277577891739,
+          "learning_log_appends": 15.389080000070408,
+          "other_json_writes": 374.17140799994104,
+          "lower_neural_sampling": 57759.06696763661,
+          "upper_neural_sampling": 2073.022537500026,
+          "upper_value_sampling": 1045.2237749999736
+        },
+        "development_seconds": {
+          "physics_reports_metrics": 2131.4479367999975,
+          "lower_neural_sampling": 15007.14017364552,
+          "upper_neural_sampling": 497.52540900000616
+        },
+        "optional_primary_test_seconds": {
+          "physics_reports_metrics": 2186.1004479999974,
+          "lower_neural_sampling": 15391.93863963643,
+          "upper_neural_sampling": 552.8060100000068,
+          "metrics_json": 30.486637999995196
+        },
+        "training_plus_development_hours": 177.69175758844352,
+        "optional_primary_test_hours": 5.044814371010119,
+        "training_development_primary_test_hours": 182.73657195945364,
+        "planning_hours_with_5_to_15_percent_reserve": [
+          186.5763454678657,
+          204.34552122671005
+        ],
+        "hours_using_measured_fixture_PPO_KL_behavior": 176.34091911399906
+      },
+      "congested_upper_workload": {
+        "training_seconds": {
+          "critic_updates": 472267.14993000036,
+          "actor_updates": 59306.85677700002,
+          "ppo_batches_no_KL_early_stop": 10419.193679999998,
+          "replay_sampling": 69.54567299954078,
+          "scripted_physics_reports_compression_and_metrics": 10491.138179999973,
+          "checkpoint_serialization_fsync_hash": 7699.02803302532,
+          "additional_checkpoint_identity_hashes": 534.4277577891739,
+          "learning_log_appends": 15.389080000070408,
+          "other_json_writes": 374.17140799994104,
+          "lower_neural_sampling": 57759.06696763661,
+          "upper_neural_sampling": 4621.4394750000165,
+          "upper_value_sampling": 1637.2617749999777
+        },
+        "development_seconds": {
+          "physics_reports_metrics": 2131.4479367999975,
+          "lower_neural_sampling": 15007.14017364552,
+          "upper_neural_sampling": 1109.145474000004
+        },
+        "optional_primary_test_seconds": {
+          "physics_reports_metrics": 2186.1004479999974,
+          "lower_neural_sampling": 15391.93863963643,
+          "upper_neural_sampling": 1232.3838600000045,
+          "metrics_json": 30.486637999995196
+        },
+        "training_plus_development_hours": 178.73400064469354,
+        "optional_primary_test_hours": 5.2335859960101185,
+        "training_development_primary_test_hours": 183.96758664070367,
+        "planning_hours_with_5_to_15_percent_reserve": [
+          187.67070067692822,
+          205.54410074139756
+        ],
+        "hours_using_measured_fixture_PPO_KL_behavior": 177.38316217024908
+      }
+    },
+    "limitations": [
+      "All full-seed values are conditional extrapolations, not training results. SAC/PPO use five independent scripted physical trajectories; inference/component timing uses the first trajectory.",
+      "PPO data use real scripted reports with synthetic current-policy auxiliary values; they are a computational fixture, not an on-policy research batch.",
+      "SAC repeats perform bounded updates only on temporary learners; timing uses the median of three after one warmup.",
+      "Ordinary/congested upper workload bounds are sensitivity cases, not probability or confidence bounds.",
+      "Replay occupancy counts are exact for the schedule; checkpoint cost is affine extrapolation from 0/4 episodes to 55, including Adam states.",
+      "Physical collection already includes compression/report generation; standalone component timings are not added again.",
+      "The main PPO envelope assumes all 36 actor/value minibatches and six KL scans. The complete measured fixture also reports its actual KL behavior; its alternate budget does not change the research protocol. Later epoch snapshot overhead is included in the complete measurement, but not isolated in the no-early-stop extrapolation.",
+      "Additional checkpoint identity hashing uses measured production read_bytes SHA256 throughput when supplied. Target Polyak updates, source-identity hashing, startup, garbage collection and filesystem latency variation use the explicit 5-15% planning reserve.",
+      "Primary stochastic test is shown separately; optional secondary-checkpoint and deterministic-policy tests are excluded and each requires its own declared panel budget.",
+      "No research batch reduction, history truncation, queue deletion, encoder sharing or distribution backend change is used."
+    ]
+  }
+}

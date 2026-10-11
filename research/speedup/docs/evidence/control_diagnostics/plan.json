@@ -1,0 +1,35 @@
+{
+  "layouts": [
+    [
+      92,
+      93
+    ],
+    [
+      102,
+      103
+    ]
+  ],
+  "patterns": [
+    "staggered_busy",
+    "synchronous_busy"
+  ],
+  "motions": [
+    "hover",
+    "toward",
+    "away"
+  ],
+  "routes": [
+    "local",
+    "equal"
+  ],
+  "seconds": 60,
+  "planned_panel_steps": 14400,
+  "planned_mechanism_steps": 450,
+  "limit": 18000,
+  "scene_sha256": "daea8771a2cb06754724c2af373704c279c080c7216d55ad990c86f0918b6136",
+  "no_training": true,
+  "unchanged_physical_parameters": true,
+  "base_commit": "13c0040f3957a35929bbb18bbefbf58cbb8bf1e3",
+  "diagnostic_sha256": "ac89a39de7380c25974354df08979bb35934a3f7fdfac638bf9c4d48fb106f62",
+  "note": "Fixed scripted mechanism comparisons, not a parameter search or stochastic performance evaluation"
+}

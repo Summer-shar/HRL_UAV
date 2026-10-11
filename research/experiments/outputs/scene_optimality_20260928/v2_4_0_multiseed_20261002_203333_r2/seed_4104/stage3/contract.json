@@ -1,0 +1,993 @@
+{
+  "identity": {
+    "schema": "hrl_uav_continuing_service_1_1",
+    "files": {
+      "hrl_v2/__init__.py": "212faca30f312dccb18ea6840c3c81e95ed2cb7257f0de478523198274218325",
+      "hrl_v2/__main__.py": "3129adff95e0f38b87ab34cddfc27082c7892bcaec267ff5d40f160fdf55b44a",
+      "hrl_v2/archive.py": "27fda1a60bd76f9f42a978aa6e685fec4caed6fc014427b9ad4aa34add91f373",
+      "hrl_v2/baseline_protocol.py": "7ceeb218a6cf8d61790a3183bae249b07faf05a40b20b54c656f34bcec4f67ef",
+      "hrl_v2/baseline_reference.py": "40aae7e7fa7c1b61271bf0262a84c900fe8dc16d4f4e32ae492914aeb1c880a1",
+      "hrl_v2/baselines.py": "ae3630d540628a095a2bc9d9d5917cab142877838ba235c20f64e0ee79e6a585",
+      "hrl_v2/batching.py": "4da47b9b1279f72f6af8b9f98c44d1f13bb4763e228bcbeb0bbea135bce9b8ba",
+      "hrl_v2/benchmark_optimization.py": "ab6190d693cb035487b193f08f2540f955c37627ef334b8df4a766438aa75320",
+      "hrl_v2/budget.py": "73c58d85f8e9c804498e90ec578ad2289bfe6b3a7aff18b2a077d7eebf6787a3",
+      "hrl_v2/checkpoint.py": "8cbe056e7f39e38875d3be06a5eeb57d7c32316e3c505bf282673201e0b9088b",
+      "hrl_v2/cli.py": "213dc6f43c1d53a3f39d4c694d24a71800639ab9c384e7bbabce75704a8f4fc7",
+      "hrl_v2/collector.py": "a8daf6106836df0c1610e988443f273c89505e845b40d2a08601eb37f637f5ab",
+      "hrl_v2/control_diagnostics.py": "04636594c85c94b364a8bb6143f92680cf78d65cd720fa764d022c14e1a2bc67",
+      "hrl_v2/control_mechanisms.py": "b69fb70a999547d844cf95a0d52b9d06515ca4e7c8ec10ca627ab32aee59d7fd",
+      "hrl_v2/evaluate.py": "c2933b856de7e1ace5285114b1cf7e3bb9b1b5d13494a78ba778278d5de2bb69",
+      "hrl_v2/features.py": "571e2105d8b16ae0c8c9e95cfa9bc530fb0fb9f0dcd55a36872e31bec5a27797",
+      "hrl_v2/fixture.py": "c76085ac3141af6334ad218db0a36df6e3db0aab6c0a10115defa4274d124d7e",
+      "hrl_v2/gates.py": "4b632f5b247555e6998d97a79400885fe790c0752ae3042c2c6ec3a4708ec75f",
+      "hrl_v2/hybrid_simplex.py": "6ccf43569f3d45c58c9df3588e2a4871dfeb3400ff862df1b06282f8c2a54d84",
+      "hrl_v2/lite_batch.py": "8f352b6c82c78cdcb4b82a2b9f46eb5b78f2aa193932b3e00a6b8ab2c851db1e",
+      "hrl_v2/lite_networks.py": "c43cfec9e62bb5e682cc43718cfa8cff9b255289af572bb73e6347a00f1853a9",
+      "hrl_v2/lite_observation.py": "4283dbb7772f57e0fba6c3fefde85836ffd23e5a9f1499b4d68a582fc89c69c1",
+      "hrl_v2/metrics.py": "d6f8d9fd9a0c8637f22e3a673a91520569cfac0551c56d912a670b65cdf08311",
+      "hrl_v2/networks.py": "b60f33aac58b533b642f6f6af96f4060e52468560772b93a484200773e19e8aa",
+      "hrl_v2/paper_evaluation.py": "1e988ac6f4f33aba984e197dbbddb6e7a8125107c589c41bef0f9947eb3258cc",
+      "hrl_v2/paths.py": "155dcf8147fc8f3ce35d393f3745ec8a2dd5671a5e39021448944c8e419866a3",
+      "hrl_v2/physics_adapter.py": "4d56f0bb1c9479173d1bfc437877a7bdd9cda3a0fdeb30dcfbbc73b422fd5a8a",
+      "hrl_v2/plot_control_diagnostics.py": "8c05ea4d745aced235b0b31af9f449cf73dfe0685ae250bf74e306a9f6b50468",
+      "hrl_v2/policy.py": "ebf97694d0af19e8f8e01ceb709f88981e7339a3afe46509ea876a480b5b579c",
+      "hrl_v2/ppo.py": "a326188601de1a3b102e9cad3cb1fb6c5040b646f77b2cd4af6666ac709de4c2",
+      "hrl_v2/prepared.py": "3bf8918d38e601f47e1362b807b8946218b9d6ab7fa6afe40efb3a6100fbf19d",
+      "hrl_v2/randomness.py": "b2f673ba7012f46e3512f51ec8ad554701f1ab5d72546dc94887ca264d6b3214",
+      "hrl_v2/replay.py": "5bb7f4512a42f3dc0852ad238a641d57d5dacd49d0c99a2832c74cc70cd28225",
+      "hrl_v2/reports.py": "54ca53eca9c0778fa884da7a12c209166c0d42e0fb16862e807e62bf789ba996",
+      "hrl_v2/run.py": "6e7714738aeccae8ae83e566c4412d996fd5671f441cb8aafcf7d033484c3317",
+      "hrl_v2/runtime.py": "02a6e33d62dd3063fa4d85c51dee859656c54be0d5b4afdc23abd4c33677df92",
+      "hrl_v2/sac.py": "526a2e0fb511f4de4ce66be7677eb84f261e5c8a1f6ac943a7821d774e9950de",
+      "hrl_v2/schedule.py": "3c723fe8d024c583f2633f1ee38556219fc2d857663b9165993ecc8460ac68be",
+      "hrl_v2/telemetry.py": "f66a90738e10c4f5d8e2e0bce1e6d34c1c2d65ac15f7f7b97cb425a2ca801d31",
+      "hrl_v2/timing.py": "bb8864a0394e81d71efd6473533e57195c19177960fbfa7837ae08eb255f4d56",
+      "hrl_v2/train_upper.py": "c571648a24ab70d96dd7d30026a6bb48f385877efc6b45e816a0e706f9913bab",
+      "hrl_v2/upper_baselines.py": "da93240257418de5d59830d8cccbe0b9c5c97ebe585b3d6de75264f8c8566925",
+      "hrl_v2/validate.py": "749908558ec8928ddb7b7a802e3c862f3eb7b8aa36f8a021d664b32d1b7afabe",
+      "hrl_v2/design/reference_hybrid_simplex.py": "2cebf741d67b6e1e08d84c09ac69bbb90b8d263ea8e952f6770f80e7600ce0b7",
+      "hrl_uav/__init__.py": "3bd2c458f9491ed0d4742640ec2dee493f0472c57b9c745bc4a9e9f2a6d7cedd",
+      "hrl_uav/env.py": "4920b329d4359b4c711fd4dc1f5adda437cd2912e21c498801a37bbc92fc8ca3",
+      "hrl_uav/geometry.py": "93a32babbb42d6df2676b274a57673afa4e6896e717f56988369726d254241af",
+      "hrl_uav/industrial_baselines.py": "00df33f1e4e0831dc9b0f782aad163f7c83a3f86a38098f5d153b4fff9f203a8",
+      "hrl_uav/industrial_deployment_env.py": "c6edb15118d6157d5b022c59077630952dffb6b60788e6bec7aa0ae7a007df0e",
+      "hrl_uav/industrial_deployment_observation.py": "789c12eadce5472bef0a91e2e4d33319b1c733006bac4b5a41e485484d056ea0",
+      "hrl_uav/industrial_deployment_scene.py": "4512d8630245047185f50c525319d2d33aaf5752ed6d1ad4eeccc59d1c6f0cb1",
+      "hrl_uav/industrial_env.py": "c6c7ae069c8828a8bc889378485f0095d9049d4bd7b40a8e4df822df83476f04",
+      "hrl_uav/industrial_hotspot_env.py": "7a5f76cb37c4ba9a794ccb31235224293f2a0bbc1609c81c7bafb83298de867e",
+      "hrl_uav/industrial_hotspot_scene.py": "ad5ee91c8f1fbb300c19082adc2c1d3c7148a2b898786379533d9492d59f615f",
+      "hrl_uav/industrial_observation.py": "0945a55b40ddfe6a2ec41c6818ded3ee55cdbc7c0c9297c9e60f41f6927ee964",
+      "hrl_uav/industrial_scene.py": "b487d4d7749efb0eccea8add13cf894e9af7fae8ea0bb47a56c532feeb05187e",
+      "hrl_uav/load_switching.py": "8649cb491b127ea79f0fd0b7402678f4b36dd36761fc12bd3760fb7eed2fbe11",
+      "hrl_uav/mdp.py": "a8af6af4b94108eef253668ca5abc89027a3733c0b132eb64fe243ea9ff80cf3",
+      "hrl_uav/routing.py": "5e45b645b8eb97bb5b1ee6fe8f943631adfd235d37c304d3cf6f8b171c56ddde",
+      "hrl_uav/xu_cvx_r.py": "8beea2a0e083133c7c311dcb35ec1f3ba133454c9df0ccbb3eb1be088692fa26"
+    },
+    "config_sha256": "7424127e2248f7318ea9128dfc254bef85e1fec0244dae5fda80c760d4559e23",
+    "scene_sha256": "6933abadbb8e34a532de6429477d52441e131996015126e458cbc97494e4c582"
+  },
+  "source_checkpoints": {
+    "SACDET-200": {
+      "path": "D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_multiseed_20261002_203333_r2\\seed_4104\\stage2\\runs\\sacdet\\checkpoints\\episode-0200.pt",
+      "sha256": "98eb3c117bf5d8e3bda863ab1c7541cd5d74defa7af6a677aba7c0e50ca78c83"
+    },
+    "S300": {
+      "path": "D:\\HRL_UAV_V2_speedup\\outputs\\lite_v2_4_0\\multiseed_20261002_203333_r2\\runs\\Proposed\\seed_4104\\checkpoints\\episode-0300-evaluated.pt",
+      "sha256": "6922537220b8ef6a0cd0257be429a0fdfd075821b3245ea62e3f4daf966d7ad4"
+    }
+  },
+  "LOWER": [
+    {
+      "global_episode": 411,
+      "stage": 3,
+      "cycle": 2,
+      "block_episode": 1,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": false
+    },
+    {
+      "global_episode": 412,
+      "stage": 3,
+      "cycle": 2,
+      "block_episode": 2,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": false
+    },
+    {
+      "global_episode": 413,
+      "stage": 3,
+      "cycle": 2,
+      "block_episode": 3,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 414,
+      "stage": 3,
+      "cycle": 2,
+      "block_episode": 4,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 415,
+      "stage": 3,
+      "cycle": 2,
+      "block_episode": 5,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 416,
+      "stage": 3,
+      "cycle": 2,
+      "block_episode": 6,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 417,
+      "stage": 3,
+      "cycle": 2,
+      "block_episode": 7,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 418,
+      "stage": 3,
+      "cycle": 2,
+      "block_episode": 8,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 419,
+      "stage": 3,
+      "cycle": 2,
+      "block_episode": 9,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 420,
+      "stage": 3,
+      "cycle": 2,
+      "block_episode": 10,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 431,
+      "stage": 3,
+      "cycle": 4,
+      "block_episode": 1,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": false
+    },
+    {
+      "global_episode": 432,
+      "stage": 3,
+      "cycle": 4,
+      "block_episode": 2,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": false
+    },
+    {
+      "global_episode": 433,
+      "stage": 3,
+      "cycle": 4,
+      "block_episode": 3,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 434,
+      "stage": 3,
+      "cycle": 4,
+      "block_episode": 4,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 435,
+      "stage": 3,
+      "cycle": 4,
+      "block_episode": 5,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 436,
+      "stage": 3,
+      "cycle": 4,
+      "block_episode": 6,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 437,
+      "stage": 3,
+      "cycle": 4,
+      "block_episode": 7,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 438,
+      "stage": 3,
+      "cycle": 4,
+      "block_episode": 8,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 439,
+      "stage": 3,
+      "cycle": 4,
+      "block_episode": 9,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 440,
+      "stage": 3,
+      "cycle": 4,
+      "block_episode": 10,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 451,
+      "stage": 3,
+      "cycle": 6,
+      "block_episode": 1,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": false
+    },
+    {
+      "global_episode": 452,
+      "stage": 3,
+      "cycle": 6,
+      "block_episode": 2,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": false
+    },
+    {
+      "global_episode": 453,
+      "stage": 3,
+      "cycle": 6,
+      "block_episode": 3,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 454,
+      "stage": 3,
+      "cycle": 6,
+      "block_episode": 4,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 455,
+      "stage": 3,
+      "cycle": 6,
+      "block_episode": 5,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 456,
+      "stage": 3,
+      "cycle": 6,
+      "block_episode": 6,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 457,
+      "stage": 3,
+      "cycle": 6,
+      "block_episode": 7,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 458,
+      "stage": 3,
+      "cycle": 6,
+      "block_episode": 8,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 459,
+      "stage": 3,
+      "cycle": 6,
+      "block_episode": 9,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 460,
+      "stage": 3,
+      "cycle": 6,
+      "block_episode": 10,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 471,
+      "stage": 3,
+      "cycle": 8,
+      "block_episode": 1,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": false
+    },
+    {
+      "global_episode": 472,
+      "stage": 3,
+      "cycle": 8,
+      "block_episode": 2,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": false
+    },
+    {
+      "global_episode": 473,
+      "stage": 3,
+      "cycle": 8,
+      "block_episode": 3,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 474,
+      "stage": 3,
+      "cycle": 8,
+      "block_episode": 4,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 475,
+      "stage": 3,
+      "cycle": 8,
+      "block_episode": 5,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 476,
+      "stage": 3,
+      "cycle": 8,
+      "block_episode": 6,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 477,
+      "stage": 3,
+      "cycle": 8,
+      "block_episode": 7,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 478,
+      "stage": 3,
+      "cycle": 8,
+      "block_episode": 8,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 479,
+      "stage": 3,
+      "cycle": 8,
+      "block_episode": 9,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 480,
+      "stage": 3,
+      "cycle": 8,
+      "block_episode": 10,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 491,
+      "stage": 3,
+      "cycle": 10,
+      "block_episode": 1,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": false
+    },
+    {
+      "global_episode": 492,
+      "stage": 3,
+      "cycle": 10,
+      "block_episode": 2,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": false
+    },
+    {
+      "global_episode": 493,
+      "stage": 3,
+      "cycle": 10,
+      "block_episode": 3,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 494,
+      "stage": 3,
+      "cycle": 10,
+      "block_episode": 4,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 495,
+      "stage": 3,
+      "cycle": 10,
+      "block_episode": 5,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 496,
+      "stage": 3,
+      "cycle": 10,
+      "block_episode": 6,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 497,
+      "stage": 3,
+      "cycle": 10,
+      "block_episode": 7,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 498,
+      "stage": 3,
+      "cycle": 10,
+      "block_episode": 8,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 499,
+      "stage": 3,
+      "cycle": 10,
+      "block_episode": 9,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 500,
+      "stage": 3,
+      "cycle": 10,
+      "block_episode": 10,
+      "layer": "lower",
+      "alpha": 0.0005,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 511,
+      "stage": 3,
+      "cycle": 12,
+      "block_episode": 1,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": false
+    },
+    {
+      "global_episode": 512,
+      "stage": 3,
+      "cycle": 12,
+      "block_episode": 2,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": false
+    },
+    {
+      "global_episode": 513,
+      "stage": 3,
+      "cycle": 12,
+      "block_episode": 3,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 514,
+      "stage": 3,
+      "cycle": 12,
+      "block_episode": 4,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 515,
+      "stage": 3,
+      "cycle": 12,
+      "block_episode": 5,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 516,
+      "stage": 3,
+      "cycle": 12,
+      "block_episode": 6,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 517,
+      "stage": 3,
+      "cycle": 12,
+      "block_episode": 7,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 518,
+      "stage": 3,
+      "cycle": 12,
+      "block_episode": 8,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 519,
+      "stage": 3,
+      "cycle": 12,
+      "block_episode": 9,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 520,
+      "stage": 3,
+      "cycle": 12,
+      "block_episode": 10,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 531,
+      "stage": 3,
+      "cycle": 14,
+      "block_episode": 1,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": false
+    },
+    {
+      "global_episode": 532,
+      "stage": 3,
+      "cycle": 14,
+      "block_episode": 2,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": false
+    },
+    {
+      "global_episode": 533,
+      "stage": 3,
+      "cycle": 14,
+      "block_episode": 3,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 534,
+      "stage": 3,
+      "cycle": 14,
+      "block_episode": 4,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 535,
+      "stage": 3,
+      "cycle": 14,
+      "block_episode": 5,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 536,
+      "stage": 3,
+      "cycle": 14,
+      "block_episode": 6,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 537,
+      "stage": 3,
+      "cycle": 14,
+      "block_episode": 7,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 538,
+      "stage": 3,
+      "cycle": 14,
+      "block_episode": 8,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 539,
+      "stage": 3,
+      "cycle": 14,
+      "block_episode": 9,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 540,
+      "stage": 3,
+      "cycle": 14,
+      "block_episode": 10,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 551,
+      "stage": 3,
+      "cycle": 16,
+      "block_episode": 1,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": false
+    },
+    {
+      "global_episode": 552,
+      "stage": 3,
+      "cycle": 16,
+      "block_episode": 2,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": false
+    },
+    {
+      "global_episode": 553,
+      "stage": 3,
+      "cycle": 16,
+      "block_episode": 3,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 554,
+      "stage": 3,
+      "cycle": 16,
+      "block_episode": 4,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 555,
+      "stage": 3,
+      "cycle": 16,
+      "block_episode": 5,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 556,
+      "stage": 3,
+      "cycle": 16,
+      "block_episode": 6,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 557,
+      "stage": 3,
+      "cycle": 16,
+      "block_episode": 7,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 558,
+      "stage": 3,
+      "cycle": 16,
+      "block_episode": 8,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 559,
+      "stage": 3,
+      "cycle": 16,
+      "block_episode": 9,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 560,
+      "stage": 3,
+      "cycle": 16,
+      "block_episode": 10,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 571,
+      "stage": 3,
+      "cycle": 18,
+      "block_episode": 1,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": false
+    },
+    {
+      "global_episode": 572,
+      "stage": 3,
+      "cycle": 18,
+      "block_episode": 2,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": false
+    },
+    {
+      "global_episode": 573,
+      "stage": 3,
+      "cycle": 18,
+      "block_episode": 3,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 574,
+      "stage": 3,
+      "cycle": 18,
+      "block_episode": 4,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 575,
+      "stage": 3,
+      "cycle": 18,
+      "block_episode": 5,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 576,
+      "stage": 3,
+      "cycle": 18,
+      "block_episode": 6,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 577,
+      "stage": 3,
+      "cycle": 18,
+      "block_episode": 7,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 578,
+      "stage": 3,
+      "cycle": 18,
+      "block_episode": 8,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 579,
+      "stage": 3,
+      "cycle": 18,
+      "block_episode": 9,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 580,
+      "stage": 3,
+      "cycle": 18,
+      "block_episode": 10,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 591,
+      "stage": 3,
+      "cycle": 20,
+      "block_episode": 1,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": false
+    },
+    {
+      "global_episode": 592,
+      "stage": 3,
+      "cycle": 20,
+      "block_episode": 2,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": false
+    },
+    {
+      "global_episode": 593,
+      "stage": 3,
+      "cycle": 20,
+      "block_episode": 3,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 594,
+      "stage": 3,
+      "cycle": 20,
+      "block_episode": 4,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 595,
+      "stage": 3,
+      "cycle": 20,
+      "block_episode": 5,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 596,
+      "stage": 3,
+      "cycle": 20,
+      "block_episode": 6,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 597,
+      "stage": 3,
+      "cycle": 20,
+      "block_episode": 7,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 598,
+      "stage": 3,
+      "cycle": 20,
+      "block_episode": 8,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 599,
+      "stage": 3,
+      "cycle": 20,
+      "block_episode": 9,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    },
+    {
+      "global_episode": 600,
+      "stage": 3,
+      "cycle": 20,
+      "block_episode": 10,
+      "layer": "lower",
+      "alpha": 0.0,
+      "actor_enabled": true
+    }
+  ],
+  "expected_sac_delta": {
+    "triggers": 9000,
+    "skipped": 90,
+    "events": 8910,
+    "critic_fits": 17820,
+    "target_updates": 8910,
+    "actor_updates": 3600
+  },
+  "seed": 4104,
+  "intermediate_models": "S3-c1..S3-c9 report only; no selection",
+  "only_protocol_difference": "上层冻结为 SACDET-200，因此经验池只在第一块开头因上层版本变化清空一次；其余规则与原第三阶段下层块相同。",
+  "created_at": "2026-10-03 17:11:25"
+}

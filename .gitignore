@@ -1,0 +1,27 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv*/
+venv/
+.pytest_cache/
+build/
+dist/
+/outputs/
+data/fixtures/*.pkl
+*.pt
+*.pth
+.local_backup/
+.env
+.idea/
+.vscode/
+
+# Exclude generated research data in every source tree
+*.npz
+*.npy
+*.pkl
+*.jsonl
+*.zip
+*.csv
+.env.*
+*.pem
+*.key

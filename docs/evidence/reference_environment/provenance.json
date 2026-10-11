@@ -1,0 +1,112 @@
+{
+  "base_commit": "3b858f9e248f95c489e88f72ce4e525e2deea64f",
+  "branch": "codex/hrl-uav-v2-standalone",
+  "initial_worktree_clean": true,
+  "production_source_changed": false,
+  "reference_read_method": "read-only exact-commit GitHub file fetch; no external source executed or vendored",
+  "references": [
+    {
+      "repository": "revenol/LyDROO",
+      "commit": "d1084ab1038a49eb8c97b4a9342c456920728eaf",
+      "files": {
+        "LyDROO.py": [
+          140,
+          148
+        ],
+        "ResourceAllocation.py": [
+          [
+            64,
+            71
+          ],
+          [
+            144,
+            177
+          ]
+        ]
+      },
+      "source": "https://github.com/revenol/LyDROO/tree/d1084ab1038a49eb8c97b4a9342c456920728eaf"
+    },
+    {
+      "repository": "raoulraft/multi-agent-fanet-offload",
+      "commit": "a267b0c1ce060fa6ac383f8043c55d92c2297669",
+      "files": {
+        "drone.py": [
+          98,
+          157
+        ],
+        "uav_env.py": [
+          [
+            232,
+            247
+          ],
+          [
+            347,
+            350
+          ]
+        ],
+        "packet.py": [
+          5,
+          16
+        ],
+        "event.py": [
+          57,
+          63
+        ]
+      },
+      "source": "https://github.com/raoulraft/multi-agent-fanet-offload/tree/a267b0c1ce060fa6ac383f8043c55d92c2297669"
+    },
+    {
+      "repository": "fangvv/UAV-DDPG",
+      "commit": "67e46755fa484b51424c923cfd3ddc4217676bc9",
+      "files": {
+        "DDPG/UAV_env.py": [
+          [
+            115,
+            117
+          ],
+          [
+            129,
+            135
+          ],
+          [
+            164,
+            173
+          ],
+          [
+            184,
+            199
+          ]
+        ]
+      },
+      "source": "https://github.com/fangvv/UAV-DDPG/tree/67e46755fa484b51424c923cfd3ddc4217676bc9"
+    }
+  ],
+  "final_local_file_sha256": {
+    "src/hrl_uav/industrial_env.py": "44fa5f11df4f5350274ad8aff209edcbda813071288fabca2cf5bb23786baaf9",
+    "src/hrl_uav/industrial_deployment_env.py": "c6edb15118d6157d5b022c59077630952dffb6b60788e6bec7aa0ae7a007df0e",
+    "src/hrl_uav/industrial_hotspot_env.py": "2484eb2e7b990a3e6827ead6a92bbe59c853a5dd7d0b7ed6395041770c9951f0",
+    "src/hrl_uav/industrial_scene.py": "58e4cc1ea0d6cf993757fac51a6edf5eaa234a956d7f381c577a3d797454d312",
+    "src/hrl_uav/industrial_hotspot_scene.py": "59764df467f85cfc68c8d0cb6888e3d3c358ff2acd4a6f32b91070e6f28befca",
+    "src/hrl_uav/env.py": "ff6dbee5c0e643695c6f9f9fb36e9040ae0b4abb84bcb1faef521c605421569e",
+    "src/hrl_v2/physics_adapter.py": "8d522021bee997c6984fef2873ee2b6b6a70818ec6c6714ab0949a28895b8928",
+    "src/hrl_v2/collector.py": "2715311761b571dd81fa2850f7d2333d51869b4e8af6379578b30d2b739ae269",
+    "src/hrl_v2/metrics.py": "c26e99acf7c38b9f6409670e918a8524e47bb69885c90a06f80bb14ce5766e6f",
+    "src/hrl_v2/replay.py": "44d94025f0fe6c88f0b3194e60de630dadd2667b62810eb81cac469b0aa8ea41",
+    "src/hrl_v2/timing.py": "bb8864a0394e81d71efd6473533e57195c19177960fbfa7837ae08eb255f4d56",
+    "src/hrl_v2/features.py": "fb58b4df43fbf33d113b216279c979c55b7f93186cdaa722fb9aec6497b04649",
+    "src/hrl_v2/reports.py": "54ca53eca9c0778fa884da7a12c209166c0d42e0fb16862e807e62bf789ba996",
+    "src/hrl_v2/run.py": "14791bb74c8780b6f5aaf3b31bd77e706249a203acc5d0045600b1231765992e",
+    "src/hrl_v2/configs/physical_scene.json": "daea8771a2cb06754724c2af373704c279c080c7216d55ad990c86f0918b6136",
+    "src/hrl_v2/configs/v2_1_0.json": "fdd4f02305a865f1502fa683d72bdd102ff8022372f9ebaca595b560aa6174ee",
+    "src/hrl_v2/tests/reference_validation.py": "3867ddac6e7372feef3deb9c6b58a6f72ce5a8a0778d35c60621252967cce0ef",
+    "src/hrl_v2/tests/test_reference_parents.py": "d8911d8924f02e81f875a25ba93d7ffc93659fb293a5a09c3b2b95ef70beba79",
+    "src/hrl_v2/tests/test_reference_physics.py": "070defe57936b030c0c78c0655ee1dccf2ed9cb08596ae300d991c9fbd85348a",
+    "src/hrl_v2/tests/test_reference_continuation.py": "e7cda8cee9999a5020d0fb22313e0f04370fd90add577ff93330901064a4c8d9",
+    "src/hrl_v2/tests/test_physical_contract.py": "59f44d5b0025c4df6f727a52d7c89098635b68f2b223cb140f08b01090cbce59",
+    "src/hrl_v2/tests/test_observation_metrics.py": "e1078383d266af8dd78e7a2aaf4c59037ecdf6174953f04da9427125d394fb0a"
+  },
+  "attachment_sha256": "3501edbf70d1d6f662b40885fb8c59ee14a3ec70d63084a14d030cf9756809ec",
+  "physical_steps": 1451,
+  "training_started": false,
+  "optimizer_updates": 0
+}

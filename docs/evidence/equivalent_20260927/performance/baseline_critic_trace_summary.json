@@ -1,0 +1,348 @@
+{
+  "schema": "chrome_trace_inclusive_cpu_summary_1",
+  "trace_path": "D:\\HRL_UAV_V2\\outputs\\equivalent_20260927\\baseline\\critic.e2.h1800.backlog.trace.json",
+  "trace_bytes": 317722030,
+  "events_seen": 834292,
+  "user_annotations": [
+    {
+      "name": "critic.e2.h1800.backlog",
+      "calls": 1,
+      "inclusive_cpu_seconds": 8.881389800000001,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/critic_fit",
+      "calls": 1,
+      "inclusive_cpu_seconds": 8.8812926,
+      "instant_events": 0
+    },
+    {
+      "name": "data/batch_graph_and_transfer",
+      "calls": 40,
+      "inclusive_cpu_seconds": 4.3608252,
+      "instant_events": 0
+    },
+    {
+      "name": "data/fixed_graph_features",
+      "calls": 201,
+      "inclusive_cpu_seconds": 3.7809298999999976,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/q1/batch_forward",
+      "calls": 8,
+      "inclusive_cpu_seconds": 2.5915758,
+      "instant_events": 0
+    },
+    {
+      "name": "autograd/backward",
+      "calls": 10,
+      "inclusive_cpu_seconds": 2.5409818,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/actor/batch_forward",
+      "calls": 8,
+      "inclusive_cpu_seconds": 2.3836069,
+      "instant_events": 0
+    },
+    {
+      "name": "network/typed_attention",
+      "calls": 120,
+      "inclusive_cpu_seconds": 0.9665744999999998,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/q2/batch_forward",
+      "calls": 8,
+      "inclusive_cpu_seconds": 0.3270069,
+      "instant_events": 0
+    },
+    {
+      "name": "data/replay_unpack",
+      "calls": 224,
+      "inclusive_cpu_seconds": 0.3003889,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/target1/batch_forward",
+      "calls": 8,
+      "inclusive_cpu_seconds": 0.2897792,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/target2/batch_forward",
+      "calls": 8,
+      "inclusive_cpu_seconds": 0.2752515,
+      "instant_events": 0
+    },
+    {
+      "name": "data/attention_indices",
+      "calls": 16,
+      "inclusive_cpu_seconds": 0.22633630000000002,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/hybrid_sampling",
+      "calls": 8,
+      "inclusive_cpu_seconds": 0.0291555,
+      "instant_events": 0
+    },
+    {
+      "name": "history/prefix_forward",
+      "calls": 5,
+      "inclusive_cpu_seconds": 0.0232069,
+      "instant_events": 0
+    },
+    {
+      "name": "optimizer/adam_step",
+      "calls": 1,
+      "inclusive_cpu_seconds": 0.020378900000000002,
+      "instant_events": 0
+    },
+    {
+      "name": "Optimizer.step#Adam.step",
+      "calls": 1,
+      "inclusive_cpu_seconds": 0.0203265,
+      "instant_events": 0
+    },
+    {
+      "name": "data/arrival_normalize_and_transfer",
+      "calls": 10,
+      "inclusive_cpu_seconds": 0.015384600000000002,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/action_cast",
+      "calls": 16,
+      "inclusive_cpu_seconds": 0.006964000000000001,
+      "instant_events": 0
+    },
+    {
+      "name": "history/full_prefix_backward",
+      "calls": 2,
+      "inclusive_cpu_seconds": 0.0050030000000000005,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/q1/q_value_head",
+      "calls": 8,
+      "inclusive_cpu_seconds": 0.0048568000000000005,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/q2/q_value_head",
+      "calls": 8,
+      "inclusive_cpu_seconds": 0.0045754,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/target1/q_value_head",
+      "calls": 8,
+      "inclusive_cpu_seconds": 0.0043082,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/actor/queue_upload_gru",
+      "calls": 8,
+      "inclusive_cpu_seconds": 0.0041179,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/actor/queue_ready_gru",
+      "calls": 8,
+      "inclusive_cpu_seconds": 0.0039623,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/q1/queue_upload_gru",
+      "calls": 8,
+      "inclusive_cpu_seconds": 0.0039116,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/target2/q_value_head",
+      "calls": 8,
+      "inclusive_cpu_seconds": 0.0038725,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/target1/queue_upload_gru",
+      "calls": 8,
+      "inclusive_cpu_seconds": 0.003733,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/q1/queue_ready_gru",
+      "calls": 8,
+      "inclusive_cpu_seconds": 0.0036710000000000002,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/q2/queue_upload_gru",
+      "calls": 8,
+      "inclusive_cpu_seconds": 0.0035121,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/target2/queue_upload_gru",
+      "calls": 8,
+      "inclusive_cpu_seconds": 0.0034341000000000003,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/q2/queue_ready_gru",
+      "calls": 8,
+      "inclusive_cpu_seconds": 0.0033993,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/target2/queue_ready_gru",
+      "calls": 8,
+      "inclusive_cpu_seconds": 0.0032789,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/q1/arrival_gru",
+      "calls": 2,
+      "inclusive_cpu_seconds": 0.0031553,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/target2/queue_cpu_gru",
+      "calls": 8,
+      "inclusive_cpu_seconds": 0.0030781000000000003,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/q1/queue_cpu_gru",
+      "calls": 8,
+      "inclusive_cpu_seconds": 0.0029183,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/target1/queue_ready_gru",
+      "calls": 8,
+      "inclusive_cpu_seconds": 0.0028838,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/q2/queue_cpu_gru",
+      "calls": 8,
+      "inclusive_cpu_seconds": 0.0028628,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/target1/queue_cpu_gru",
+      "calls": 8,
+      "inclusive_cpu_seconds": 0.0028541,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/actor/queue_cpu_gru",
+      "calls": 8,
+      "inclusive_cpu_seconds": 0.0027851,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/q2/queue_transfer_gru",
+      "calls": 4,
+      "inclusive_cpu_seconds": 0.0018514,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/q1/queue_transfer_gru",
+      "calls": 4,
+      "inclusive_cpu_seconds": 0.0018126000000000001,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/actor/queue_transfer_gru",
+      "calls": 4,
+      "inclusive_cpu_seconds": 0.0013811,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/target2/queue_transfer_gru",
+      "calls": 4,
+      "inclusive_cpu_seconds": 0.0013257,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/target1/queue_transfer_gru",
+      "calls": 4,
+      "inclusive_cpu_seconds": 0.0011713000000000001,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/q2/arrival_gru",
+      "calls": 2,
+      "inclusive_cpu_seconds": 0.0008978,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/actor/arrival_gru",
+      "calls": 2,
+      "inclusive_cpu_seconds": 0.0008347000000000001,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/target1/arrival_gru",
+      "calls": 2,
+      "inclusive_cpu_seconds": 0.0007647999999999999,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/target2/arrival_gru",
+      "calls": 2,
+      "inclusive_cpu_seconds": 0.0007336,
+      "instant_events": 0
+    },
+    {
+      "name": "Optimizer.zero_grad#Adam.zero_grad",
+      "calls": 1,
+      "inclusive_cpu_seconds": 0.0001137,
+      "instant_events": 0
+    }
+  ],
+  "cpu_transfer_related_calls": [
+    {
+      "name": "aten::copy_",
+      "calls": 14815,
+      "inclusive_cpu_seconds": 0.1951816999999978,
+      "instant_events": 0
+    },
+    {
+      "name": "aten::to",
+      "calls": 5585,
+      "inclusive_cpu_seconds": 0.08414490000000459,
+      "instant_events": 0
+    },
+    {
+      "name": "aten::_to_copy",
+      "calls": 1686,
+      "inclusive_cpu_seconds": 0.0782421,
+      "instant_events": 0
+    }
+  ],
+  "cuda_activity": {
+    "kernel_events": 0,
+    "memcpy_events": 0,
+    "memset_events": 0,
+    "activity_available": false,
+    "interpretation": "No actual CUDA kernel/memcpy events were captured. CUPTI activity data is unavailable in this trace; do not attribute time to CUDA kernels or transfers."
+  },
+  "diagnostics": {
+    "invalid_durations": 0,
+    "ignored_events": {}
+  },
+  "notes": [
+    "All reported CPU durations are inclusive nested spans. Rows overlap and must not be added together.",
+    "These tables are not a wall-clock decomposition and contain no wall-clock percentage attribution.",
+    "Transfer-related CPU calls measure host dispatch/conversion/copy work, not actual CUDA transfer duration; aten::to may only change dtype or return its input.",
+    "CUDA counts come only from actual kernel/gpu_memcpy/gpu_memset categories, never cudaLaunchKernel or other CPU runtime API calls.",
+    "Chrome trace ts/dur fields are interpreted as microseconds; displayTimeUnit does not change their storage unit.",
+    "Only completed X or matched B/E spans contribute duration. Instant annotation events are counted with zero duration; incomplete/unsupported annotation events are reported separately.",
+    "This offline parser loads the trace into host memory. Run it after performance measurements, not alongside them."
+  ]
+}

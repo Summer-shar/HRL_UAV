@@ -1,0 +1,6 @@
+test_deliberately_late_fragment_blocks_parent_without_double_completion (hrl_v2.tests.test_reference_parents.ReferenceParentTests) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.012s
+
+OK

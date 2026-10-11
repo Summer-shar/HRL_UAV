@@ -1,0 +1,2265 @@
+{
+  "schema": "read_only_training_speed_analysis_v1",
+  "started_at": "2026-10-11T21:38:44.183713+08:00",
+  "snapshot_note": "All D numbers are a bounded read snapshot; training continues and logs append. No profiling, tensor/checkpoint loads, or new training.",
+  "boundaries": {
+    "output": "D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\speed_analysis_20261011",
+    "only_new_output_written": true,
+    "training_interrupted": false,
+    "source_modified": false,
+    "existing_files_modified": false,
+    "additional_training_or_profile": false,
+    "test_scenes_accessed": false
+  },
+  "timing_definitions": {
+    "base_collection": "includes SAC updates, guard checks, learning callbacks, physics, policy, rollout seal and audit; excludes full resume checkpoint",
+    "base_sac_zero": "0 is separately timed sentinel; SAC time cannot be separated from collection in existing logs",
+    "joint_sac": "90 event calls per normal ordinal including learning writes and resource checks; PPO time charged only to last of each five",
+    "checkpoint": "train_metrics checkpoint_seconds means selected-candidate save only, not full resume",
+    "JC_wall": "work + candidate checkpoint + inline dev evaluation; result total includes gaps",
+    "D_wall": "work + candidate checkpoint only; resume, additional callbacks outside timer, source checks excluded; no evaluation_seconds field",
+    "extra": "extra_metrics logs collection only; no update budget added and no per-row wall timing",
+    "shares": "percentages use each phase sum(recorded wall); work/wall are composites and not additional parts",
+    "residual": "recorded-field arithmetic residual is not uninstrumented real time; missing values never replaced with a measured zero"
+  },
+  "datasets": [
+    {
+      "experiment": "JC",
+      "seed": 4104,
+      "normal_log": {
+        "path": "D:\\HRL_UAV_V2_speedup\\outputs\\lite_v2_4_0\\joint_sync_pilot_20261009_131658\\seed_4104\\train\\train_metrics.jsonl",
+        "exists": true,
+        "partial_tail": false
+      },
+      "extra_log": {
+        "path": "D:\\HRL_UAV_V2_speedup\\outputs\\lite_v2_4_0\\joint_sync_pilot_20261009_131658\\seed_4104\\train\\extra_metrics.jsonl",
+        "exists": false,
+        "partial_tail": false
+      },
+      "normal_rows": 400,
+      "extra_rows": 0,
+      "last_normal_episode": 400,
+      "groups": [
+        {
+          "phase": "base_hover",
+          "period": "all",
+          "count": 200,
+          "first_episode": 1,
+          "last_episode": 200,
+          "fields": {
+            "collection_seconds": {
+              "recorded": 200,
+              "missing": 0,
+              "total_seconds": 10258.291082499989,
+              "mean_seconds": 51.29145541249995,
+              "median_seconds": 39.38037415000008,
+              "p90_seconds": 94.20933135999996,
+              "percent_of_recorded_wall": 99.99855322537104,
+              "overlaps_other_components": false
+            },
+            "sac_seconds": {
+              "recorded": 200,
+              "missing": 0,
+              "total_seconds": 0.0,
+              "mean_seconds": 0.0,
+              "median_seconds": 0.0,
+              "p90_seconds": 0.0,
+              "percent_of_recorded_wall": 0.0,
+              "overlaps_other_components": false
+            },
+            "ppo_seconds": {
+              "recorded": 200,
+              "missing": 0,
+              "total_seconds": 0.0,
+              "mean_seconds": 0.0,
+              "median_seconds": 0.0,
+              "p90_seconds": 0.0,
+              "percent_of_recorded_wall": 0.0,
+              "overlaps_other_components": false
+            },
+            "checkpoint_seconds": {
+              "recorded": 200,
+              "missing": 0,
+              "total_seconds": 0.14841419999902428,
+              "mean_seconds": 0.0007420709999951214,
+              "median_seconds": 0.0,
+              "p90_seconds": 0.0,
+              "percent_of_recorded_wall": 0.001446752208398675,
+              "overlaps_other_components": false
+            },
+            "evaluation_seconds": {
+              "recorded": 200,
+              "missing": 0,
+              "total_seconds": 2.2999993234407157e-06,
+              "mean_seconds": 1.1499996617203578e-08,
+              "median_seconds": 0.0,
+              "p90_seconds": 0.0,
+              "percent_of_recorded_wall": 2.242055747041179e-08,
+              "overlaps_other_components": false
+            },
+            "work_seconds": {
+              "recorded": 200,
+              "missing": 0,
+              "total_seconds": 10258.291082499989,
+              "mean_seconds": 51.29145541249995,
+              "median_seconds": 39.38037415000008,
+              "p90_seconds": 94.20933135999996,
+              "percent_of_recorded_wall": 99.99855322537104,
+              "overlaps_other_components": true
+            },
+            "wall_seconds": {
+              "recorded": 200,
+              "missing": 0,
+              "total_seconds": 10258.439498999987,
+              "mean_seconds": 51.29219749499994,
+              "median_seconds": 39.38037415000008,
+              "p90_seconds": 94.20933135999996,
+              "percent_of_recorded_wall": 100.0,
+              "overlaps_other_components": true
+            }
+          },
+          "recorded_component_residual_total_seconds": 0.0,
+          "recorded_component_residual_mean_seconds": 0.0,
+          "all_additive_fields_present": true,
+          "strict_total_wall_residual_seconds": null
+        },
+        {
+          "phase": "joint_normal",
+          "period": "all",
+          "count": 200,
+          "first_episode": 201,
+          "last_episode": 400,
+          "fields": {
+            "collection_seconds": {
+              "recorded": 200,
+              "missing": 0,
+              "total_seconds": 3006.624369099978,
+              "mean_seconds": 15.03312184549989,
+              "median_seconds": 14.97454844999902,
+              "p90_seconds": 15.825554620000002,
+              "percent_of_recorded_wall": 39.675615867768386,
+              "overlaps_other_components": false
+            },
+            "sac_seconds": {
+              "recorded": 200,
+              "missing": 0,
+              "total_seconds": 3033.1678822000085,
+              "mean_seconds": 15.165839411000043,
+              "median_seconds": 15.457894650000526,
+              "p90_seconds": 16.171820880000816,
+              "percent_of_recorded_wall": 40.02588583842426,
+              "overlaps_other_components": false
+            },
+            "ppo_seconds": {
+              "recorded": 200,
+              "missing": 0,
+              "total_seconds": 125.05189159999827,
+              "mean_seconds": 0.6252594579999914,
+              "median_seconds": 0.0,
+              "p90_seconds": 3.1329829599995715,
+              "percent_of_recorded_wall": 1.6501931088067887,
+              "overlaps_other_components": false
+            },
+            "checkpoint_seconds": {
+              "recorded": 200,
+              "missing": 0,
+              "total_seconds": 1.165288900001542,
+              "mean_seconds": 0.005826444500007711,
+              "median_seconds": 0.0,
+              "p90_seconds": 0.0,
+              "percent_of_recorded_wall": 0.015377230107822012,
+              "overlaps_other_components": false
+            },
+            "evaluation_seconds": {
+              "recorded": 200,
+              "missing": 0,
+              "total_seconds": 1412.0061915000042,
+              "mean_seconds": 7.060030957500021,
+              "median_seconds": 0.0,
+              "p90_seconds": 0.0,
+              "percent_of_recorded_wall": 18.632927954892754,
+              "overlaps_other_components": false
+            },
+            "work_seconds": {
+              "recorded": 200,
+              "missing": 0,
+              "total_seconds": 6164.844142899985,
+              "mean_seconds": 30.824220714499926,
+              "median_seconds": 30.691581799998858,
+              "p90_seconds": 33.60631209000057,
+              "percent_of_recorded_wall": 81.35169481499942,
+              "overlaps_other_components": true
+            },
+            "wall_seconds": {
+              "recorded": 200,
+              "missing": 0,
+              "total_seconds": 7578.015623299991,
+              "mean_seconds": 37.89007811649995,
+              "median_seconds": 30.691581799998858,
+              "p90_seconds": 33.934992399998734,
+              "percent_of_recorded_wall": 100.0,
+              "overlaps_other_components": true
+            }
+          },
+          "recorded_component_residual_total_seconds": 0.0,
+          "recorded_component_residual_mean_seconds": 0.0,
+          "all_additive_fields_present": true,
+          "strict_total_wall_residual_seconds": null
+        },
+        {
+          "phase": "base_random",
+          "period": "all",
+          "count": 0,
+          "first_episode": null,
+          "last_episode": null,
+          "fields": {
+            "collection_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "sac_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "ppo_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "checkpoint_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "evaluation_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "work_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": true
+            },
+            "wall_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": true
+            }
+          },
+          "recorded_component_residual_total_seconds": null,
+          "recorded_component_residual_mean_seconds": null,
+          "all_additive_fields_present": true,
+          "strict_total_wall_residual_seconds": null,
+          "reason": "not part of JC design"
+        },
+        {
+          "phase": "joint_random_extra",
+          "period": "all",
+          "count": 0,
+          "first_episode": null,
+          "last_episode": null,
+          "fields": {
+            "collection_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "sac_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "ppo_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "checkpoint_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "evaluation_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "work_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": true
+            },
+            "wall_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": true
+            }
+          },
+          "recorded_component_residual_total_seconds": null,
+          "recorded_component_residual_mean_seconds": null,
+          "all_additive_fields_present": true,
+          "strict_total_wall_residual_seconds": null,
+          "reason": "not part of JC design"
+        }
+      ],
+      "progress_snapshot": {
+        "status": "complete",
+        "stage": "complete",
+        "completed_episode": 400,
+        "collected_episode": 400,
+        "elapsed_seconds": 17883.829059000003,
+        "time": "2026-10-09T18:39:39.160275+08:00"
+      },
+      "training_total": {
+        "result_wall_seconds": 17882.7546235,
+        "sum_row_wall_seconds": 17836.455122299976,
+        "uncovered_seconds": 46.29950120002468,
+        "uncovered_percent": 0.2589058686695941,
+        "uncovered_per_normal_episode_seconds": 0.1157487530000617,
+        "scope": "training result only; excludes subsequent final diagnostics"
+      }
+    },
+    {
+      "experiment": "JC",
+      "seed": 4103,
+      "normal_log": {
+        "path": "D:\\HRL_UAV_V2_speedup\\outputs\\lite_v2_4_0\\joint_sync_pilot_20261009_131658\\seed_4103\\train\\train_metrics.jsonl",
+        "exists": true,
+        "partial_tail": false
+      },
+      "extra_log": {
+        "path": "D:\\HRL_UAV_V2_speedup\\outputs\\lite_v2_4_0\\joint_sync_pilot_20261009_131658\\seed_4103\\train\\extra_metrics.jsonl",
+        "exists": false,
+        "partial_tail": false
+      },
+      "normal_rows": 400,
+      "extra_rows": 0,
+      "last_normal_episode": 400,
+      "groups": [
+        {
+          "phase": "base_hover",
+          "period": "all",
+          "count": 200,
+          "first_episode": 1,
+          "last_episode": 200,
+          "fields": {
+            "collection_seconds": {
+              "recorded": 200,
+              "missing": 0,
+              "total_seconds": 6597.634257400005,
+              "mean_seconds": 32.98817128700002,
+              "median_seconds": 31.17206624999926,
+              "p90_seconds": 34.95747844000252,
+              "percent_of_recorded_wall": 99.99854515422052,
+              "overlaps_other_components": false
+            },
+            "sac_seconds": {
+              "recorded": 200,
+              "missing": 0,
+              "total_seconds": 0.0,
+              "mean_seconds": 0.0,
+              "median_seconds": 0.0,
+              "p90_seconds": 0.0,
+              "percent_of_recorded_wall": 0.0,
+              "overlaps_other_components": false
+            },
+            "ppo_seconds": {
+              "recorded": 200,
+              "missing": 0,
+              "total_seconds": 0.0,
+              "mean_seconds": 0.0,
+              "median_seconds": 0.0,
+              "p90_seconds": 0.0,
+              "percent_of_recorded_wall": 0.0,
+              "overlaps_other_components": false
+            },
+            "checkpoint_seconds": {
+              "recorded": 200,
+              "missing": 0,
+              "total_seconds": 0.09598329999789712,
+              "mean_seconds": 0.0004799164999894856,
+              "median_seconds": 0.0,
+              "p90_seconds": 0.0,
+              "percent_of_recorded_wall": 0.0014547927309134085,
+              "overlaps_other_components": false
+            },
+            "evaluation_seconds": {
+              "recorded": 200,
+              "missing": 0,
+              "total_seconds": 3.5000011848751456e-06,
+              "mean_seconds": 1.7500005924375727e-08,
+              "median_seconds": 0.0,
+              "p90_seconds": 0.0,
+              "percent_of_recorded_wall": 5.30485645112872e-08,
+              "overlaps_other_components": false
+            },
+            "work_seconds": {
+              "recorded": 200,
+              "missing": 0,
+              "total_seconds": 6597.634257400005,
+              "mean_seconds": 32.98817128700002,
+              "median_seconds": 31.17206624999926,
+              "p90_seconds": 34.95747844000252,
+              "percent_of_recorded_wall": 99.99854515422052,
+              "overlaps_other_components": true
+            },
+            "wall_seconds": {
+              "recorded": 200,
+              "missing": 0,
+              "total_seconds": 6597.730244200004,
+              "mean_seconds": 32.98865122100002,
+              "median_seconds": 31.17206624999926,
+              "p90_seconds": 34.95747844000252,
+              "percent_of_recorded_wall": 100.0,
+              "overlaps_other_components": true
+            }
+          },
+          "recorded_component_residual_total_seconds": 0.0,
+          "recorded_component_residual_mean_seconds": 0.0,
+          "all_additive_fields_present": true,
+          "strict_total_wall_residual_seconds": null
+        },
+        {
+          "phase": "joint_normal",
+          "period": "all",
+          "count": 200,
+          "first_episode": 201,
+          "last_episode": 400,
+          "fields": {
+            "collection_seconds": {
+              "recorded": 200,
+              "missing": 0,
+              "total_seconds": 3297.562045900031,
+              "mean_seconds": 16.487810229500155,
+              "median_seconds": 15.358134049998625,
+              "p90_seconds": 16.532636289999573,
+              "percent_of_recorded_wall": 39.85265902566831,
+              "overlaps_other_components": false
+            },
+            "sac_seconds": {
+              "recorded": 200,
+              "missing": 0,
+              "total_seconds": 3033.6948447999966,
+              "mean_seconds": 15.168474223999983,
+              "median_seconds": 15.407754249998106,
+              "p90_seconds": 16.177300760002982,
+              "percent_of_recorded_wall": 36.66369413368946,
+              "overlaps_other_components": false
+            },
+            "ppo_seconds": {
+              "recorded": 200,
+              "missing": 0,
+              "total_seconds": 127.2353074000057,
+              "mean_seconds": 0.6361765370000285,
+              "median_seconds": 0.0,
+              "p90_seconds": 3.114233390001027,
+              "percent_of_recorded_wall": 1.5377012627080198,
+              "overlaps_other_components": false
+            },
+            "checkpoint_seconds": {
+              "recorded": 200,
+              "missing": 0,
+              "total_seconds": 1.1713017000074615,
+              "mean_seconds": 0.005856508500037307,
+              "median_seconds": 0.0,
+              "p90_seconds": 0.0,
+              "percent_of_recorded_wall": 0.014155757076541186,
+              "overlaps_other_components": false
+            },
+            "evaluation_seconds": {
+              "recorded": 200,
+              "missing": 0,
+              "total_seconds": 1814.7205099999992,
+              "mean_seconds": 9.073602549999997,
+              "median_seconds": 0.0,
+              "p90_seconds": 0.0,
+              "percent_of_recorded_wall": 21.931789820857663,
+              "overlaps_other_components": false
+            },
+            "work_seconds": {
+              "recorded": 200,
+              "missing": 0,
+              "total_seconds": 6458.492198100033,
+              "mean_seconds": 32.29246099050017,
+              "median_seconds": 31.043966999997792,
+              "p90_seconds": 34.28690961000211,
+              "percent_of_recorded_wall": 78.05405442206579,
+              "overlaps_other_components": true
+            },
+            "wall_seconds": {
+              "recorded": 200,
+              "missing": 0,
+              "total_seconds": 8274.38400980004,
+              "mean_seconds": 41.3719200490002,
+              "median_seconds": 31.043966999997792,
+              "p90_seconds": 34.641434130003105,
+              "percent_of_recorded_wall": 100.0,
+              "overlaps_other_components": true
+            }
+          },
+          "recorded_component_residual_total_seconds": 0.0,
+          "recorded_component_residual_mean_seconds": 0.0,
+          "all_additive_fields_present": true,
+          "strict_total_wall_residual_seconds": null
+        },
+        {
+          "phase": "base_random",
+          "period": "all",
+          "count": 0,
+          "first_episode": null,
+          "last_episode": null,
+          "fields": {
+            "collection_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "sac_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "ppo_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "checkpoint_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "evaluation_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "work_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": true
+            },
+            "wall_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": true
+            }
+          },
+          "recorded_component_residual_total_seconds": null,
+          "recorded_component_residual_mean_seconds": null,
+          "all_additive_fields_present": true,
+          "strict_total_wall_residual_seconds": null,
+          "reason": "not part of JC design"
+        },
+        {
+          "phase": "joint_random_extra",
+          "period": "all",
+          "count": 0,
+          "first_episode": null,
+          "last_episode": null,
+          "fields": {
+            "collection_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "sac_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "ppo_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "checkpoint_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "evaluation_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "work_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": true
+            },
+            "wall_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": true
+            }
+          },
+          "recorded_component_residual_total_seconds": null,
+          "recorded_component_residual_mean_seconds": null,
+          "all_additive_fields_present": true,
+          "strict_total_wall_residual_seconds": null,
+          "reason": "not part of JC design"
+        }
+      ],
+      "progress_snapshot": {
+        "status": "complete",
+        "stage": "complete",
+        "completed_episode": 400,
+        "collected_episode": 400,
+        "elapsed_seconds": 14911.050819300002,
+        "time": "2026-10-09T22:50:38.442112+08:00"
+      },
+      "training_total": {
+        "result_wall_seconds": 14909.961177599998,
+        "sum_row_wall_seconds": 14872.114254000044,
+        "uncovered_seconds": 37.84692359995461,
+        "uncovered_percent": 0.2538364999689871,
+        "uncovered_per_normal_episode_seconds": 0.09461730899988652,
+        "scope": "training result only; excludes subsequent final diagnostics"
+      }
+    },
+    {
+      "experiment": "D",
+      "seed": 4104,
+      "normal_log": {
+        "path": "D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\seed_4104\\train\\train_metrics.jsonl",
+        "exists": true,
+        "partial_tail": false
+      },
+      "extra_log": {
+        "path": "D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\seed_4104\\train\\extra_metrics.jsonl",
+        "exists": false,
+        "partial_tail": false
+      },
+      "normal_rows": 64,
+      "extra_rows": 0,
+      "last_normal_episode": 64,
+      "groups": [
+        {
+          "phase": "base_hover",
+          "period": "before_change_through_56",
+          "count": 28,
+          "first_episode": 1,
+          "last_episode": 55,
+          "fields": {
+            "collection_seconds": {
+              "recorded": 28,
+              "missing": 0,
+              "total_seconds": 3400.4063085999987,
+              "mean_seconds": 121.44308244999996,
+              "median_seconds": 133.18958104999956,
+              "p90_seconds": 153.70537242999998,
+              "percent_of_recorded_wall": 100.0,
+              "overlaps_other_components": false
+            },
+            "sac_seconds": {
+              "recorded": 28,
+              "missing": 0,
+              "total_seconds": 0.0,
+              "mean_seconds": 0.0,
+              "median_seconds": 0.0,
+              "p90_seconds": 0.0,
+              "percent_of_recorded_wall": 0.0,
+              "overlaps_other_components": false
+            },
+            "ppo_seconds": {
+              "recorded": 28,
+              "missing": 0,
+              "total_seconds": 0.0,
+              "mean_seconds": 0.0,
+              "median_seconds": 0.0,
+              "p90_seconds": 0.0,
+              "percent_of_recorded_wall": 0.0,
+              "overlaps_other_components": false
+            },
+            "checkpoint_seconds": {
+              "recorded": 28,
+              "missing": 0,
+              "total_seconds": 0.0,
+              "mean_seconds": 0.0,
+              "median_seconds": 0.0,
+              "p90_seconds": 0.0,
+              "percent_of_recorded_wall": 0.0,
+              "overlaps_other_components": false
+            },
+            "evaluation_seconds": {
+              "recorded": 0,
+              "missing": 28,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "work_seconds": {
+              "recorded": 28,
+              "missing": 0,
+              "total_seconds": 3400.4063085999987,
+              "mean_seconds": 121.44308244999996,
+              "median_seconds": 133.18958104999956,
+              "p90_seconds": 153.70537242999998,
+              "percent_of_recorded_wall": 100.0,
+              "overlaps_other_components": true
+            },
+            "wall_seconds": {
+              "recorded": 28,
+              "missing": 0,
+              "total_seconds": 3400.4063085999987,
+              "mean_seconds": 121.44308244999996,
+              "median_seconds": 133.18958104999956,
+              "p90_seconds": 153.70537242999998,
+              "percent_of_recorded_wall": 100.0,
+              "overlaps_other_components": true
+            }
+          },
+          "recorded_component_residual_total_seconds": 0.0,
+          "recorded_component_residual_mean_seconds": 0.0,
+          "all_additive_fields_present": false,
+          "strict_total_wall_residual_seconds": null
+        },
+        {
+          "phase": "base_random",
+          "period": "before_change_through_56",
+          "count": 28,
+          "first_episode": 2,
+          "last_episode": 56,
+          "fields": {
+            "collection_seconds": {
+              "recorded": 28,
+              "missing": 0,
+              "total_seconds": 3811.2331187999994,
+              "mean_seconds": 136.1154685285714,
+              "median_seconds": 137.54015715000014,
+              "p90_seconds": 170.38379479000037,
+              "percent_of_recorded_wall": 100.0,
+              "overlaps_other_components": false
+            },
+            "sac_seconds": {
+              "recorded": 28,
+              "missing": 0,
+              "total_seconds": 0.0,
+              "mean_seconds": 0.0,
+              "median_seconds": 0.0,
+              "p90_seconds": 0.0,
+              "percent_of_recorded_wall": 0.0,
+              "overlaps_other_components": false
+            },
+            "ppo_seconds": {
+              "recorded": 28,
+              "missing": 0,
+              "total_seconds": 0.0,
+              "mean_seconds": 0.0,
+              "median_seconds": 0.0,
+              "p90_seconds": 0.0,
+              "percent_of_recorded_wall": 0.0,
+              "overlaps_other_components": false
+            },
+            "checkpoint_seconds": {
+              "recorded": 28,
+              "missing": 0,
+              "total_seconds": 0.0,
+              "mean_seconds": 0.0,
+              "median_seconds": 0.0,
+              "p90_seconds": 0.0,
+              "percent_of_recorded_wall": 0.0,
+              "overlaps_other_components": false
+            },
+            "evaluation_seconds": {
+              "recorded": 0,
+              "missing": 28,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "work_seconds": {
+              "recorded": 28,
+              "missing": 0,
+              "total_seconds": 3811.2331187999994,
+              "mean_seconds": 136.1154685285714,
+              "median_seconds": 137.54015715000014,
+              "p90_seconds": 170.38379479000037,
+              "percent_of_recorded_wall": 100.0,
+              "overlaps_other_components": true
+            },
+            "wall_seconds": {
+              "recorded": 28,
+              "missing": 0,
+              "total_seconds": 3811.2331187999994,
+              "mean_seconds": 136.1154685285714,
+              "median_seconds": 137.54015715000014,
+              "p90_seconds": 170.38379479000037,
+              "percent_of_recorded_wall": 100.0,
+              "overlaps_other_components": true
+            }
+          },
+          "recorded_component_residual_total_seconds": 0.0,
+          "recorded_component_residual_mean_seconds": 0.0,
+          "all_additive_fields_present": false,
+          "strict_total_wall_residual_seconds": null
+        },
+        {
+          "phase": "base_hover",
+          "period": "after_change_from_57",
+          "count": 4,
+          "first_episode": 57,
+          "last_episode": 63,
+          "fields": {
+            "collection_seconds": {
+              "recorded": 4,
+              "missing": 0,
+              "total_seconds": 594.4737307,
+              "mean_seconds": 148.618432675,
+              "median_seconds": 144.56403780000002,
+              "p90_seconds": 195.94714342999998,
+              "percent_of_recorded_wall": 100.0,
+              "overlaps_other_components": false
+            },
+            "sac_seconds": {
+              "recorded": 4,
+              "missing": 0,
+              "total_seconds": 0.0,
+              "mean_seconds": 0.0,
+              "median_seconds": 0.0,
+              "p90_seconds": 0.0,
+              "percent_of_recorded_wall": 0.0,
+              "overlaps_other_components": false
+            },
+            "ppo_seconds": {
+              "recorded": 4,
+              "missing": 0,
+              "total_seconds": 0.0,
+              "mean_seconds": 0.0,
+              "median_seconds": 0.0,
+              "p90_seconds": 0.0,
+              "percent_of_recorded_wall": 0.0,
+              "overlaps_other_components": false
+            },
+            "checkpoint_seconds": {
+              "recorded": 4,
+              "missing": 0,
+              "total_seconds": 0.0,
+              "mean_seconds": 0.0,
+              "median_seconds": 0.0,
+              "p90_seconds": 0.0,
+              "percent_of_recorded_wall": 0.0,
+              "overlaps_other_components": false
+            },
+            "evaluation_seconds": {
+              "recorded": 0,
+              "missing": 4,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "work_seconds": {
+              "recorded": 4,
+              "missing": 0,
+              "total_seconds": 594.4737307,
+              "mean_seconds": 148.618432675,
+              "median_seconds": 144.56403780000002,
+              "p90_seconds": 195.94714342999998,
+              "percent_of_recorded_wall": 100.0,
+              "overlaps_other_components": true
+            },
+            "wall_seconds": {
+              "recorded": 4,
+              "missing": 0,
+              "total_seconds": 594.4737307,
+              "mean_seconds": 148.618432675,
+              "median_seconds": 144.56403780000002,
+              "p90_seconds": 195.94714342999998,
+              "percent_of_recorded_wall": 100.0,
+              "overlaps_other_components": true
+            }
+          },
+          "recorded_component_residual_total_seconds": 0.0,
+          "recorded_component_residual_mean_seconds": 0.0,
+          "all_additive_fields_present": false,
+          "strict_total_wall_residual_seconds": null
+        },
+        {
+          "phase": "base_random",
+          "period": "after_change_from_57",
+          "count": 4,
+          "first_episode": 58,
+          "last_episode": 64,
+          "fields": {
+            "collection_seconds": {
+              "recorded": 4,
+              "missing": 0,
+              "total_seconds": 642.4064672,
+              "mean_seconds": 160.6016168,
+              "median_seconds": 149.90007269999995,
+              "p90_seconds": 202.72933753,
+              "percent_of_recorded_wall": 100.0,
+              "overlaps_other_components": false
+            },
+            "sac_seconds": {
+              "recorded": 4,
+              "missing": 0,
+              "total_seconds": 0.0,
+              "mean_seconds": 0.0,
+              "median_seconds": 0.0,
+              "p90_seconds": 0.0,
+              "percent_of_recorded_wall": 0.0,
+              "overlaps_other_components": false
+            },
+            "ppo_seconds": {
+              "recorded": 4,
+              "missing": 0,
+              "total_seconds": 0.0,
+              "mean_seconds": 0.0,
+              "median_seconds": 0.0,
+              "p90_seconds": 0.0,
+              "percent_of_recorded_wall": 0.0,
+              "overlaps_other_components": false
+            },
+            "checkpoint_seconds": {
+              "recorded": 4,
+              "missing": 0,
+              "total_seconds": 0.0,
+              "mean_seconds": 0.0,
+              "median_seconds": 0.0,
+              "p90_seconds": 0.0,
+              "percent_of_recorded_wall": 0.0,
+              "overlaps_other_components": false
+            },
+            "evaluation_seconds": {
+              "recorded": 0,
+              "missing": 4,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "work_seconds": {
+              "recorded": 4,
+              "missing": 0,
+              "total_seconds": 642.4064672,
+              "mean_seconds": 160.6016168,
+              "median_seconds": 149.90007269999995,
+              "p90_seconds": 202.72933753,
+              "percent_of_recorded_wall": 100.0,
+              "overlaps_other_components": true
+            },
+            "wall_seconds": {
+              "recorded": 4,
+              "missing": 0,
+              "total_seconds": 642.4064672,
+              "mean_seconds": 160.6016168,
+              "median_seconds": 149.90007269999995,
+              "p90_seconds": 202.72933753,
+              "percent_of_recorded_wall": 100.0,
+              "overlaps_other_components": true
+            }
+          },
+          "recorded_component_residual_total_seconds": 0.0,
+          "recorded_component_residual_mean_seconds": 0.0,
+          "all_additive_fields_present": false,
+          "strict_total_wall_residual_seconds": null
+        },
+        {
+          "phase": "joint_normal",
+          "period": "all",
+          "count": 0,
+          "first_episode": null,
+          "last_episode": null,
+          "fields": {
+            "collection_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "sac_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "ppo_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "checkpoint_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "evaluation_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "work_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": true
+            },
+            "wall_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": true
+            }
+          },
+          "recorded_component_residual_total_seconds": null,
+          "recorded_component_residual_mean_seconds": null,
+          "all_additive_fields_present": true,
+          "strict_total_wall_residual_seconds": null,
+          "reason": "no completed observation in snapshot"
+        },
+        {
+          "phase": "joint_random_extra",
+          "period": "all",
+          "count": 0,
+          "first_episode": null,
+          "last_episode": null,
+          "fields": {
+            "collection_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "sac_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "ppo_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "checkpoint_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "evaluation_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "work_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": true
+            },
+            "wall_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": true
+            }
+          },
+          "recorded_component_residual_total_seconds": null,
+          "recorded_component_residual_mean_seconds": null,
+          "all_additive_fields_present": true,
+          "strict_total_wall_residual_seconds": null,
+          "reason": "no completed observation in snapshot"
+        }
+      ],
+      "progress_snapshot": {
+        "status": "running",
+        "stage": "mixed_base",
+        "completed_episode": 64,
+        "collected_episode": 64,
+        "elapsed_seconds": 12918.3515215,
+        "time": "2026-10-11T21:34:06.249436+08:00"
+      },
+      "progress_elapsed_comparison": {
+        "elapsed_seconds": 12918.3515215,
+        "sum_row_wall_seconds": 8448.519625299998,
+        "gap_seconds": 4469.831896200003,
+        "gap_percent": 34.600636844111776,
+        "scope": "progress timer sampled before current boundary save; includes prior resume saves and other uninstrumented work, may exclude interrupted last save/downtime; cannot allocate exactly to phase"
+      }
+    },
+    {
+      "experiment": "D",
+      "seed": 4103,
+      "normal_log": {
+        "path": "D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\seed_4103\\train\\train_metrics.jsonl",
+        "exists": true,
+        "partial_tail": false
+      },
+      "extra_log": {
+        "path": "D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\seed_4103\\train\\extra_metrics.jsonl",
+        "exists": false,
+        "partial_tail": false
+      },
+      "normal_rows": 18,
+      "extra_rows": 0,
+      "last_normal_episode": 18,
+      "groups": [
+        {
+          "phase": "base_hover",
+          "period": "all",
+          "count": 9,
+          "first_episode": 1,
+          "last_episode": 17,
+          "fields": {
+            "collection_seconds": {
+              "recorded": 9,
+              "missing": 0,
+              "total_seconds": 654.6118644000001,
+              "mean_seconds": 72.7346516,
+              "median_seconds": 77.62372239999999,
+              "p90_seconds": 83.76563200000001,
+              "percent_of_recorded_wall": 100.0,
+              "overlaps_other_components": false
+            },
+            "sac_seconds": {
+              "recorded": 9,
+              "missing": 0,
+              "total_seconds": 0.0,
+              "mean_seconds": 0.0,
+              "median_seconds": 0.0,
+              "p90_seconds": 0.0,
+              "percent_of_recorded_wall": 0.0,
+              "overlaps_other_components": false
+            },
+            "ppo_seconds": {
+              "recorded": 9,
+              "missing": 0,
+              "total_seconds": 0.0,
+              "mean_seconds": 0.0,
+              "median_seconds": 0.0,
+              "p90_seconds": 0.0,
+              "percent_of_recorded_wall": 0.0,
+              "overlaps_other_components": false
+            },
+            "checkpoint_seconds": {
+              "recorded": 9,
+              "missing": 0,
+              "total_seconds": 0.0,
+              "mean_seconds": 0.0,
+              "median_seconds": 0.0,
+              "p90_seconds": 0.0,
+              "percent_of_recorded_wall": 0.0,
+              "overlaps_other_components": false
+            },
+            "evaluation_seconds": {
+              "recorded": 0,
+              "missing": 9,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "work_seconds": {
+              "recorded": 9,
+              "missing": 0,
+              "total_seconds": 654.6118644000001,
+              "mean_seconds": 72.7346516,
+              "median_seconds": 77.62372239999999,
+              "p90_seconds": 83.76563200000001,
+              "percent_of_recorded_wall": 100.0,
+              "overlaps_other_components": true
+            },
+            "wall_seconds": {
+              "recorded": 9,
+              "missing": 0,
+              "total_seconds": 654.6118644000001,
+              "mean_seconds": 72.7346516,
+              "median_seconds": 77.62372239999999,
+              "p90_seconds": 83.76563200000001,
+              "percent_of_recorded_wall": 100.0,
+              "overlaps_other_components": true
+            }
+          },
+          "recorded_component_residual_total_seconds": 0.0,
+          "recorded_component_residual_mean_seconds": 0.0,
+          "all_additive_fields_present": false,
+          "strict_total_wall_residual_seconds": null
+        },
+        {
+          "phase": "base_random",
+          "period": "all",
+          "count": 9,
+          "first_episode": 2,
+          "last_episode": 18,
+          "fields": {
+            "collection_seconds": {
+              "recorded": 9,
+              "missing": 0,
+              "total_seconds": 771.3080206999999,
+              "mean_seconds": 85.70089118888889,
+              "median_seconds": 78.39818200000002,
+              "p90_seconds": 113.90452015999999,
+              "percent_of_recorded_wall": 100.0,
+              "overlaps_other_components": false
+            },
+            "sac_seconds": {
+              "recorded": 9,
+              "missing": 0,
+              "total_seconds": 0.0,
+              "mean_seconds": 0.0,
+              "median_seconds": 0.0,
+              "p90_seconds": 0.0,
+              "percent_of_recorded_wall": 0.0,
+              "overlaps_other_components": false
+            },
+            "ppo_seconds": {
+              "recorded": 9,
+              "missing": 0,
+              "total_seconds": 0.0,
+              "mean_seconds": 0.0,
+              "median_seconds": 0.0,
+              "p90_seconds": 0.0,
+              "percent_of_recorded_wall": 0.0,
+              "overlaps_other_components": false
+            },
+            "checkpoint_seconds": {
+              "recorded": 9,
+              "missing": 0,
+              "total_seconds": 0.0,
+              "mean_seconds": 0.0,
+              "median_seconds": 0.0,
+              "p90_seconds": 0.0,
+              "percent_of_recorded_wall": 0.0,
+              "overlaps_other_components": false
+            },
+            "evaluation_seconds": {
+              "recorded": 0,
+              "missing": 9,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "work_seconds": {
+              "recorded": 9,
+              "missing": 0,
+              "total_seconds": 771.3080206999999,
+              "mean_seconds": 85.70089118888889,
+              "median_seconds": 78.39818200000002,
+              "p90_seconds": 113.90452015999999,
+              "percent_of_recorded_wall": 100.0,
+              "overlaps_other_components": true
+            },
+            "wall_seconds": {
+              "recorded": 9,
+              "missing": 0,
+              "total_seconds": 771.3080206999999,
+              "mean_seconds": 85.70089118888889,
+              "median_seconds": 78.39818200000002,
+              "p90_seconds": 113.90452015999999,
+              "percent_of_recorded_wall": 100.0,
+              "overlaps_other_components": true
+            }
+          },
+          "recorded_component_residual_total_seconds": 0.0,
+          "recorded_component_residual_mean_seconds": 0.0,
+          "all_additive_fields_present": false,
+          "strict_total_wall_residual_seconds": null
+        },
+        {
+          "phase": "joint_normal",
+          "period": "all",
+          "count": 0,
+          "first_episode": null,
+          "last_episode": null,
+          "fields": {
+            "collection_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "sac_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "ppo_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "checkpoint_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "evaluation_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "work_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": true
+            },
+            "wall_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": true
+            }
+          },
+          "recorded_component_residual_total_seconds": null,
+          "recorded_component_residual_mean_seconds": null,
+          "all_additive_fields_present": true,
+          "strict_total_wall_residual_seconds": null,
+          "reason": "no completed observation in snapshot"
+        },
+        {
+          "phase": "joint_random_extra",
+          "period": "all",
+          "count": 0,
+          "first_episode": null,
+          "last_episode": null,
+          "fields": {
+            "collection_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "sac_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "ppo_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "checkpoint_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "evaluation_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": false
+            },
+            "work_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": true
+            },
+            "wall_seconds": {
+              "recorded": 0,
+              "missing": 0,
+              "total_seconds": null,
+              "mean_seconds": null,
+              "median_seconds": null,
+              "p90_seconds": null,
+              "percent_of_recorded_wall": null,
+              "overlaps_other_components": true
+            }
+          },
+          "recorded_component_residual_total_seconds": null,
+          "recorded_component_residual_mean_seconds": null,
+          "all_additive_fields_present": true,
+          "strict_total_wall_residual_seconds": null,
+          "reason": "no completed observation in snapshot"
+        }
+      ],
+      "progress_snapshot": {
+        "status": "running",
+        "stage": "mixed_base",
+        "completed_episode": 18,
+        "collected_episode": 18,
+        "elapsed_seconds": 1518.1996104,
+        "time": "2026-10-11T21:34:53.594171+08:00"
+      },
+      "progress_elapsed_comparison": {
+        "elapsed_seconds": 1518.1996104,
+        "sum_row_wall_seconds": 1425.9198850999999,
+        "gap_seconds": 92.27972530000011,
+        "gap_percent": 6.078234025872735,
+        "scope": "progress timer sampled before current boundary save; includes prior resume saves and other uninstrumented work, may exclude interrupted last save/downtime; cannot allocate exactly to phase"
+      }
+    }
+  ],
+  "resume_timings": [
+    {
+      "seed": 4104,
+      "source": {
+        "path": "D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\seed_4104\\train\\resume_timings.jsonl",
+        "exists": true,
+        "partial_tail": false
+      },
+      "rows": [
+        {
+          "completed_episode": 60,
+          "wall_seconds": 166.35856339999998,
+          "bytes": 485281635,
+          "time": "2026-10-11T21:23:00.437300+08:00",
+          "verification_unchanged": true
+        }
+      ]
+    },
+    {
+      "seed": 4103,
+      "source": {
+        "path": "D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\seed_4103\\train\\resume_timings.jsonl",
+        "exists": true,
+        "partial_tail": false
+      },
+      "rows": [
+        {
+          "completed_episode": 0,
+          "wall_seconds": 0.10992260000000087,
+          "bytes": 5262257,
+          "time": "2026-10-11T21:09:36.866420+08:00",
+          "verification_unchanged": true
+        },
+        {
+          "completed_episode": 5,
+          "wall_seconds": 15.514522899999974,
+          "bytes": 51558627,
+          "time": "2026-10-11T21:15:02.887317+08:00",
+          "verification_unchanged": true
+        },
+        {
+          "completed_episode": 10,
+          "wall_seconds": 29.20253070000001,
+          "bytes": 94926819,
+          "time": "2026-10-11T21:23:10.863954+08:00",
+          "verification_unchanged": true
+        },
+        {
+          "completed_episode": 15,
+          "wall_seconds": 43.757654499999944,
+          "bytes": 138516771,
+          "time": "2026-10-11T21:30:35.804278+08:00",
+          "verification_unchanged": true
+        }
+      ]
+    }
+  ],
+  "existing_parallel_benchmark": {
+    "time": "2026-10-11T21:25:30.846400+08:00",
+    "rounds": {
+      "4104": 5,
+      "4103": 11
+    },
+    "baseline": {
+      "time": "2026-10-11T21:05:43.568011+08:00",
+      "reason": "user_authorized_speedup_switch",
+      "decision_path_changed": false,
+      "verified_checkpoint": {
+        "path": "D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\seed_4104\\train\\resume\\boundary-0056-1791723791824840500.pt",
+        "sha256": "91696df94b03a5f6fdaac0d3fd304941334f357b864311feafb99e42351013c8",
+        "completed_episode": 56,
+        "parameter_hashes": {
+          "sac_actor": "09568795d826d54171041e7d824520ceead041ccb69cb7b099876c4c99e82064",
+          "sac_q1": "28952400ea27fdee4f524b8585bc85e015d49ea2b8764a3263fc47ee31f1357e",
+          "sac_q2": "c428753de4ca4a826f8bfe00ce17eeb130cd2d96597991b4f11da039983554a3",
+          "sac_target1": "5c02ef2682a4c9cf3a26983f9f6beab625df04ede27349eeb6ad68f2e2a9e7a3",
+          "sac_target2": "166cff59e569fa3e2eaf391182949a0030fb03e2454f0b6c77d3f1403a84da93",
+          "ppo_actor": "44ad9626b8c9c4ea5de685a31d8951091e7a23dba3a2c89a1027660f7c425344",
+          "ppo_value": "dde4a3d34214abacb57c2966079e81cc7a9b5fd6d50e8436da0c03d36a44df47"
+        },
+        "replay_digest": "c25433321b9c31be28c886ce3b88f5f04c2d1b634b679635a5391c74c46a894a",
+        "time": "2026-10-11T21:05:42.812889+08:00",
+        "verified": true
+      },
+      "stopped_processes": [
+        {
+          "pid": 99200,
+          "command": "D:\\Anaconda3\\envs\\pytorch-gpu\\python.exe -B -u D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\scripts\\d_background.py"
+        },
+        {
+          "pid": 124808,
+          "command": "D:\\HRL_UAV_V2\\.venv\\Scripts\\python.exe -B -u D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\scripts\\d_background.py"
+        },
+        {
+          "pid": 127780,
+          "command": "D:\\Anaconda3\\envs\\pytorch-gpu\\python.exe -B -u D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\scripts\\d_main.py"
+        },
+        {
+          "pid": 142440,
+          "command": "D:\\HRL_UAV_V2\\.venv\\Scripts\\python.exe -B -u D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\scripts\\d_main.py"
+        }
+      ],
+      "baseline_last10_episodes": [
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56
+      ],
+      "baseline_collection_seconds": 128.5290565999996,
+      "baseline_cycle_seconds": 267.71016550064087,
+      "resume_save_before_seconds": 151.00323963165283
+    },
+    "cycle_seconds": {
+      "4104": 177.66930356025696,
+      "4103": 81.520464962179
+    },
+    "collection_seconds": {
+      "4104": 144.26175134,
+      "4103": 76.49205766363637
+    },
+    "slowdown_fraction_4104": -0.3363371046146111,
+    "threshold_seconds": 428.33626480102544,
+    "pause_4103": false,
+    "passed": true
+  },
+  "existing_speedup_restore": {
+    "passed": true,
+    "time": "2026-10-11T21:10:41.905536+08:00",
+    "completed_episode": 56,
+    "checkpoint_SHA": "91696df94b03a5f6fdaac0d3fd304941334f357b864311feafb99e42351013c8",
+    "parameter_hashes_equal": true,
+    "full_network_optimizer_counters_equal": true,
+    "CPU_RNG_equal": true,
+    "CUDA_RNG_equal": true,
+    "replay_digest_equal": true,
+    "decision_path_changed": false
+  },
+  "existing_resource_summary": {
+    "samples": 59,
+    "duration_seconds": 948.7939295768738,
+    "system_cpu_mean_percent": 28.272881355932203,
+    "system_cpu_min_percent": 26.2,
+    "system_cpu_max_percent": 32.2,
+    "gpu_util_mean_percent": 5.677966101694915,
+    "gpu_util_min_percent": 1.0,
+    "gpu_util_max_percent": 36.0,
+    "gpu_memory_min_MiB": 1683.0,
+    "gpu_memory_max_MiB": 2275.0,
+    "gpu_total_MiB": 8151.0,
+    "processes": {
+      "4104": {
+        "cpu_seconds": 908.140625,
+        "one_core_percent": 95.71526510556369,
+        "rss_last_bytes": 4234018816
+      },
+      "4103": {
+        "cpu_seconds": 916.609375,
+        "one_core_percent": 96.60784564766061,
+        "rss_last_bytes": 2204033024
+      }
+    },
+    "notes": "existing benchmark samples only, no new resource sampling; CPU one-core convention, no logical-core count assumed"
+  },
+  "candidates": [
+    {
+      "id": "C1",
+      "name": "缓存已完成回合的原始 digest 字节片段；读回对象仍独立全量复算",
+      "locations": [
+        {
+          "path": "D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\scripts\\d_train.py",
+          "line": 83
+        },
+        {
+          "path": "D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\scripts\\d_train.py",
+          "line": 103
+        },
+        {
+          "path": "D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\scripts\\d_train.py",
+          "line": 105
+        },
+        {
+          "path": "D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\scripts\\d_train.py",
+          "line": 21
+        }
+      ],
+      "expected": "逐位不变（条件：只缓存已封存且不再变更的内容；不改变字节顺序、dtype/shape、repr、字典排序及原 SHA 定义）",
+      "mechanism": "缓存放在 replay 对象之外；当回合身份/版本/数据发生变更时失效。保留 FIFO 淘汰；数组片段可引用原只读数据，其他片段有界缓存。新存档读回的 replay 必须从加载对象独立生成完整原字节流，不能复用保存端缓存；不将回合哈希拼接替代原字节流。",
+      "estimate": {
+        "per_save_seconds": [
+          18.1818,
+          54.5455
+        ],
+        "amortized_per_normal_episode_seconds": [
+          3.63636,
+          10.9091
+        ],
+        "basis": "未测 digest 分项。工作估计假设两次遍历合计占 166.3586 秒中的 40–120 秒；稳定 FIFO55 每5回合仅5个新回合，保存端可省50/55遍历，而读回端保持完整，因此节省约(40–120)*0.5*50/55。若 digest 不占此比例或内容不可安全缓存，收益可为0。"
+      },
+      "effort_hours": [
+        8,
+        16
+      ],
+      "extra_memory": "需测缓存字节数并限制峰值；不能破坏现有 RAM 硬检查；本次未分配缓存"
+    },
+    {
+      "id": "C2",
+      "name": "在同一 LiteBatch 生命周期缓存同一 device 的整数索引张量",
+      "locations": [
+        {
+          "path": "D:\\HRL_UAV_V2_speedup\\src\\hrl_v2\\lite_batch.py",
+          "line": 26
+        },
+        {
+          "path": "D:\\HRL_UAV_V2_speedup\\src\\hrl_v2\\lite_batch.py",
+          "line": 34
+        },
+        {
+          "path": "D:\\HRL_UAV_V2_speedup\\src\\hrl_v2\\sac.py",
+          "line": 62
+        },
+        {
+          "path": "D:\\HRL_UAV_V2_speedup\\src\\hrl_v2\\sac.py",
+          "line": 92
+        }
+      ],
+      "expected": "逐位不变（保留原输入、顺序、dtype、设备、微批边界及每次 gather 运算）",
+      "mechanism": "当前 values 已缓存设备张量；第39行仍每次生成 indices 设备张量。同一 following 对象供 actor/target1/target2 使用，同一 current 对象供 q1/q2 使用，只复用相同整数张量，不缓存 learned outputs，不合并网络调用。缓存外置或只在临时 batch 中，不进入续训 learner/replay 状态。",
+      "estimate": {
+        "per_normal_episode_seconds": [
+          0,
+          2
+        ],
+        "basis": "估计，非实测：90 events、约225 fits/回合。仅算 critic target3次+current2次调用，2 critic fits/event*8微批*(2+1)重复索引传输≈4320次/回合；假设每次可省0–0.46ms。actor 路径额外复用不另计，避免重复收益。"
+      },
+      "effort_hours": [
+        2,
+        4
+      ]
+    },
+    {
+      "id": "C3",
+      "name": "不可变已完成回合的采样概率数组外置缓存",
+      "locations": [
+        {
+          "path": "D:\\HRL_UAV_V2_speedup\\src\\hrl_v2\\replay.py",
+          "line": 153
+        },
+        {
+          "path": "D:\\HRL_UAV_V2_speedup\\src\\hrl_v2\\replay.py",
+          "line": 180
+        },
+        {
+          "path": "D:\\HRL_UAV_V2_speedup\\src\\hrl_v2\\sac.py",
+          "line": 151
+        }
+      ],
+      "expected": "逐位不变（概率值由同一个 probabilities 函数生成；保留原 integers/choice 调用和顺序）",
+      "mechanism": "每个 fit 抽4个回合，反复把同一 severe 列表转数组、求和和生成概率。只缓存原函数输出，仍执行 rng.choice(count,size=32,replace=True,p=q)，不改随机流，不自行重写 choice/CDF；缓存不得新增到 Episode.__dict__ 导致 replay_digest 改变。",
+      "estimate": {
+        "per_normal_episode_seconds": [
+          0,
+          0.5
+        ],
+        "basis": "估计，非实测：90*(2+0.5)*4≈900次概率生成/回合（actor 冻结回合为720次）；1800条 severe 的转换和概率生成，每次假设省0–0.56ms。choice 内部工作仍保留。"
+      },
+      "effort_hours": [
+        2,
+        4
+      ]
+    },
+    {
+      "id": "C5",
+      "name": "读回校验用一次读取的原文件字节同时做 SHA 和反序列化；指针复用该次已验证 SHA",
+      "locations": [
+        {
+          "path": "D:\\HRL_UAV_V2_speedup\\src\\hrl_v2\\checkpoint.py",
+          "line": 70
+        },
+        {
+          "path": "D:\\HRL_UAV_V2_speedup\\src\\hrl_v2\\checkpoint.py",
+          "line": 75
+        },
+        {
+          "path": "D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\scripts\\d_train.py",
+          "line": 105
+        },
+        {
+          "path": "D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\scripts\\d_train.py",
+          "line": 106
+        }
+      ],
+      "expected": "逐位不变（保持原存档文件字节、atomic replace/fsync、sidecar SHA、全状态读回与 RNG 检查）",
+      "mechanism": "保存后的 SHA 和读回 SHA 两次独立校验仍保留。读回时读取一次不可变已完成文件到 BytesIO，计算其 SHA 后从同一字节反序列化，随后指针使用该已验证 SHA；不能直接信 sidecar，不能复用保存前哈希。保持同文件对象/身份与异常处理，禁止并发修改此存档。不要对 torch.save 的乱序 seek 简单做顺序流哈希。",
+      "estimate": {
+        "per_save_seconds": [
+          0,
+          2.43
+        ],
+        "amortized_per_normal_episode_seconds": [
+          0,
+          0.486
+        ],
+        "basis": "估计，非实测：可少一次反序列化文件读取和一次指针哈希文件读取，约2*485281635字节；假定有效读取400–2000MB/s，约0.49–2.43秒；系统页缓存已命中时可能接近0。不含新增 BytesIO 开销，不能保证净收益。"
+      },
+      "effort_hours": [
+        3,
+        6
+      ],
+      "extra_memory": "约485 MB额外字节缓冲；只有峰值内存允许且实测净收益为正时才具备收益"
+    },
+    {
+      "id": "C4",
+      "name": "equal 中复用一次 firstdiff 结果",
+      "locations": [
+        {
+          "path": "D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\scripts\\j_common.py",
+          "line": 77
+        },
+        {
+          "path": "D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\scripts\\d_train.py",
+          "line": 105
+        }
+      ],
+      "expected": "逐位不变（相同比较、相同 firstdiff 细节、相同失败行为）",
+      "mechanism": "现函数无条件做两次 firstdiff；改为先计算 d，再 check(d is None,label,d)。不删除任何比较项。只针对比较期间不会被异步修改的对象；本实验参数/优化器写入在当前线程。",
+      "estimate": {
+        "per_save_seconds": [
+          0,
+          0.5
+        ],
+        "amortized_per_normal_episode_seconds": [
+          0,
+          0.1
+        ],
+        "basis": "估计，非实测；消除一次相同网络/优化器/RNG 比较，省其重复遍历及 tensor→CPU。日志无比较分项，不声称占166秒的大头。其他成功比较收益不另叠加。"
+      },
+      "effort_hours": [
+        1,
+        2
+      ]
+    }
+  ],
+  "not_recommended": [
+    {
+      "name": "提高 SAC/PPO 微批大小、合并网络算子、torch.compile/CUDA Graph/融合 Adam",
+      "status": "可能改变浮点结果，不建议",
+      "location": "D:\\HRL_UAV_V2_speedup\\src\\hrl_v2\\sac.py:49,84,120"
+    },
+    {
+      "name": "AMP/TF32、CPU float64 分布改 GPU或float32",
+      "status": "可能改变浮点结果或采样随机流，不建议",
+      "location": "D:\\HRL_UAV_V2_speedup\\src\\hrl_v2\\runtime.py:17-20; D:\\HRL_UAV_V2_speedup\\src\\hrl_v2\\hybrid_simplex.py:10-20"
+    },
+    {
+      "name": "改变 torch 线程数/设备放置",
+      "status": "逐位不变未经证明，可能改变浮点规约，不建议",
+      "location": "D:\\HRL_UAV_V2_speedup\\src\\hrl_v2\\runtime.py:16"
+    },
+    {
+      "name": "减少采样/更新/验证场景、清空经验池、降低完整续训校验",
+      "status": "改变算法、训练预算或检查要求，不建议",
+      "location": "D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\scripts\\j_train.py:275; D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\scripts\\d_train.py:105"
+    },
+    {
+      "name": "将 physics 汇总 sum 改增量加减或不同顺序向量求和",
+      "status": "可能改变浮点结果，不建议",
+      "location": "D:\\HRL_UAV_V2_speedup\\src\\hrl_v2\\physics_adapter.py:66-98"
+    }
+  ],
+  "forecast": {
+    "reference_cycle_seconds": 177.66930356025696,
+    "additional_saved_seconds_per_normal_episode_assumption": [
+      3.63636,
+      13.9951
+    ],
+    "additional_speedup_factor_assumption": [
+      1.0208946646859476,
+      1.0855058384007819
+    ],
+    "includes_existing_save_frequency_change": false,
+    "measured": false,
+    "valid_scope": "当前4104打底、FIFO55、每5回合保存的短窗口；不是整个D全任务倍数",
+    "zero_gain_possible": true,
+    "total_D_task_speedup_factor": null,
+    "total_D_task_speedup_reason": "D 联合正常回合、额外随机回合、正式评估尚无完成样本；无法识别全任务权重。条件投影同结构且同负载时约1.02–1.10；允许无收益1.00。",
+    "implementation_hours_sum": [
+      16,
+      32
+    ],
+    "verification_engineering_hours": [
+      4,
+      8
+    ],
+    "verification_machine_time": "仅计划：前10回合每seed基线+候选两跑约1–2小时；前220正常+8额外回合每seed两跑约18–32小时；基于当前短窗口177.7/81.5秒与未观测联合耗时，误差较大。两seed共4条序列串行约36–64小时；正式验证必须等当前训练结束。"
+  },
+  "verification": {
+    "executed": false,
+    "plan": [
+      "N=10：两个seed各自基线/候选从0开始；覆盖悬停、随机、首次有效SAC、2份续训档。",
+      "N=60：覆盖FIFO55装满和淘汰；额外核对 old/new replay_digest 原始字节流一致。",
+      "N=220正常回合+8额外回合：覆盖首次联合批、PPO版本约束、正常/额外采样、alpha切换和首份候选。",
+      "同seed同环境逐回合 event_sha256、所有非时间/资源/路径元数据的训练数值记录、网络参数哈希必须完全相同；逐更新 critic/actor值和计数、优化器、CPU/CUDA/独立streams RNG、经验池内容逐位一致。耗时、资源占用、输出绝对路径和生成时间本来就会不同，不能作为数值一致性对象。",
+      "每次候选存档→加载→全状态比对；原始回放字节与SHA规则保持一致，所有硬检查和逐场景逐流锚点保留。",
+      "分别验证候选，再验证组合；测量净耗时和内存。此清单只提议，本次没有运行这些训练/测试/profile。"
+    ]
+  },
+  "input_snapshots": [
+    {
+      "path": "D:\\HRL_UAV_V2_speedup\\outputs\\lite_v2_4_0\\joint_sync_pilot_20261009_131658\\seed_4104\\train\\train_metrics.jsonl",
+      "bytes": 1281468,
+      "sha256": "bb4d0c21a8e63aed8361837d1f40435e370f1ab446d81178b4c8a2ebc3309ead",
+      "read_time": "2026-10-11T21:38:44.184714+08:00",
+      "snapshot": "file bytes read once; running logs may append subsequently"
+    },
+    {
+      "path": "D:\\HRL_UAV_V2_speedup\\outputs\\lite_v2_4_0\\joint_sync_pilot_20261009_131658\\seed_4104\\train\\training_progress.json",
+      "bytes": 675,
+      "sha256": "a37eac39307107bf5459e8e175d5a864d1931a92ff20aae415e267ee55fcc5e9",
+      "read_time": "2026-10-11T21:38:44.201340+08:00",
+      "snapshot": "file bytes read once; running logs may append subsequently"
+    },
+    {
+      "path": "D:\\HRL_UAV_V2_speedup\\outputs\\lite_v2_4_0\\joint_sync_pilot_20261009_131658\\seed_4104\\train\\result.json",
+      "bytes": 218828,
+      "sha256": "81c21091cccf0bc03627e83888ed23bd3b53be6678b6547f256e7a328a672d7f",
+      "read_time": "2026-10-11T21:38:44.201340+08:00",
+      "snapshot": "file bytes read once; running logs may append subsequently"
+    },
+    {
+      "path": "D:\\HRL_UAV_V2_speedup\\outputs\\lite_v2_4_0\\joint_sync_pilot_20261009_131658\\seed_4103\\train\\train_metrics.jsonl",
+      "bytes": 1281643,
+      "sha256": "e690009308fc4161862614ded92b9dbc00539192ea9485c70c67d959272aa231",
+      "read_time": "2026-10-11T21:38:44.203872+08:00",
+      "snapshot": "file bytes read once; running logs may append subsequently"
+    },
+    {
+      "path": "D:\\HRL_UAV_V2_speedup\\outputs\\lite_v2_4_0\\joint_sync_pilot_20261009_131658\\seed_4103\\train\\training_progress.json",
+      "bytes": 675,
+      "sha256": "3195776c0e96f57c0f9301ab360cbeac3f68a50f240aa7680b0be58021392e52",
+      "read_time": "2026-10-11T21:38:44.219930+08:00",
+      "snapshot": "file bytes read once; running logs may append subsequently"
+    },
+    {
+      "path": "D:\\HRL_UAV_V2_speedup\\outputs\\lite_v2_4_0\\joint_sync_pilot_20261009_131658\\seed_4103\\train\\result.json",
+      "bytes": 218808,
+      "sha256": "58dbfe20929747319a8dd81383ebc3b371d552d414bad7a8701245ded8d6a20a",
+      "read_time": "2026-10-11T21:38:44.220931+08:00",
+      "snapshot": "file bytes read once; running logs may append subsequently"
+    },
+    {
+      "path": "D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\seed_4104\\train\\train_metrics.jsonl",
+      "bytes": 169498,
+      "sha256": "e3c8095dff080974c1ab6f9a011fba526cd346302c30609ebc507beb62b2a21b",
+      "read_time": "2026-10-11T21:38:44.221930+08:00",
+      "snapshot": "file bytes read once; running logs may append subsequently"
+    },
+    {
+      "path": "D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\seed_4104\\train\\training_progress.json",
+      "bytes": 1075,
+      "sha256": "6b077f1e25bad6438bc7fa384bb82a69c75c20a91a7f71eef7c29fafbfa188ef",
+      "read_time": "2026-10-11T21:38:44.225931+08:00",
+      "snapshot": "file bytes read once; running logs may append subsequently"
+    },
+    {
+      "path": "D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\seed_4104\\train\\resume_timings.jsonl",
+      "bytes": 158,
+      "sha256": "c88e1c13e79d3b02f431e67cccb5e3e717aa12a7f5165c15fad2c32cd8a5703b",
+      "read_time": "2026-10-11T21:38:44.225931+08:00",
+      "snapshot": "file bytes read once; running logs may append subsequently"
+    },
+    {
+      "path": "D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\seed_4103\\train\\train_metrics.jsonl",
+      "bytes": 47530,
+      "sha256": "a86504dde3dadac3d10c2ba17565905e8ebdff9806f9b0cf03340cc5b76b3c5c",
+      "read_time": "2026-10-11T21:38:44.225931+08:00",
+      "snapshot": "file bytes read once; running logs may append subsequently"
+    },
+    {
+      "path": "D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\seed_4103\\train\\training_progress.json",
+      "bytes": 1012,
+      "sha256": "2470bda4eebfb74433c6d509378ea41580155d54024d371a79b39bfb11c6c9b7",
+      "read_time": "2026-10-11T21:38:44.226931+08:00",
+      "snapshot": "file bytes read once; running logs may append subsequently"
+    },
+    {
+      "path": "D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\seed_4103\\train\\resume_timings.jsonl",
+      "bytes": 626,
+      "sha256": "e6718a847a042efff6556e6f88f1b6bcfe50f194250d0fdb0af0efdad2e66e54",
+      "read_time": "2026-10-11T21:38:44.227931+08:00",
+      "snapshot": "file bytes read once; running logs may append subsequently"
+    },
+    {
+      "path": "D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\parallel_benchmark.json",
+      "bytes": 110015,
+      "sha256": "a499aacf822a56721236a93fb29f6c9d7e41f4215f24bd11c449778f401e8ef2",
+      "read_time": "2026-10-11T21:38:44.227931+08:00",
+      "snapshot": "file bytes read once; running logs may append subsequently"
+    },
+    {
+      "path": "D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\speedup_amendment.json",
+      "bytes": 3274,
+      "sha256": "9f5987ebe03572333d95afdea59022286cd660eed4ab7178e24b0d9e16ece934",
+      "read_time": "2026-10-11T21:38:44.227931+08:00",
+      "snapshot": "file bytes read once; running logs may append subsequently"
+    },
+    {
+      "path": "D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\seed_4104\\recovery\\restore_validation.json",
+      "bytes": 393,
+      "sha256": "c71323667a56aae74ee56651715077bb3ad18978d5e1680c79deb11f723796fb",
+      "read_time": "2026-10-11T21:38:44.227931+08:00",
+      "snapshot": "file bytes read once; running logs may append subsequently"
+    }
+  ],
+  "source_snapshots": [
+    {
+      "path": "D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\scripts\\d_train.py",
+      "bytes": 19636,
+      "sha256": "b1c9fd6bd7ff56e2fadb56097fdc7cea92df7d2c1316366ea24ce7f335c1a70b"
+    },
+    {
+      "path": "D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\scripts\\j_train.py",
+      "bytes": 38195,
+      "sha256": "f22357bad51015f0526cb82d2483fc7019bf67140d85f262032cbfe016735a91"
+    },
+    {
+      "path": "D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\scripts\\j_common.py",
+      "bytes": 12043,
+      "sha256": "cd7ed89bf9414a6f008f2ba1d00465a87dbe88eece7d8488dc6cba615daeeadf"
+    },
+    {
+      "path": "D:\\HRL_UAV_V2_speedup\\src\\hrl_v2\\checkpoint.py",
+      "bytes": 3810,
+      "sha256": "8cbe056e7f39e38875d3be06a5eeb57d7c32316e3c505bf282673201e0b9088b"
+    },
+    {
+      "path": "D:\\HRL_UAV_V2_speedup\\src\\hrl_v2\\replay.py",
+      "bytes": 10395,
+      "sha256": "5bb7f4512a42f3dc0852ad238a641d57d5dacd49d0c99a2832c74cc70cd28225"
+    },
+    {
+      "path": "D:\\HRL_UAV_V2_speedup\\src\\hrl_v2\\lite_batch.py",
+      "bytes": 2161,
+      "sha256": "8f352b6c82c78cdcb4b82a2b9f46eb5b78f2aa193932b3e00a6b8ab2c851db1e"
+    },
+    {
+      "path": "D:\\HRL_UAV_V2_speedup\\src\\hrl_v2\\sac.py",
+      "bytes": 9245,
+      "sha256": "526a2e0fb511f4de4ce66be7677eb84f261e5c8a1f6ac943a7821d774e9950de"
+    },
+    {
+      "path": "D:\\HRL_UAV_V2_speedup\\src\\hrl_v2\\collector.py",
+      "bytes": 8126,
+      "sha256": "a8daf6106836df0c1610e988443f273c89505e845b40d2a08601eb37f637f5ab"
+    },
+    {
+      "path": "D:\\HRL_UAV_V2_speedup\\src\\hrl_v2\\physics_adapter.py",
+      "bytes": 8419,
+      "sha256": "4d56f0bb1c9479173d1bfc437877a7bdd9cda3a0fdeb30dcfbbc73b422fd5a8a"
+    },
+    {
+      "path": "D:\\HRL_UAV_V2_speedup\\src\\hrl_v2\\policy.py",
+      "bytes": 3358,
+      "sha256": "ebf97694d0af19e8f8e01ceb709f88981e7339a3afe46509ea876a480b5b579c"
+    },
+    {
+      "path": "D:\\HRL_UAV_V2_speedup\\src\\hrl_v2\\hybrid_simplex.py",
+      "bytes": 2681,
+      "sha256": "6ccf43569f3d45c58c9df3588e2a4871dfeb3400ff862df1b06282f8c2a54d84"
+    },
+    {
+      "path": "D:\\HRL_UAV_V2_speedup\\src\\hrl_v2\\runtime.py",
+      "bytes": 3522,
+      "sha256": "02a6e33d62dd3063fa4d85c51dee859656c54be0d5b4afdc23abd4c33677df92"
+    },
+    {
+      "path": "D:\\HRL_UAV_V2_speedup\\src\\hrl_v2\\prepared.py",
+      "bytes": 7669,
+      "sha256": "3bf8918d38e601f47e1362b807b8946218b9d6ab7fa6afe40efb3a6100fbf19d"
+    },
+    {
+      "path": "D:\\HRL_UAV_V2_speedup\\src\\hrl_v2\\lite_observation.py",
+      "bytes": 5970,
+      "sha256": "4283dbb7772f57e0fba6c3fefde85836ffd23e5a9f1499b4d68a582fc89c69c1"
+    },
+    {
+      "path": "D:\\HRL_UAV_V2_speedup\\src\\hrl_v2\\configs\\v2_4_0_lite.json",
+      "bytes": 10261,
+      "sha256": "7424127e2248f7318ea9128dfc254bef85e1fec0244dae5fda80c760d4559e23"
+    }
+  ],
+  "source_recheck_passed": true,
+  "finished_at": "2026-10-11T21:38:44.230930+08:00"
+}

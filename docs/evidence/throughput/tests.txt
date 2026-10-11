@@ -1,0 +1,56 @@
+test_all_supports (hrl_v2.tests.test_math.MathTests) ... ok
+test_continuous_gradient (hrl_v2.tests.test_math.MathTests) ... ok
+test_density_recomputation (hrl_v2.tests.test_math.MathTests) ... ok
+test_density_rejects_wrong_support (hrl_v2.tests.test_math.MathTests) ... ok
+test_deterministic_decode (hrl_v2.tests.test_math.MathTests) ... ok
+test_fixed_schedule_counts (hrl_v2.tests.test_math.MathTests) ... ok
+test_importance_weights_restore_uniform (hrl_v2.tests.test_math.MathTests) ... ok
+test_nonadditive_discrete_gradient_exact_enumeration (hrl_v2.tests.test_math.MathTests) ... ok
+test_ppo_full_returns_and_tanh_density (hrl_v2.tests.test_math.MathTests) ... ok
+test_reward_and_terminal_identity (hrl_v2.tests.test_math.MathTests) ... ok
+test_stream_separation_and_restore (hrl_v2.tests.test_math.MathTests) ... ok
+test_surrogate_gradients_finite (hrl_v2.tests.test_math.MathTests) ... ok
+test_uniform_face_normalization (hrl_v2.tests.test_math.MathTests) ... ok
+test_uniform_reference_density (hrl_v2.tests.test_math.MathTests) ... ok
+test_T01_900_second_physics_identity (hrl_v2.tests.test_physics.PhysicsTests) ... ok
+test_T02_reports_detached_from_hidden_generator (hrl_v2.tests.test_physics.PhysicsTests) ... ok
+test_T03_fifo_and_parent_links (hrl_v2.tests.test_physics.PhysicsTests) ... ok
+test_T03_sibling_relationships_not_lost (hrl_v2.tests.test_physics.PhysicsTests) ... ok
+test_T06_true_macro_successors_and_no_terminal_arrivals (hrl_v2.tests.test_physics.PhysicsTests) ... ok
+test_T08_complete_replay_and_version_flush (hrl_v2.tests.test_physics.PhysicsTests) ... ok
+test_T10_censoring_and_lossless_storage (hrl_v2.tests.test_physics.PhysicsTests) ... ok
+test_01_initialization_and_no_parameter_sharing (hrl_v2.tests.test_learning.LearningTests) ... ok
+test_02_cuda_float64_distribution_gradient (hrl_v2.tests.test_learning.LearningTests) ... ok
+test_03_sac_update_terminal_mask_and_upper_freeze (hrl_v2.tests.test_learning.LearningTests) ... ok
+test_04_complete_checkpoint_restore_and_rng (hrl_v2.tests.test_learning.LearningTests) ... ok
+test_05_evaluation_policy_zero_updates_and_isolated_rng (hrl_v2.tests.test_learning.LearningTests) ... ok
+test_06_history_prefix_recompute_preserves_gradient (hrl_v2.tests.test_learning.LearningTests) ... ok
+test_07_disjoint_graph_batch_matches_independent_outputs_and_gradients (hrl_v2.tests.test_learning.LearningTests) ... ok
+test_08_incremental_arrival_cache_matches_full_and_invalidates (hrl_v2.tests.test_learning.LearningTests) ... ok
+test_09_q_state_action_factorization_matches_original_head (hrl_v2.tests.test_learning.LearningTests) ... ok
+test_accepted_epochs_and_lower_version_rejection (hrl_v2.tests.test_ppo.PPOTests) ... ok
+test_epoch_rollback_restores_adam_and_value_continues (hrl_v2.tests.test_ppo.PPOTests) ... ok
+test_actor_matches_pinned_baseline_and_keeps_independent_q_encoders (hrl_v2.tests.test_optimizer_reuse.OptimizerReuseTests) ... ok
+test_critic_matches_pinned_baseline_and_backpropagates_history_once (hrl_v2.tests.test_optimizer_reuse.OptimizerReuseTests) ... ok
+test_graph_preprocessing_matches_pinned_outputs_and_all_gradients (hrl_v2.tests.test_optimizer_reuse.OptimizerReuseTests) ... ok
+test_real_ppo_minibatch_matches_unshared_full_history (hrl_v2.tests.test_optimizer_reuse.OptimizerReuseTests) ... ok
+test_batch_cache_released_without_waiting_for_cyclic_gc (hrl_v2.tests.test_prepared_optimization.PreparedOptimizationTests) ... ok
+test_fixed_history_inputs_extend_by_suffix (hrl_v2.tests.test_prepared_optimization.PreparedOptimizationTests) ... ok
+test_long_incremental_history_and_optimizer_invalidation (hrl_v2.tests.test_prepared_optimization.PreparedOptimizationTests) ... ok
+test_q_factored_head_matches_candidate_outputs_and_all_gradients (hrl_v2.tests.test_prepared_optimization.PreparedOptimizationTests) ... ok
+test_replay_decompresses_each_episode_and_report_once (hrl_v2.tests.test_prepared_optimization.PreparedOptimizationTests) ... ok
+test_step_tape_full_bptt_matches_repeated_prefix_gradients (hrl_v2.tests.test_prepared_optimization.PreparedOptimizationTests) ... ok
+test_tape_rejects_parameter_change_and_releases_after_failure (hrl_v2.tests.test_prepared_optimization.PreparedOptimizationTests) ... ok
+test_action_cast_features_and_gradients_match_original (hrl_v2.tests.test_runtime_optimization.RuntimeOptimizationTests) ... ok
+test_policy_episode_and_parameter_versions_invalidate_history (hrl_v2.tests.test_runtime_optimization.RuntimeOptimizationTests) ... ok
+test_policy_really_extends_each_independent_encoder (hrl_v2.tests.test_runtime_optimization.RuntimeOptimizationTests) ... ok
+test_run_policy_skips_value_only_for_lower_collection (hrl_v2.tests.test_runtime_optimization.RuntimeOptimizationTests) ... ok
+test_streamed_collection_matches_stored_without_episode_allocation (hrl_v2.tests.test_runtime_optimization.RuntimeOptimizationTests) ... ok
+test_streaming_pool_matches_legacy_sums_exactly (hrl_v2.tests.test_runtime_optimization.RuntimeOptimizationTests) ... ok
+test_original_research_update_budget (hrl_v2.tests.test_throughput_budget.ThroughputBudgetTests) ... ok
+test_sampling_cache_development_and_io_counts (hrl_v2.tests.test_throughput_budget.ThroughputBudgetTests) ... ok
+
+----------------------------------------------------------------------
+Ran 51 tests in 47.017s
+
+OK

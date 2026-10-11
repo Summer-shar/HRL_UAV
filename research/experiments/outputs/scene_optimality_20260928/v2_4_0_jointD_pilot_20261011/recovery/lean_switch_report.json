@@ -1,0 +1,541 @@
+{
+  "status": "switch_complete_background_running",
+  "time": "2026-10-11T22:22:14.144788+08:00",
+  "OUT": "D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011",
+  "decision_path_changed": false,
+  "training_content_unchanged": true,
+  "preflight": {
+    "passed": true,
+    "time": "2026-10-11T21:59:59.331811+08:00",
+    "checks": {
+      "numerical_functions_AST_unchanged": true,
+      "compile_all": true,
+      "budget_alpha_frozen_unchanged": true,
+      "PermissionError_reader_retry": true,
+      "incomplete_JSONL_tail_safe": true,
+      "minimal_network_parameters_and_outputs_equal": true,
+      "minimal_candidate_bytes": 2078587,
+      "lean_resume_full_state_loadable": true,
+      "input_start_once": {
+        "passed": true,
+        "time": "2026-10-11T21:59:23.778046+08:00",
+        "transition_id": "1791727005569975300",
+        "protected_count": 6,
+        "git": {
+          "D:\\HRL_UAV_V2": {
+            "status": "D outputs/lite_v2_3_0/baselines/contract.json\n D outputs/lite_v2_3_0/baselines/summary.json\n D outputs/lite_v2_3_0/old_validation/tests.txt\n D outputs/lite_v2_3_0/old_validation/validation.json\n D outputs/lite_v2_3_0/validation_final/tests.txt\n D outputs/lite_v2_3_0/validation_final/validation.json",
+            "branch": "codex/v2-lite-paper-caliber",
+            "head": "a9953dc36d9d65f99bcc35044cdfc250ca11bb49"
+          },
+          "D:\\HRL_UAV_V2_speedup": {
+            "status": "D outputs/lite_v2_3_0/baselines/contract.json\n D outputs/lite_v2_3_0/baselines/summary.json\n D outputs/lite_v2_3_0/old_validation/tests.txt\n D outputs/lite_v2_3_0/old_validation/validation.json\n D outputs/lite_v2_3_0/validation_final/tests.txt\n D outputs/lite_v2_3_0/validation_final/validation.json",
+            "branch": "codex/v2-lite-speedup",
+            "head": "25d59ff9f7c3e27c060c63d462235a30ce28930a"
+          }
+        },
+        "check_policy": "actual inputs once at lean transition",
+        "actual_RandomUpperPolicy_source_SHA_passed": true,
+        "actual_RandomUpperPolicy_source": "D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\scripts\\d_random.py"
+      },
+      "anchor_scene1_both_streams": true,
+      "raw_windows_not_written": true,
+      "PermissionError_JSONL_retry": true
+    },
+    "training_ran": false,
+    "decision_path_changed": false,
+    "final_checked_at": "2026-10-11T22:03:39.197388+08:00"
+  },
+  "seeds": {
+    "4104": {
+      "restore": {
+        "passed": true,
+        "time": "2026-10-11T22:04:43.099491+08:00",
+        "completed_episode": 60,
+        "loadable": true,
+        "parameter_hashes_equal": true,
+        "counts_continuous": true,
+        "full_network_optimizer_counters_equal": true,
+        "CPU_RNG_equal": true,
+        "CUDA_RNG_equal": true,
+        "replay_loaded": true,
+        "sha256_not_recomputed": true,
+        "decision_path_changed": false
+      },
+      "replayed_rows": [
+        {
+          "episode": 61,
+          "nontiming_fields_equal": true,
+          "event_SHA_equal": true
+        },
+        {
+          "episode": 62,
+          "nontiming_fields_equal": true,
+          "event_SHA_equal": true
+        },
+        {
+          "episode": 63,
+          "nontiming_fields_equal": true,
+          "event_SHA_equal": true
+        },
+        {
+          "episode": 64,
+          "nontiming_fields_equal": true,
+          "event_SHA_equal": true
+        }
+      ],
+      "measurement": {
+        "first_episode": 61,
+        "last_episode": 65,
+        "rounds": 5,
+        "cycle_seconds": 179.8001028060913,
+        "collection_seconds": 179.6538379,
+        "measured_at": "2026-10-11T22:19:44.098716+08:00"
+      },
+      "collection_samples": [
+        {
+          "episode": 61,
+          "seconds": 167.6022811
+        },
+        {
+          "episode": 62,
+          "seconds": 182.05323990000002
+        },
+        {
+          "episode": 63,
+          "seconds": 245.39767439999997
+        },
+        {
+          "episode": 64,
+          "seconds": 142.35134549999998
+        },
+        {
+          "episode": 65,
+          "seconds": 160.8646486
+        }
+      ],
+      "collection_excluding_first_seconds": 182.6667271,
+      "latest_completed_episode": 65,
+      "resume_timings_before": [
+        {
+          "completed_episode": 60,
+          "wall_seconds": 166.35856339999998,
+          "bytes": 485281635,
+          "time": "2026-10-11T21:23:00.437300+08:00",
+          "verification_unchanged": true
+        }
+      ],
+      "resume_timings_after": [],
+      "resume_files": [
+        "D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\seed_4104\\train\\resume\\boundary-0060-1791724814080072000.pt"
+      ],
+      "checkpoint_timing_comparison_is_same_size": false
+    },
+    "4103": {
+      "restore": {
+        "passed": true,
+        "time": "2026-10-11T22:04:32.788506+08:00",
+        "completed_episode": 15,
+        "loadable": true,
+        "parameter_hashes_equal": true,
+        "counts_continuous": true,
+        "full_network_optimizer_counters_equal": true,
+        "CPU_RNG_equal": true,
+        "CUDA_RNG_equal": true,
+        "replay_loaded": true,
+        "sha256_not_recomputed": true,
+        "decision_path_changed": false
+      },
+      "replayed_rows": [
+        {
+          "episode": 16,
+          "nontiming_fields_equal": true,
+          "event_SHA_equal": true
+        },
+        {
+          "episode": 17,
+          "nontiming_fields_equal": true,
+          "event_SHA_equal": true
+        },
+        {
+          "episode": 18,
+          "nontiming_fields_equal": true,
+          "event_SHA_equal": true
+        }
+      ],
+      "measurement": {
+        "first_episode": 16,
+        "last_episode": 24,
+        "rounds": 9,
+        "cycle_seconds": 97.67833884557088,
+        "collection_seconds": 95.78661748888888,
+        "measured_at": "2026-10-11T22:19:44.099748+08:00"
+      },
+      "collection_samples": [
+        {
+          "episode": 16,
+          "seconds": 122.9810845
+        },
+        {
+          "episode": 17,
+          "seconds": 75.53286259999999
+        },
+        {
+          "episode": 18,
+          "seconds": 80.43043739999996
+        },
+        {
+          "episode": 19,
+          "seconds": 70.05077779999999
+        },
+        {
+          "episode": 20,
+          "seconds": 148.8877769
+        },
+        {
+          "episode": 21,
+          "seconds": 110.77856080000004
+        },
+        {
+          "episode": 22,
+          "seconds": 92.66800219999993
+        },
+        {
+          "episode": 23,
+          "seconds": 83.0327403
+        },
+        {
+          "episode": 24,
+          "seconds": 77.71731490000002
+        }
+      ],
+      "collection_excluding_first_seconds": 92.38730911249999,
+      "latest_completed_episode": 25,
+      "resume_timings_before": [
+        {
+          "completed_episode": 0,
+          "wall_seconds": 0.10992260000000087,
+          "bytes": 5262257,
+          "time": "2026-10-11T21:09:36.866420+08:00",
+          "verification_unchanged": true
+        },
+        {
+          "completed_episode": 5,
+          "wall_seconds": 15.514522899999974,
+          "bytes": 51558627,
+          "time": "2026-10-11T21:15:02.887317+08:00",
+          "verification_unchanged": true
+        },
+        {
+          "completed_episode": 10,
+          "wall_seconds": 29.20253070000001,
+          "bytes": 94926819,
+          "time": "2026-10-11T21:23:10.863954+08:00",
+          "verification_unchanged": true
+        },
+        {
+          "completed_episode": 15,
+          "wall_seconds": 43.757654499999944,
+          "bytes": 138516771,
+          "time": "2026-10-11T21:30:35.804278+08:00",
+          "verification_unchanged": true
+        }
+      ],
+      "resume_timings_after": [
+        {
+          "completed_episode": 20,
+          "wall_seconds": 15.747012499999926,
+          "bytes": 181751843,
+          "time": "2026-10-11T22:13:07.189514+08:00",
+          "readback_performed": false,
+          "sha256_performed": false,
+          "parameter_hashes_recorded": true
+        }
+      ],
+      "resume_files": [
+        "D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\seed_4103\\train\\resume\\boundary-0020-1791727971443764300.pt"
+      ],
+      "checkpoint_timing_comparison_is_same_size": false
+    }
+  },
+  "parallel_benchmark": {
+    "passed": true,
+    "time": "2026-10-11T22:19:44.099748+08:00",
+    "seeds": {
+      "4104": {
+        "first_episode": 61,
+        "last_episode": 65,
+        "rounds": 5,
+        "cycle_seconds": 179.8001028060913,
+        "collection_seconds": 179.6538379,
+        "measured_at": "2026-10-11T22:19:44.098716+08:00"
+      },
+      "4103": {
+        "first_episode": 16,
+        "last_episode": 24,
+        "rounds": 9,
+        "cycle_seconds": 97.67833884557088,
+        "collection_seconds": 95.78661748888888,
+        "measured_at": "2026-10-11T22:19:44.099748+08:00"
+      }
+    },
+    "resume_frequency_normal_episodes": 20,
+    "write_time_SHA_or_readback": false,
+    "parallel": true,
+    "decision_path_changed": false
+  },
+  "baseline_cycle_seconds": 267.71016550064087,
+  "slowdown_fraction_4104": -0.3283777533443687,
+  "slowdown_stop_threshold_seconds": 428.33626480102544,
+  "pause_4103_required": false,
+  "resources": {
+    "measurement": "10-second read-only psutil sample; nvidia-smi snapshot",
+    "system_CPU_percent": 34.4,
+    "logical_CPUs": 16,
+    "process_CPU_percent_one_core_100": {
+      "4104": 98.9113861515792,
+      "4103": 98.13132790117243
+    },
+    "GPU_used_MiB": 2367,
+    "GPU_total_MiB": 8151,
+    "GPU_utilization_percent": 11
+  },
+  "settings": {
+    "resume_frequency_normal_episodes": 20,
+    "latest_resume_only": true,
+    "resume_write_SHA": false,
+    "resume_write_readback": false,
+    "candidates": [
+      220,
+      240,
+      260,
+      280,
+      300,
+      320,
+      340,
+      360,
+      380,
+      400
+    ],
+    "candidate_contains_replay": false,
+    "candidate_smoke_bytes": 2078587,
+    "evaluation_groups_per_seed": [
+      14,
+      15
+    ],
+    "evaluation_workers": 3,
+    "upper_cvx": [
+      300,
+      400,
+      "selected deduplicated"
+    ],
+    "TFOO_upper_new_lower": "selected only",
+    "raw_window_files": false,
+    "event_SHA_all_rounds_retained": true,
+    "event_SHA_exception": "Event SHA is embedded in WT arrival/frame generation and has no independent opt-out; retained under user exception to preserve decision path.",
+    "actual_inputs_SHA_checked_once": 6
+  },
+  "ETA": {
+    "remaining_hours": [
+      12,
+      18
+    ],
+    "estimated": true,
+    "current_stage": "mixed_base",
+    "base_parallel_remaining_hours": [
+      6.5,
+      9
+    ],
+    "joint_and_extra_parallel_hours": [
+      3,
+      6
+    ],
+    "evaluation_hours": [
+      2,
+      3
+    ],
+    "basis": "Current post-transition base cycle samples; JC joint work excluding candidate evaluation; historical DG2 group duration ~318 seconds at 6 workers scaled for 3 workers and 14–15 groups per seed.",
+    "uncertainties": [
+      "Only 5 and 9 measured post-transition base rounds",
+      "SAC work grows before replay reaches capacity",
+      "D joint phase and extra random round timings not yet measured",
+      "Evaluation overlapping training causes resource contention"
+    ],
+    "end_window": [
+      "2026-10-12T10:22:14.144788+08:00",
+      "2026-10-12T16:22:14.144788+08:00"
+    ]
+  },
+  "incident": {
+    "time": "2026-10-11T21:34:53+08:00",
+    "error": "PermissionError reading atomically replaced seed progress",
+    "last_completed_before_failure": {
+      "4104": 64,
+      "4103": 18
+    },
+    "restored_boundaries": {
+      "4104": 60,
+      "4103": 15
+    },
+    "preserved_failure": "D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\recovery\\formal_failure_PermissionError_1791727419307477700.json",
+    "automatic_peripheral_fix": true
+  },
+  "implementation_corrections": [
+    {
+      "time": "2026-10-11T17:33:24.529217+08:00",
+      "error": "historical_baseline_reference_path_after_archival",
+      "attempt": 1,
+      "scope": "peripheral read-only reference lookup",
+      "changes": [
+        "Archived baseline summary exact original SHA 07001398f225d2a970d045de991abcab47d9e709a0ce62ecca98af85659121e2",
+        "Missing raw hover external-event reference replaced by already stored TFOO external-event hashes at identical gate20 scenarios/streams",
+        "Original full TFOO window anchor comparisons retained with zero tolerance",
+        "Independent WMI child explicitly imports authorized WT src"
+      ],
+      "decision_path_changed": false,
+      "selftests_to_rerun": [
+        "step0",
+        "all_peripheral_tests",
+        "S1",
+        "S2",
+        "TFOO_anchor_smoke"
+      ]
+    },
+    {
+      "time": "2026-10-11T17:36:13.793505+08:00",
+      "error": "JC_alpha_contract_reader_shape",
+      "attempt": 1,
+      "scope": "peripheral contract parser",
+      "changes": [
+        "Read unchanged JC alpha table as episodes/alpha dictionaries instead of triplets",
+        "Add full 200/400 ordinal budget parser selftests",
+        "Keep original child exception instead of overwriting with SystemExit"
+      ],
+      "decision_path_changed": false,
+      "selftests_to_rerun": [
+        "all_peripheral_tests",
+        "S1",
+        "S2",
+        "TFOO_anchor_smoke"
+      ]
+    },
+    {
+      "time": "2026-10-11T17:39:05.221330+08:00",
+      "error": "CIM_hidden_process_start_type_mismatch",
+      "attempt": 1,
+      "scope": "peripheral background launcher",
+      "changes": [
+        "Use Windows PowerShell WMI native Win32_ProcessStartup ShowWindow=0",
+        "Verified process creation ReturnValue=0 and current complete command line"
+      ],
+      "decision_path_changed": false,
+      "selftests_to_rerun": [
+        "background_current_process_command",
+        "all_peripheral_tests"
+      ]
+    },
+    {
+      "time": "2026-10-11T17:42:46.907073+08:00",
+      "error": "joint_batch_audit_record_missing_episode_fields",
+      "attempt": 1,
+      "scope": "peripheral observation and audit records",
+      "changes": [
+        "Persist normal/extra episode IDs, true behavior source, returns and replay fractions",
+        "Assert PPO episode ID list and extra exclusion directly",
+        "Correct replay size-before-add observation at FIFO capacity",
+        "Emit S2 per-collection and per-ordinal progress"
+      ],
+      "decision_path_changed": false,
+      "selftests_to_rerun": [
+        "all_peripheral_tests",
+        "S1",
+        "S2",
+        "TFOO_anchor_smoke",
+        "report_generation"
+      ]
+    },
+    {
+      "time": 1791724070.2394526,
+      "kind": "user_authorized_peripheral_speedup",
+      "changes": [
+        "base resume every five episodes",
+        "parallel separate seed processes and logs",
+        "evaluation workers three",
+        "full optimizer RNG replay restoration validation",
+        "resume timing instrumentation"
+      ],
+      "decision_path_changed": false,
+      "contract_addendum": "D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\speedup_amendment.json"
+    },
+    {
+      "time": "2026-10-11T21:09:00.550933+08:00",
+      "kind": "speedup_selftest_import_fix",
+      "error": "CANDIDATES imported from j_common instead of j_train in one-off test harness",
+      "fix": "import from original defining j_train module",
+      "decision_path_changed": false
+    },
+    {
+      "time": "2026-10-11T21:21:13.751789+08:00",
+      "kind": "parallel_hard_failure_child_cleanup",
+      "changes": [
+        "independent background safety cleanup if supervisor exits or hard failure is recorded"
+      ],
+      "decision_path_changed": false
+    },
+    {
+      "time": "2026-10-11T21:56:45.628157+08:00",
+      "kind": "lean_runtime_and_permission_error_recovery",
+      "error": "Windows transient PermissionError reading atomically replaced seed progress",
+      "attempt": 1,
+      "backup": "D:\\HRL_UAV_V2\\outputs\\scene_optimality_20260928\\v2_4_0_jointD_pilot_20261011\\recovery\\lean_transition_1791727005569975300",
+      "changes": [
+        "bounded PermissionError retry for JSON read/atomic replace",
+        "ignore incomplete final line only when sampling live OUT JSONL",
+        "full resume every20 without write-time SHA/readback",
+        "minimal candidate evaluation states",
+        "actual input SHA startup once",
+        "14–15 evaluation groups perseed; raw windows memory only",
+        "preserve numerical event SHA because environment generation remains unchanged"
+      ],
+      "decision_path_changed": false,
+      "restoration_boundaries": {
+        "4104": 60,
+        "4103": 15
+      }
+    },
+    {
+      "time": "2026-10-11T21:58:42.235137+08:00",
+      "kind": "lean_transition_static_review_fix",
+      "error": "restore replacement omitted interrupted suffix directory initialization",
+      "attempt": 1,
+      "fix": "restore original OUT/train/interruptions directory initialization",
+      "decision_path_changed": false
+    },
+    {
+      "time": "2026-10-11T21:59:18.917409+08:00",
+      "kind": "lean_preflight_import_fix",
+      "error": "selftest SCHEMA NameError",
+      "attempt": 1,
+      "fix": "import SCHEMA from j_train; unique output folder per selftest attempt",
+      "decision_path_changed": false
+    },
+    {
+      "attempt": 1,
+      "fix": "Use native Windows PowerShell WMI CreateInstance ShowWindow=0",
+      "error": "CIM embedded startup object type mismatch",
+      "kind": "lean_background_launcher_fix",
+      "time": "2026-10-11T22:04:20.6125391+08:00",
+      "decision_path_changed": false
+    }
+  ],
+  "checks": {
+    "current_root_failure_absent": true,
+    "full_command_lines_confirmed_seeds": [
+      4104,
+      4103
+    ],
+    "script_provenance_matches": true,
+    "MAIN_and_WT_source_unmodified": true,
+    "test_scenes_21_40_not_accessed": true,
+    "writes_confined_to_OUT": true
+  }
+}

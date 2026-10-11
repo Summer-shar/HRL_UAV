@@ -1,0 +1,7 @@
+{
+  "suite": "cuda",
+  "physical_steps": 5,
+  "seconds": 22.5583375,
+  "passed": false,
+  "research_training_episodes": 0
+}

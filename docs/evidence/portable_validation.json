@@ -1,0 +1,117 @@
+{
+  "status": "passed",
+  "version": "2.1.0",
+  "wheel_install_verified": true,
+  "installed_in_new_virtual_environment": true,
+  "preinstalled_numeric_dependencies_shared": true,
+  "dependency_downloads": 0,
+  "original_repository_required": false,
+  "git_required": false,
+  "packaging_tests": 5,
+  "implementation_tests": 51,
+  "cuda_equivalence_tests": 4,
+  "total_tests": 60,
+  "cuda_measurements": {
+    "test_actor_matches_pinned_baseline_and_keeps_independent_q_encoders": {
+      "actor_parameter_max_abs": 7.679639566049445e-06,
+      "actor_gradient_max_abs": 1.2619420886039734e-07,
+      "actor_largest_parameter_difference": {
+        "name": "support.2.bias",
+        "flat_index": 0,
+        "actual": 1.1507568160595838e-06,
+        "reference": -6.528882749989862e-06,
+        "actual_clipped_gradient": -1.1641532182693481e-10,
+        "reference_clipped_gradient": 6.984919309616089e-10
+      },
+      "actor_optimizer_state_max_abs": 1.261651050299406e-08
+    },
+    "test_critic_matches_pinned_baseline_and_backpropagates_history_once": {
+      "q1_parameter_max_abs": 3.9711594581604e-06,
+      "q1_gradient_max_abs": 1.4901161193847656e-08,
+      "q1_largest_parameter_difference": {
+        "name": "encoder.nodes.terminal.0.weight",
+        "flat_index": 772,
+        "actual": 0.11013859510421753,
+        "reference": 0.11014256626367569,
+        "actual_clipped_gradient": 4.2275298817173734e-09,
+        "reference_clipped_gradient": 3.964594430527768e-09
+      },
+      "q2_parameter_max_abs": 1.239776611328125e-05,
+      "q2_gradient_max_abs": 1.4901161193847656e-08,
+      "q2_largest_parameter_difference": {
+        "name": "encoder.graph.1.ff.2.weight",
+        "flat_index": 827,
+        "actual": -0.2986844480037689,
+        "reference": -0.29867205023765564,
+        "actual_clipped_gradient": 6.001858565696239e-09,
+        "reference_clipped_gradient": 5.010547976525004e-09
+      },
+      "critic_optimizer_state_max_abs": 1.3969838619232178e-09
+    },
+    "test_graph_preprocessing_matches_pinned_outputs_and_all_gradients": {
+      "output_max_abs": 0.0,
+      "gradient_max_abs": 0.0
+    },
+    "test_real_ppo_minibatch_matches_unshared_full_history": {
+      "actor_parameter_max_abs": 7.450580596923828e-09,
+      "actor_gradient_max_abs": 1.862645149230957e-09,
+      "actor_largest_parameter_difference": {
+        "name": "encoder.arrival.weight_ih_l0",
+        "flat_index": 126,
+        "actual": 0.06672630459070206,
+        "reference": 0.06672631204128265,
+        "actual_clipped_gradient": 3.721985564197894e-08,
+        "reference_clipped_gradient": 3.7202006808456645e-08
+      },
+      "actor_optimizer_state_max_abs": 1.8917489796876907e-10,
+      "value_parameter_max_abs": 5.820766091346741e-11,
+      "value_gradient_max_abs": 1.862645149230957e-09,
+      "value_largest_parameter_difference": {
+        "name": "encoder.arrival.bias_ih_l0",
+        "flat_index": 20,
+        "actual": 0.00029995155637152493,
+        "reference": 0.00029995161457918584,
+        "actual_clipped_gradient": -6.196180038386956e-05,
+        "reference_clipped_gradient": -6.19617712800391e-05
+      },
+      "value_optimizer_state_max_abs": 2.3283064365386963e-10
+    }
+  },
+  "runtime": {
+    "python": "3.9.25 (main, Nov  3 2025, 22:44:01) [MSC v.1929 64 bit (AMD64)]",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "torch": "2.7.0.dev20250227+cu128",
+    "numpy": "1.26.4",
+    "cuda": "12.8",
+    "device": "NVIDIA GeForce RTX 5060",
+    "deterministic": true
+  },
+  "unchanged_algorithm_modules": [
+    "networks.py",
+    "sac.py",
+    "ppo.py",
+    "prepared.py",
+    "batching.py",
+    "features.py",
+    "hybrid_simplex.py",
+    "physics_adapter.py",
+    "collector.py",
+    "metrics.py",
+    "schedule.py",
+    "policy.py",
+    "randomness.py",
+    "replay.py",
+    "reports.py",
+    "runtime.py"
+  ],
+  "physical_source_unchanged": true,
+  "config_difference_only": "runtime.preserve_local_python removed",
+  "wheel_sha256": "5a7023f62d2343322ba23a36aac0aff5abd304d83c3af2d856ffba6feda149e7",
+  "training_started": false,
+  "research_episodes": 0,
+  "limitations": [
+    "No fresh internet dependency installation was performed.",
+    "Windows/CUDA was executed; Linux CI is supplied but has not run here.",
+    "Version ranges describe installability, not numerical validation of every backend."
+  ]
+}

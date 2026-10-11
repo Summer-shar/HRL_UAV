@@ -1,0 +1,194 @@
+[
+  {
+    "document": "docs/PERFORMANCE_EXECUTION_20260927.md",
+    "excluded_target": "evidence/equivalent_20260927/performance/performance_comparison.json"
+  },
+  {
+    "document": "docs/PERFORMANCE_EXECUTION_20260927.md",
+    "excluded_target": "evidence/equivalent_20260927/performance/performance_comparison.json"
+  },
+  {
+    "document": "docs/PERFORMANCE_EXECUTION_20260927.md",
+    "excluded_target": "evidence/equivalent_20260927/performance/budget_baseline.json"
+  },
+  {
+    "document": "docs/PERFORMANCE_EXECUTION_20260927.md",
+    "excluded_target": "evidence/equivalent_20260927/performance/budget_current.json"
+  },
+  {
+    "document": "docs/evidence/original_implementation.md",
+    "excluded_target": "validation/throughput_report.md"
+  },
+  {
+    "document": "docs/history/outputs/diagnosis_g1_20260928/README.md",
+    "excluded_target": "stop_evidence.json"
+  },
+  {
+    "document": "docs/history/outputs/diagnosis_g1_20260928/README.md",
+    "excluded_target": "budget.json"
+  },
+  {
+    "document": "docs/history/outputs/diagnosis_g1_20260928/README.md",
+    "excluded_target": "evidence/g1_independent_evidence.json"
+  },
+  {
+    "document": "docs/history/outputs/diagnosis_g1_20260928/README.md",
+    "excluded_target": "candidates/summary.json"
+  },
+  {
+    "document": "docs/history/outputs/diagnosis_g1_20260928/README.md",
+    "excluded_target": "candidates/budget.json"
+  },
+  {
+    "document": "docs/history/outputs/diagnosis_scene9_20260928/README.md",
+    "excluded_target": "v1_evaluation_evidence.json"
+  },
+  {
+    "document": "docs/history/outputs/diagnosis_scene9_20260928/README.md",
+    "excluded_target": "summary.json"
+  },
+  {
+    "document": "docs/history/outputs/diagnosis_scene9_20260928/README.md",
+    "excluded_target": "switch_detail.json"
+  },
+  {
+    "document": "docs/history/outputs/diagnosis_scene9_20260928/README.md",
+    "excluded_target": "summary.json"
+  },
+  {
+    "document": "docs/history/outputs/diagnosis_scene9_20260928/README.md",
+    "excluded_target": "results.json"
+  },
+  {
+    "document": "docs/history/outputs/diagnosis_scene9_20260928/README.md",
+    "excluded_target": "continuation_control_results.json"
+  },
+  {
+    "document": "docs/history/outputs/diagnosis_scene9_20260928/README.md",
+    "excluded_target": "contract.json"
+  },
+  {
+    "document": "docs/history/outputs/diagnosis_scene9_20260928/README.md",
+    "excluded_target": "continuation_control_contract.json"
+  },
+  {
+    "document": "docs/history/outputs/diagnosis_scene9_20260928/README.md",
+    "excluded_target": "diagnose.py"
+  },
+  {
+    "document": "docs/history/outputs/diagnosis_scene9_20260928/README.md",
+    "excluded_target": "check_deterministic_continuation.py"
+  },
+  {
+    "document": "docs/history/outputs/diagnosis_scene9_20260928/README.md",
+    "excluded_target": "summarize.py"
+  },
+  {
+    "document": "docs/history/outputs/diagnosis_scene9_20260928/README.md",
+    "excluded_target": "plot_trace.py"
+  },
+  {
+    "document": "docs/history/outputs/diagnosis_step0_20260928/README.md",
+    "excluded_target": "v1_comparison/README.md"
+  },
+  {
+    "document": "docs/history/outputs/diagnosis_step0_20260928/README.md",
+    "excluded_target": "deterministic/comparison.json"
+  },
+  {
+    "document": "docs/history/outputs/diagnosis_step0_20260928/README.md",
+    "excluded_target": "summary.json"
+  },
+  {
+    "document": "docs/history/outputs/scene_optimality_20260928/speed_analysis_20261011/report.md",
+    "excluded_target": "/D:/HRL_UAV_V2/outputs/scene_optimality_20260928/v2_4_0_jointD_pilot_20261011/scripts/d_train.py:83"
+  },
+  {
+    "document": "docs/history/outputs/scene_optimality_20260928/speed_analysis_20261011/report.md",
+    "excluded_target": "/D:/HRL_UAV_V2/outputs/scene_optimality_20260928/v2_4_0_jointD_pilot_20261011/scripts/d_train.py:103"
+  },
+  {
+    "document": "docs/history/outputs/scene_optimality_20260928/speed_analysis_20261011/report.md",
+    "excluded_target": "/D:/HRL_UAV_V2/outputs/scene_optimality_20260928/v2_4_0_jointD_pilot_20261011/scripts/d_train.py:105"
+  },
+  {
+    "document": "docs/history/outputs/scene_optimality_20260928/speed_analysis_20261011/report.md",
+    "excluded_target": "/D:/HRL_UAV_V2/outputs/scene_optimality_20260928/v2_4_0_jointD_pilot_20261011/scripts/d_train.py:21"
+  },
+  {
+    "document": "docs/history/outputs/scene_optimality_20260928/speed_analysis_20261011/report.md",
+    "excluded_target": "/D:/HRL_UAV_V2_speedup/src/hrl_v2/lite_batch.py:26"
+  },
+  {
+    "document": "docs/history/outputs/scene_optimality_20260928/speed_analysis_20261011/report.md",
+    "excluded_target": "/D:/HRL_UAV_V2_speedup/src/hrl_v2/lite_batch.py:34"
+  },
+  {
+    "document": "docs/history/outputs/scene_optimality_20260928/speed_analysis_20261011/report.md",
+    "excluded_target": "/D:/HRL_UAV_V2_speedup/src/hrl_v2/sac.py:62"
+  },
+  {
+    "document": "docs/history/outputs/scene_optimality_20260928/speed_analysis_20261011/report.md",
+    "excluded_target": "/D:/HRL_UAV_V2_speedup/src/hrl_v2/sac.py:92"
+  },
+  {
+    "document": "docs/history/outputs/scene_optimality_20260928/speed_analysis_20261011/report.md",
+    "excluded_target": "/D:/HRL_UAV_V2_speedup/src/hrl_v2/replay.py:153"
+  },
+  {
+    "document": "docs/history/outputs/scene_optimality_20260928/speed_analysis_20261011/report.md",
+    "excluded_target": "/D:/HRL_UAV_V2_speedup/src/hrl_v2/replay.py:180"
+  },
+  {
+    "document": "docs/history/outputs/scene_optimality_20260928/speed_analysis_20261011/report.md",
+    "excluded_target": "/D:/HRL_UAV_V2_speedup/src/hrl_v2/sac.py:151"
+  },
+  {
+    "document": "docs/history/outputs/scene_optimality_20260928/speed_analysis_20261011/report.md",
+    "excluded_target": "/D:/HRL_UAV_V2_speedup/src/hrl_v2/checkpoint.py:70"
+  },
+  {
+    "document": "docs/history/outputs/scene_optimality_20260928/speed_analysis_20261011/report.md",
+    "excluded_target": "/D:/HRL_UAV_V2_speedup/src/hrl_v2/checkpoint.py:75"
+  },
+  {
+    "document": "docs/history/outputs/scene_optimality_20260928/speed_analysis_20261011/report.md",
+    "excluded_target": "/D:/HRL_UAV_V2/outputs/scene_optimality_20260928/v2_4_0_jointD_pilot_20261011/scripts/d_train.py:105"
+  },
+  {
+    "document": "docs/history/outputs/scene_optimality_20260928/speed_analysis_20261011/report.md",
+    "excluded_target": "/D:/HRL_UAV_V2/outputs/scene_optimality_20260928/v2_4_0_jointD_pilot_20261011/scripts/d_train.py:106"
+  },
+  {
+    "document": "docs/history/outputs/scene_optimality_20260928/speed_analysis_20261011/report.md",
+    "excluded_target": "/D:/HRL_UAV_V2/outputs/scene_optimality_20260928/v2_4_0_jointD_pilot_20261011/scripts/j_common.py:77"
+  },
+  {
+    "document": "docs/history/outputs/scene_optimality_20260928/speed_analysis_20261011/report.md",
+    "excluded_target": "/D:/HRL_UAV_V2/outputs/scene_optimality_20260928/v2_4_0_jointD_pilot_20261011/scripts/d_train.py:105"
+  },
+  {
+    "document": "docs/history/outputs/scene_optimality_20260928/speed_analysis_20261011/report.md",
+    "excluded_target": "/D:/HRL_UAV_V2/outputs/scene_optimality_20260928/speed_analysis_20261011/report.json"
+  },
+  {
+    "document": "research/speedup/docs/PERFORMANCE_EXECUTION_20260927.md",
+    "excluded_target": "evidence/equivalent_20260927/performance/performance_comparison.json"
+  },
+  {
+    "document": "research/speedup/docs/PERFORMANCE_EXECUTION_20260927.md",
+    "excluded_target": "evidence/equivalent_20260927/performance/performance_comparison.json"
+  },
+  {
+    "document": "research/speedup/docs/PERFORMANCE_EXECUTION_20260927.md",
+    "excluded_target": "evidence/equivalent_20260927/performance/budget_baseline.json"
+  },
+  {
+    "document": "research/speedup/docs/PERFORMANCE_EXECUTION_20260927.md",
+    "excluded_target": "evidence/equivalent_20260927/performance/budget_current.json"
+  },
+  {
+    "document": "research/speedup/docs/evidence/original_implementation.md",
+    "excluded_target": "validation/throughput_report.md"
+  }
+]

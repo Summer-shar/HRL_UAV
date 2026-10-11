@@ -1,0 +1,180 @@
+{
+  "limit": 18000,
+  "cases": [
+    {
+      "label": "92/staggered_busy/hover/local",
+      "reserved_steps": 600,
+      "physical_steps": 600,
+      "status": "passed"
+    },
+    {
+      "label": "92/staggered_busy/hover/equal",
+      "reserved_steps": 600,
+      "physical_steps": 600,
+      "status": "passed"
+    },
+    {
+      "label": "92/staggered_busy/toward/local",
+      "reserved_steps": 600,
+      "physical_steps": 600,
+      "status": "passed"
+    },
+    {
+      "label": "92/staggered_busy/toward/equal",
+      "reserved_steps": 600,
+      "physical_steps": 600,
+      "status": "passed"
+    },
+    {
+      "label": "92/staggered_busy/away/local",
+      "reserved_steps": 600,
+      "physical_steps": 600,
+      "status": "passed"
+    },
+    {
+      "label": "92/staggered_busy/away/equal",
+      "reserved_steps": 600,
+      "physical_steps": 600,
+      "status": "passed"
+    },
+    {
+      "label": "92/synchronous_busy/hover/local",
+      "reserved_steps": 600,
+      "physical_steps": 600,
+      "status": "passed"
+    },
+    {
+      "label": "92/synchronous_busy/hover/equal",
+      "reserved_steps": 600,
+      "physical_steps": 600,
+      "status": "passed"
+    },
+    {
+      "label": "92/synchronous_busy/toward/local",
+      "reserved_steps": 600,
+      "physical_steps": 600,
+      "status": "passed"
+    },
+    {
+      "label": "92/synchronous_busy/toward/equal",
+      "reserved_steps": 600,
+      "physical_steps": 600,
+      "status": "passed"
+    },
+    {
+      "label": "92/synchronous_busy/away/local",
+      "reserved_steps": 600,
+      "physical_steps": 600,
+      "status": "passed"
+    },
+    {
+      "label": "92/synchronous_busy/away/equal",
+      "reserved_steps": 600,
+      "physical_steps": 600,
+      "status": "passed"
+    },
+    {
+      "label": "102/staggered_busy/hover/local",
+      "reserved_steps": 600,
+      "physical_steps": 600,
+      "status": "passed"
+    },
+    {
+      "label": "102/staggered_busy/hover/equal",
+      "reserved_steps": 600,
+      "physical_steps": 600,
+      "status": "passed"
+    },
+    {
+      "label": "102/staggered_busy/toward/local",
+      "reserved_steps": 600,
+      "physical_steps": 600,
+      "status": "passed"
+    },
+    {
+      "label": "102/staggered_busy/toward/equal",
+      "reserved_steps": 600,
+      "physical_steps": 600,
+      "status": "passed"
+    },
+    {
+      "label": "102/staggered_busy/away/local",
+      "reserved_steps": 600,
+      "physical_steps": 600,
+      "status": "passed"
+    },
+    {
+      "label": "102/staggered_busy/away/equal",
+      "reserved_steps": 600,
+      "physical_steps": 600,
+      "status": "passed"
+    },
+    {
+      "label": "102/synchronous_busy/hover/local",
+      "reserved_steps": 600,
+      "physical_steps": 600,
+      "status": "passed"
+    },
+    {
+      "label": "102/synchronous_busy/hover/equal",
+      "reserved_steps": 600,
+      "physical_steps": 600,
+      "status": "passed"
+    },
+    {
+      "label": "102/synchronous_busy/toward/local",
+      "reserved_steps": 600,
+      "physical_steps": 600,
+      "status": "passed"
+    },
+    {
+      "label": "102/synchronous_busy/toward/equal",
+      "reserved_steps": 600,
+      "physical_steps": 600,
+      "status": "passed"
+    },
+    {
+      "label": "102/synchronous_busy/away/local",
+      "reserved_steps": 600,
+      "physical_steps": 600,
+      "status": "passed"
+    },
+    {
+      "label": "102/synchronous_busy/away/equal",
+      "reserved_steps": 600,
+      "physical_steps": 600,
+      "status": "passed"
+    },
+    {
+      "label": "split_mechanisms",
+      "reserved_steps": 450,
+      "physical_steps": 450,
+      "status": "passed"
+    },
+    {
+      "label": "92/staggered_busy/hover/high_local_low_equal",
+      "reserved_steps": 600,
+      "physical_steps": 600,
+      "status": "passed"
+    },
+    {
+      "label": "92/synchronous_busy/hover/high_local_low_equal",
+      "reserved_steps": 600,
+      "physical_steps": 600,
+      "status": "passed"
+    },
+    {
+      "label": "102/staggered_busy/hover/high_local_low_equal",
+      "reserved_steps": 600,
+      "physical_steps": 600,
+      "status": "passed"
+    },
+    {
+      "label": "102/synchronous_busy/hover/high_local_low_equal",
+      "reserved_steps": 600,
+      "physical_steps": 600,
+      "status": "passed"
+    }
+  ],
+  "physical_steps": 17250
+}

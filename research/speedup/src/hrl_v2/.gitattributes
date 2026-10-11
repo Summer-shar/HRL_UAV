@@ -1,0 +1,2 @@
+# Preserve byte identities used by V2 configuration and validation checks.
+* -text

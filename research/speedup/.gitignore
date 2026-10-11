@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv*/
+venv/
+.pytest_cache/
+build/
+dist/
+outputs/
+data/fixtures/*.pkl
+*.pt
+*.pth
+.local_backup/
+.env
+.idea/
+.vscode/

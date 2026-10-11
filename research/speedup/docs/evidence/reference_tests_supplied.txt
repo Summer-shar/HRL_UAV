@@ -1,0 +1,19 @@
+test_actor_surrogate_has_finite_parameter_gradients (test_reference_hybrid_simplex.ReferenceTests.test_actor_surrogate_has_finite_parameter_gradients) ... ok
+test_all_seven_supports_exact_zeros_and_unit_sums (test_reference_hybrid_simplex.ReferenceTests.test_all_seven_supports_exact_zeros_and_unit_sums) ... ok
+test_categorical_gradient_can_reduce_bad_singleton_preference (test_reference_hybrid_simplex.ReferenceTests.test_categorical_gradient_can_reduce_bad_singleton_preference) ... ok
+test_density_rejects_nonzero_excluded_destination (test_reference_hybrid_simplex.ReferenceTests.test_density_rejects_nonzero_excluded_destination) ... ok
+test_dirichlet_conditional_ratio_gradients_exist (test_reference_hybrid_simplex.ReferenceTests.test_dirichlet_conditional_ratio_gradients_exist) ... ok
+test_entropy_only_uniform_reference_is_stationary (test_reference_hybrid_simplex.ReferenceTests.test_entropy_only_uniform_reference_is_stationary) ... ok
+test_enumerated_row_discrete_gradient_matches_joint_coupled_objective (test_reference_hybrid_simplex.ReferenceTests.test_enumerated_row_discrete_gradient_matches_joint_coupled_objective) ... ok
+test_frame_and_macro_cost_identity_no_double_discount (test_reference_hybrid_simplex.ReferenceTests.test_frame_and_macro_cost_identity_no_double_discount) ... ok
+test_sample_and_density_recompute_match (test_reference_hybrid_simplex.ReferenceTests.test_sample_and_density_recompute_match) ... ok
+test_secondary_decode_keeps_zero_and_ratio (test_reference_hybrid_simplex.ReferenceTests.test_secondary_decode_keeps_zero_and_ratio) ... ok
+test_stratified_importance_weights_restore_uniform_objective (test_reference_hybrid_simplex.ReferenceTests.test_stratified_importance_weights_restore_uniform_objective) ... ok
+test_terminal_bootstrap_zero_and_nonterminal_one (test_reference_hybrid_simplex.ReferenceTests.test_terminal_bootstrap_zero_and_nonterminal_one) ... ok
+test_uniform_face_density_is_zero_for_all_dimensions (test_reference_hybrid_simplex.ReferenceTests.test_uniform_face_density_is_zero_for_all_dimensions) ... ok
+test_uniform_reference_joint_log_density_zero (test_reference_hybrid_simplex.ReferenceTests.test_uniform_reference_joint_log_density_zero) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 0.209s
+
+OK

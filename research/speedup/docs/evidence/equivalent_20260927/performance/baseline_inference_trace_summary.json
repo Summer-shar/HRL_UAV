@@ -1,0 +1,102 @@
+{
+  "schema": "chrome_trace_inclusive_cpu_summary_1",
+  "trace_path": "D:\\HRL_UAV_V2\\outputs\\equivalent_20260927\\baseline\\inference.lower.h1800.cached.trace.json",
+  "trace_bytes": 2710746,
+  "events_seen": 7016,
+  "user_annotations": [
+    {
+      "name": "inference.lower.h1800.cached",
+      "calls": 1,
+      "inclusive_cpu_seconds": 0.0405651,
+      "instant_events": 0
+    },
+    {
+      "name": "network/typed_attention",
+      "calls": 3,
+      "inclusive_cpu_seconds": 0.0158609,
+      "instant_events": 0
+    },
+    {
+      "name": "data/batch_graph_and_transfer",
+      "calls": 1,
+      "inclusive_cpu_seconds": 0.0112988,
+      "instant_events": 0
+    },
+    {
+      "name": "data/fixed_graph_features",
+      "calls": 1,
+      "inclusive_cpu_seconds": 0.0041535,
+      "instant_events": 0
+    },
+    {
+      "name": "data/attention_indices",
+      "calls": 1,
+      "inclusive_cpu_seconds": 0.0039456,
+      "instant_events": 0
+    },
+    {
+      "name": "history/inference_cache",
+      "calls": 1,
+      "inclusive_cpu_seconds": 0.0013617,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/actor/queue_upload_gru",
+      "calls": 1,
+      "inclusive_cpu_seconds": 0.0006564,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/actor/arrival_gru",
+      "calls": 1,
+      "inclusive_cpu_seconds": 0.0004803,
+      "instant_events": 0
+    },
+    {
+      "name": "sac/actor/queue_cpu_gru",
+      "calls": 1,
+      "inclusive_cpu_seconds": 0.00028619999999999996,
+      "instant_events": 0
+    }
+  ],
+  "cpu_transfer_related_calls": [
+    {
+      "name": "aten::to",
+      "calls": 101,
+      "inclusive_cpu_seconds": 0.004014199999999998,
+      "instant_events": 0
+    },
+    {
+      "name": "aten::_to_copy",
+      "calls": 90,
+      "inclusive_cpu_seconds": 0.0038964000000000004,
+      "instant_events": 0
+    },
+    {
+      "name": "aten::copy_",
+      "calls": 122,
+      "inclusive_cpu_seconds": 0.0028837999999999997,
+      "instant_events": 0
+    }
+  ],
+  "cuda_activity": {
+    "kernel_events": 0,
+    "memcpy_events": 0,
+    "memset_events": 0,
+    "activity_available": false,
+    "interpretation": "No actual CUDA kernel/memcpy events were captured. CUPTI activity data is unavailable in this trace; do not attribute time to CUDA kernels or transfers."
+  },
+  "diagnostics": {
+    "invalid_durations": 0,
+    "ignored_events": {}
+  },
+  "notes": [
+    "All reported CPU durations are inclusive nested spans. Rows overlap and must not be added together.",
+    "These tables are not a wall-clock decomposition and contain no wall-clock percentage attribution.",
+    "Transfer-related CPU calls measure host dispatch/conversion/copy work, not actual CUDA transfer duration; aten::to may only change dtype or return its input.",
+    "CUDA counts come only from actual kernel/gpu_memcpy/gpu_memset categories, never cudaLaunchKernel or other CPU runtime API calls.",
+    "Chrome trace ts/dur fields are interpreted as microseconds; displayTimeUnit does not change their storage unit.",
+    "Only completed X or matched B/E spans contribute duration. Instant annotation events are counted with zero duration; incomplete/unsupported annotation events are reported separately.",
+    "This offline parser loads the trace into host memory. Run it after performance measurements, not alongside them."
+  ]
+}

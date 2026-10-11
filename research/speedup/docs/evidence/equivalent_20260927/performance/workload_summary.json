@@ -1,0 +1,1285 @@
+{
+  "schema": "baseline_workload_summary_1",
+  "source": "outputs\\equivalent_20260927\\baseline\\times.json",
+  "episode_count_rule": "Episode object and independent physical-trajectory counts are copied from workload metadata, never inferred by deduplicating report records.",
+  "source_rule": "The two true trajectories are source 0 (local routing) and source 1 (equal routing). Repeated source IDs in other workloads denote copied episode objects, not new physical trajectories.",
+  "memory_rule": "Maximum across recorded repetitions; sampled process RSS and resident CUDA allocated/reserved bytes, not incremental allocation or a guarantee about an entire research run.",
+  "selected_critic_workloads": [
+    {
+      "case": "critic.e2.h120.normal",
+      "status": "measured",
+      "batch_size": 128,
+      "episode_objects": 2,
+      "independent_physical_trajectories": 2,
+      "episode_sources": [
+        {
+          "episode_object": 0,
+          "physical_source": 0,
+          "sample_count": 64,
+          "max_prefix_anchor": 118
+        },
+        {
+          "episode_object": 1,
+          "physical_source": 1,
+          "sample_count": 64,
+          "max_prefix_anchor": 118
+        }
+      ],
+      "synthetic": false,
+      "max_successor_history_prefix": 120,
+      "observed_report_history_prefix": {
+        "min": 27,
+        "max": 119
+      },
+      "single_graph_nodes": {
+        "min": 65,
+        "max": 176
+      },
+      "single_graph_edges": {
+        "min": 271,
+        "max": 1032
+      },
+      "max_fifo_length_by_kind": {
+        "cpu": 58,
+        "ready": 4,
+        "transfer": 4,
+        "upload": 4
+      },
+      "report_graph_records": 50,
+      "sampling_note": "Fixed stratified stress sample plus one prefix anchor per object; not an unbiased replay estimate."
+    },
+    {
+      "case": "critic.e2.h120.backlog",
+      "status": "measured",
+      "batch_size": 128,
+      "episode_objects": 2,
+      "independent_physical_trajectories": 2,
+      "episode_sources": [
+        {
+          "episode_object": 0,
+          "physical_source": 0,
+          "sample_count": 64,
+          "max_prefix_anchor": 118
+        },
+        {
+          "episode_object": 1,
+          "physical_source": 1,
+          "sample_count": 64,
+          "max_prefix_anchor": 118
+        }
+      ],
+      "synthetic": false,
+      "max_successor_history_prefix": 120,
+      "observed_report_history_prefix": {
+        "min": 57,
+        "max": 119
+      },
+      "single_graph_nodes": {
+        "min": 65,
+        "max": 213
+      },
+      "single_graph_edges": {
+        "min": 271,
+        "max": 1295
+      },
+      "max_fifo_length_by_kind": {
+        "cpu": 58,
+        "ready": 5,
+        "transfer": 4,
+        "upload": 4
+      },
+      "report_graph_records": 26,
+      "sampling_note": "Fixed stratified stress sample plus one prefix anchor per object; not an unbiased replay estimate."
+    },
+    {
+      "case": "critic.e2.h600.normal",
+      "status": "measured",
+      "batch_size": 128,
+      "episode_objects": 2,
+      "independent_physical_trajectories": 2,
+      "episode_sources": [
+        {
+          "episode_object": 0,
+          "physical_source": 0,
+          "sample_count": 64,
+          "max_prefix_anchor": 598
+        },
+        {
+          "episode_object": 1,
+          "physical_source": 1,
+          "sample_count": 64,
+          "max_prefix_anchor": 598
+        }
+      ],
+      "synthetic": false,
+      "max_successor_history_prefix": 600,
+      "observed_report_history_prefix": {
+        "min": 7,
+        "max": 599
+      },
+      "single_graph_nodes": {
+        "min": 71,
+        "max": 542
+      },
+      "single_graph_edges": {
+        "min": 297,
+        "max": 3600
+      },
+      "max_fifo_length_by_kind": {
+        "cpu": 174,
+        "ready": 5,
+        "transfer": 3,
+        "upload": 6
+      },
+      "report_graph_records": 101,
+      "sampling_note": "Fixed stratified stress sample plus one prefix anchor per object; not an unbiased replay estimate."
+    },
+    {
+      "case": "critic.e2.h600.backlog",
+      "status": "measured",
+      "batch_size": 128,
+      "episode_objects": 2,
+      "independent_physical_trajectories": 2,
+      "episode_sources": [
+        {
+          "episode_object": 0,
+          "physical_source": 0,
+          "sample_count": 64,
+          "max_prefix_anchor": 598
+        },
+        {
+          "episode_object": 1,
+          "physical_source": 1,
+          "sample_count": 64,
+          "max_prefix_anchor": 598
+        }
+      ],
+      "synthetic": false,
+      "max_successor_history_prefix": 600,
+      "observed_report_history_prefix": {
+        "min": 20,
+        "max": 599
+      },
+      "single_graph_nodes": {
+        "min": 71,
+        "max": 609
+      },
+      "single_graph_edges": {
+        "min": 307,
+        "max": 4063
+      },
+      "max_fifo_length_by_kind": {
+        "cpu": 182,
+        "ready": 4,
+        "transfer": 4,
+        "upload": 6
+      },
+      "report_graph_records": 86,
+      "sampling_note": "Fixed stratified stress sample plus one prefix anchor per object; not an unbiased replay estimate."
+    },
+    {
+      "case": "critic.e2.h1800.normal",
+      "status": "measured",
+      "batch_size": 128,
+      "episode_objects": 2,
+      "independent_physical_trajectories": 2,
+      "episode_sources": [
+        {
+          "episode_object": 0,
+          "physical_source": 0,
+          "sample_count": 64,
+          "max_prefix_anchor": 1798
+        },
+        {
+          "episode_object": 1,
+          "physical_source": 1,
+          "sample_count": 64,
+          "max_prefix_anchor": 1798
+        }
+      ],
+      "synthetic": false,
+      "max_successor_history_prefix": 1800,
+      "observed_report_history_prefix": {
+        "min": 42,
+        "max": 1799
+      },
+      "single_graph_nodes": {
+        "min": 64,
+        "max": 660
+      },
+      "single_graph_edges": {
+        "min": 256,
+        "max": 4424
+      },
+      "max_fifo_length_by_kind": {
+        "cpu": 171,
+        "ready": 5,
+        "transfer": 4,
+        "upload": 7
+      },
+      "report_graph_records": 123,
+      "sampling_note": "Fixed stratified stress sample plus one prefix anchor per object; not an unbiased replay estimate."
+    },
+    {
+      "case": "critic.e2.h1800.backlog",
+      "status": "measured",
+      "batch_size": 128,
+      "episode_objects": 2,
+      "independent_physical_trajectories": 2,
+      "episode_sources": [
+        {
+          "episode_object": 0,
+          "physical_source": 0,
+          "sample_count": 64,
+          "max_prefix_anchor": 1798
+        },
+        {
+          "episode_object": 1,
+          "physical_source": 1,
+          "sample_count": 64,
+          "max_prefix_anchor": 1798
+        }
+      ],
+      "synthetic": false,
+      "max_successor_history_prefix": 1800,
+      "observed_report_history_prefix": {
+        "min": 23,
+        "max": 1799
+      },
+      "single_graph_nodes": {
+        "min": 64,
+        "max": 660
+      },
+      "single_graph_edges": {
+        "min": 256,
+        "max": 4424
+      },
+      "max_fifo_length_by_kind": {
+        "cpu": 181,
+        "ready": 4,
+        "transfer": 4,
+        "upload": 7
+      },
+      "report_graph_records": 111,
+      "sampling_note": "Fixed stratified stress sample plus one prefix anchor per object; not an unbiased replay estimate."
+    }
+  ],
+  "all_baseline_case_memory": [
+    {
+      "case": "actor.e1.h1800.backlog",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2481852416,
+        "cuda_peak_allocated": 580267008,
+        "cuda_peak_reserved": 1182793728
+      },
+      "max_mib": {
+        "rss_peak": 2366.87890625,
+        "cuda_peak_allocated": 553.3857421875,
+        "cuda_peak_reserved": 1128.0
+      },
+      "missing": []
+    },
+    {
+      "case": "actor.e1.h1800.normal",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2422251520,
+        "cuda_peak_allocated": 449630208,
+        "cuda_peak_reserved": 905969664
+      },
+      "max_mib": {
+        "rss_peak": 2310.0390625,
+        "cuda_peak_allocated": 428.80078125,
+        "cuda_peak_reserved": 864.0
+      },
+      "missing": []
+    },
+    {
+      "case": "actor.e2.h1800.backlog",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2535096320,
+        "cuda_peak_allocated": 619362816,
+        "cuda_peak_reserved": 1182793728
+      },
+      "max_mib": {
+        "rss_peak": 2417.65625,
+        "cuda_peak_allocated": 590.67041015625,
+        "cuda_peak_reserved": 1128.0
+      },
+      "missing": []
+    },
+    {
+      "case": "actor.e2.h1800.normal",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2544910336,
+        "cuda_peak_allocated": 493204992,
+        "cuda_peak_reserved": 1312817152
+      },
+      "max_mib": {
+        "rss_peak": 2427.015625,
+        "cuda_peak_allocated": 470.35693359375,
+        "cuda_peak_reserved": 1252.0
+      },
+      "missing": []
+    },
+    {
+      "case": "actor.e4.h1800.backlog",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2550046720,
+        "cuda_peak_allocated": 715808256,
+        "cuda_peak_reserved": 1451229184
+      },
+      "max_mib": {
+        "rss_peak": 2431.9140625,
+        "cuda_peak_allocated": 682.64794921875,
+        "cuda_peak_reserved": 1384.0
+      },
+      "missing": []
+    },
+    {
+      "case": "actor.e4.h1800.normal",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2550149120,
+        "cuda_peak_allocated": 591336960,
+        "cuda_peak_reserved": 1237319680
+      },
+      "max_mib": {
+        "rss_peak": 2432.01171875,
+        "cuda_peak_allocated": 563.94287109375,
+        "cuda_peak_reserved": 1180.0
+      },
+      "missing": []
+    },
+    {
+      "case": "checkpoint.digest2",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2780041216,
+        "cuda_peak_allocated": 156797952,
+        "cuda_peak_reserved": 1478492160
+      },
+      "max_mib": {
+        "rss_peak": 2651.25390625,
+        "cuda_peak_allocated": 149.5341796875,
+        "cuda_peak_reserved": 1410.0
+      },
+      "missing": []
+    },
+    {
+      "case": "checkpoint.load2",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2937651200,
+        "cuda_peak_allocated": 156797952,
+        "cuda_peak_reserved": 1478492160
+      },
+      "max_mib": {
+        "rss_peak": 2801.5625,
+        "cuda_peak_allocated": 149.5341796875,
+        "cuda_peak_reserved": 1410.0
+      },
+      "missing": []
+    },
+    {
+      "case": "checkpoint.save0",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2924945408,
+        "cuda_peak_allocated": 321532416,
+        "cuda_peak_reserved": 1478492160
+      },
+      "max_mib": {
+        "rss_peak": 2789.4453125,
+        "cuda_peak_allocated": 306.63720703125,
+        "cuda_peak_reserved": 1410.0
+      },
+      "missing": []
+    },
+    {
+      "case": "checkpoint.save2",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2978897920,
+        "cuda_peak_allocated": 211709440,
+        "cuda_peak_reserved": 1478492160
+      },
+      "max_mib": {
+        "rss_peak": 2840.8984375,
+        "cuda_peak_allocated": 201.90185546875,
+        "cuda_peak_reserved": 1410.0
+      },
+      "missing": []
+    },
+    {
+      "case": "critic.e1.h1800.backlog",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2480730112,
+        "cuda_peak_allocated": 961156096,
+        "cuda_peak_reserved": 1182793728
+      },
+      "max_mib": {
+        "rss_peak": 2365.80859375,
+        "cuda_peak_allocated": 916.6298828125,
+        "cuda_peak_reserved": 1128.0
+      },
+      "missing": []
+    },
+    {
+      "case": "critic.e1.h1800.normal",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2423881728,
+        "cuda_peak_allocated": 719965696,
+        "cuda_peak_reserved": 905969664
+      },
+      "max_mib": {
+        "rss_peak": 2311.59375,
+        "cuda_peak_allocated": 686.61279296875,
+        "cuda_peak_reserved": 864.0
+      },
+      "missing": []
+    },
+    {
+      "case": "critic.e2.h120.backlog",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2426826752,
+        "cuda_peak_allocated": 403961856,
+        "cuda_peak_reserved": 492830720
+      },
+      "max_mib": {
+        "rss_peak": 2314.40234375,
+        "cuda_peak_allocated": 385.248046875,
+        "cuda_peak_reserved": 470.0
+      },
+      "missing": []
+    },
+    {
+      "case": "critic.e2.h120.normal",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2407522304,
+        "cuda_peak_allocated": 343552000,
+        "cuda_peak_reserved": 369098752
+      },
+      "max_mib": {
+        "rss_peak": 2295.9921875,
+        "cuda_peak_allocated": 327.63671875,
+        "cuda_peak_reserved": 352.0
+      },
+      "missing": []
+    },
+    {
+      "case": "critic.e2.h1800.backlog",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2566766592,
+        "cuda_peak_allocated": 1035263488,
+        "cuda_peak_reserved": 1312817152
+      },
+      "max_mib": {
+        "rss_peak": 2447.859375,
+        "cuda_peak_allocated": 987.30419921875,
+        "cuda_peak_reserved": 1252.0
+      },
+      "missing": []
+    },
+    {
+      "case": "critic.e2.h1800.normal",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2540806144,
+        "cuda_peak_allocated": 801674752,
+        "cuda_peak_reserved": 1312817152
+      },
+      "max_mib": {
+        "rss_peak": 2423.1015625,
+        "cuda_peak_allocated": 764.53662109375,
+        "cuda_peak_reserved": 1252.0
+      },
+      "missing": []
+    },
+    {
+      "case": "critic.e2.h600.backlog",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2519793664,
+        "cuda_peak_allocated": 914334208,
+        "cuda_peak_reserved": 1189085184
+      },
+      "max_mib": {
+        "rss_peak": 2403.0625,
+        "cuda_peak_allocated": 871.97705078125,
+        "cuda_peak_reserved": 1134.0
+      },
+      "missing": []
+    },
+    {
+      "case": "critic.e2.h600.normal",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2474528768,
+        "cuda_peak_allocated": 694526976,
+        "cuda_peak_reserved": 790626304
+      },
+      "max_mib": {
+        "rss_peak": 2359.89453125,
+        "cuda_peak_allocated": 662.3525390625,
+        "cuda_peak_reserved": 754.0
+      },
+      "missing": []
+    },
+    {
+      "case": "critic.e4.h1800.backlog",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2554167296,
+        "cuda_peak_allocated": 1223815168,
+        "cuda_peak_reserved": 1451229184
+      },
+      "max_mib": {
+        "rss_peak": 2435.84375,
+        "cuda_peak_allocated": 1167.12109375,
+        "cuda_peak_reserved": 1384.0
+      },
+      "missing": []
+    },
+    {
+      "case": "critic.e4.h1800.normal",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2552045568,
+        "cuda_peak_allocated": 988898304,
+        "cuda_peak_reserved": 1237319680
+      },
+      "max_mib": {
+        "rss_peak": 2433.8203125,
+        "cuda_peak_allocated": 943.0869140625,
+        "cuda_peak_reserved": 1180.0
+      },
+      "missing": []
+    },
+    {
+      "case": "evaluation.replay900s",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 3525890048,
+        "cuda_peak_allocated": 171535360,
+        "cuda_peak_reserved": 1478492160
+      },
+      "max_mib": {
+        "rss_peak": 3362.55078125,
+        "cuda_peak_allocated": 163.5888671875,
+        "cuda_peak_reserved": 1410.0
+      },
+      "missing": []
+    },
+    {
+      "case": "inference.lower.h1.rebuild",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2538655744,
+        "cuda_peak_allocated": 165616640,
+        "cuda_peak_reserved": 1451229184
+      },
+      "max_mib": {
+        "rss_peak": 2421.05078125,
+        "cuda_peak_allocated": 157.9443359375,
+        "cuda_peak_reserved": 1384.0
+      },
+      "missing": []
+    },
+    {
+      "case": "inference.lower.h120.backlog.cached",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2529865728,
+        "cuda_peak_allocated": 165743104,
+        "cuda_peak_reserved": 1451229184
+      },
+      "max_mib": {
+        "rss_peak": 2412.66796875,
+        "cuda_peak_allocated": 158.06494140625,
+        "cuda_peak_reserved": 1384.0
+      },
+      "missing": []
+    },
+    {
+      "case": "inference.lower.h120.backlog.rebuild",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2546946048,
+        "cuda_peak_allocated": 170989056,
+        "cuda_peak_reserved": 1451229184
+      },
+      "max_mib": {
+        "rss_peak": 2428.95703125,
+        "cuda_peak_allocated": 163.06787109375,
+        "cuda_peak_reserved": 1384.0
+      },
+      "missing": []
+    },
+    {
+      "case": "inference.lower.h120.cached",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2524971008,
+        "cuda_peak_allocated": 165504512,
+        "cuda_peak_reserved": 1451229184
+      },
+      "max_mib": {
+        "rss_peak": 2408.0,
+        "cuda_peak_allocated": 157.83740234375,
+        "cuda_peak_reserved": 1384.0
+      },
+      "missing": []
+    },
+    {
+      "case": "inference.lower.h120.normal.cached",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2529865728,
+        "cuda_peak_allocated": 165576704,
+        "cuda_peak_reserved": 1451229184
+      },
+      "max_mib": {
+        "rss_peak": 2412.66796875,
+        "cuda_peak_allocated": 157.90625,
+        "cuda_peak_reserved": 1384.0
+      },
+      "missing": []
+    },
+    {
+      "case": "inference.lower.h120.normal.rebuild",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2546958336,
+        "cuda_peak_allocated": 172711936,
+        "cuda_peak_reserved": 1451229184
+      },
+      "max_mib": {
+        "rss_peak": 2428.96875,
+        "cuda_peak_allocated": 164.7109375,
+        "cuda_peak_reserved": 1384.0
+      },
+      "missing": []
+    },
+    {
+      "case": "inference.lower.h120.rebuild",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2537844736,
+        "cuda_peak_allocated": 173992448,
+        "cuda_peak_reserved": 1451229184
+      },
+      "max_mib": {
+        "rss_peak": 2420.27734375,
+        "cuda_peak_allocated": 165.93212890625,
+        "cuda_peak_reserved": 1384.0
+      },
+      "missing": []
+    },
+    {
+      "case": "inference.lower.h1800.after_actor_update",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2465984512,
+        "cuda_peak_allocated": 288474624,
+        "cuda_peak_reserved": 1451229184
+      },
+      "max_mib": {
+        "rss_peak": 2351.74609375,
+        "cuda_peak_allocated": 275.11083984375,
+        "cuda_peak_reserved": 1384.0
+      },
+      "missing": []
+    },
+    {
+      "case": "inference.lower.h1800.backlog.cached",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2535661568,
+        "cuda_peak_allocated": 165725696,
+        "cuda_peak_reserved": 1451229184
+      },
+      "max_mib": {
+        "rss_peak": 2418.1953125,
+        "cuda_peak_allocated": 158.04833984375,
+        "cuda_peak_reserved": 1384.0
+      },
+      "missing": []
+    },
+    {
+      "case": "inference.lower.h1800.backlog.rebuild",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2548678656,
+        "cuda_peak_allocated": 281335296,
+        "cuda_peak_reserved": 1451229184
+      },
+      "max_mib": {
+        "rss_peak": 2430.609375,
+        "cuda_peak_allocated": 268.30224609375,
+        "cuda_peak_reserved": 1384.0
+      },
+      "missing": []
+    },
+    {
+      "case": "inference.lower.h1800.cached",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2521944064,
+        "cuda_peak_allocated": 165509632,
+        "cuda_peak_reserved": 1451229184
+      },
+      "max_mib": {
+        "rss_peak": 2405.11328125,
+        "cuda_peak_allocated": 157.84228515625,
+        "cuda_peak_reserved": 1384.0
+      },
+      "missing": []
+    },
+    {
+      "case": "inference.lower.h1800.normal.cached",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2531573760,
+        "cuda_peak_allocated": 165540352,
+        "cuda_peak_reserved": 1451229184
+      },
+      "max_mib": {
+        "rss_peak": 2414.296875,
+        "cuda_peak_allocated": 157.87158203125,
+        "cuda_peak_reserved": 1384.0
+      },
+      "missing": []
+    },
+    {
+      "case": "inference.lower.h1800.normal.rebuild",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2546982912,
+        "cuda_peak_allocated": 282641408,
+        "cuda_peak_reserved": 1451229184
+      },
+      "max_mib": {
+        "rss_peak": 2428.9921875,
+        "cuda_peak_allocated": 269.5478515625,
+        "cuda_peak_reserved": 1384.0
+      },
+      "missing": []
+    },
+    {
+      "case": "inference.lower.h1800.rebuild",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2537353216,
+        "cuda_peak_allocated": 282892288,
+        "cuda_peak_reserved": 1451229184
+      },
+      "max_mib": {
+        "rss_peak": 2419.80859375,
+        "cuda_peak_allocated": 269.787109375,
+        "cuda_peak_reserved": 1384.0
+      },
+      "missing": []
+    },
+    {
+      "case": "inference.lower.h600.backlog.cached",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2529988608,
+        "cuda_peak_allocated": 165651968,
+        "cuda_peak_reserved": 1451229184
+      },
+      "max_mib": {
+        "rss_peak": 2412.78515625,
+        "cuda_peak_allocated": 157.97802734375,
+        "cuda_peak_reserved": 1384.0
+      },
+      "missing": []
+    },
+    {
+      "case": "inference.lower.h600.backlog.rebuild",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2547011584,
+        "cuda_peak_allocated": 203619840,
+        "cuda_peak_reserved": 1451229184
+      },
+      "max_mib": {
+        "rss_peak": 2429.01953125,
+        "cuda_peak_allocated": 194.18701171875,
+        "cuda_peak_reserved": 1384.0
+      },
+      "missing": []
+    },
+    {
+      "case": "inference.lower.h600.cached",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2520887296,
+        "cuda_peak_allocated": 165688832,
+        "cuda_peak_reserved": 1451229184
+      },
+      "max_mib": {
+        "rss_peak": 2404.10546875,
+        "cuda_peak_allocated": 158.01318359375,
+        "cuda_peak_reserved": 1384.0
+      },
+      "missing": []
+    },
+    {
+      "case": "inference.lower.h600.normal.cached",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2534076416,
+        "cuda_peak_allocated": 165688832,
+        "cuda_peak_reserved": 1451229184
+      },
+      "max_mib": {
+        "rss_peak": 2416.68359375,
+        "cuda_peak_allocated": 158.01318359375,
+        "cuda_peak_reserved": 1384.0
+      },
+      "missing": []
+    },
+    {
+      "case": "inference.lower.h600.normal.rebuild",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2546970624,
+        "cuda_peak_allocated": 204337152,
+        "cuda_peak_reserved": 1451229184
+      },
+      "max_mib": {
+        "rss_peak": 2428.98046875,
+        "cuda_peak_allocated": 194.87109375,
+        "cuda_peak_reserved": 1384.0
+      },
+      "missing": []
+    },
+    {
+      "case": "inference.lower.h600.rebuild",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2537357312,
+        "cuda_peak_allocated": 204337152,
+        "cuda_peak_reserved": 1451229184
+      },
+      "max_mib": {
+        "rss_peak": 2419.8125,
+        "cuda_peak_allocated": 194.87109375,
+        "cuda_peak_reserved": 1384.0
+      },
+      "missing": []
+    },
+    {
+      "case": "inference.upper.h0.rebuild",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2547474432,
+        "cuda_peak_allocated": 157008384,
+        "cuda_peak_reserved": 1451229184
+      },
+      "max_mib": {
+        "rss_peak": 2429.4609375,
+        "cuda_peak_allocated": 149.73486328125,
+        "cuda_peak_reserved": 1384.0
+      },
+      "missing": []
+    },
+    {
+      "case": "inference.upper.h120.cached",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2530488320,
+        "cuda_peak_allocated": 165864448,
+        "cuda_peak_reserved": 1451229184
+      },
+      "max_mib": {
+        "rss_peak": 2413.26171875,
+        "cuda_peak_allocated": 158.1806640625,
+        "cuda_peak_reserved": 1384.0
+      },
+      "missing": []
+    },
+    {
+      "case": "inference.upper.h120.rebuild",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2547228672,
+        "cuda_peak_allocated": 173992448,
+        "cuda_peak_reserved": 1451229184
+      },
+      "max_mib": {
+        "rss_peak": 2429.2265625,
+        "cuda_peak_allocated": 165.93212890625,
+        "cuda_peak_reserved": 1384.0
+      },
+      "missing": []
+    },
+    {
+      "case": "inference.upper.h1800.cached",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2531807232,
+        "cuda_peak_allocated": 165864448,
+        "cuda_peak_reserved": 1451229184
+      },
+      "max_mib": {
+        "rss_peak": 2414.51953125,
+        "cuda_peak_allocated": 158.1806640625,
+        "cuda_peak_reserved": 1384.0
+      },
+      "missing": []
+    },
+    {
+      "case": "inference.upper.h1800.rebuild",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2547216384,
+        "cuda_peak_allocated": 282892288,
+        "cuda_peak_reserved": 1451229184
+      },
+      "max_mib": {
+        "rss_peak": 2429.21484375,
+        "cuda_peak_allocated": 269.787109375,
+        "cuda_peak_reserved": 1384.0
+      },
+      "missing": []
+    },
+    {
+      "case": "inference.upper.h600.cached",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2534309888,
+        "cuda_peak_allocated": 165864448,
+        "cuda_peak_reserved": 1451229184
+      },
+      "max_mib": {
+        "rss_peak": 2416.90625,
+        "cuda_peak_allocated": 158.1806640625,
+        "cuda_peak_reserved": 1384.0
+      },
+      "missing": []
+    },
+    {
+      "case": "inference.upper.h600.rebuild",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2547240960,
+        "cuda_peak_allocated": 204337152,
+        "cuda_peak_reserved": 1451229184
+      },
+      "max_mib": {
+        "rss_peak": 2429.23828125,
+        "cuda_peak_allocated": 194.87109375,
+        "cuda_peak_reserved": 1384.0
+      },
+      "missing": []
+    },
+    {
+      "case": "inference.upper_value.h0.rebuild",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2547466240,
+        "cuda_peak_allocated": 157010432,
+        "cuda_peak_reserved": 1451229184
+      },
+      "max_mib": {
+        "rss_peak": 2429.453125,
+        "cuda_peak_allocated": 149.73681640625,
+        "cuda_peak_reserved": 1384.0
+      },
+      "missing": []
+    },
+    {
+      "case": "inference.upper_value.h120.cached",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2530627584,
+        "cuda_peak_allocated": 165869056,
+        "cuda_peak_reserved": 1451229184
+      },
+      "max_mib": {
+        "rss_peak": 2413.39453125,
+        "cuda_peak_allocated": 158.18505859375,
+        "cuda_peak_reserved": 1384.0
+      },
+      "missing": []
+    },
+    {
+      "case": "inference.upper_value.h120.rebuild",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2547216384,
+        "cuda_peak_allocated": 173997056,
+        "cuda_peak_reserved": 1451229184
+      },
+      "max_mib": {
+        "rss_peak": 2429.21484375,
+        "cuda_peak_allocated": 165.9365234375,
+        "cuda_peak_reserved": 1384.0
+      },
+      "missing": []
+    },
+    {
+      "case": "inference.upper_value.h1800.cached",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2535632896,
+        "cuda_peak_allocated": 165869056,
+        "cuda_peak_reserved": 1451229184
+      },
+      "max_mib": {
+        "rss_peak": 2418.16796875,
+        "cuda_peak_allocated": 158.18505859375,
+        "cuda_peak_reserved": 1384.0
+      },
+      "missing": []
+    },
+    {
+      "case": "inference.upper_value.h1800.rebuild",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2546954240,
+        "cuda_peak_allocated": 282896896,
+        "cuda_peak_reserved": 1451229184
+      },
+      "max_mib": {
+        "rss_peak": 2428.96484375,
+        "cuda_peak_allocated": 269.79150390625,
+        "cuda_peak_reserved": 1384.0
+      },
+      "missing": []
+    },
+    {
+      "case": "inference.upper_value.h600.cached",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2530226176,
+        "cuda_peak_allocated": 165869056,
+        "cuda_peak_reserved": 1451229184
+      },
+      "max_mib": {
+        "rss_peak": 2413.01171875,
+        "cuda_peak_allocated": 158.18505859375,
+        "cuda_peak_reserved": 1384.0
+      },
+      "missing": []
+    },
+    {
+      "case": "inference.upper_value.h600.rebuild",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2547220480,
+        "cuda_peak_allocated": 204341760,
+        "cuda_peak_reserved": 1451229184
+      },
+      "max_mib": {
+        "rss_peak": 2429.21875,
+        "cuda_peak_allocated": 194.87548828125,
+        "cuda_peak_reserved": 1384.0
+      },
+      "missing": []
+    },
+    {
+      "case": "io.learning_jsonl",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2783358976,
+        "cuda_peak_allocated": 156797952,
+        "cuda_peak_reserved": 1478492160
+      },
+      "max_mib": {
+        "rss_peak": 2654.41796875,
+        "cuda_peak_allocated": 149.5341796875,
+        "cuda_peak_reserved": 1410.0
+      },
+      "missing": []
+    },
+    {
+      "case": "io.metrics_json",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2783358976,
+        "cuda_peak_allocated": 156797952,
+        "cuda_peak_reserved": 1478492160
+      },
+      "max_mib": {
+        "rss_peak": 2654.41796875,
+        "cuda_peak_allocated": 149.5341796875,
+        "cuda_peak_reserved": 1410.0
+      },
+      "missing": []
+    },
+    {
+      "case": "ppo.rows900",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2859634688,
+        "cuda_peak_allocated": 750597632,
+        "cuda_peak_reserved": 1478492160
+      },
+      "max_mib": {
+        "rss_peak": 2727.16015625,
+        "cuda_peak_allocated": 715.82568359375,
+        "cuda_peak_reserved": 1410.0
+      },
+      "missing": []
+    },
+    {
+      "case": "replay.sample128",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2777751552,
+        "cuda_peak_allocated": 156797952,
+        "cuda_peak_reserved": 1478492160
+      },
+      "max_mib": {
+        "rss_peak": 2649.0703125,
+        "cuda_peak_allocated": 149.5341796875,
+        "cuda_peak_reserved": 1410.0
+      },
+      "missing": []
+    },
+    {
+      "case": "source.identity",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2777149440,
+        "cuda_peak_allocated": 156797952,
+        "cuda_peak_reserved": 1478492160
+      },
+      "max_mib": {
+        "rss_peak": 2648.49609375,
+        "cuda_peak_allocated": 149.5341796875,
+        "cuda_peak_reserved": 1410.0
+      },
+      "missing": []
+    },
+    {
+      "case": "target.polyak",
+      "repeats": 3,
+      "max_bytes": {
+        "rss_peak": 2783354880,
+        "cuda_peak_allocated": 156797952,
+        "cuda_peak_reserved": 1478492160
+      },
+      "max_mib": {
+        "rss_peak": 2654.4140625,
+        "cuda_peak_allocated": 149.5341796875,
+        "cuda_peak_reserved": 1410.0
+      },
+      "missing": []
+    }
+  ],
+  "global_observed_peaks": {
+    "rss_peak": {
+      "max_bytes": 3525890048,
+      "max_mib": 3362.55078125,
+      "cases": [
+        "evaluation.replay900s"
+      ]
+    },
+    "cuda_peak_allocated": {
+      "max_bytes": 1223815168,
+      "max_mib": 1167.12109375,
+      "cases": [
+        "critic.e4.h1800.backlog"
+      ]
+    },
+    "cuda_peak_reserved": {
+      "max_bytes": 1478492160,
+      "max_mib": 1410.0,
+      "cases": [
+        "checkpoint.digest2",
+        "checkpoint.load2",
+        "checkpoint.save0",
+        "checkpoint.save2",
+        "evaluation.replay900s",
+        "io.learning_jsonl",
+        "io.metrics_json",
+        "ppo.rows900",
+        "replay.sample128",
+        "source.identity",
+        "target.polyak"
+      ]
+    }
+  },
+  "copied_episode_workload_provenance": [
+    {
+      "case": "actor.e4.h1800.backlog",
+      "episode_objects": 4,
+      "physical_sources": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "independent_physical_trajectories": 2,
+      "synthetic": true,
+      "note": "Repeated source IDs are copied episode/history objects, not new trajectories."
+    },
+    {
+      "case": "actor.e4.h1800.normal",
+      "episode_objects": 4,
+      "physical_sources": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "independent_physical_trajectories": 2,
+      "synthetic": true,
+      "note": "Repeated source IDs are copied episode/history objects, not new trajectories."
+    },
+    {
+      "case": "critic.e4.h1800.backlog",
+      "episode_objects": 4,
+      "physical_sources": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "independent_physical_trajectories": 2,
+      "synthetic": true,
+      "note": "Repeated source IDs are copied episode/history objects, not new trajectories."
+    },
+    {
+      "case": "critic.e4.h1800.normal",
+      "episode_objects": 4,
+      "physical_sources": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "independent_physical_trajectories": 2,
+      "synthetic": true,
+      "note": "Repeated source IDs are copied episode/history objects, not new trajectories."
+    },
+    {
+      "case": "ppo.rows900",
+      "episode_objects": 5,
+      "physical_sources": [
+        0,
+        1,
+        0,
+        1,
+        0
+      ],
+      "independent_physical_trajectories": 2,
+      "synthetic": true,
+      "note": "Repeated source IDs are copied episode/history objects, not new trajectories."
+    }
+  ]
+}

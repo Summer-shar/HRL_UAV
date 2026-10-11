@@ -1,0 +1,74 @@
+{
+  "status": "complete",
+  "fixture_sha256": "d4ed747c5a9398d3544965f1fe522b63eec9afcbd85c5580149f6621d973729f",
+  "method": "Replace optimized online-window timing only: clear fixed CPU graph LRU before each repeat, retaining within-window sharing. Baseline single-state Encoder.forward rebuilds the graph on every call.",
+  "script_sha256": "0daa5d0b03ef2fd1cf2fcf13286fca842ee9a38c0ab938982a535dd9280f3ecf",
+  "measurements": {
+    "ordinary_lower_inference": {
+      "seconds": 0.047310725,
+      "samples_seconds": [
+        0.05107720625000001,
+        0.046568006249999794,
+        0.047310725
+      ],
+      "frames_per_sample": 16,
+      "fixed_graph_cache_cleared_before_each_window": true,
+      "incremental_history_primed": true
+    },
+    "ordinary_upper_inference": {
+      "seconds": 0.03838930625000048,
+      "samples_seconds": [
+        0.03828368125000026,
+        0.0389439437500001,
+        0.03838930625000048
+      ],
+      "frames_per_sample": 16,
+      "fixed_graph_cache_cleared_before_each_window": true,
+      "incremental_history_primed": true
+    },
+    "ordinary_upper_with_value_inference": {
+      "seconds": 0.06742329999999974,
+      "samples_seconds": [
+        0.06562008749999926,
+        0.06954446249999968,
+        0.06742329999999974
+      ],
+      "frames_per_sample": 16,
+      "fixed_graph_cache_cleared_before_each_window": true,
+      "incremental_history_primed": true
+    },
+    "congested_lower_inference": {
+      "seconds": 0.09616213124999984,
+      "samples_seconds": [
+        0.1194668624999995,
+        0.09616213124999984,
+        0.09615106249999972
+      ],
+      "frames_per_sample": 16,
+      "fixed_graph_cache_cleared_before_each_window": true,
+      "incremental_history_primed": true
+    },
+    "congested_upper_inference": {
+      "seconds": 0.08558221250000031,
+      "samples_seconds": [
+        0.08486932500000055,
+        0.08615636874999932,
+        0.08558221250000031
+      ],
+      "frames_per_sample": 16,
+      "fixed_graph_cache_cleared_before_each_window": true,
+      "incremental_history_primed": true
+    },
+    "congested_upper_with_value_inference": {
+      "seconds": 0.1310617062499997,
+      "samples_seconds": [
+        0.1310617062499997,
+        0.1408258312500008,
+        0.1184872312499996
+      ],
+      "frames_per_sample": 16,
+      "fixed_graph_cache_cleared_before_each_window": true,
+      "incremental_history_primed": true
+    }
+  }
+}

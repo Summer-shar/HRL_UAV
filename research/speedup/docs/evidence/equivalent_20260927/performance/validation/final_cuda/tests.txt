@@ -1,0 +1,12 @@
+test_actor_matches_pinned_baseline_and_keeps_independent_q_encoders (hrl_v2.tests.test_optimizer_reuse.OptimizerReuseTests) ... ok
+test_critic_candidate_chunks_require_explicit_numerical_audit (hrl_v2.tests.test_optimizer_reuse.OptimizerReuseTests) ... skipped '64/128 were rejected by the unchanged parameter tolerance; set V2_AUDIT_CANDIDATE_CHUNKS=1 to audit them explicitly'
+test_critic_default_chunk_matches_correctness_baseline (hrl_v2.tests.test_optimizer_reuse.OptimizerReuseTests) ... ok
+test_critic_matches_pinned_baseline_and_backpropagates_history_once (hrl_v2.tests.test_optimizer_reuse.OptimizerReuseTests) ... ok
+test_graph_batch_matches_single_graphs_without_cross_graph_messages (hrl_v2.tests.test_optimizer_reuse.OptimizerReuseTests) ... ok
+test_graph_preprocessing_matches_pinned_outputs_and_all_gradients (hrl_v2.tests.test_optimizer_reuse.OptimizerReuseTests) ... ok
+test_real_ppo_minibatch_matches_unshared_full_history (hrl_v2.tests.test_optimizer_reuse.OptimizerReuseTests) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 21.051s
+
+OK (skipped=1)

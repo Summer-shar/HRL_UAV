@@ -1,0 +1,14 @@
+{
+  "version": "2.1.0",
+  "python": "D:\\HRL_UAV_V2\\.venv\\Scripts\\python.exe",
+  "torch": "2.7.0.dev20250227+cu128",
+  "cuda": "12.8",
+  "cuda_available": true,
+  "workspace": "D:\\HRL_UAV_V2\\outputs\\equivalent_20260927\\final_status",
+  "validation_ready": true,
+  "research_protocol_confirmed": true,
+  "training_ready": true,
+  "training_authorized": false,
+  "training_started": false,
+  "updates": 0
+}

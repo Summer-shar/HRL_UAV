@@ -1,0 +1,23 @@
+{
+  "planned_steps": 2400,
+  "reason": "Test whether local high priority avoids the observed extra forwarding delay while low priority retains parallel CPU capacity",
+  "layouts": [
+    [
+      92,
+      93
+    ],
+    [
+      102,
+      103
+    ]
+  ],
+  "patterns": [
+    "staggered_busy",
+    "synchronous_busy"
+  ],
+  "motion": "hover",
+  "route": "high_local_low_equal",
+  "diagnostic_sha256": "e2febf7fff7cb3699129861c74d891a56f4fa086d22b5b9d0e5c7b56d79efd65",
+  "tuning": false,
+  "changed_physical_parameters": false
+}

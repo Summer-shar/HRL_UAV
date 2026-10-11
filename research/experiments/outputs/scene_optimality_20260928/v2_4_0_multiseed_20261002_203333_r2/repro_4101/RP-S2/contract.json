@@ -1,0 +1,1697 @@
+{
+  "identity": {
+    "schema": "hrl_uav_continuing_service_1_1",
+    "files": {
+      "hrl_v2/__init__.py": "212faca30f312dccb18ea6840c3c81e95ed2cb7257f0de478523198274218325",
+      "hrl_v2/__main__.py": "3129adff95e0f38b87ab34cddfc27082c7892bcaec267ff5d40f160fdf55b44a",
+      "hrl_v2/archive.py": "27fda1a60bd76f9f42a978aa6e685fec4caed6fc014427b9ad4aa34add91f373",
+      "hrl_v2/baseline_protocol.py": "7ceeb218a6cf8d61790a3183bae249b07faf05a40b20b54c656f34bcec4f67ef",
+      "hrl_v2/baseline_reference.py": "40aae7e7fa7c1b61271bf0262a84c900fe8dc16d4f4e32ae492914aeb1c880a1",
+      "hrl_v2/baselines.py": "ae3630d540628a095a2bc9d9d5917cab142877838ba235c20f64e0ee79e6a585",
+      "hrl_v2/batching.py": "4da47b9b1279f72f6af8b9f98c44d1f13bb4763e228bcbeb0bbea135bce9b8ba",
+      "hrl_v2/benchmark_optimization.py": "ab6190d693cb035487b193f08f2540f955c37627ef334b8df4a766438aa75320",
+      "hrl_v2/budget.py": "73c58d85f8e9c804498e90ec578ad2289bfe6b3a7aff18b2a077d7eebf6787a3",
+      "hrl_v2/checkpoint.py": "8cbe056e7f39e38875d3be06a5eeb57d7c32316e3c505bf282673201e0b9088b",
+      "hrl_v2/cli.py": "213dc6f43c1d53a3f39d4c694d24a71800639ab9c384e7bbabce75704a8f4fc7",
+      "hrl_v2/collector.py": "a8daf6106836df0c1610e988443f273c89505e845b40d2a08601eb37f637f5ab",
+      "hrl_v2/control_diagnostics.py": "04636594c85c94b364a8bb6143f92680cf78d65cd720fa764d022c14e1a2bc67",
+      "hrl_v2/control_mechanisms.py": "b69fb70a999547d844cf95a0d52b9d06515ca4e7c8ec10ca627ab32aee59d7fd",
+      "hrl_v2/evaluate.py": "c2933b856de7e1ace5285114b1cf7e3bb9b1b5d13494a78ba778278d5de2bb69",
+      "hrl_v2/features.py": "571e2105d8b16ae0c8c9e95cfa9bc530fb0fb9f0dcd55a36872e31bec5a27797",
+      "hrl_v2/fixture.py": "c76085ac3141af6334ad218db0a36df6e3db0aab6c0a10115defa4274d124d7e",
+      "hrl_v2/gates.py": "4b632f5b247555e6998d97a79400885fe790c0752ae3042c2c6ec3a4708ec75f",
+      "hrl_v2/hybrid_simplex.py": "6ccf43569f3d45c58c9df3588e2a4871dfeb3400ff862df1b06282f8c2a54d84",
+      "hrl_v2/lite_batch.py": "8f352b6c82c78cdcb4b82a2b9f46eb5b78f2aa193932b3e00a6b8ab2c851db1e",
+      "hrl_v2/lite_networks.py": "c43cfec9e62bb5e682cc43718cfa8cff9b255289af572bb73e6347a00f1853a9",
+      "hrl_v2/lite_observation.py": "4283dbb7772f57e0fba6c3fefde85836ffd23e5a9f1499b4d68a582fc89c69c1",
+      "hrl_v2/metrics.py": "d6f8d9fd9a0c8637f22e3a673a91520569cfac0551c56d912a670b65cdf08311",
+      "hrl_v2/networks.py": "b60f33aac58b533b642f6f6af96f4060e52468560772b93a484200773e19e8aa",
+      "hrl_v2/paper_evaluation.py": "1e988ac6f4f33aba984e197dbbddb6e7a8125107c589c41bef0f9947eb3258cc",
+      "hrl_v2/paths.py": "155dcf8147fc8f3ce35d393f3745ec8a2dd5671a5e39021448944c8e419866a3",
+      "hrl_v2/physics_adapter.py": "4d56f0bb1c9479173d1bfc437877a7bdd9cda3a0fdeb30dcfbbc73b422fd5a8a",
+      "hrl_v2/plot_control_diagnostics.py": "8c05ea4d745aced235b0b31af9f449cf73dfe0685ae250bf74e306a9f6b50468",
+      "hrl_v2/policy.py": "ebf97694d0af19e8f8e01ceb709f88981e7339a3afe46509ea876a480b5b579c",
+      "hrl_v2/ppo.py": "a326188601de1a3b102e9cad3cb1fb6c5040b646f77b2cd4af6666ac709de4c2",
+      "hrl_v2/prepared.py": "3bf8918d38e601f47e1362b807b8946218b9d6ab7fa6afe40efb3a6100fbf19d",
+      "hrl_v2/randomness.py": "b2f673ba7012f46e3512f51ec8ad554701f1ab5d72546dc94887ca264d6b3214",
+      "hrl_v2/replay.py": "5bb7f4512a42f3dc0852ad238a641d57d5dacd49d0c99a2832c74cc70cd28225",
+      "hrl_v2/reports.py": "54ca53eca9c0778fa884da7a12c209166c0d42e0fb16862e807e62bf789ba996",
+      "hrl_v2/run.py": "6e7714738aeccae8ae83e566c4412d996fd5671f441cb8aafcf7d033484c3317",
+      "hrl_v2/runtime.py": "02a6e33d62dd3063fa4d85c51dee859656c54be0d5b4afdc23abd4c33677df92",
+      "hrl_v2/sac.py": "526a2e0fb511f4de4ce66be7677eb84f261e5c8a1f6ac943a7821d774e9950de",
+      "hrl_v2/schedule.py": "3c723fe8d024c583f2633f1ee38556219fc2d857663b9165993ecc8460ac68be",
+      "hrl_v2/telemetry.py": "f66a90738e10c4f5d8e2e0bce1e6d34c1c2d65ac15f7f7b97cb425a2ca801d31",
+      "hrl_v2/timing.py": "bb8864a0394e81d71efd6473533e57195c19177960fbfa7837ae08eb255f4d56",
+      "hrl_v2/train_upper.py": "c571648a24ab70d96dd7d30026a6bb48f385877efc6b45e816a0e706f9913bab",
+      "hrl_v2/upper_baselines.py": "da93240257418de5d59830d8cccbe0b9c5c97ebe585b3d6de75264f8c8566925",
+      "hrl_v2/validate.py": "749908558ec8928ddb7b7a802e3c862f3eb7b8aa36f8a021d664b32d1b7afabe",
+      "hrl_v2/design/reference_hybrid_simplex.py": "2cebf741d67b6e1e08d84c09ac69bbb90b8d263ea8e952f6770f80e7600ce0b7",
+      "hrl_uav/__init__.py": "3bd2c458f9491ed0d4742640ec2dee493f0472c57b9c745bc4a9e9f2a6d7cedd",
+      "hrl_uav/env.py": "4920b329d4359b4c711fd4dc1f5adda437cd2912e21c498801a37bbc92fc8ca3",
+      "hrl_uav/geometry.py": "93a32babbb42d6df2676b274a57673afa4e6896e717f56988369726d254241af",
+      "hrl_uav/industrial_baselines.py": "00df33f1e4e0831dc9b0f782aad163f7c83a3f86a38098f5d153b4fff9f203a8",
+      "hrl_uav/industrial_deployment_env.py": "c6edb15118d6157d5b022c59077630952dffb6b60788e6bec7aa0ae7a007df0e",
+      "hrl_uav/industrial_deployment_observation.py": "789c12eadce5472bef0a91e2e4d33319b1c733006bac4b5a41e485484d056ea0",
+      "hrl_uav/industrial_deployment_scene.py": "4512d8630245047185f50c525319d2d33aaf5752ed6d1ad4eeccc59d1c6f0cb1",
+      "hrl_uav/industrial_env.py": "c6c7ae069c8828a8bc889378485f0095d9049d4bd7b40a8e4df822df83476f04",
+      "hrl_uav/industrial_hotspot_env.py": "7a5f76cb37c4ba9a794ccb31235224293f2a0bbc1609c81c7bafb83298de867e",
+      "hrl_uav/industrial_hotspot_scene.py": "ad5ee91c8f1fbb300c19082adc2c1d3c7148a2b898786379533d9492d59f615f",
+      "hrl_uav/industrial_observation.py": "0945a55b40ddfe6a2ec41c6818ded3ee55cdbc7c0c9297c9e60f41f6927ee964",
+      "hrl_uav/industrial_scene.py": "b487d4d7749efb0eccea8add13cf894e9af7fae8ea0bb47a56c532feeb05187e",
+      "hrl_uav/load_switching.py": "8649cb491b127ea79f0fd0b7402678f4b36dd36761fc12bd3760fb7eed2fbe11",
+      "hrl_uav/mdp.py": "a8af6af4b94108eef253668ca5abc89027a3733c0b132eb64fe243ea9ff80cf3",
+      "hrl_uav/routing.py": "5e45b645b8eb97bb5b1ee6fe8f943631adfd235d37c304d3cf6f8b171c56ddde",
+      "hrl_uav/xu_cvx_r.py": "8beea2a0e083133c7c311dcb35ec1f3ba133454c9df0ccbb3eb1be088692fa26"
+    },
+    "config_sha256": "7424127e2248f7318ea9128dfc254bef85e1fec0244dae5fda80c760d4559e23",
+    "scene_sha256": "6933abadbb8e34a532de6429477d52441e131996015126e458cbc97494e4c582"
+  },
+  "config_path": "D:\\HRL_UAV_V2_speedup\\src\\hrl_v2\\configs\\v2_4_0_lite.json",
+  "seed": 4101,
+  "source_checkpoint": "D:\\HRL_UAV_V2_speedup\\outputs\\lite_v2_4_0\\training_4101_20260930_010036\\runs\\Proposed\\seed_4101\\checkpoints\\episode-0300-evaluated.pt",
+  "source_checkpoint_sha256": "c893ce01e4ab9a56b4f374aea2d772a05061a20628ffd06037d5938924e56e12",
+  "runtime": {
+    "python": "3.9.25 (main, Nov  3 2025, 22:44:01) [MSC v.1929 64 bit (AMD64)]",
+    "executable": "D:\\HRL_UAV_V2\\.venv\\Scripts\\python.exe",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "torch": "2.7.0.dev20250227+cu128",
+    "numpy": "1.26.4",
+    "cuda": "12.8",
+    "device": "NVIDIA GeForce RTX 5060",
+    "deterministic": true
+  },
+  "created_at": "2026-10-02 20:51:17",
+  "initial_hashes": {
+    "sac_actor": "fdd2210a868536ff61bce8975ee04c03a36a2bfa071866af60e1f13574412776",
+    "ppo_actor": "ee876a6f08080fedf378bd0bcb37a0705c6441b515a7fe0d4943f3773252f8a4",
+    "ppo_value": "47b0f8e8a26ff3917154d0aa520535429fa78226e18f17dcf91e980feeee3618"
+  },
+  "upper_phases": [
+    {
+      "global_episode": 301,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 1,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 302,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 2,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 303,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 3,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 304,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 4,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 305,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 5,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 306,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 6,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 307,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 7,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 308,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 8,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 309,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 9,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 310,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 10,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 311,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 11,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 312,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 12,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 313,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 13,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 314,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 14,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 315,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 15,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 316,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 16,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 317,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 17,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 318,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 18,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 319,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 19,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 320,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 20,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 321,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 21,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 322,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 22,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 323,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 23,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 324,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 24,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 325,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 25,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 326,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 26,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 327,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 27,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 328,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 28,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 329,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 29,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 330,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 30,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 331,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 31,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 332,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 32,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 333,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 33,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 334,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 34,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 335,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 35,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 336,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 36,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 337,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 37,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 338,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 38,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 339,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 39,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 340,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 40,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 341,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 41,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 342,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 42,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 343,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 43,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 344,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 44,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 345,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 45,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 346,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 46,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 347,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 47,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 348,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 48,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 349,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 49,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 350,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 50,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 351,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 51,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 352,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 52,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 353,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 53,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 354,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 54,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 355,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 55,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 356,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 56,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 357,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 57,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 358,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 58,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 359,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 59,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 360,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 60,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 361,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 61,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 362,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 62,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 363,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 63,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 364,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 64,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 365,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 65,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 366,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 66,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 367,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 67,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 368,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 68,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 369,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 69,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 370,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 70,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 371,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 71,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 372,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 72,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 373,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 73,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 374,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 74,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 375,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 75,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 376,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 76,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 377,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 77,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 378,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 78,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 379,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 79,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 380,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 80,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 381,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 81,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 382,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 82,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 383,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 83,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 384,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 84,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 385,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 85,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 386,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 86,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 387,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 87,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 388,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 88,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 389,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 89,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 390,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 90,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 391,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 91,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 392,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 92,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 393,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 93,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 394,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 94,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 395,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 95,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 396,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 96,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 397,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 97,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 398,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 98,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 399,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 99,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 400,
+      "stage": 2,
+      "cycle": 0,
+      "block_episode": 100,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 401,
+      "stage": 3,
+      "cycle": 1,
+      "block_episode": 1,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 402,
+      "stage": 3,
+      "cycle": 1,
+      "block_episode": 2,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 403,
+      "stage": 3,
+      "cycle": 1,
+      "block_episode": 3,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 404,
+      "stage": 3,
+      "cycle": 1,
+      "block_episode": 4,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 405,
+      "stage": 3,
+      "cycle": 1,
+      "block_episode": 5,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 406,
+      "stage": 3,
+      "cycle": 1,
+      "block_episode": 6,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 407,
+      "stage": 3,
+      "cycle": 1,
+      "block_episode": 7,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 408,
+      "stage": 3,
+      "cycle": 1,
+      "block_episode": 8,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 409,
+      "stage": 3,
+      "cycle": 1,
+      "block_episode": 9,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 410,
+      "stage": 3,
+      "cycle": 1,
+      "block_episode": 10,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 421,
+      "stage": 3,
+      "cycle": 3,
+      "block_episode": 1,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 422,
+      "stage": 3,
+      "cycle": 3,
+      "block_episode": 2,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 423,
+      "stage": 3,
+      "cycle": 3,
+      "block_episode": 3,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 424,
+      "stage": 3,
+      "cycle": 3,
+      "block_episode": 4,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 425,
+      "stage": 3,
+      "cycle": 3,
+      "block_episode": 5,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 426,
+      "stage": 3,
+      "cycle": 3,
+      "block_episode": 6,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 427,
+      "stage": 3,
+      "cycle": 3,
+      "block_episode": 7,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 428,
+      "stage": 3,
+      "cycle": 3,
+      "block_episode": 8,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 429,
+      "stage": 3,
+      "cycle": 3,
+      "block_episode": 9,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 430,
+      "stage": 3,
+      "cycle": 3,
+      "block_episode": 10,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 441,
+      "stage": 3,
+      "cycle": 5,
+      "block_episode": 1,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 442,
+      "stage": 3,
+      "cycle": 5,
+      "block_episode": 2,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 443,
+      "stage": 3,
+      "cycle": 5,
+      "block_episode": 3,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 444,
+      "stage": 3,
+      "cycle": 5,
+      "block_episode": 4,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 445,
+      "stage": 3,
+      "cycle": 5,
+      "block_episode": 5,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 446,
+      "stage": 3,
+      "cycle": 5,
+      "block_episode": 6,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 447,
+      "stage": 3,
+      "cycle": 5,
+      "block_episode": 7,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 448,
+      "stage": 3,
+      "cycle": 5,
+      "block_episode": 8,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 449,
+      "stage": 3,
+      "cycle": 5,
+      "block_episode": 9,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 450,
+      "stage": 3,
+      "cycle": 5,
+      "block_episode": 10,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 461,
+      "stage": 3,
+      "cycle": 7,
+      "block_episode": 1,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 462,
+      "stage": 3,
+      "cycle": 7,
+      "block_episode": 2,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 463,
+      "stage": 3,
+      "cycle": 7,
+      "block_episode": 3,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 464,
+      "stage": 3,
+      "cycle": 7,
+      "block_episode": 4,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 465,
+      "stage": 3,
+      "cycle": 7,
+      "block_episode": 5,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 466,
+      "stage": 3,
+      "cycle": 7,
+      "block_episode": 6,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 467,
+      "stage": 3,
+      "cycle": 7,
+      "block_episode": 7,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 468,
+      "stage": 3,
+      "cycle": 7,
+      "block_episode": 8,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 469,
+      "stage": 3,
+      "cycle": 7,
+      "block_episode": 9,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 470,
+      "stage": 3,
+      "cycle": 7,
+      "block_episode": 10,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 481,
+      "stage": 3,
+      "cycle": 9,
+      "block_episode": 1,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 482,
+      "stage": 3,
+      "cycle": 9,
+      "block_episode": 2,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 483,
+      "stage": 3,
+      "cycle": 9,
+      "block_episode": 3,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 484,
+      "stage": 3,
+      "cycle": 9,
+      "block_episode": 4,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 485,
+      "stage": 3,
+      "cycle": 9,
+      "block_episode": 5,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 486,
+      "stage": 3,
+      "cycle": 9,
+      "block_episode": 6,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 487,
+      "stage": 3,
+      "cycle": 9,
+      "block_episode": 7,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 488,
+      "stage": 3,
+      "cycle": 9,
+      "block_episode": 8,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 489,
+      "stage": 3,
+      "cycle": 9,
+      "block_episode": 9,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 490,
+      "stage": 3,
+      "cycle": 9,
+      "block_episode": 10,
+      "layer": "upper",
+      "alpha": 0.0005
+    },
+    {
+      "global_episode": 501,
+      "stage": 3,
+      "cycle": 11,
+      "block_episode": 1,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 502,
+      "stage": 3,
+      "cycle": 11,
+      "block_episode": 2,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 503,
+      "stage": 3,
+      "cycle": 11,
+      "block_episode": 3,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 504,
+      "stage": 3,
+      "cycle": 11,
+      "block_episode": 4,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 505,
+      "stage": 3,
+      "cycle": 11,
+      "block_episode": 5,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 506,
+      "stage": 3,
+      "cycle": 11,
+      "block_episode": 6,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 507,
+      "stage": 3,
+      "cycle": 11,
+      "block_episode": 7,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 508,
+      "stage": 3,
+      "cycle": 11,
+      "block_episode": 8,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 509,
+      "stage": 3,
+      "cycle": 11,
+      "block_episode": 9,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 510,
+      "stage": 3,
+      "cycle": 11,
+      "block_episode": 10,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 521,
+      "stage": 3,
+      "cycle": 13,
+      "block_episode": 1,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 522,
+      "stage": 3,
+      "cycle": 13,
+      "block_episode": 2,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 523,
+      "stage": 3,
+      "cycle": 13,
+      "block_episode": 3,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 524,
+      "stage": 3,
+      "cycle": 13,
+      "block_episode": 4,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 525,
+      "stage": 3,
+      "cycle": 13,
+      "block_episode": 5,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 526,
+      "stage": 3,
+      "cycle": 13,
+      "block_episode": 6,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 527,
+      "stage": 3,
+      "cycle": 13,
+      "block_episode": 7,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 528,
+      "stage": 3,
+      "cycle": 13,
+      "block_episode": 8,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 529,
+      "stage": 3,
+      "cycle": 13,
+      "block_episode": 9,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 530,
+      "stage": 3,
+      "cycle": 13,
+      "block_episode": 10,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 541,
+      "stage": 3,
+      "cycle": 15,
+      "block_episode": 1,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 542,
+      "stage": 3,
+      "cycle": 15,
+      "block_episode": 2,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 543,
+      "stage": 3,
+      "cycle": 15,
+      "block_episode": 3,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 544,
+      "stage": 3,
+      "cycle": 15,
+      "block_episode": 4,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 545,
+      "stage": 3,
+      "cycle": 15,
+      "block_episode": 5,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 546,
+      "stage": 3,
+      "cycle": 15,
+      "block_episode": 6,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 547,
+      "stage": 3,
+      "cycle": 15,
+      "block_episode": 7,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 548,
+      "stage": 3,
+      "cycle": 15,
+      "block_episode": 8,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 549,
+      "stage": 3,
+      "cycle": 15,
+      "block_episode": 9,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 550,
+      "stage": 3,
+      "cycle": 15,
+      "block_episode": 10,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 561,
+      "stage": 3,
+      "cycle": 17,
+      "block_episode": 1,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 562,
+      "stage": 3,
+      "cycle": 17,
+      "block_episode": 2,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 563,
+      "stage": 3,
+      "cycle": 17,
+      "block_episode": 3,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 564,
+      "stage": 3,
+      "cycle": 17,
+      "block_episode": 4,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 565,
+      "stage": 3,
+      "cycle": 17,
+      "block_episode": 5,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 566,
+      "stage": 3,
+      "cycle": 17,
+      "block_episode": 6,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 567,
+      "stage": 3,
+      "cycle": 17,
+      "block_episode": 7,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 568,
+      "stage": 3,
+      "cycle": 17,
+      "block_episode": 8,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 569,
+      "stage": 3,
+      "cycle": 17,
+      "block_episode": 9,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 570,
+      "stage": 3,
+      "cycle": 17,
+      "block_episode": 10,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 581,
+      "stage": 3,
+      "cycle": 19,
+      "block_episode": 1,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 582,
+      "stage": 3,
+      "cycle": 19,
+      "block_episode": 2,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 583,
+      "stage": 3,
+      "cycle": 19,
+      "block_episode": 3,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 584,
+      "stage": 3,
+      "cycle": 19,
+      "block_episode": 4,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 585,
+      "stage": 3,
+      "cycle": 19,
+      "block_episode": 5,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 586,
+      "stage": 3,
+      "cycle": 19,
+      "block_episode": 6,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 587,
+      "stage": 3,
+      "cycle": 19,
+      "block_episode": 7,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 588,
+      "stage": 3,
+      "cycle": 19,
+      "block_episode": 8,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 589,
+      "stage": 3,
+      "cycle": 19,
+      "block_episode": 9,
+      "layer": "upper",
+      "alpha": 0.0
+    },
+    {
+      "global_episode": 590,
+      "stage": 3,
+      "cycle": 19,
+      "block_episode": 10,
+      "layer": "upper",
+      "alpha": 0.0
+    }
+  ],
+  "control_episodes": 0,
+  "sacdet_episodes": 200,
+  "ppo_batches": 40,
+  "only_collection_protocol_difference": "SAC lower deterministic decoding; PPO upper remains stochastic",
+  "implementation_repair_limit": 1,
+  "auto_resume": false
+}

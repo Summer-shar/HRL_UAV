@@ -1,0 +1,10 @@
+{
+  "version": "2.1.0",
+  "environment_contract": "hrl_uav_continuing_service_1_0",
+  "review_base_commit": "4c0a8c881853b0da30ec20cd3b779e68865128e0",
+  "research_training_enabled": false,
+  "research_training_episodes": 0,
+  "network_structure_changed": false,
+  "algorithm_numeric_choices_changed": false,
+  "changes": "Continuing service, causal observations, physical conservation, artificial truncation and bootstrap semantics; see docs/design_specification.md"
+}

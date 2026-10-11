@@ -1,0 +1,43 @@
+test_actor_matches_pinned_baseline_and_keeps_independent_q_encoders (hrl_v2.tests.test_optimizer_reuse.OptimizerReuseTests) ... ok
+test_critic_candidate_chunks_require_explicit_numerical_audit (hrl_v2.tests.test_optimizer_reuse.OptimizerReuseTests) ... test_critic_default_chunk_matches_correctness_baseline (hrl_v2.tests.test_optimizer_reuse.OptimizerReuseTests) ... ok
+test_critic_matches_pinned_baseline_and_backpropagates_history_once (hrl_v2.tests.test_optimizer_reuse.OptimizerReuseTests) ... ok
+test_graph_batch_matches_single_graphs_without_cross_graph_messages (hrl_v2.tests.test_optimizer_reuse.OptimizerReuseTests) ... ok
+test_graph_preprocessing_matches_pinned_outputs_and_all_gradients (hrl_v2.tests.test_optimizer_reuse.OptimizerReuseTests) ... ok
+test_real_ppo_minibatch_matches_unshared_full_history (hrl_v2.tests.test_optimizer_reuse.OptimizerReuseTests) ... ok
+
+======================================================================
+FAIL: test_critic_candidate_chunks_require_explicit_numerical_audit (hrl_v2.tests.test_optimizer_reuse.OptimizerReuseTests) (critic_microbatch_size=64)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\HRL_UAV_V2\src\hrl_v2\tests\test_optimizer_reuse.py", line 468, in check_critic_chunks_against_correctness_baseline
+    self.assert_optimizer_close(actual,reference,("q1","q2"),"critic_optimizer")
+  File "D:\HRL_UAV_V2\src\hrl_v2\tests\test_optimizer_reuse.py", line 236, in assert_optimizer_close
+    torch.testing.assert_close(value,right.state_dict()[key],atol=3e-5,rtol=2e-5,msg=lambda s:f"{name}.{key}: {s}")
+  File "D:\Anaconda3\envs\pytorch-gpu\lib\site-packages\torch\testing\_comparison.py", line 1519, in assert_close
+    raise error_metas[0].to_error(msg)
+AssertionError: q2.encoder.nodes.parent.2.weight: Tensor-likes are not close!
+
+Mismatched elements: 1 / 4096 (0.0%)
+Greatest absolute difference: 3.673136234283447e-05 at index (19, 39) (up to 3e-05 allowed)
+Greatest relative difference: 0.0014491243055090308 at index (19, 39) (up to 2e-05 allowed)
+
+======================================================================
+FAIL: test_critic_candidate_chunks_require_explicit_numerical_audit (hrl_v2.tests.test_optimizer_reuse.OptimizerReuseTests) (critic_microbatch_size=128)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\HRL_UAV_V2\src\hrl_v2\tests\test_optimizer_reuse.py", line 468, in check_critic_chunks_against_correctness_baseline
+    self.assert_optimizer_close(actual,reference,("q1","q2"),"critic_optimizer")
+  File "D:\HRL_UAV_V2\src\hrl_v2\tests\test_optimizer_reuse.py", line 236, in assert_optimizer_close
+    torch.testing.assert_close(value,right.state_dict()[key],atol=3e-5,rtol=2e-5,msg=lambda s:f"{name}.{key}: {s}")
+  File "D:\Anaconda3\envs\pytorch-gpu\lib\site-packages\torch\testing\_comparison.py", line 1519, in assert_close
+    raise error_metas[0].to_error(msg)
+AssertionError: q2.encoder.graph.1.query.weight: Tensor-likes are not close!
+
+Mismatched elements: 1 / 4096 (0.0%)
+Greatest absolute difference: 3.46451997756958e-05 at index (35, 12) (up to 3e-05 allowed)
+Greatest relative difference: 0.0002726641541812569 at index (35, 12) (up to 2e-05 allowed)
+
+----------------------------------------------------------------------
+Ran 7 tests in 32.425s
+
+FAILED (failures=2)
