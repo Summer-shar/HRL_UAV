@@ -29,7 +29,7 @@ from p2 import evaluate, pipeline, plots, report  # noqa: E402
 
 def fabricate(root, seed, method, source='CA', scale=1.):
     for src in C.seed_dir(root, seed).glob(f'**/{source}/*.json'):
-        dst = Path(str(src).replace(f'/{source}/', f'/{method}/'))
+        dst = src.parent.with_name(method) / src.name
         row = json.loads(src.read_text())
         for k in ('truncated_delay_s', 'high_truncated_delay_s', 'energy_w_compute_comm', 'cost_per_s'):
             if row.get(k) is not None:
