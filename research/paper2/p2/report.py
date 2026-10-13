@@ -89,15 +89,15 @@ def paired(rows, methods, metric='truncated_delay_s', reference='Proposed'):
     return result
 
 
-def sweep_table(root, seeds, methods, param, d):
+def sweep_table(root, seeds, methods, param, d, values=None):
     nominal = C.NOMINAL[param]
     test_rows = load_rows(root, seeds, methods, 'test', scenarios=set(d['sweep_scenarios']))
     table = []
-    for value in d['sweeps'][param]:
+    for value in (d['sweeps'][param] if values is None else values):
         rows = test_rows if float(value) == nominal else load_rows(root, seeds, methods, 'sweep', param, value,
                                                                    scenarios=set(d['sweep_scenarios']))
         for m in methods:
-            line = dict(param=param, value=value, method=m)
+            line = dict(param=param, value=value, utilization=C.utilization(param, value), method=m)
             for key, _ in METRICS:
                 seeds_ = per_seed(rows, m, key)
                 if seeds_:
@@ -133,11 +133,17 @@ def build(root, seeds, smoke=False, methods=C.METHODS):
     stats = {metric: paired(rows, present, metric) for metric in
              ('truncated_delay_s', 'energy_w_compute_comm', 'cost_per_s', 'high_truncated_delay_s')}
     sweeps = {p: sweep_table(root, seeds, present, p, d) for p in d['sweeps']}
+    saturated = {p: [r for r in sweep_table(root, seeds, present, p, d, values=v) if r.get('truncated_delay_s') is not None]
+                 for p, v in d.get('saturated', {}).items() if v}
     write_csv(res/'main_table.csv', table)
     for p, t in sweeps.items():
         write_csv(res/f'sweep_{p}.csv', t)
+    for p, t in saturated.items():
+        if t:
+            write_csv(res/f'saturated_{p}.csv', t)
     C.write_json(res/'stats.json', C.clean(dict(seeds=list(seeds), test_scenarios=list(d['test']),
-                                                 paired=stats, main_table=table, sweeps=sweeps)))
+                                                 paired=stats, main_table=table, sweeps=sweeps,
+                                                 saturated=saturated)))
     lines = ['# Paper-2 results', '',
              f'Seeds: {", ".join(map(str, seeds))}; test scenarios {d["test"][0]}–{d["test"][-1]} (split "test"); '
              'deterministic execution; values = mean over seeds of scenario means (± std over seeds).', '',
@@ -155,14 +161,21 @@ def build(root, seeds, smoke=False, methods=C.METHODS):
             lines.append(f'| {LABELS.get(m, m)} | {fmt(r["proposed_mean"])} | {fmt(r["other_mean"])} | '
                          f'{100*r["relative_change"]:+.1f}% | {r["proposed_better_scenarios"]}/{r["scenarios"]} | '
                          f'{fmt(r["wilcoxon_p"], 3)} | {r["seeds_proposed_better"]}/{r["seeds"]} |')
-    for p, t in sweeps.items():
-        lines += ['', f'## Sweep: {p}', '', '| '+p+' | '+' | '.join(LABELS.get(m, m) for m in present)+' |',
-                  '|---:|'+'---:|'*len(present)]
-        for value in d['sweeps'][p]:
+    def sweep_lines(title, p, t, values):
+        out = ['', title, '', '| '+p+' | demand/capacity | '+' | '.join(LABELS.get(m, m) for m in present)+' |',
+               '|---:|---:|'+'---:|'*len(present)]
+        for value in values:
             cells = []
             for m in present:
                 r = next((x for x in t if x['value'] == value and x['method'] == m), {})
                 cells.append(f'{fmt(r.get("truncated_delay_s"))} s / {fmt(r.get("energy_w_compute_comm"))} W')
-            lines.append(f'| {value:g} | '+' | '.join(cells)+' |')
+            out.append(f'| {value:g} | {C.utilization(p, value):.2f} | '+' | '.join(cells)+' |')
+        return out
+    for p, t in sweeps.items():
+        lines += sweep_lines(f'## Sweep: {p} (stable points, demand/capacity < 0.95)', p, t, d['sweeps'][p])
+    for p, t in saturated.items():
+        if t:
+            lines += sweep_lines(f'## Saturated regime: {p} (demand/capacity >= 0.95; queues grow over the window)',
+                                 p, t, sorted({r['value'] for r in t}))
     (res/'summary.md').write_text('\n'.join(lines)+'\n', encoding='utf-8')
     return res

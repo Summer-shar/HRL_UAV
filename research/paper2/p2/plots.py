@@ -88,12 +88,14 @@ def sweeps(root, seeds, methods, out, smoke=False):
         table = sweep_table(root, seeds, methods, param, d)
         fig, axes = plt.subplots(1, 2, figsize=(8.4, 3.4))
         for ax, (key, title) in zip(axes, [('truncated_delay_s', 'Average delay (s)'),
-                                           ('energy_w_compute_comm', 'Compute + comm. energy (W)')]):
+                                           ('energy_w_compute_comm', 'Compute + comm. power (W)')]):
             for m in methods:
                 xs = [r['value'] for r in table if r['method'] == m and r.get(key) is not None]
                 ys = [r[key] for r in table if r['method'] == m and r.get(key) is not None]
                 ax.plot(xs, ys, marker=MARKERS[m], color=COLORS[m], label=LABELS[m].split(' (')[0])
-            ax.set_xlabel(xlabel[param]); ax.set_title(title)
+            values = list(d['sweeps'][param])
+            ax.set_xticks(values, [f'{v:g}\n({C.utilization(param, v):.2f})' for v in values])
+            ax.set_xlabel(xlabel[param]+'\n(mean demand / total CPU capacity)', fontsize=9); ax.set_title(title)
             if key == 'truncated_delay_s':
                 ax.set_yscale('log')
         axes[0].legend(fontsize=8)

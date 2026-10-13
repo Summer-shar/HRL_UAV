@@ -55,10 +55,26 @@ SNAPSHOT_EVERY = 10                         # resumable state interval (episodes
 DEV_SCENARIOS = tuple(range(1, 9))          # dev split, 8 scenarios
 TEST_SCENARIOS = tuple(range(21, 41))       # test split, 20 fresh scenarios (1-20 were used before)
 SWEEP_SCENARIOS = tuple(range(21, 29))      # first 8 test scenarios
-SWEEPS = dict(cpu_ghz=(8.0, 9.0, 10.0, 11.0, 12.0), load=(0.8, 0.9, 1.0, 1.1, 1.2))
+# Sweeps cover stable operating points only: mean computation demand below
+# 95 % of the total UAV CPU capacity (rho < 0.95).  The analytic mean demand is
+# 24.725 Gcycles/s at nominal load (identical in every scenario), so 8 GHz
+# (rho = 1.03, demand exceeds capacity; every queue diverges) and 1.2x load
+# (rho = 0.99) are saturated.  Those two points were run under the first
+# design (8-12 GHz, 0.8-1.2x); they are kept and reported separately as the
+# saturated regime, never dropped silently.
+SWEEPS = dict(cpu_ghz=(9.0, 10.0, 11.0, 12.0, 13.0, 14.0), load=(0.6, 0.7, 0.8, 0.9, 1.0, 1.1))
+SATURATED = dict(cpu_ghz=(8.0,), load=(1.2,))
+MEAN_DEMAND_GCYCLES = 24.725   # hrl_uav workload_summary, nominal load, 3 UAVs share it
 NOMINAL = dict(cpu_ghz=10.0, load=1.0)
 SELECTION_METRIC = 'cost_per_s'             # the objective both layers optimise
 TRAJECTORY_SCENARIO = 21
+
+
+def utilization(param, value):
+    """Mean computation demand / total UAV CPU capacity at a sweep point."""
+    cpu = float(value) if param == 'cpu_ghz' else NOMINAL['cpu_ghz']
+    load = float(value) if param == 'load' else NOMINAL['load']
+    return MEAN_DEMAND_GCYCLES*load/(3*cpu)
 
 
 def out_root(path=None):
@@ -223,7 +239,9 @@ def design(smoke=False):
     if not smoke:
         return dict(budget=dict(BUDGET), upper_candidates=UPPER_CANDIDATES, lower_candidates=LOWER_CANDIDATES,
                     dev=DEV_SCENARIOS, test=TEST_SCENARIOS, sweep_scenarios=SWEEP_SCENARIOS,
-                    sweeps={k: tuple(v) for k, v in SWEEPS.items()}, seeds=SEEDS)
+                    sweeps={k: tuple(v) for k, v in SWEEPS.items()}, saturated={k: tuple(v) for k, v in SATURATED.items()},
+                    seeds=SEEDS)
     return dict(budget=dict(M1=4, M2=10, M3=3, HoverSAC=3, PPO=10), upper_candidates=(5, 10),
                 lower_candidates=(0, 2, 3), dev=(1, 2), test=(21, 22), sweep_scenarios=(21,),
-                sweeps=dict(cpu_ghz=(8.0, 10.0), load=(1.0, 1.2)), seeds=(4101,))
+                sweeps=dict(cpu_ghz=(10.0, 12.0), load=(0.8, 1.0)), saturated=dict(cpu_ghz=(), load=()),
+                seeds=(4101,))
