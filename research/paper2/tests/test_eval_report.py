@@ -62,7 +62,7 @@ def main():
         for v in values:
             if v != C.NOMINAL[p]:
                 assert list((C.seed_dir(root, seed)/'sweep'/f'{p}={v:g}'/'CA').glob('*.json')), (p, v)
-    for i, m in enumerate(C.METHODS):
+    for i, m in enumerate(m for m in C.METHODS if m != 'CA'):
         fabricate(root, seed, m, scale=1.+.1*i)
         rd = C.run_dir(root, seed, {'Proposed': 'M2'}.get(m, m))
         for ep in range(1, 21):

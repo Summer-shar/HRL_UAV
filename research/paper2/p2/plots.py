@@ -83,7 +83,7 @@ def trajectory(root, seed, methods, out, scenario=C.TRAJECTORY_SCENARIO):
 def sweeps(root, seeds, methods, out, smoke=False):
     plt = _plt()
     d = C.design(smoke)
-    xlabel = dict(cpu_ghz='UAV CPU frequency (GHz)', load='Task arrival rate (× nominal)')
+    xlabel = dict(cpu_ghz='UAV CPU frequency (GHz)', load='Task arrival rate (× nominal)', u2u_mhz='Total U2U bandwidth (MHz)')
     for param in d['sweeps']:
         table = sweep_table(root, seeds, methods, param, d)
         fig, axes = plt.subplots(1, 3, figsize=(12.2, 3.5))
@@ -95,8 +95,13 @@ def sweeps(root, seeds, methods, out, smoke=False):
                 ys = [r[key] for r in table if r['method'] == m and r.get(key) is not None]
                 ax.plot(xs, ys, marker=MARKERS[m], color=COLORS[m], label=LABELS[m].split(' (')[0])
             values = list(d['sweeps'][param])
-            ax.set_xticks(values, [f'{v:g}\n({C.utilization(param, v):.2f})' for v in values])
-            ax.set_xlabel(xlabel[param]+'\n(mean demand / total CPU capacity)', fontsize=9); ax.set_title(title)
+            if param == 'u2u_mhz':
+                ax.set_xticks(values, [f'{v:g}' for v in values])
+                ax.set_xlabel(xlabel[param], fontsize=9)
+            else:
+                ax.set_xticks(values, [f'{v:g}\n({C.utilization(param, v):.2f})' for v in values])
+                ax.set_xlabel(xlabel[param]+'\n(mean demand / total CPU capacity)', fontsize=9)
+            ax.set_title(title)
             if key in ('truncated_delay_s', 'cost_per_s'):
                 ax.set_yscale('log')
         axes[0].legend(fontsize=8)
@@ -246,11 +251,31 @@ def positioning(root, seeds, methods, out):
     return summ
 
 
+def stage_delay(root, seeds, methods, out):
+    """Stacked per-stage delay of the last-finishing branch (upload / wait for routing / U2U / CPU)."""
+    plt = _plt()
+    rows = load_rows(root, seeds, methods, 'test')
+    stages = [('upload', 'Upload'), ('ready', 'Wait for routing'), ('u2u', 'U2U transfer'), ('cpu', 'Computing')]
+    colors = ['#8da0cb', '#bdbdbd', '#fc8d62', '#66c2a5']
+    fig, ax = plt.subplots(figsize=(5.6, 3.4))
+    bottom = np.zeros(len(methods))
+    for (key, label), color in zip(stages, colors):
+        vals = np.asarray([np.mean([r['stage_delay_s'][key] for r in rows if r['method'] == m and r.get('stage_delay_s')])
+                           for m in methods])
+        ax.bar(range(len(methods)), vals, bottom=bottom, color=color, label=label)
+        bottom += vals
+    ax.set_xticks(range(len(methods)), [LABELS[m].split(' (')[0] for m in methods], rotation=20)
+    ax.set_ylabel('delay of last-finishing branch (s)'); ax.legend(fontsize=8)
+    _save(fig, out/'fig_stage_delay')
+    plt.close(fig)
+
+
 def build(root, seeds, smoke=False, methods=C.METHODS):
     out = Path(root)/'results'/'figures'
     rows = load_rows(root, seeds, methods, 'test')
     present = [m for m in methods if any(r['method'] == m for r in rows)]
     bars(root, seeds, present, out)
+    stage_delay(root, seeds, present, out)
     trajectory(root, seeds[0], [m for m in ('Proposed', 'TFOO', 'HoverSAC') if m in present], out)
     trajectory_relative(root, seeds[0], [m for m in ('Proposed', 'TOO', 'NC') if m in present], out)
     positioning(root, seeds, present, out)

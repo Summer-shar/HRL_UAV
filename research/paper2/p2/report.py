@@ -9,6 +9,8 @@ from . import common as C
 LABELS = {'Proposed': 'Proposed (HRL)', 'TFOO': 'TFOO (PPO+CVX)', 'TOO': 'TOO (PPO+Equal)',
           'NC': 'NC (no cooperation)', 'HoverSAC': 'Hover-SAC', 'CA': 'CA (hover+equal)'}
 METRICS = [('truncated_delay_s', 'Avg. delay (s)'), ('high_truncated_delay_s', 'High-priority delay (s)'),
+           ('low_truncated_delay_s', 'Low-priority delay (s)'), ('high_completed_p95_s', 'High p95 (s)'),
+           ('low_completed_p95_s', 'Low p95 (s)'),
            ('weighted_completed_delay_s', 'Completed-task delay (s)'),
            ('energy_w_compute_comm', 'Compute+comm. energy (W)'), ('energy_w_total', 'Total energy (W)'),
            ('cost_per_s', 'Weighted cost (/s)'), ('unfinished_rate', 'Unfinished rate'),

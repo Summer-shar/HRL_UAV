@@ -26,7 +26,7 @@ SCENE_PATH = SRC / 'hrl_v2' / 'configs' / 'physical_scene.json'
 # Experiment design (fixed before any training; see README.md)
 # ---------------------------------------------------------------------------
 SEEDS = (4101, 4102, 4103)
-METHODS = ('Proposed', 'TFOO', 'TOO', 'NC', 'HoverSAC')
+METHODS = ('Proposed', 'TFOO', 'TOO', 'NC', 'HoverSAC', 'CA')
 # upper: 'ppo' (own independently trained PPO) or 'hover'; lower: 'sac' or a fixed rule
 METHOD_SPEC = {
     'Proposed': dict(upper='ppo', lower='sac'),
@@ -62,10 +62,11 @@ SWEEP_SCENARIOS = tuple(range(21, 29))      # first 8 test scenarios
 # (rho = 0.99) are saturated.  Those two points were run under the first
 # design (8-12 GHz, 0.8-1.2x); they are kept and reported separately as the
 # saturated regime, never dropped silently.
-SWEEPS = dict(cpu_ghz=(9.0, 10.0, 11.0, 12.0, 13.0, 14.0), load=(0.6, 0.7, 0.8, 0.9, 1.0, 1.1))
-SATURATED = dict(cpu_ghz=(8.0,), load=(1.2,))
+SWEEPS = dict(cpu_ghz=(9.0, 10.0, 11.0, 12.0, 13.0, 14.0), load=(0.6, 0.7, 0.8, 0.9, 1.0, 1.1),
+              u2u_mhz=(1.5, 2.0, 3.0, 4.5, 6.0))
+SATURATED = dict(cpu_ghz=(8.0,), load=(1.2,), u2u_mhz=())
 MEAN_DEMAND_GCYCLES = 24.725   # hrl_uav workload_summary, nominal load, 3 UAVs share it
-NOMINAL = dict(cpu_ghz=10.0, load=1.0)
+NOMINAL = dict(cpu_ghz=10.0, load=1.0, u2u_mhz=3.0)
 SELECTION_METRIC = 'cost_per_s'             # the objective both layers optimise
 TRAJECTORY_SCENARIO = 21
 
@@ -126,10 +127,13 @@ def load_scene():
     return read_json(SCENE_PATH)
 
 
-def scaled_scene(scene, cpu_ghz=None, load=None):
-    """Copy of the scene with every UAV CPU at cpu_ghz and all arrival rates x load."""
+def scaled_scene(scene, cpu_ghz=None, load=None, u2u_mhz=None):
+    """Copy of the scene with every UAV CPU at cpu_ghz, all arrival rates x load,
+    and the total U2U bandwidth at u2u_mhz."""
     s = copy.deepcopy(scene)
     base = s['base_scene']
+    if u2u_mhz is not None and float(u2u_mhz) != NOMINAL['u2u_mhz']:
+        base['resources']['u2u_bandwidth_hz'] = float(u2u_mhz)*1e6
     if cpu_ghz is not None and float(cpu_ghz) != NOMINAL['cpu_ghz']:
         base['resources']['cpu_hz'] = [float(cpu_ghz)*1e9]*base['num_uavs']
     if load is not None and float(load) != NOMINAL['load']:
@@ -243,5 +247,6 @@ def design(smoke=False):
                     seeds=SEEDS)
     return dict(budget=dict(M1=4, M2=10, M3=3, HoverSAC=3, PPO=10), upper_candidates=(5, 10),
                 lower_candidates=(0, 2, 3), dev=(1, 2), test=(21, 22), sweep_scenarios=(21,),
-                sweeps=dict(cpu_ghz=(10.0, 12.0), load=(0.8, 1.0)), saturated=dict(cpu_ghz=(), load=()),
+                sweeps=dict(cpu_ghz=(10.0, 12.0), load=(0.8, 1.0), u2u_mhz=(2.0, 3.0)),
+                saturated=dict(cpu_ghz=(), load=(), u2u_mhz=()),
                 seeds=(4101,))

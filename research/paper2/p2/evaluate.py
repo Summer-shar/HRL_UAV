@@ -119,6 +119,7 @@ def evaluate_one(make_policy, scene, split, scenario, out_json, *, smoke=False, 
                offloaded_fraction=float(1-np.trace(assigned.sum(axis=0))/total) if total else None,
                uav_path_m=float(np.linalg.norm(np.diff(np.asarray(uavs), axis=0), axis=-1).sum(axis=0).mean()),
                cpu_ghz=scene['base_scene']['resources']['cpu_hz'][0]/1e9,
+               u2u_mhz=scene['base_scene']['resources']['u2u_bandwidth_hz']/1e6,
                load=scene['base_scene']['region_multipliers'][0]/C.load_scene()['base_scene']['region_multipliers'][0])
     override = getattr(policy, 'lower_override', None)
     records = getattr(getattr(override, 'rule', None), 'records', None)
