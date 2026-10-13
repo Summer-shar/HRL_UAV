@@ -168,14 +168,14 @@ def build(root, seeds, smoke=False, methods=C.METHODS):
             cells = []
             for m in present:
                 r = next((x for x in t if x['value'] == value and x['method'] == m), {})
-                cells.append(f'{fmt(r.get("truncated_delay_s"))} s / {fmt(r.get("energy_w_compute_comm"))} W')
+                cells.append(f'{fmt(r.get("truncated_delay_s"))} s / {fmt(r.get("energy_w_compute_comm"))} W / {fmt(r.get("cost_per_s"))}')
             out.append(f'| {value:g} | {C.utilization(p, value):.2f} | '+' | '.join(cells)+' |')
         return out
     for p, t in sweeps.items():
-        lines += sweep_lines(f'## Sweep: {p} (stable points, demand/capacity < 0.95)', p, t, d['sweeps'][p])
+        lines += sweep_lines(f'## Sweep: {p} (demand/capacity < 0.95; cells: delay / compute+comm power / joint cost)', p, t, d['sweeps'][p])
     for p, t in saturated.items():
         if t:
-            lines += sweep_lines(f'## Saturated regime: {p} (demand/capacity >= 0.95; queues grow over the window)',
+            lines += sweep_lines(f'## Near or above total capacity: {p} (demand/capacity >= 0.95; reported separately)',
                                  p, t, sorted({r['value'] for r in t}))
     (res/'summary.md').write_text('\n'.join(lines)+'\n', encoding='utf-8')
     return res

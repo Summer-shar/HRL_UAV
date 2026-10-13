@@ -86,9 +86,10 @@ def sweeps(root, seeds, methods, out, smoke=False):
     xlabel = dict(cpu_ghz='UAV CPU frequency (GHz)', load='Task arrival rate (× nominal)')
     for param in d['sweeps']:
         table = sweep_table(root, seeds, methods, param, d)
-        fig, axes = plt.subplots(1, 2, figsize=(8.4, 3.4))
+        fig, axes = plt.subplots(1, 3, figsize=(12.2, 3.5))
         for ax, (key, title) in zip(axes, [('truncated_delay_s', 'Average delay (s)'),
-                                           ('energy_w_compute_comm', 'Compute + comm. power (W)')]):
+                                           ('energy_w_compute_comm', 'Compute + comm. power (W)'),
+                                           ('cost_per_s', 'Joint weighted cost (/s)')]):
             for m in methods:
                 xs = [r['value'] for r in table if r['method'] == m and r.get(key) is not None]
                 ys = [r[key] for r in table if r['method'] == m and r.get(key) is not None]
@@ -96,7 +97,7 @@ def sweeps(root, seeds, methods, out, smoke=False):
             values = list(d['sweeps'][param])
             ax.set_xticks(values, [f'{v:g}\n({C.utilization(param, v):.2f})' for v in values])
             ax.set_xlabel(xlabel[param]+'\n(mean demand / total CPU capacity)', fontsize=9); ax.set_title(title)
-            if key == 'truncated_delay_s':
+            if key in ('truncated_delay_s', 'cost_per_s'):
                 ax.set_yscale('log')
         axes[0].legend(fontsize=8)
         _save(fig, out/f'fig_sweep_{param}')
