@@ -31,18 +31,26 @@ def _save(fig, path):
 def bars(root, seeds, methods, out):
     plt = _plt()
     rows = load_rows(root, seeds, methods, 'test')
-    panels = [('truncated_delay_s', 'Average delay (s)'), ('high_truncated_delay_s', 'High-priority delay (s)'),
-              ('energy_w_compute_comm', 'Compute + comm. energy (W)')]
-    fig, axes = plt.subplots(1, len(panels), figsize=(4*len(panels), 3.4))
-    for ax, (key, title) in zip(axes, panels):
+    panels = [('truncated_delay_s', 'Average delay (s)', True), ('high_truncated_delay_s', 'High-priority delay (s)', False),
+              ('energy_w_compute_comm', 'Compute + comm. power (W)', False), ('cost_per_s', 'Joint weighted cost (/s)', True)]
+    fig, axes = plt.subplots(1, len(panels), figsize=(3.6*len(panels), 3.4))
+    for ax, (key, title, log) in zip(axes, panels):
         means, stds = [], []
         for m in methods:
             v = np.asarray(list(per_seed(rows, m, key).values()) or [np.nan])
             means.append(v.mean())
             stds.append(v.std(ddof=1) if len(v) > 1 else 0.)
-        ax.bar(range(len(methods)), means, yerr=stds, capsize=3, color=[COLORS[m] for m in methods])
+        bars_ = ax.bar(range(len(methods)), means, yerr=stds, capsize=3, color=[COLORS[m] for m in methods])
+        for b, v in zip(bars_, means):
+            ax.annotate(f'{v:.3g}', (b.get_x()+b.get_width()/2, v), xytext=(0, 3), textcoords='offset points',
+                        ha='center', va='bottom', fontsize=7)
+        if log:
+            ax.set_yscale('log')
+        elif key.startswith('energy'):
+            lo = min(means)
+            ax.set_ylim(lo*0.95, max(means)*1.03)   # zoomed axis; values are labelled on the bars
         ax.set_xticks(range(len(methods)), [LABELS[m].split(' (')[0] for m in methods], rotation=20)
-        ax.set_title(title)
+        ax.set_title(title, fontsize=9)
     _save(fig, out/'fig_main_bars')
     plt.close(fig)
 
@@ -61,9 +69,9 @@ def trajectory(root, seed, methods, out, scenario=C.TRAJECTORY_SCENARIO):
             ax.plot(*user[-1, k], '.', color=GROUP_COLORS[src[k]], ms=3, alpha=.6)
         for i in range(uav.shape[1]):
             ax.plot(uav[:, i, 0], uav[:, i, 1], color=GROUP_COLORS[i], lw=2.2)
-            ax.plot(*uav[0, i], 'o', mfc='white', mec=GROUP_COLORS[i], ms=7, mew=2)
-            ax.plot(*uav[-1, i], '^', color=GROUP_COLORS[i], ms=8, mec='k', mew=.6)
-        ax.set_xlim(0, 1000); ax.set_ylim(0, 1000); ax.set_aspect('equal')
+            ax.plot(*uav[0, i], 'o', mfc='white', mec=GROUP_COLORS[i], ms=7, mew=2, clip_on=False, zorder=5)
+            ax.plot(*uav[-1, i], '^', color=GROUP_COLORS[i], ms=8, mec='k', mew=.6, clip_on=False, zorder=5)
+        ax.set_xlim(-30, 1030); ax.set_ylim(-30, 1030); ax.set_aspect('equal')
         ax.set_title(LABELS[m]); ax.set_xlabel('x (m)')
     axes[0][0].set_ylabel('y (m)')
     fig.suptitle(f'UAV trajectories (thick; ○ start, ▲ end) and user movement (thin), test scenario {scenario}, seed {seed}',
@@ -93,6 +101,10 @@ def sweeps(root, seeds, methods, out, smoke=False):
         plt.close(fig)
 
 
+STAGE_COLORS = {'M2': '#d62728', 'TFOO': '#1f77b4', 'TOO': '#2ca02c', 'NC': '#9467bd',
+                'M1': '#7f7f7f', 'M3': '#d62728', 'HoverSAC': '#ff7f0e'}
+
+
 def convergence(root, seeds, out, window=10):
     plt = _plt()
     fig, axes = plt.subplots(1, 2, figsize=(8.8, 3.4))
@@ -108,12 +120,16 @@ def convergence(root, seeds, out, window=10):
                 continue
             n = min(map(len, curves))
             y = np.asarray([c[:n] for c in curves]).mean(axis=0)
+            x = np.arange(1, n+1)
             if n >= window:
                 y = np.convolve(y, np.ones(window)/window, mode='valid')
-            name = dict(M2='Proposed upper (M2)', M1='M1 pre-train', M3='M3 fine-tune').get(stage, stage)
-            color = COLORS.get(stage, None) if stage not in ('M2',) else COLORS['Proposed']
-            ax.plot(np.arange(1, len(y)+1), y, label=name, color=color)
-        ax.set_xlabel('training episode (900 s)'); ax.set_ylabel('average delay (s)'); ax.set_title(title)
+                x = np.arange(window, n+1)        # trailing window: point at its last episode
+            name = dict(M2='Proposed upper (M2)', M1='M1 pre-train (random deployments)', M3='M3 fine-tune',
+                        HoverSAC='Hover-SAC fine-tune').get(stage, stage)
+            ax.plot(x, y, label=name, color=STAGE_COLORS[stage])
+        ax.set_xlabel('training episode (900 s each)')
+        ax.set_ylabel('average delay (s)')
+        ax.set_title(f'{title}\n(mean over seeds, {window}-episode trailing average)', fontsize=9)
         ax.set_yscale('log'); ax.legend(fontsize=8)
     _save(fig, out/'fig_convergence')
     plt.close(fig)
