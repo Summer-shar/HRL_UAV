@@ -12,7 +12,8 @@ METRICS = [('truncated_delay_s', 'Avg. delay (s)'), ('high_truncated_delay_s', '
            ('weighted_completed_delay_s', 'Completed-task delay (s)'),
            ('energy_w_compute_comm', 'Compute+comm. energy (W)'), ('energy_w_total', 'Total energy (W)'),
            ('cost_per_s', 'Weighted cost (/s)'), ('unfinished_rate', 'Unfinished rate'),
-           ('offloaded_fraction', 'Offloaded fraction'), ('uav_path_m', 'UAV path (m)')]
+           ('offloaded_fraction', 'Offloaded fraction'), ('uav_path_m', 'UAV path (m)'),
+           ('upload_stage_s', 'Upload stage (s)'), ('u2u_stage_s', 'U2U stage (s)'), ('cpu_stage_s', 'CPU stage (s)')]
 
 
 def load_rows(root, seeds, methods, kind='test', param=None, value=None, scenarios=None):
@@ -25,6 +26,8 @@ def load_rows(root, seeds, methods, kind='test', param=None, value=None, scenari
                 folder = C.seed_dir(root, seed)/'sweep'/f'{param}={value:g}'/method
             for path in sorted(folder.glob('[0-9][0-9].json')):
                 r = C.read_json(path)
+                for stage in ('upload', 'u2u', 'cpu', 'ready'):
+                    r[f'{stage}_stage_s'] = (r.get('stage_delay_s') or {}).get(stage)
                 if scenarios is None or r['scenario'] in scenarios:
                     rows.append(dict(r, seed=seed, method=method))
     return rows
