@@ -46,8 +46,23 @@ STAGE = dict(M1=1, M2=2, M3=3, HoverSAC=4, PPO=2)
 BUDGET = dict(M1=200, M2=400, M3=100, HoverSAC=100, PPO=400)
 UPPER_INITIAL_STD = 0.5            # was 0.15 in v2.4.0 (lite_networks.py:101)
 ALPHA_M1 = ((100, 0.005), (200, 0.0025))   # (last episode, alpha)
-ALPHA_FINETUNE = 0.0005            # floor; never 0 (schedule.py:29 used 0)
-ACTOR_FROZEN_EPISODES = dict(M1=2, M3=3, HoverSAC=3)
+ACTOR_FROZEN_EPISODES = dict(M1=2)  # M3 / HoverSAC: see FINETUNE_RECIPES
+
+# Fine-tuning recipe of the two SAC fine-tuning stages (M3 and HoverSAC; M1,
+# M2 and the PPO baselines do not depend on it).  The recipe is a property of
+# an output root (``<out>/recipe.json``); a root without that file is v1.
+#   v1  original run (pipeline d458a73): alpha dropped 0.0025 -> 0.0005 at the
+#       start of fine-tuning, pre-training actor learning rate, 3 critic-only
+#       episodes.  Its training logs show entropy collapse in every seed and
+#       two divergences in M3 for seed 4102.
+#   v2  conservative fine-tuning, fixed from those training diagnostics before
+#       any v2 run and judged on the dev split only: keep the final M1 alpha,
+#       smaller actor steps, longer critic-only warm-up after the replay flush.
+FINETUNE_RECIPES = {
+    'v1': dict(alpha=0.0005, actor_lr=1e-4, actor_frozen_episodes=3),
+    'v2': dict(alpha=0.0025, actor_lr=3e-5, actor_frozen_episodes=10),
+}
+ALPHA_FINETUNE = FINETUNE_RECIPES['v1']['alpha']   # kept for old imports; use finetune(root)
 UPPER_CANDIDATES = (100, 200, 300, 400)    # PPO checkpoints considered on dev
 LOWER_CANDIDATES = (0, 25, 50, 75, 100)    # 0 = M1 SAC without fine-tuning
 SNAPSHOT_EVERY = 10                         # resumable state interval (episodes)
@@ -69,6 +84,22 @@ MEAN_DEMAND_GCYCLES = 24.725   # hrl_uav workload_summary, nominal load, 3 UAVs 
 NOMINAL = dict(cpu_ghz=10.0, load=1.0, u2u_mhz=3.0)
 SELECTION_METRIC = 'cost_per_s'             # the objective both layers optimise
 TRAJECTORY_SCENARIO = 21
+
+
+def recipe_name(root):
+    path = Path(root)/'recipe.json'
+    name = read_json(path)['finetune'] if path.exists() else 'v1'
+    if name not in FINETUNE_RECIPES:
+        raise ValueError(f'Unknown fine-tuning recipe {name!r} in {path}')
+    return name
+
+
+def finetune(root, smoke=False, episodes=None):
+    """Fine-tuning parameters of this output root (smoke runs keep >= 1 actor episode)."""
+    r = dict(FINETUNE_RECIPES[recipe_name(root)], recipe=recipe_name(root))
+    if smoke and episodes is not None:
+        r['actor_frozen_episodes'] = min(r['actor_frozen_episodes'], max(int(episodes)-1, 0))
+    return r
 
 
 def utilization(param, value):

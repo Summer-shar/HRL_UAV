@@ -7,7 +7,9 @@ only how the stages are organised, following the audit of the old schedule:
 * M1   SAC pre-training on generic random deployments (not only hover).
 * M2   PPO upper training against the FROZEN, DETERMINISTIC M1 SAC, i.e. the
        same lower behaviour that is used at evaluation time.
-* M3   SAC fine-tuning on the selected M2 upper (deterministic), alpha floor.
+* M3   SAC fine-tuning on the selected M2 upper (deterministic); alpha, actor
+       step size and critic-only warm-up follow the root's fine-tuning recipe
+       (common.FINETUNE_RECIPES).
 * TFOO / TOO / NC  independent PPO uppers with their fixed lower rule, same
        PPO settings, budget, training scenarios and exploration noise as M2.
 * HoverSAC  M1 SAC fine-tuned with all UAVs hovering (ablation).
@@ -165,6 +167,13 @@ def train_sac_stage(name, seed, root, *, smoke=False, init_paths=None):
     clk = C.clocks(scene, smoke)
     device = device_setup()
     learner = proposed_learner(seed, device, config)
+    recipe = C.finetune(root, smoke, episodes) if name in ('M3', 'HoverSAC') else None
+    contract_path = rd/'contract.json'
+    if recipe is not None and contract_path.exists():
+        started_with = C.read_json(contract_path).get('finetune', dict(recipe='v1'))
+        if started_with.get('recipe') != recipe['recipe']:
+            raise RuntimeError(f'{rd} was started with fine-tuning recipe {started_with.get("recipe")}, '
+                               f'this output root uses {recipe["recipe"]}; use a separate --out')
     replay, completed = Replay(), 0
     state_path = rd/'state.pt'
     if state_path.exists():
@@ -180,10 +189,16 @@ def train_sac_stage(name, seed, root, *, smoke=False, init_paths=None):
                 load_ppo_part(learner, load_state(init_paths['upper'])['learner'])
         C.write_json(rd/'contract.json', dict(stage=name, seed=seed, episodes=episodes, smoke=smoke,
             init_paths={k: str(v) for k, v in (init_paths or {}).items()},
-            alpha=('M1 schedule '+str(C.ALPHA_M1)) if name == 'M1' else C.ALPHA_FINETUNE,
-            actor_frozen_episodes=C.ACTOR_FROZEN_EPISODES[name], upper_initial_std=C.UPPER_INITIAL_STD,
+            alpha=('M1 schedule '+str(C.ALPHA_M1)) if name == 'M1' else recipe['alpha'],
+            actor_frozen_episodes=C.ACTOR_FROZEN_EPISODES['M1'] if name == 'M1' else recipe['actor_frozen_episodes'],
+            finetune=recipe, upper_initial_std=C.UPPER_INITIAL_STD,
             training_scenarios=f'derive(seed, stage={C.STAGE[name]}, 0, episode)',
             parameter_hashes=_hashes(learner), device=str(device), torch=torch.__version__))
+    if recipe is not None:
+        # The learner state loaded from M1 (or a snapshot) carries its Adam
+        # param_groups; the recipe's actor step size overrides the stored lr.
+        for group in learner.sac.actor_optimizer.param_groups:
+            group['lr'] = recipe['actor_lr']
     frozen_upper = parameter_hash(learner.ppo.actor) if name == 'M3' else None
     version = dict(M1='explore-v1', M3='m2-selected-deterministic', HoverSAC='hover-0')[name]
     if replay.upper_version != version:
@@ -195,8 +210,8 @@ def train_sac_stage(name, seed, root, *, smoke=False, init_paths=None):
         adapter = perf.TrainingAdapter(scene, timing=clk)
         adapter.reset(**C.training_seeds(seed, stage, n))
         policy = _sac_policy(name, learner, streams, seed, n)
-        alpha = C.alpha_m1(n) if name == 'M1' else C.ALPHA_FINETUNE
-        actor_enabled = n > C.ACTOR_FROZEN_EPISODES[name]
+        alpha = C.alpha_m1(n) if name == 'M1' else recipe['alpha']
+        actor_enabled = n > (C.ACTOR_FROZEN_EPISODES['M1'] if name == 'M1' else recipe['actor_frozen_episodes'])
         residuals = []
 
         def event(streams=streams, alpha=alpha, actor_enabled=actor_enabled, residuals=residuals):
@@ -209,6 +224,7 @@ def train_sac_stage(name, seed, root, *, smoke=False, init_paths=None):
                           gamma_lower=config['objective']['gamma_micro'])
         replay.add(episode)
         row = dict(stage=name, seed=seed, episode=n, alpha=alpha, actor_enabled=actor_enabled,
+                   actor_lr=learner.sac.actor_optimizer.param_groups[0]['lr'],
                    reward_physical=float(sum(episode.rewards)),
                    critic_residual_mse=float(np.mean(residuals)) if residuals else None,
                    actor_relative_entropy=policy.entropy_sum/policy.entropy_count if policy.entropy_count else None,

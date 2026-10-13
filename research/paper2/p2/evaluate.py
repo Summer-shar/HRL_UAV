@@ -189,12 +189,16 @@ def test_job(root, seed, method, smoke=False):
                                    upper=str(upper_path) if upper_path else None))
 
 
-def sweep_job(root, seed, method, param, smoke=False):
+def sweep_job(root, seed, method, param, smoke=False, saturated=False):
+    """Stable sweep points, or with saturated=True the points with rho >= 0.95."""
     d = C.design(smoke)
+    values = d['saturated' if saturated else 'sweeps'][param]
+    if not values:
+        return
     method_, learner_path, upper_path = method_paths(root, seed, method)
     make = factory(method_, seed, learner_path, upper_path)
     base = C.load_scene()
-    for value in d['sweeps'][param]:
+    for value in values:
         if float(value) == C.NOMINAL[param]:
             continue    # nominal point = the test runs on the same scenarios
         scene = C.scaled_scene(base, **{param: value})

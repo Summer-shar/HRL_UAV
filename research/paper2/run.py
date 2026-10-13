@@ -7,7 +7,10 @@
   python run.py select --seed 4101 --labels ProposedUpper
   python run.py test --seed 4101 --method Proposed
   python run.py sweep --seed 4101 --method Proposed --param cpu_ghz
+  python run.py sweep --seed 4101 --method Proposed --param cpu_ghz --saturated   # rho >= 0.95 points
   python run.py report [--seeds ...]
+  python run.py revise --from <old out> --out <new out>   # new root, fine-tuning recipe v2,
+                                                           # unchanged stages carried over
 
 Outputs go to --out (default: $P2_OUT or research/paper2/outputs).
 """
@@ -27,8 +30,12 @@ def seeds_arg(text):
 
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument('command', choices=('pipeline', 'bench', 'train', 'dev', 'select', 'test', 'sweep', 'report', 'plan'))
+    p.add_argument('command', choices=('pipeline', 'bench', 'train', 'dev', 'select', 'test', 'sweep', 'report', 'plan',
+                                        'revise'))
     p.add_argument('--out', default=None)
+    p.add_argument('--from', dest='source', default=None, help='revise: the finished output root to derive from')
+    p.add_argument('--recipe', default='v2', help='revise: fine-tuning recipe of the new root')
+    p.add_argument('--saturated', action='store_true', help='sweep: evaluate the rho >= 0.95 points')
     p.add_argument('--smoke', action='store_true', help='50 s windows and tiny budgets: plumbing check only')
     p.add_argument('--seed', type=int)
     p.add_argument('--seeds', type=seeds_arg)
@@ -41,6 +48,13 @@ def main(argv=None):
     p.add_argument('--workers', type=int, default=int(os.environ.get('P2_WORKERS', '4')))
     p.add_argument('--no-sweeps', action='store_true')
     a = p.parse_args(argv)
+    if a.command == 'revise':
+        from p2 import revise
+        if not a.source or not a.out:
+            p.error('revise needs --from and --out')
+        seeds = a.seeds or C.design(a.smoke)['seeds']
+        revise.prepare(Path(a.source), Path(a.out), seeds, recipe=a.recipe, smoke=a.smoke)
+        return 0
     root = C.out_root(a.out)
     seeds = a.seeds or C.design(a.smoke)['seeds']
 
@@ -50,7 +64,7 @@ def main(argv=None):
         C.write_json(root/'design.json', dict(design=C.design(a.smoke), seeds=list(seeds), smoke=a.smoke,
                                               methods=list(C.METHODS), method_spec=C.METHOD_SPEC,
                                               upper_initial_std=C.UPPER_INITIAL_STD, alpha_m1=C.ALPHA_M1,
-                                              alpha_finetune=C.ALPHA_FINETUNE, selection_metric=C.SELECTION_METRIC))
+                                              finetune=C.finetune(root), selection_metric=C.SELECTION_METRIC))
         return pipeline.run(jobs, root, workers=a.workers, dry=a.command == 'plan')
     if a.command == 'bench':
         return bench(root)
@@ -78,7 +92,7 @@ def main(argv=None):
     elif a.command == 'test':
         evaluate.test_job(root, a.seed, a.method, smoke=a.smoke)
     elif a.command == 'sweep':
-        evaluate.sweep_job(root, a.seed, a.method, a.param, smoke=a.smoke)
+        evaluate.sweep_job(root, a.seed, a.method, a.param, smoke=a.smoke, saturated=a.saturated)
     elif a.command == 'report':
         from p2 import report, plots
         print('tables:', report.build(root, seeds, smoke=a.smoke))

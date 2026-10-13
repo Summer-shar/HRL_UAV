@@ -90,7 +90,9 @@ def paired(rows, methods, metric='truncated_delay_s', reference='Proposed'):
         result[m] = dict(metric=metric, scenarios=len(keys), proposed_mean=float(a.mean()), other_mean=float(b.mean()),
                          relative_change=float(a.mean()/b.mean()-1), proposed_better_scenarios=int((a < b).sum()),
                          wilcoxon_p=p, seeds_proposed_better=int(sum(ref_seed[s] < other_seed[s] for s in ref_seed if s in other_seed)),
-                         seeds=len(set(ref_seed) & set(other_seed)))
+                         seeds=len(set(ref_seed) & set(other_seed)),
+                         per_seed={str(s): dict(proposed=float(ref_seed[s]), other=float(other_seed[s]))
+                                   for s in sorted(set(ref_seed) & set(other_seed))})
     return result
 
 
@@ -146,12 +148,19 @@ def build(root, seeds, smoke=False, methods=C.METHODS):
     for p, t in saturated.items():
         if t:
             write_csv(res/f'saturated_{p}.csv', t)
-    C.write_json(res/'stats.json', C.clean(dict(seeds=list(seeds), test_scenarios=list(d['test']),
+    recipe = C.finetune(root)
+    for seed in seeds:     # which dev candidate each label used, next to the tables
+        src = C.seed_dir(root, seed)/'selection_report.json'
+        if src.exists():
+            C.write_json(res/'selection'/f'seed_{seed}.json', C.read_json(src))
+    C.write_json(res/'stats.json', C.clean(dict(seeds=list(seeds), test_scenarios=list(d['test']), finetune=recipe,
                                                  paired=stats, main_table=table, sweeps=sweeps,
                                                  saturated=saturated)))
     lines = ['# Paper-2 results', '',
              f'Seeds: {", ".join(map(str, seeds))}; test scenarios {d["test"][0]}–{d["test"][-1]} (split "test"); '
-             'deterministic execution; values = mean over seeds of scenario means (± std over seeds).', '',
+             'deterministic execution; values = mean over seeds of scenario means (± std over seeds).',
+             f'Fine-tuning recipe (M3, HoverSAC): {recipe["recipe"]} (alpha {recipe["alpha"]:g}, actor lr '
+             f'{recipe["actor_lr"]:g}, {recipe["actor_frozen_episodes"]} critic-only episodes).', '',
              '| Method | '+' | '.join(label for _, label in METRICS)+' |',
              '|---|'+'---:|'*len(METRICS)]
     for line in table:

@@ -55,7 +55,11 @@ def plan(seeds, smoke=False, methods=C.METHODS, include_sweeps=True):
             if include_sweeps:
                 for p in d['sweeps']:
                     add(f's{s}_sweep_{m}_{p}', ['sweep', S, f'--method={m}', f'--param={p}'], [sel], 10)
-    finals = [j.id for j in jobs if '_test_' in j.id or '_sweep_' in j.id]
+                for p, values in d['saturated'].items():
+                    if values:
+                        add(f's{s}_sat_{m}_{p}', ['sweep', S, f'--method={m}', f'--param={p}', '--saturated'],
+                            [sel], 5)
+    finals = [j.id for j in jobs if '_test_' in j.id or '_sweep_' in j.id or '_sat_' in j.id]
     jobs.append(Job('report', ['report']+flag+[f'--seeds={",".join(map(str, seeds))}'], finals, 0))
     return jobs
 
