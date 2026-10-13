@@ -174,7 +174,7 @@ def trajectory_relative(root, seed, methods, out, scenario=C.TRAJECTORY_SCENARIO
     shown = [m for m in methods if (C.seed_dir(root, seed)/'test'/m/'traj'/f'{scenario:02d}.npz').exists()]
     if not shown:
         return
-    fig, axes = plt.subplots(1, len(shown), figsize=(3.8*len(shown), 4.0), squeeze=False, sharex=True, sharey=True)
+    fig, axes = plt.subplots(1, len(shown), figsize=(3.8*len(shown), 4.4), squeeze=False, sharex=True, sharey=True)
     lim = 10.
     for ax, m in zip(axes[0], shown):
         t = np.load(C.seed_dir(root, seed)/'test'/m/'traj'/f'{scenario:02d}.npz')
@@ -206,7 +206,9 @@ def trajectory_relative(root, seed, methods, out, scenario=C.TRAJECTORY_SCENARIO
     axes[0][0].set_ylabel('y offset from own users (m)')
     fig.suptitle(f'UAV offset from the centroid of its own users; solid arrow = mean offset, dashed = direction to '
                  f'partner groups (test scenario {scenario}, seed {seed})', fontsize=8.5)
-    _save(fig, out/'fig_trajectory_relative')
+    fig.tight_layout(rect=(0, 0.02, 1, 0.95))
+    fig.savefig((out/'fig_trajectory_relative').with_suffix('.png'))
+    fig.savefig((out/'fig_trajectory_relative').with_suffix('.pdf'))
     plt.close(fig)
 
 
@@ -237,6 +239,7 @@ def positioning(root, seeds, methods, out):
     axes[2].axhline(0, color='k', lw=.8)
     axes[2].set_xticks(np.arange(len(keys))+width*(len(moving)-1)/2, [lab for _, lab in keys], fontsize=8)
     axes[2].set_title('Offset toward partner region (m, >0 = leans toward it)', fontsize=9)
+    axes[2].legend(fontsize=7)
     _save(fig, out/'fig_positioning')
     plt.close(fig)
     C.write_json(out.parent/'positioning.json', C.clean(dict(warmup_s=60, by_method=summ)))
@@ -249,7 +252,7 @@ def build(root, seeds, smoke=False, methods=C.METHODS):
     present = [m for m in methods if any(r['method'] == m for r in rows)]
     bars(root, seeds, present, out)
     trajectory(root, seeds[0], [m for m in ('Proposed', 'TFOO', 'HoverSAC') if m in present], out)
-    trajectory_relative(root, seeds[0], [m for m in ('Proposed', 'TFOO', 'TOO') if m in present], out)
+    trajectory_relative(root, seeds[0], [m for m in ('Proposed', 'TOO', 'NC') if m in present], out)
     positioning(root, seeds, present, out)
     sweeps(root, seeds, present, out, smoke)
     convergence(root, seeds, out)
