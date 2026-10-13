@@ -164,29 +164,48 @@ def cooperation(root, seeds, methods, out):
     plt.close(fig)
 
 
-def trajectory_relative(root, seed, methods, out, scenario=C.TRAJECTORY_SCENARIO):
+def trajectory_relative(root, seed, methods, out, scenario=C.TRAJECTORY_SCENARIO, smooth=12):
     """Co-moving frame: each UAV relative to the centroid of its own users.
-    Removes the common user drift, leaving where the policy places the UAV
-    with respect to its users (and toward the partner UAVs)."""
+    Removes the common user drift. Thin line: offset path (60 s moving average);
+    solid arrow: mean offset after the first 60 s; dashed arrow: direction to the
+    other two user groups (where cooperation partners are). Aligned arrows mean
+    the UAV sits on the side of its users facing its partners."""
     plt = _plt()
     shown = [m for m in methods if (C.seed_dir(root, seed)/'test'/m/'traj'/f'{scenario:02d}.npz').exists()]
     if not shown:
         return
-    fig, axes = plt.subplots(1, len(shown), figsize=(3.8*len(shown), 3.9), squeeze=False, sharex=True, sharey=True)
+    fig, axes = plt.subplots(1, len(shown), figsize=(3.8*len(shown), 4.0), squeeze=False, sharex=True, sharey=True)
+    lim = 10.
     for ax, m in zip(axes[0], shown):
         t = np.load(C.seed_dir(root, seed)/'test'/m/'traj'/f'{scenario:02d}.npz')
-        uav, user, src = t['uav_xy'], t['user_xy'], t['user_source']
+        time, uav, user, src = t['time_s'], t['uav_xy'], t['user_xy'], t['user_source']
+        cent = np.stack([user[:, src == k].mean(axis=1) for k in range(uav.shape[1])], axis=1)
+        keep = time >= min(60., time[-1]/2)
         for k in range(uav.shape[1]):
-            cent = user[:, src == k].mean(axis=1)
-            rel = uav[:, k]-cent
-            ax.plot(rel[:, 0], rel[:, 1], color=GROUP_COLORS[k], lw=1.4)
-            ax.plot(*rel[0], 'o', mfc='white', mec=GROUP_COLORS[k], ms=6, mew=2)
-            ax.plot(*rel[-1], '^', color=GROUP_COLORS[k], ms=7, mec='k', mew=.6)
-        ax.axhline(0, color='k', lw=.6); ax.axvline(0, color='k', lw=.6)
-        ax.set_aspect('equal'); ax.set_title(LABELS[m]); ax.set_xlabel('x offset from own users (m)')
+            rel = uav[:, k]-cent[:, k]
+            if len(rel) > smooth:
+                kernel = np.ones(smooth)/smooth
+                rel_s = np.stack([np.convolve(rel[:, i], kernel, mode='valid') for i in range(2)], axis=1)
+            else:
+                rel_s = rel
+            ax.plot(rel_s[:, 0], rel_s[:, 1], color=GROUP_COLORS[k], lw=.9, alpha=.45)
+            mean = rel[keep].mean(axis=0)
+            others = np.mean([cent[keep][:, j] for j in range(uav.shape[1]) if j != k], axis=0)-cent[keep][:, k]
+            direction = others.mean(axis=0)
+            direction = direction/max(np.linalg.norm(direction), 1e-9)
+            scale = max(np.linalg.norm(mean), 5.)
+            ax.annotate('', xy=tuple(direction*scale), xytext=(0, 0),
+                        arrowprops=dict(arrowstyle='->', color=GROUP_COLORS[k], lw=1.2, ls='--'))
+            ax.annotate('', xy=tuple(mean), xytext=(0, 0),
+                        arrowprops=dict(arrowstyle='-|>', color=GROUP_COLORS[k], lw=2.4))
+            lim = max(lim, np.abs(rel_s).max()*1.1, scale*1.2)
+        ax.axhline(0, color='k', lw=.5); ax.axvline(0, color='k', lw=.5)
+        ax.set_aspect('equal'); ax.set_title(LABELS[m], fontsize=10); ax.set_xlabel('x offset from own users (m)')
+    for ax in axes[0]:
+        ax.set_xlim(-lim, lim); ax.set_ylim(-lim, lim)
     axes[0][0].set_ylabel('y offset from own users (m)')
-    fig.suptitle(f'UAV position relative to the centroid of its own users (origin), test scenario {scenario}, seed {seed}',
-                 fontsize=9)
+    fig.suptitle(f'UAV offset from the centroid of its own users; solid arrow = mean offset, dashed = direction to '
+                 f'partner groups (test scenario {scenario}, seed {seed})', fontsize=8.5)
     _save(fig, out/'fig_trajectory_relative')
     plt.close(fig)
 
