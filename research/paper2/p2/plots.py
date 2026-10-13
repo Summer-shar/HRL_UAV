@@ -164,12 +164,74 @@ def cooperation(root, seeds, methods, out):
     plt.close(fig)
 
 
+def trajectory_relative(root, seed, methods, out, scenario=C.TRAJECTORY_SCENARIO):
+    """Co-moving frame: each UAV relative to the centroid of its own users.
+    Removes the common user drift, leaving where the policy places the UAV
+    with respect to its users (and toward the partner UAVs)."""
+    plt = _plt()
+    shown = [m for m in methods if (C.seed_dir(root, seed)/'test'/m/'traj'/f'{scenario:02d}.npz').exists()]
+    if not shown:
+        return
+    fig, axes = plt.subplots(1, len(shown), figsize=(3.8*len(shown), 3.9), squeeze=False, sharex=True, sharey=True)
+    for ax, m in zip(axes[0], shown):
+        t = np.load(C.seed_dir(root, seed)/'test'/m/'traj'/f'{scenario:02d}.npz')
+        uav, user, src = t['uav_xy'], t['user_xy'], t['user_source']
+        for k in range(uav.shape[1]):
+            cent = user[:, src == k].mean(axis=1)
+            rel = uav[:, k]-cent
+            ax.plot(rel[:, 0], rel[:, 1], color=GROUP_COLORS[k], lw=1.4)
+            ax.plot(*rel[0], 'o', mfc='white', mec=GROUP_COLORS[k], ms=6, mew=2)
+            ax.plot(*rel[-1], '^', color=GROUP_COLORS[k], ms=7, mec='k', mew=.6)
+        ax.axhline(0, color='k', lw=.6); ax.axvline(0, color='k', lw=.6)
+        ax.set_aspect('equal'); ax.set_title(LABELS[m]); ax.set_xlabel('x offset from own users (m)')
+    axes[0][0].set_ylabel('y offset from own users (m)')
+    fig.suptitle(f'UAV position relative to the centroid of its own users (origin), test scenario {scenario}, seed {seed}',
+                 fontsize=9)
+    _save(fig, out/'fig_trajectory_relative')
+    plt.close(fig)
+
+
+def positioning(root, seeds, methods, out):
+    from .positioning import collect, summary
+    plt = _plt()
+    moving = [m for m in methods if C.METHOD_SPEC[m]['upper'] == 'ppo']
+    rows = collect(root, seeds, moving)
+    if not rows:
+        return None
+    summ = summary(rows, moving)
+    fig, axes = plt.subplots(1, 3, figsize=(12.2, 3.4))
+    for m in moving:
+        rs = [r for r in rows if r['method'] == m]
+        n = min(len(r['time_s']) for r in rs)
+        t = rs[0]['time_s'][:n]
+        axes[0].plot(t, np.mean([r['spread_ratio'][:n] for r in rs], axis=0), color=COLORS[m], label=LABELS[m].split(' (')[0])
+        axes[1].plot(t, np.mean([r['tracking_m'][:n] for r in rs], axis=0), color=COLORS[m])
+    axes[0].axhline(1, color='k', ls='--', lw=1)
+    axes[0].set_title('UAV spread / user-group spread', fontsize=9); axes[0].set_xlabel('time (s)')
+    axes[0].legend(fontsize=8)
+    axes[1].set_title('Distance UAV ↔ own users\' centroid (m)', fontsize=9); axes[1].set_xlabel('time (s)')
+    keys = [('lean_light_m', 'light-load UAV toward heavy'), ('lean_heavy_m', 'heavy-load UAV toward light')]
+    width = .8/len(moving)
+    for i, m in enumerate(moving):
+        vals = [summ[m].get(k, np.nan) for k, _ in keys]
+        axes[2].bar(np.arange(len(keys))+i*width, vals, width, color=COLORS[m], label=LABELS[m].split(' (')[0])
+    axes[2].axhline(0, color='k', lw=.8)
+    axes[2].set_xticks(np.arange(len(keys))+width*(len(moving)-1)/2, [lab for _, lab in keys], fontsize=8)
+    axes[2].set_title('Offset toward partner region (m, >0 = leans toward it)', fontsize=9)
+    _save(fig, out/'fig_positioning')
+    plt.close(fig)
+    C.write_json(out.parent/'positioning.json', C.clean(dict(warmup_s=60, by_method=summ)))
+    return summ
+
+
 def build(root, seeds, smoke=False, methods=C.METHODS):
     out = Path(root)/'results'/'figures'
     rows = load_rows(root, seeds, methods, 'test')
     present = [m for m in methods if any(r['method'] == m for r in rows)]
     bars(root, seeds, present, out)
     trajectory(root, seeds[0], [m for m in ('Proposed', 'TFOO', 'HoverSAC') if m in present], out)
+    trajectory_relative(root, seeds[0], [m for m in ('Proposed', 'TFOO', 'TOO') if m in present], out)
+    positioning(root, seeds, present, out)
     sweeps(root, seeds, present, out, smoke)
     convergence(root, seeds, out)
     cooperation(root, seeds, present, out)
