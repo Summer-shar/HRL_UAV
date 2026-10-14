@@ -8,6 +8,7 @@
   python run.py test --seed 4101 --method Proposed
   python run.py sweep --seed 4101 --method Proposed --param cpu_ghz
   python run.py sweep --seed 4101 --method Proposed --param cpu_ghz --saturated   # rho >= 0.95 points
+  python run.py burst --seed 4101 --method Proposed     # controlled overload burst (p2/burst.py)
   python run.py report [--seeds ...]
   python run.py revise --from <old out> --out <new out>   # new root, fine-tuning recipe v2,
                                                            # unchanged stages carried over
@@ -31,7 +32,7 @@ def seeds_arg(text):
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('command', choices=('pipeline', 'bench', 'train', 'dev', 'select', 'test', 'sweep', 'report', 'plan',
-                                        'revise'))
+                                        'revise', 'burst'))
     p.add_argument('--out', default=None)
     p.add_argument('--from', dest='source', default=None, help='revise: the finished output root to derive from')
     p.add_argument('--recipe', default='v2', help='revise: fine-tuning recipe of the new root')
@@ -91,6 +92,8 @@ def main(argv=None):
         print(evaluate.select(root, a.seed, a.labels.split(','), smoke=a.smoke))
     elif a.command == 'test':
         evaluate.test_job(root, a.seed, a.method, smoke=a.smoke)
+    elif a.command == 'burst':
+        evaluate.burst_job(root, a.seed, a.method, smoke=a.smoke)
     elif a.command == 'sweep':
         evaluate.sweep_job(root, a.seed, a.method, a.param, smoke=a.smoke, saturated=a.saturated)
     elif a.command == 'report':

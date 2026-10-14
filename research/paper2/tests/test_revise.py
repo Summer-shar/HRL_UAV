@@ -89,6 +89,7 @@ def main():
                 f's{seed}_test_Proposed', f's{seed}_test_HoverSAC'}
     expected |= {f's{seed}_dev_{lb}_{c}' for lb in ('ProposedLower', 'HoverSAC') for c in d['lower_candidates'][1:]}
     expected |= {f's{seed}_sweep_{m}_{p}' for m in ('Proposed', 'HoverSAC') for p in d['sweeps']}
+    expected |= {f's{seed}_burst_{m}' for m in C.METHODS}      # no burst records in the fake v1 root
     assert set(todo) == expected, sorted(set(todo) ^ expected)
     ids = {j.id for j in pipeline.plan([seed], smoke=True)}
     assert set(done) | set(todo) == ids

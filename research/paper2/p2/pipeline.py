@@ -52,6 +52,7 @@ def plan(seeds, smoke=False, methods=C.METHODS, include_sweeps=True):
                   devs, 70)
         for m in methods:
             add(f's{s}_test_{m}', ['test', S, f'--method={m}'], [sel], 20)
+            add(f's{s}_burst_{m}', ['burst', S, f'--method={m}'], [sel], 15)
             if include_sweeps:
                 for p in d['sweeps']:
                     add(f's{s}_sweep_{m}_{p}', ['sweep', S, f'--method={m}', f'--param={p}'], [sel], 10)
@@ -59,7 +60,7 @@ def plan(seeds, smoke=False, methods=C.METHODS, include_sweeps=True):
                     if values:
                         add(f's{s}_sat_{m}_{p}', ['sweep', S, f'--method={m}', f'--param={p}', '--saturated'],
                             [sel], 5)
-    finals = [j.id for j in jobs if '_test_' in j.id or '_sweep_' in j.id or '_sat_' in j.id]
+    finals = [j.id for j in jobs if any(k in j.id for k in ('_test_', '_sweep_', '_sat_', '_burst_'))]
     jobs.append(Job('report', ['report']+flag+[f'--seeds={",".join(map(str, seeds))}'], finals, 0))
     return jobs
 

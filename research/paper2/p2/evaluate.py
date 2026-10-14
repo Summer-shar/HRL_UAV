@@ -86,7 +86,11 @@ def factory(method, seed, learner_path, upper_path):
 # ---------------------------------------------------------------------------
 # One closed-loop run
 # ---------------------------------------------------------------------------
-def evaluate_one(make_policy, scene, split, scenario, out_json, *, smoke=False, traj_npz=None, identity=None):
+def evaluate_one(make_policy, scene, split, scenario, out_json, *, smoke=False, traj_npz=None, identity=None,
+                 burst=None):
+    """One deterministic 900 s run.  burst: window dict of p2.burst (controlled
+    overload of the heaviest region); the run then also records the delay by
+    arrival time."""
     out_json = Path(out_json)
     if out_json.exists():
         return C.read_json(out_json)
@@ -96,6 +100,10 @@ def evaluate_one(make_policy, scene, split, scenario, out_json, *, smoke=False, 
     config = C.load_config()
     adapter = PhysicsAdapter(scene, timing=C.clocks(scene, smoke))
     adapter.reset(**C.scenario_seeds(split, scenario))
+    burst_info = None
+    if burst is not None:
+        from . import burst as B
+        burst_info = B.install(adapter.env, **burst)
     policy = make_policy(scene, split, scenario)
     per_upper = adapter.timing.physical_per_upper
     env = adapter.env
@@ -121,6 +129,10 @@ def evaluate_one(make_policy, scene, split, scenario, out_json, *, smoke=False, 
                cpu_ghz=scene['base_scene']['resources']['cpu_hz'][0]/1e9,
                u2u_mhz=scene['base_scene']['resources']['u2u_bandwidth_hz']/1e6,
                load=scene['base_scene']['region_multipliers'][0]/C.load_scene()['base_scene']['region_multipliers'][0])
+    if burst is not None:
+        from . import burst as B
+        row.update(burst=burst_info, burst_bins=B.record(env, burst['bin_s'], env.time_s,
+                                                          tuple(config['objective']['priority_weights'])))
     override = getattr(policy, 'lower_override', None)
     records = getattr(getattr(override, 'rule', None), 'records', None)
     if records is not None:
@@ -187,6 +199,19 @@ def test_job(root, seed, method, smoke=False):
                      traj_npz=folder/'traj'/f'{scenario:02d}.npz',
                      identity=dict(seed=seed, method=method, learner=str(learner_path) if learner_path else None,
                                    upper=str(upper_path) if upper_path else None))
+
+
+def burst_job(root, seed, method, smoke=False):
+    """Controlled burst (p2.burst) on the sweep scenarios, nominal parameters."""
+    from . import burst as B
+    d = C.design(smoke)
+    method_, learner_path, upper_path = method_paths(root, seed, method)
+    make = factory(method_, seed, learner_path, upper_path)
+    scene = C.load_scene()
+    folder = C.seed_dir(root, seed)/'burst'/method
+    for scenario in d['sweep_scenarios']:
+        evaluate_one(make, scene, 'test', scenario, folder/f'{scenario:02d}.json', smoke=smoke,
+                     burst=B.window(smoke), identity=dict(seed=seed, method=method, experiment='burst'))
 
 
 def sweep_job(root, seed, method, param, smoke=False, saturated=False):

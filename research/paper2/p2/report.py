@@ -115,6 +115,39 @@ def sweep_table(root, seeds, methods, param, d, values=None):
     return table
 
 
+def burst_table(root, seeds, methods, smoke=False):
+    """Delay by task arrival time under the controlled burst (pooled over seeds and scenarios)."""
+    from . import burst as B
+    win = B.window(smoke)
+    bins, windows = [], []
+    for m in methods:
+        runs = [C.read_json(p) for seed in seeds
+                for p in sorted((C.seed_dir(root, seed)/'burst'/m).glob('[0-9][0-9].json'))]
+        runs = [r for r in runs if r.get('burst_bins')]
+        if not runs:
+            continue
+        edges = runs[0]['burst_bins']['edges']
+        tot = {k: np.sum([r['burst_bins'][k] for r in runs], axis=0)
+               for k in ('w_sojourn', 'w', 'high_sojourn', 'high_n', 'low_sojourn', 'low_n', 'unfinished')}
+        ratio = lambda a, b: np.divide(a, b, out=np.full_like(a, np.nan), where=b > 0)
+        wd, hd, ld = ratio(tot['w_sojourn'], tot['w']), ratio(tot['high_sojourn'], tot['high_n']), ratio(tot['low_sojourn'], tot['low_n'])
+        for i in range(len(edges)-1):
+            bins.append(dict(method=m, t_start_s=edges[i], t_end_s=edges[i+1], weighted_delay_s=wd[i],
+                             high_delay_s=hd[i], low_delay_s=ld[i], tasks=tot['high_n'][i]+tot['low_n'][i],
+                             unfinished=tot['unfinished'][i], runs=len(runs)))
+        span = win['end_s'] - win['start_s']
+        for name, (a, b) in dict(before=(win['start_s']-span, win['start_s']), burst=(win['start_s'], win['end_s']),
+                                 after=(win['end_s'], win['end_s']+span)).items():
+            sel = [i for i in range(len(edges)-1) if a <= edges[i] < b]
+            if sel:
+                windows.append(dict(method=m, window=name, t_start_s=a, t_end_s=b,
+                                    weighted_delay_s=float(tot['w_sojourn'][sel].sum()/max(tot['w'][sel].sum(), 1e-12)),
+                                    high_delay_s=float(tot['high_sojourn'][sel].sum()/max(tot['high_n'][sel].sum(), 1e-12)),
+                                    low_delay_s=float(tot['low_sojourn'][sel].sum()/max(tot['low_n'][sel].sum(), 1e-12)),
+                                    runs=len(runs)))
+    return dict(window=win, bins=bins, windows=windows)
+
+
 def write_csv(path, rows):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -149,13 +182,17 @@ def build(root, seeds, smoke=False, methods=C.METHODS):
         if t:
             write_csv(res/f'saturated_{p}.csv', t)
     recipe = C.finetune(root)
+    burst = burst_table(root, seeds, present, smoke)
+    if burst['bins']:
+        write_csv(res/'burst_bins.csv', burst['bins'])
+        write_csv(res/'burst_windows.csv', burst['windows'])
     for seed in seeds:     # which dev candidate each label used, next to the tables
         src = C.seed_dir(root, seed)/'selection_report.json'
         if src.exists():
             C.write_json(res/'selection'/f'seed_{seed}.json', C.read_json(src))
     C.write_json(res/'stats.json', C.clean(dict(seeds=list(seeds), test_scenarios=list(d['test']), finetune=recipe,
                                                  paired=stats, main_table=table, sweeps=sweeps,
-                                                 saturated=saturated)))
+                                                 saturated=saturated, burst_windows=burst['windows'])))
     lines = ['# Paper-2 results', '',
              f'Seeds: {", ".join(map(str, seeds))}; test scenarios {d["test"][0]}–{d["test"][-1]} (split "test"); '
              'deterministic execution; values = mean over seeds of scenario means (± std over seeds).',
@@ -191,5 +228,17 @@ def build(root, seeds, smoke=False, methods=C.METHODS):
         if t:
             lines += sweep_lines(f'## Near or above total capacity: {p} (demand/capacity >= 0.95; reported separately)',
                                  p, t, sorted({r['value'] for r in t}))
+    if burst['windows']:
+        w = burst['window']
+        lines += ['', f'## Controlled burst: heaviest region fully busy in [{w["start_s"]:g}, {w["end_s"]:g}) s '
+                  '(delay by task arrival time; pooled over seeds and sweep scenarios)', '',
+                  '| Method | before: weighted / high (s) | burst: weighted / high (s) | after: weighted / high (s) |',
+                  '|---|---:|---:|---:|']
+        for m in present:
+            cells = []
+            for name in ('before', 'burst', 'after'):
+                r = next((x for x in burst['windows'] if x['method'] == m and x['window'] == name), None)
+                cells.append(f'{fmt(r["weighted_delay_s"])} / {fmt(r["high_delay_s"])}' if r else '—')
+            lines.append(f'| {LABELS.get(m, m)} | '+' | '.join(cells)+' |')
     (res/'summary.md').write_text('\n'.join(lines)+'\n', encoding='utf-8')
     return res

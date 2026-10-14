@@ -7,7 +7,7 @@ links where the file system allows, copies otherwise):
 * train/M1, train/M2, train/TFOO|TOO|NC          checkpoints, logs, contracts
 * dev/ProposedUpper, dev/TFOO|TOO|NC              validation summaries
 * dev/ProposedLower/0, dev/HoverSAC/0             candidate 0 = the M1 SAC, no fine-tuning
-* test/ and sweep/ records of TFOO, TOO, NC, CA   methods without a fine-tuned SAC
+* test/, sweep/ and burst/ records of TFOO, TOO, NC, CA   methods without a fine-tuned SAC
 * the ProposedUpper and PPO-baseline entries of selected.json / selection_report.json
 
 The jobs whose outputs are complete in the new root are marked done, so
@@ -88,6 +88,9 @@ def carried_done(job, root, d):
             sel = sd/'selected.json'
             return sel.exists() and all(lb in C.read_json(sel) for lb in labels)
         return False
+    if cmd == 'burst':
+        files = [sd/'burst'/a['method']/f'{s:02d}.json' for s in d['sweep_scenarios']]
+        return a['method'] in FIXED_METHODS and all(f.exists() for f in files)
     if cmd in ('test', 'sweep'):
         if a['method'] not in FIXED_METHODS:
             return False
@@ -140,6 +143,7 @@ def prepare(src, dst, seeds, recipe='v2', smoke=False):
             placed += _carry(s_src/'dev'/label/'0', s_dst/'dev'/label/'0')
         for m in FIXED_METHODS:
             placed += _carry(s_src/'test'/m, s_dst/'test'/m)
+            placed += _carry(s_src/'burst'/m, s_dst/'burst'/m)
             for point in sorted(s_src.glob('sweep/*')):
                 placed += _carry(point/m, s_dst/'sweep'/point.name/m)
         for name in ('selected.json', 'selection_report.json'):
