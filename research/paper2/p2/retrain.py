@@ -12,8 +12,19 @@ carry the replay buffer) are deleted when a stage finishes, to save disk.
 
     python run.py retrain --out-base D:\\p2_retrain --first u2u_mhz=1.5,u2u_mhz=2
     python run.py retrain-report --out-base D:\\p2_retrain --main D:\\p2_runs_v2
+    python run.py retrain-export --out-base D:\\p2_retrain --dest D:\\p2_export_A.zip --machine A
+
+Points may be split between computers (--points); each computer exports its
+finished points with retrain-export (records only: no weights, trajectories or
+logs) and the exports are merged into one folder for retrain-report.
 """
+import hashlib
+import json
+import os
+import platform
+import sys
 import time
+import zipfile
 from pathlib import Path
 
 from . import common as C
@@ -61,3 +72,82 @@ def prepare_point(base, param, value, smoke=False, recipe='v2'):
                                           methods=list(C.METHODS), finetune=C.finetune(root),
                                           test_scenarios=list(C.test_scenarios(root, C.design(smoke)))))
     return root
+
+
+def point_finished(root, seeds, smoke=False, methods=C.METHODS):
+    """Every method has a test record on every sweep scenario for every seed."""
+    d = C.design(smoke)
+    return all((C.seed_dir(root, s)/'test'/m/f'{sc:02d}.json').exists()
+               for s in seeds for m in methods for sc in d['sweep_scenarios'])
+
+
+EXPORT_PATTERNS = ('scene.json', 'recipe.json', 'design.json', 'results/*.md', 'results/*.csv', 'results/*.json',
+                   'seed_*/selected.json', 'seed_*/selection_report.json', 'seed_*/test/*/[0-9][0-9].json',
+                   'seed_*/train/*/train.jsonl', 'seed_*/train/*/done.json', 'seed_*/dev/*/*/summary.json',
+                   '_jobs/*.done')
+
+
+def _sha256(path):
+    h = hashlib.sha256()
+    with open(path, 'rb') as f:
+        for block in iter(lambda: f.read(1 << 20), b''):
+            h.update(block)
+    return h.hexdigest()
+
+
+def code_fingerprint():
+    """SHA-256 over the paper-2 code and the v2.4.0 source/configs (identifies the code without git)."""
+    files = sorted([*C.PAPER2.glob('p2/*.py'), C.PAPER2/'run.py', *C.SRC.glob('hrl_v2/*.py'),
+                    *C.SRC.glob('hrl_v2/configs/*.json'), *C.SRC.glob('hrl_uav/*.py')])
+    h = hashlib.sha256()
+    for f in files:
+        h.update(str(f.relative_to(C.REPO)).replace('\\', '/').encode())
+        h.update(f.read_bytes().replace(b'\r\n', b'\n'))
+    return h.hexdigest(), len(files)
+
+
+def environment():
+    from importlib import metadata
+    versions = {}
+    for pkg in ('numpy', 'scipy', 'torch', 'cvxpy', 'clarabel', 'matplotlib'):
+        try:
+            versions[pkg] = metadata.version(pkg)
+        except metadata.PackageNotFoundError:
+            versions[pkg] = None
+    fp, n = code_fingerprint()
+    return dict(platform=platform.platform(), python=sys.version.split()[0], processor=platform.processor(),
+                logical_cpus=os.cpu_count(), packages=versions, P2_DEVICE=os.environ.get('P2_DEVICE'),
+                P2_THREADS=os.environ.get('P2_THREADS'), code_sha256=fp, code_files=n)
+
+
+def export(base, dest, points, seeds, machine, smoke=False, require_report=True):
+    """Zip the records of the finished points (no weights, trajectories or logs) plus a manifest.
+    A point counts as finished when its report job is done (require_report) and every test record exists."""
+    from .pipeline import point_name
+    base, dest = Path(base), Path(dest)
+    finished, missing, files = [], [], []
+    for param, value in points:
+        name = point_name(param, value)
+        root = base/name
+        done = root.exists() and point_finished(root, seeds, smoke)
+        if not done or (require_report and not (root/'_jobs'/'report.done').exists()):
+            missing.append(name)
+            continue
+        finished.append(name)
+        for pattern in EXPORT_PATTERNS:
+            files += [p for p in sorted(root.glob(pattern)) if p.is_file()]
+    if not finished:
+        raise ValueError(f'no finished point under {base} among {[point_name(*p) for p in points]}')
+    manifest = dict(machine=machine, created=time.strftime('%Y-%m-%d %H:%M:%S'), out_base=str(base),
+                    finished=finished, not_finished=missing, seeds=list(seeds), smoke=smoke,
+                    environment=environment(),
+                    files={str(p.relative_to(base)).replace('\\', '/'): _sha256(p) for p in files})
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    tmp = dest.with_suffix('.tmp')
+    with zipfile.ZipFile(tmp, 'w', zipfile.ZIP_DEFLATED) as z:
+        for rel, p in zip(manifest['files'], files):
+            z.write(p, rel)
+        z.writestr(f'manifest_{machine}.json', json.dumps(manifest, indent=1, ensure_ascii=False))
+    os.replace(tmp, dest)
+    return dict(dest=str(dest), sha256=_sha256(dest), finished=finished, not_finished=missing,
+                files=len(files))

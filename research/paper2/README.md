@@ -82,6 +82,7 @@ python run.py retrain-report --out-base D:\p2_retrain --main D:\p2_runs_v2
 - 所有点放在**同一个任务图**里调度：`--first` 指定的点整体优先（优先级 +1000）；它们的任务因依赖暂时不能开始时，空闲进程自动去跑其他点，进程不会闲着。中断后原样重跑同一条命令即可续跑。
 - 每个点内部的关键路径是 M1 → M2 → 选上层 → M3 → 选下层 → test，与主实验相同；增加 `--workers` 只能让更多点同时推进，不能缩短单个点的关键路径。
 - 训练阶段结束后删除该阶段的续跑快照 `state.pt`（含经验池），只保留 `final.pt` 和候选权重，以节省磁盘。
+- **多台电脑**：各点互相独立，可以用 `--points` 分给几台电脑，每台各用自己的 `--out-base`；同一个点的所有方法必须在同一台电脑上训练。每台电脑用 `python run.py retrain-export --out-base <目录> --points <本机的点> --dest <zip> --machine <标签>` 导出已完成的点（只含记录：scene/recipe/design、选档、test JSON、train.jsonl、dev summary，不含权重、轨迹和日志；附 `manifest_<标签>.json`，记录软件版本、P2_DEVICE / P2_THREADS、代码指纹和每个文件的 SHA-256）。各 zip 解压到同一个文件夹后，用它作 `--out-base` 运行 `retrain-report`；`--main` 可以指向主实验目录，或论文仓库里 `results_v2/raw` 这样只含 test 记录的导出。
 - `retrain-report` 只汇总已经完成的点，可以随时运行：`<out-base>\results\retrain_summary.md`（每个点是否完成 + 各参数的重训扫参表）、`retrain_sweep_<参数>.csv`（标称点 + 已完成的点）和 `results\points\<点>.csv`。每个点目录下也有自己的 `results\summary.md`。
 
 ## 速度：做了什么、为什么

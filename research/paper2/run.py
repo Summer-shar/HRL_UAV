@@ -13,6 +13,8 @@
   python run.py retrain --out-base D:\\p2_retrain [--points u2u_mhz=1.5,...] [--first u2u_mhz=1.5,u2u_mhz=2]
                                                            # retrain every learned method at sweep points
   python run.py retrain-report --out-base D:\\p2_retrain --main <nominal out>
+  python run.py retrain-export --out-base D:\\p2_retrain --points ... --dest D:\\p2_export_A.zip --machine A
+                                                           # zip the finished points' records (no weights)
   python run.py revise --from <old out> --out <new out>   # new root, fine-tuning recipe v2,
                                                            # unchanged stages carried over
 
@@ -35,7 +37,8 @@ def seeds_arg(text):
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('command', choices=('pipeline', 'bench', 'train', 'dev', 'select', 'test', 'sweep', 'report', 'plan',
-                                        'revise', 'burst', 'retrain', 'retrain-report'))
+                                        'revise', 'burst', 'retrain', 'retrain-report',
+                                        'retrain-export'))
     p.add_argument('--out', default=None)
     p.add_argument('--from', dest='source', default=None, help='revise: the finished output root to derive from')
     p.add_argument('--recipe', default='v2', help='revise: fine-tuning recipe of the new root')
@@ -56,14 +59,24 @@ def main(argv=None):
     p.add_argument('--first', default='', help='retrain: points scheduled before the others')
     p.add_argument('--main', default=None, help='retrain-report: the nominal output root')
     p.add_argument('--dry-run', action='store_true', help='retrain: list the jobs without running them')
+    p.add_argument('--dest', default=None, help='retrain-export: zip file to write')
+    p.add_argument('--machine', default='A', help='retrain-export: label of this computer')
     a = p.parse_args(argv)
-    if a.command in ('retrain', 'retrain-report'):
+    if a.command in ('retrain', 'retrain-report', 'retrain-export'):
         from p2 import pipeline, report, retrain
         if not a.out_base:
             p.error(f'{a.command} needs --out-base')
         base = Path(a.out_base)
         seeds = a.seeds or C.design(a.smoke)['seeds']
         points = retrain.parse_points(a.points) if a.points else retrain.all_points(a.smoke)
+        if a.command == 'retrain-export':
+            if not a.dest:
+                p.error('retrain-export needs --dest')
+            info = retrain.export(base, a.dest, points, seeds, a.machine, smoke=a.smoke)
+            print(f"exported {', '.join(info['finished'])} ({info['files']} files)")
+            print(f"not finished: {', '.join(info['not_finished']) or 'none'}")
+            print(f"{info['dest']}  SHA-256 {info['sha256'].upper()}")
+            return 0
         if a.command == 'retrain-report':
             if not a.main:
                 p.error('retrain-report needs --main (the nominal output root)')

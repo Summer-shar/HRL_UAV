@@ -95,6 +95,32 @@ def main():
         assert {x['retrained'] for x in t} == {True, False}
         assert (res/f'retrain_sweep_{p}.csv').exists(), p
     print((res/'retrain_summary.md').read_text()[:800])
+
+    # export (records only) from a split run, merged elsewhere, gives the same tables
+    import zipfile
+    for junk in ('seed_%d/train/M1/final.pt' % seed, 'seed_%d/test/CA/traj/21.npz' % seed, '_jobs/x.log'):
+        (u2u_root/junk).parent.mkdir(parents=True, exist_ok=True)
+        (u2u_root/junk).write_text('junk')
+    try:
+        retrain.export(base, tmp/'none.zip', points, [seed], 'A', smoke=True)     # no report.done yet
+    except ValueError as e:
+        print('refused as expected:', e)
+    else:
+        raise AssertionError('points without report.done must not be exported')
+    merged = tmp/'merged'
+    for machine, part in (('A', points[:1]), ('B', points[1:])):
+        info = retrain.export(base, tmp/f'export_{machine}.zip', part, [seed], machine, smoke=True,
+                              require_report=False)
+        names = zipfile.ZipFile(info['dest']).namelist()
+        assert f'manifest_{machine}.json' in names and not any(n.endswith(('.pt', '.npz', '.log')) for n in names)
+        man = json.loads(zipfile.ZipFile(info['dest']).read(f'manifest_{machine}.json'))
+        assert man['finished'] == [pipeline.point_name(*p) for p in part] and man['environment']['code_sha256']
+        zipfile.ZipFile(info['dest']).extractall(merged)
+    res2 = report.retrain_build(main_root, merged, [seed], points, smoke=True)
+    for p in d['sweeps']:
+        a = (res/f'retrain_sweep_{p}.csv').read_text().replace(str(base), '')
+        b = (res2/f'retrain_sweep_{p}.csv').read_text().replace(str(merged), '')
+        assert a == b, p
     print('OK; outputs in', tmp)
 
 
