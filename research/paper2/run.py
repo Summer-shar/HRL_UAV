@@ -10,6 +10,9 @@
   python run.py sweep --seed 4101 --method Proposed --param cpu_ghz --saturated   # rho >= 0.95 points
   python run.py burst --seed 4101 --method Proposed     # controlled overload burst (p2/burst.py)
   python run.py report [--seeds ...]
+  python run.py retrain --out-base D:\\p2_retrain [--points u2u_mhz=1.5,...] [--first u2u_mhz=1.5,u2u_mhz=2]
+                                                           # retrain every learned method at sweep points
+  python run.py retrain-report --out-base D:\\p2_retrain --main <nominal out>
   python run.py revise --from <old out> --out <new out>   # new root, fine-tuning recipe v2,
                                                            # unchanged stages carried over
 
@@ -32,7 +35,7 @@ def seeds_arg(text):
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('command', choices=('pipeline', 'bench', 'train', 'dev', 'select', 'test', 'sweep', 'report', 'plan',
-                                        'revise', 'burst'))
+                                        'revise', 'burst', 'retrain', 'retrain-report'))
     p.add_argument('--out', default=None)
     p.add_argument('--from', dest='source', default=None, help='revise: the finished output root to derive from')
     p.add_argument('--recipe', default='v2', help='revise: fine-tuning recipe of the new root')
@@ -48,7 +51,28 @@ def main(argv=None):
     p.add_argument('--param', choices=tuple(C.SWEEPS))
     p.add_argument('--workers', type=int, default=int(os.environ.get('P2_WORKERS', '4')))
     p.add_argument('--no-sweeps', action='store_true')
+    p.add_argument('--out-base', default=None, help='retrain: folder that holds one root per sweep point')
+    p.add_argument('--points', default=None, help='retrain: e.g. u2u_mhz=1.5,cpu_ghz=9 (default: all stable points)')
+    p.add_argument('--first', default='', help='retrain: points scheduled before the others')
+    p.add_argument('--main', default=None, help='retrain-report: the nominal output root')
+    p.add_argument('--dry-run', action='store_true', help='retrain: list the jobs without running them')
     a = p.parse_args(argv)
+    if a.command in ('retrain', 'retrain-report'):
+        from p2 import pipeline, report, retrain
+        if not a.out_base:
+            p.error(f'{a.command} needs --out-base')
+        base = Path(a.out_base)
+        seeds = a.seeds or C.design(a.smoke)['seeds']
+        points = retrain.parse_points(a.points) if a.points else retrain.all_points(a.smoke)
+        if a.command == 'retrain-report':
+            if not a.main:
+                p.error('retrain-report needs --main (the nominal output root)')
+            print(report.retrain_build(Path(a.main), base, seeds, points, smoke=a.smoke))
+            return 0
+        for param, value in points:
+            retrain.prepare_point(base, param, value, smoke=a.smoke)
+        jobs = pipeline.retrain_plan(base, points, seeds, smoke=a.smoke, first=retrain.parse_points(a.first))
+        return pipeline.run(jobs, base, workers=a.workers, dry=a.dry_run)
     if a.command == 'revise':
         from p2 import revise
         if not a.source or not a.out:
@@ -57,11 +81,14 @@ def main(argv=None):
         revise.prepare(Path(a.source), Path(a.out), seeds, recipe=a.recipe, smoke=a.smoke)
         return 0
     root = C.out_root(a.out)
+    C.set_active_root(root)
     seeds = a.seeds or C.design(a.smoke)['seeds']
 
     if a.command in ('pipeline', 'plan'):
         from p2 import pipeline
-        jobs = pipeline.plan(seeds, smoke=a.smoke, include_sweeps=not a.no_sweeps)
+        point = C.scene_override(root) is not None
+        jobs = pipeline.plan(seeds, smoke=a.smoke, include_sweeps=not a.no_sweeps and not point,
+                             include_burst=not point)
         C.write_json(root/'design.json', dict(design=C.design(a.smoke), seeds=list(seeds), smoke=a.smoke,
                                               methods=list(C.METHODS), method_spec=C.METHOD_SPEC,
                                               upper_initial_std=C.UPPER_INITIAL_STD, alpha_m1=C.ALPHA_M1,
@@ -99,7 +126,8 @@ def main(argv=None):
     elif a.command == 'report':
         from p2 import report, plots
         print('tables:', report.build(root, seeds, smoke=a.smoke))
-        print('figures:', plots.build(root, seeds, smoke=a.smoke))
+        if C.scene_override(root) is None:          # sweep-point roots: tables only
+            print('figures:', plots.build(root, seeds, smoke=a.smoke))
     return 0
 
 

@@ -45,6 +45,7 @@ python run.py pipeline --workers 6 --out D:\p2_runs            # 正式实验
 **评价**：
 - **seed 与场景**：3 个 seed（4101–4103）；最终 test 用 20 个新场景（test split 21–40，旧的 1–20 已经用过）。
 - **扫参**：只取稳定工作点，即平均计算需求 / 三机 CPU 总容量 < 0.95（标称负载下平均需求 24.725 Gcycles/s，各场景相同）。CPU 频率 9–14 GHz，任务量 0.6–1.1 倍；每个点 8 个 test 场景 × 3 个 seed。只在标称参数下训练，扫参时直接评估。第一版设计里的 8 GHz（需求/容量 1.03，需求超过容量）和 1.2 倍任务量（0.99）属于饱和区，结果保留，单独列在 `summary.md` 的饱和区表和 `saturated_*.csv` 里，不进主扫参图。
+- **重训扫参**（`p2/retrain.py`，见下节）：每个非标称点把所有学习型方法从头重新训练，再在同样 8 个扫参场景上评估；与上一条“标称训练、直接评估”的结果分开存放、分开报表。
 - **突发业务实验**（`p2/burst.py`）：在 8 个扫参场景、标称参数下，令期望计算需求最大的区域在 300–400 s 内全部终端处于繁忙强度（3 倍到达率），其余时间不变；任务到达与策略无关，各方法配对比较。记录按任务到达时刻分箱（10 s）的加权时延与高、低优先级时延，报表输出 `burst_bins.csv`、`burst_windows.csv` 和 `summary.md` 末尾的前/中/后三段对比。
 - **检验与图**：主表报告 seed 均值 ± seed 间标准差；配对 Wilcoxon 以场景为单位（先对 seed 取平均）。轨迹图画 test 场景 21。
 
@@ -66,6 +67,23 @@ python run.py pipeline --out <新目录>
 
 `revise` 只读旧目录，把与微调无关的部分（M1、M2、三条 PPO 基线的训练；它们和 M1 候选的 dev 结果；TFOO / TOO / NC / CA 的 test 与扫参记录；上层与基线的选档）用硬链接（不支持时复制）带到新目录，并标记对应任务已完成。随后的 pipeline 只重跑 M3、Hover-SAC 微调、它们的 dev 候选与选档、Proposed 与 Hover-SAC 的 test / 扫参 / 饱和点，以及报表。`summary.md` 和 `stats.json` 记录所用配方；`stats.json` 另含每个 seed 的配对数值，`results/selection/` 存各 seed 的选档记录。
 
+## 重训扫参：每个参数点重新训练
+
+场景参数一变，策略就应在新场景下重新训练。`retrain` 为每个非标称点建一个独立输出目录 `<out-base>\<参数>=<取值>\`，其中 `scene.json` 记录该点的参数（`common.load_scene(root)` 据此缩放场景，v2.4.0 源码不动），`recipe.json` 固定为 v2 配方。seed、训练场景、初始权重、探索噪声流、训练阶段和选档规则都与主实验相同，唯一不同的是这一个场景参数。每个点在扫参场景 21–28 上 test（不在点目录里再做嵌套扫参或突发实验）；标称点直接取主实验在同样 8 个场景上的 test 结果。
+
+```powershell
+python tests\test_retrain.py                                        # 不需要 torch
+python run.py retrain --smoke --out-base D:\p2_retrain_smoke --points u2u_mhz=2 --workers 4
+python run.py retrain --out-base D:\p2_retrain --first u2u_mhz=1.5,u2u_mhz=2 --workers N
+python run.py retrain-report --out-base D:\p2_retrain --main D:\p2_runs_v2
+```
+
+- 默认重训全部 14 个稳定点（CPU 9/11/12/13/14 GHz，任务量 0.6/0.7/0.8/0.9/1.1，U2U 1.5/2/4.5/6 MHz），共 1736 个任务，可用 `--points` 只跑一部分。
+- 所有点放在**同一个任务图**里调度：`--first` 指定的点整体优先（优先级 +1000）；它们的任务因依赖暂时不能开始时，空闲进程自动去跑其他点，进程不会闲着。中断后原样重跑同一条命令即可续跑。
+- 每个点内部的关键路径是 M1 → M2 → 选上层 → M3 → 选下层 → test，与主实验相同；增加 `--workers` 只能让更多点同时推进，不能缩短单个点的关键路径。
+- 训练阶段结束后删除该阶段的续跑快照 `state.pt`（含经验池），只保留 `final.pt` 和候选权重，以节省磁盘。
+- `retrain-report` 只汇总已经完成的点，可以随时运行：`<out-base>\results\retrain_summary.md`（每个点是否完成 + 各参数的重训扫参表）、`retrain_sweep_<参数>.csv`（标称点 + 已完成的点）和 `results\points\<点>.csv`。每个点目录下也有自己的 `results\summary.md`。
+
 ## 速度：做了什么、为什么
 
 在本机 profile 了一个 900 s 回合，纯仿真约 11 s。
@@ -83,5 +101,6 @@ python run.py pipeline --out <新目录>
 - `p2/pipeline.py`：带依赖的多进程任务调度（可续跑）。
 - `p2/burst.py`：受控突发业务实验（只包装单次评估的场景实例，不改 v2.4.0 源码）。
 - `p2/revise.py`：从已完成的目录派生新微调配方的目录（`run.py revise`）。
+- `p2/retrain.py`：重训扫参的点目录（`run.py retrain` / `retrain-report`）。
 - `p2/perf.py`：逐位等价的仿真加速与训练专用 adapter。
 - `tests/`：等价性、种子一致性、评估与报表的测试。

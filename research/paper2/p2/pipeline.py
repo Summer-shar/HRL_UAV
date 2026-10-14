@@ -16,17 +16,22 @@ RUN = C.PAPER2/'run.py'
 
 
 class Job:
-    def __init__(self, jid, args, deps=(), priority=0):
+    def __init__(self, jid, args, deps=(), priority=0, out=None, marker=None):
         self.id, self.args, self.deps, self.priority = jid, list(args), list(deps), priority
+        self.out = out                  # output root of this job (None: the pipeline's --out)
+        self.marker = marker or jid     # name of its _jobs/<marker>.done inside that root
 
 
-def plan(seeds, smoke=False, methods=C.METHODS, include_sweeps=True):
+def plan(seeds, smoke=False, methods=C.METHODS, include_sweeps=True, include_burst=True,
+         prefix='', out=None, priority_offset=0):
+    """Job graph of one output root.  prefix/out/priority_offset let several roots
+    share one scheduler (retrained sweep points); markers stay root-local."""
     d = C.design(smoke)
     flag = ['--smoke'] if smoke else []
     jobs = []
 
     def add(jid, args, deps=(), priority=0):
-        jobs.append(Job(jid, args+flag, deps, priority))
+        jobs.append(Job(prefix+jid, args+flag, [prefix+x for x in deps], priority+priority_offset, out, jid))
         return jid
 
     for s in seeds:
@@ -52,7 +57,8 @@ def plan(seeds, smoke=False, methods=C.METHODS, include_sweeps=True):
                   devs, 70)
         for m in methods:
             add(f's{s}_test_{m}', ['test', S, f'--method={m}'], [sel], 20)
-            add(f's{s}_burst_{m}', ['burst', S, f'--method={m}'], [sel], 15)
+            if include_burst:
+                add(f's{s}_burst_{m}', ['burst', S, f'--method={m}'], [sel], 15)
             if include_sweeps:
                 for p in d['sweeps']:
                     add(f's{s}_sweep_{m}_{p}', ['sweep', S, f'--method={m}', f'--param={p}'], [sel], 10)
@@ -60,8 +66,23 @@ def plan(seeds, smoke=False, methods=C.METHODS, include_sweeps=True):
                     if values:
                         add(f's{s}_sat_{m}_{p}', ['sweep', S, f'--method={m}', f'--param={p}', '--saturated'],
                             [sel], 5)
-    finals = [j.id for j in jobs if any(k in j.id for k in ('_test_', '_sweep_', '_sat_', '_burst_'))]
-    jobs.append(Job('report', ['report']+flag+[f'--seeds={",".join(map(str, seeds))}'], finals, 0))
+    finals = [j.marker for j in jobs if any(k in j.marker for k in ('_test_', '_sweep_', '_sat_', '_burst_'))]
+    add('report', ['report', f'--seeds={",".join(map(str, seeds))}'], finals, 0)
+    return jobs
+
+
+def point_name(param, value):
+    return f'{param}={float(value):g}'
+
+
+def retrain_plan(base, points, seeds, smoke=False, first=()):
+    """All retrained sweep points in one job graph; points in `first` get priority."""
+    jobs = []
+    for param, value in points:
+        name = point_name(param, value)
+        boost = 1000 if (param, float(value)) in {(p, float(v)) for p, v in first} else 0
+        jobs += plan(seeds, smoke, include_sweeps=False, include_burst=False, prefix=name+'/',
+                     out=Path(base)/name, priority_offset=boost)
     return jobs
 
 
@@ -69,7 +90,12 @@ def run(jobs, out, workers=4, dry=False):
     out = Path(out)
     jd = out/'_jobs'
     jd.mkdir(parents=True, exist_ok=True)
-    done = {j.id for j in jobs if (jd/f'{j.id}.done').exists()}
+    root_of = {j.id: Path(j.out) if j.out is not None else out for j in jobs}
+    marker = {j.id: root_of[j.id]/'_jobs'/f'{j.marker}.done' for j in jobs}
+    log_of = {j.id: root_of[j.id]/'_jobs'/f'{j.marker}.log' for j in jobs}
+    for path in marker.values():
+        path.parent.mkdir(parents=True, exist_ok=True)
+    done = {j.id for j in jobs if marker[j.id].exists()}
     failed, running = set(), {}
     pending = [j for j in jobs if j.id not in done]
     if dry:
@@ -88,10 +114,11 @@ def run(jobs, out, workers=4, dry=False):
         while ready and len(running) < workers:
             j = ready.pop(0)
             pending.remove(j)
-            log = (jd/f'{j.id}.log').open('a', encoding='utf-8')
+            log = log_of[j.id].open('a', encoding='utf-8')
             log.write(f'\n=== start {time.strftime("%Y-%m-%d %H:%M:%S")} ===\n'); log.flush()
-            proc = subprocess.Popen([sys.executable, str(RUN)]+j.args+[f'--out={out}'], stdout=log,
-                                    stderr=subprocess.STDOUT, cwd=str(C.PAPER2), env=env)
+            job_env = dict(env, P2_OUT=str(root_of[j.id]))
+            proc = subprocess.Popen([sys.executable, str(RUN)]+j.args+[f'--out={root_of[j.id]}'], stdout=log,
+                                    stderr=subprocess.STDOUT, cwd=str(C.PAPER2), env=job_env)
             running[j.id] = (proc, log, time.time())
             print(f'START {j.id}', flush=True)
         time.sleep(2)
@@ -103,12 +130,12 @@ def run(jobs, out, workers=4, dry=False):
             del running[jid]
             minutes = (time.time()-t0)/60
             if code == 0:
-                (jd/f'{jid}.done').write_text(time.strftime('%Y-%m-%d %H:%M:%S')+'\n')
+                marker[jid].write_text(time.strftime('%Y-%m-%d %H:%M:%S')+'\n')
                 done.add(jid)
                 print(f'DONE  {jid} ({minutes:.1f} min) [{len(done)}/{len(jobs)}]', flush=True)
             else:
                 failed.add(jid)
-                print(f'FAIL  {jid} (exit {code}, {minutes:.1f} min) -> see {jd/(jid+".log")}', flush=True)
+                print(f'FAIL  {jid} (exit {code}, {minutes:.1f} min) -> see {log_of[jid]}', flush=True)
         if not running and pending and not any(all(dep in done for dep in j.deps) for j in pending):
             for j in pending:
                 print(f'SKIP {j.id} (dependency failed)', flush=True)

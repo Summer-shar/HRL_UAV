@@ -163,7 +163,10 @@ def train_sac_stage(name, seed, root, *, smoke=False, init_paths=None):
     episodes = budget[name]
     rd = C.run_dir(root, seed, name)
     (rd/'ckpt').mkdir(parents=True, exist_ok=True)
-    config, scene = C.load_config(), C.load_scene()
+    if (rd/'done.json').exists() and (rd/'final.pt').exists():
+        print(f'[{name} seed {seed}] already finished', flush=True)
+        return
+    config, scene = C.load_config(), C.load_scene(root)
     clk = C.clocks(scene, smoke)
     device = device_setup()
     learner = proposed_learner(seed, device, config)
@@ -245,6 +248,8 @@ def train_sac_stage(name, seed, root, *, smoke=False, init_paths=None):
     save_state(rd/'final.pt', learner=learner.state_dict(), stage=name, episode=episodes, seed=seed)
     C.write_json(rd/'done.json', dict(stage=name, seed=seed, episodes=episodes, sac_counts=learner.sac.counts,
                                       parameter_hashes=_hashes(learner)))
+    if C.prune_snapshots(root):
+        state_path.unlink(missing_ok=True)      # resume snapshot (with replay) no longer needed
 
 
 # ---------------------------------------------------------------------------
@@ -255,7 +260,10 @@ def train_ppo_stage(name, seed, root, *, smoke=False, init_paths=None):
     episodes = budget['PPO']
     rd = C.run_dir(root, seed, name)
     (rd/'ckpt').mkdir(parents=True, exist_ok=True)
-    config, scene = C.load_config(), C.load_scene()
+    if (rd/'done.json').exists() and (rd/'final.pt').exists():
+        print(f'[{name} seed {seed}] already finished', flush=True)
+        return
+    config, scene = C.load_config(), C.load_scene(root)
     clk = C.clocks(scene, smoke)
     device = device_setup()
     proposed = name == 'M2'
@@ -322,6 +330,8 @@ def train_ppo_stage(name, seed, root, *, smoke=False, init_paths=None):
     save_state(rd/'final.pt', learner=learner.state_dict(), stage=name, episode=episodes, seed=seed)
     C.write_json(rd/'done.json', dict(stage=name, seed=seed, episodes=episodes, ppo_counts=learner.ppo.counts,
                                       parameter_hashes=_hashes(learner)))
+    if C.prune_snapshots(root):
+        state_path.unlink(missing_ok=True)
 
 
 def _hashes(learner):

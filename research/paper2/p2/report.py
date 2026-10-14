@@ -148,6 +148,76 @@ def burst_table(root, seeds, methods, smoke=False):
     return dict(window=win, bins=bins, windows=windows)
 
 
+def retrain_table(main_root, base, seeds, param, d, methods=C.METHODS, values=None):
+    """Sweep table where every non-nominal point comes from its own retrained root.
+    The nominal point is the main root's test runs on the same sweep scenarios."""
+    from .pipeline import point_name
+    scen = set(d['sweep_scenarios'])
+    table = []
+    for value in (d['sweeps'][param] if values is None else values):
+        root = Path(main_root) if float(value) == C.NOMINAL[param] else Path(base)/point_name(param, value)
+        rows = load_rows(root, seeds, methods, 'test', scenarios=scen)
+        for m in methods:
+            line = dict(param=param, value=value, utilization=C.utilization(param, value), method=m,
+                        retrained=float(value) != C.NOMINAL[param], source=str(root))
+            for key, _ in METRICS:
+                seeds_ = per_seed(rows, m, key)
+                if seeds_:
+                    v = np.asarray(list(seeds_.values()))
+                    line[key] = float(v.mean())
+                    line[key+'_std_over_seeds'] = float(v.std(ddof=1)) if len(v) > 1 else 0.
+                    line['seeds'] = len(v)
+            table.append(line)
+    return table
+
+
+def retrain_build(main_root, base, seeds, points, smoke=False, methods=C.METHODS):
+    """Tables of the retrained sweep from the points finished so far (nominal = main root)."""
+    from .pipeline import point_name
+    d = C.design(smoke)
+    res = Path(base)/'results'
+    lines = ['# Retrained sweep', '',
+             'Every learned method retrained at each non-nominal value (same seeds, training scenarios, '
+             'initial weights and fine-tuning recipe as the main run); evaluated on the sweep scenarios '
+             f'{", ".join(map(str, d["sweep_scenarios"]))}. Nominal point: main run {main_root}.', '']
+    status = {}
+    for param, value in points:
+        root = Path(base)/point_name(param, value)
+        status[point_name(param, value)] = all(
+            (C.seed_dir(root, s)/'test'/m/f'{sc:02d}.json').exists()
+            for s in seeds for m in methods for sc in d['sweep_scenarios'])
+    lines += ['| point | finished |', '|---|---|'] + [f'| {k} | {"yes" if v else "no"} |' for k, v in status.items()]
+    for param in d['sweeps']:
+        values = [v for v in d['sweeps'][param]
+                  if float(v) == C.NOMINAL[param] or status.get(point_name(param, v))]
+        if len(values) < 2:
+            continue
+        complete = len(values) == len(d['sweeps'][param])
+        t = retrain_table(main_root, base, seeds, param, d, methods, values)
+        write_csv(res/f'retrain_sweep_{param}.csv', t)
+        lines += ['', f'## {param} (retrained{"" if complete else ", finished points only"}; '
+                  'cells: delay / compute+comm power / joint cost)', '',
+                  '| '+param+' | demand/capacity | '+' | '.join(LABELS.get(m, m) for m in methods)+' |',
+                  '|---:|---:|'+'---:|'*len(methods)]
+        for value in values:
+            cells = []
+            for m in methods:
+                r = next((x for x in t if x['value'] == value and x['method'] == m), {})
+                cells.append(f'{fmt(r.get("truncated_delay_s"))} s / {fmt(r.get("energy_w_compute_comm"))} W / '
+                             f'{fmt(r.get("cost_per_s"))}')
+            lines.append(f'| {value:g} | {C.utilization(param, value):.2f} | '+' | '.join(cells)+' |')
+    # partial results per finished point (useful while the rest is still training)
+    for name, ok in status.items():
+        if ok:
+            root = Path(base)/name
+            rows = load_rows(root, seeds, methods, 'test')
+            tbl = main_table(rows, [m for m in methods if any(r['method'] == m for r in rows)])
+            write_csv(res/'points'/f'{name}.csv', tbl)
+    res.mkdir(parents=True, exist_ok=True)
+    (res/'retrain_summary.md').write_text('\n'.join(lines)+'\n', encoding='utf-8')
+    return res
+
+
 def write_csv(path, rows):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -172,9 +242,11 @@ def build(root, seeds, smoke=False, methods=C.METHODS):
     table = main_table(rows, present)
     stats = {metric: paired(rows, present, metric) for metric in
              ('truncated_delay_s', 'energy_w_compute_comm', 'cost_per_s', 'high_truncated_delay_s')}
-    sweeps = {p: sweep_table(root, seeds, present, p, d) for p in d['sweeps']}
-    saturated = {p: [r for r in sweep_table(root, seeds, present, p, d, values=v) if r.get('truncated_delay_s') is not None]
-                 for p, v in d.get('saturated', {}).items() if v}
+    point = C.scene_override(root)
+    sweeps = {} if point else {p: sweep_table(root, seeds, present, p, d) for p in d['sweeps']}
+    saturated = {} if point else {
+        p: [r for r in sweep_table(root, seeds, present, p, d, values=v) if r.get('truncated_delay_s') is not None]
+        for p, v in d.get('saturated', {}).items() if v}
     write_csv(res/'main_table.csv', table)
     for p, t in sweeps.items():
         write_csv(res/f'sweep_{p}.csv', t)
@@ -182,7 +254,7 @@ def build(root, seeds, smoke=False, methods=C.METHODS):
         if t:
             write_csv(res/f'saturated_{p}.csv', t)
     recipe = C.finetune(root)
-    burst = burst_table(root, seeds, present, smoke)
+    burst = dict(window=None, bins=[], windows=[]) if point else burst_table(root, seeds, present, smoke)
     if burst['bins']:
         write_csv(res/'burst_bins.csv', burst['bins'])
         write_csv(res/'burst_windows.csv', burst['windows'])
@@ -194,7 +266,9 @@ def build(root, seeds, smoke=False, methods=C.METHODS):
                                                  paired=stats, main_table=table, sweeps=sweeps,
                                                  saturated=saturated, burst_windows=burst['windows'])))
     lines = ['# Paper-2 results', '',
-             f'Seeds: {", ".join(map(str, seeds))}; test scenarios {d["test"][0]}–{d["test"][-1]} (split "test"); '
+             (f'Retrained sweep point: {point["param"]} = {point["value"]:g} (every learned method trained at this value). '
+              if point else '') +
+             f'Seeds: {", ".join(map(str, seeds))}; test scenarios {", ".join(map(str, C.test_scenarios(root, d)))} (split "test"); '
              'deterministic execution; values = mean over seeds of scenario means (± std over seeds).',
              f'Fine-tuning recipe (M3, HoverSAC): {recipe["recipe"]} (alpha {recipe["alpha"]:g}, actor lr '
              f'{recipe["actor_lr"]:g}, {recipe["actor_frozen_episodes"]} critic-only episodes).', '',

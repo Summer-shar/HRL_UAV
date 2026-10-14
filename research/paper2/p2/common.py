@@ -154,8 +154,49 @@ def load_config():
     return config
 
 
-def load_scene():
+# A retrained sweep point is an output root with <out>/scene.json =
+# {"param": ..., "value": ...}: every stage of that root trains and evaluates
+# on the scaled scene.  run.py sets the active root for each command.
+ACTIVE_ROOT = None
+
+
+def set_active_root(root):
+    global ACTIVE_ROOT
+    ACTIVE_ROOT = Path(root) if root is not None else None
+
+
+def scene_override(root=None):
+    root = root if root is not None else ACTIVE_ROOT
+    if root is None:
+        return None
+    path = Path(root)/'scene.json'
+    return read_json(path) if path.exists() else None
+
+
+def load_base_scene():
     return read_json(SCENE_PATH)
+
+
+def load_scene(root=None):
+    """Nominal scene, or the scaled scene of a retrained sweep point root."""
+    base = load_base_scene()
+    override = scene_override(root)
+    if not override:
+        return base
+    if override['param'] not in SWEEPS:
+        raise ValueError(f'unknown sweep parameter {override["param"]!r}')
+    return scaled_scene(base, **{override['param']: float(override['value'])})
+
+
+def test_scenarios(root, d):
+    """Retrained sweep points are evaluated on the sweep scenarios (the scenarios
+    of the non-retrained sweep), the main root on the full test split."""
+    return tuple(d['sweep_scenarios']) if scene_override(root) else tuple(d['test'])
+
+
+def prune_snapshots(root):
+    override = scene_override(root)
+    return bool(override and override.get('prune_snapshots'))
 
 
 def scaled_scene(scene, cpu_ghz=None, load=None, u2u_mhz=None):

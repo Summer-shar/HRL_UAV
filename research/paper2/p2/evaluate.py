@@ -128,7 +128,7 @@ def evaluate_one(make_policy, scene, split, scenario, out_json, *, smoke=False, 
                uav_path_m=float(np.linalg.norm(np.diff(np.asarray(uavs), axis=0), axis=-1).sum(axis=0).mean()),
                cpu_ghz=scene['base_scene']['resources']['cpu_hz'][0]/1e9,
                u2u_mhz=scene['base_scene']['resources']['u2u_bandwidth_hz']/1e6,
-               load=scene['base_scene']['region_multipliers'][0]/C.load_scene()['base_scene']['region_multipliers'][0])
+               load=scene['base_scene']['region_multipliers'][0]/C.load_base_scene()['base_scene']['region_multipliers'][0])
     if burst is not None:
         from . import burst as B
         row.update(burst=burst_info, burst_bins=B.record(env, burst['bin_s'], env.time_s,
@@ -154,7 +154,7 @@ def dev_job(root, seed, label, candidate, smoke=False):
     selected = C.read_json(sd/'selected.json') if (sd/'selected.json').exists() else {}
     method, learner_path, upper_path = candidate_paths(root, seed, label, candidate, selected)
     make = factory(method, seed, learner_path, upper_path)
-    scene = C.load_scene()
+    scene = C.load_scene(root)
     folder = sd/'dev'/label/str(candidate)
     rows = []
     for scenario in d['dev']:
@@ -192,9 +192,9 @@ def test_job(root, seed, method, smoke=False):
     d = C.design(smoke)
     method_, learner_path, upper_path = method_paths(root, seed, method)
     make = factory(method_, seed, learner_path, upper_path)
-    scene = C.load_scene()
+    scene = C.load_scene(root)
     folder = C.seed_dir(root, seed)/'test'/method
-    for scenario in d['test']:
+    for scenario in C.test_scenarios(root, d):
         evaluate_one(make, scene, 'test', scenario, folder/f'{scenario:02d}.json', smoke=smoke,
                      traj_npz=folder/'traj'/f'{scenario:02d}.npz',
                      identity=dict(seed=seed, method=method, learner=str(learner_path) if learner_path else None,
@@ -204,10 +204,12 @@ def test_job(root, seed, method, smoke=False):
 def burst_job(root, seed, method, smoke=False):
     """Controlled burst (p2.burst) on the sweep scenarios, nominal parameters."""
     from . import burst as B
+    if C.scene_override(root):
+        raise ValueError('burst runs belong to the nominal root, not to a retrained sweep point')
     d = C.design(smoke)
     method_, learner_path, upper_path = method_paths(root, seed, method)
     make = factory(method_, seed, learner_path, upper_path)
-    scene = C.load_scene()
+    scene = C.load_scene(root)
     folder = C.seed_dir(root, seed)/'burst'/method
     for scenario in d['sweep_scenarios']:
         evaluate_one(make, scene, 'test', scenario, folder/f'{scenario:02d}.json', smoke=smoke,
@@ -216,13 +218,15 @@ def burst_job(root, seed, method, smoke=False):
 
 def sweep_job(root, seed, method, param, smoke=False, saturated=False):
     """Stable sweep points, or with saturated=True the points with rho >= 0.95."""
+    if C.scene_override(root):
+        raise ValueError('a retrained sweep point root has no nested sweeps')
     d = C.design(smoke)
     values = d['saturated' if saturated else 'sweeps'][param]
     if not values:
         return
     method_, learner_path, upper_path = method_paths(root, seed, method)
     make = factory(method_, seed, learner_path, upper_path)
-    base = C.load_scene()
+    base = C.load_scene(root)
     for value in values:
         if float(value) == C.NOMINAL[param]:
             continue    # nominal point = the test runs on the same scenarios
