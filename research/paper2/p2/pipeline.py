@@ -75,21 +75,38 @@ def point_name(param, value):
     return f'{param}={float(value):g}'
 
 
-def retrain_plan(base, points, seeds, smoke=False, first=()):
+def retrain_plan(base, points, seeds, smoke=False, first=(), main=None, gate=True):
     """All retrained sweep points in one job graph.  Priorities (higher first):
     points in `first`, then the pilot point, then the parameters in
     C.RETRAIN_ORDER, so that on one computer whole curves finish one after the
-    other while idle workers still pick up later points."""
+    other while idle workers still pick up later points.
+
+    Pilot gate (PROTOCOL.md section 5): when the pilot point is planned together
+    with other points, a job 'pilot_gate' runs `run.py pilot-check` as soon as the
+    pilot's M1 runs are finished, and every job of the other points depends on
+    it; if the check fails, only the pilot point goes on.  `main` is the nominal
+    output root the check compares with."""
     jobs = []
     first = {(p, float(v)) for p, v in first}
     order = {p: len(C.RETRAIN_ORDER)-i for i, p in enumerate(C.RETRAIN_ORDER)}
     pilot = (C.PILOT_POINT[0], float(C.PILOT_POINT[1]))
+    gated = gate and any((p, float(v)) == pilot for p, v in points) and len(points) > 1
+    if gated and main is None:
+        raise ValueError('the pilot gate needs the nominal output root (--main), or switch it off (--no-pilot-gate)')
     for param, value in points:
         name = point_name(param, value)
         key = (param, float(value))
         boost = (10000 if key in first else 0) + (5000 if key == pilot else 0) + 1000*order.get(param, 0)
-        jobs += plan(seeds, smoke, include_sweeps=False, include_burst=False, prefix=name+'/',
-                     out=Path(base)/name, priority_offset=boost)
+        point_jobs = plan(seeds, smoke, include_sweeps=False, include_burst=False, prefix=name+'/',
+                          out=Path(base)/name, priority_offset=boost)
+        if gated and key != pilot:
+            for j in point_jobs:
+                j.deps.append('pilot_gate')
+        jobs += point_jobs
+    if gated:
+        pilot_m1 = [f'{point_name(*pilot)}/s{s}_train_M1' for s in seeds]
+        args = ['pilot-check', f'--out-base={base}', f'--main={main}', f'--seeds={",".join(map(str, seeds))}']
+        jobs.append(Job('pilot_gate', args + (['--smoke'] if smoke else []), pilot_m1, 20000, Path(base), 'pilot_gate'))
     return jobs
 
 

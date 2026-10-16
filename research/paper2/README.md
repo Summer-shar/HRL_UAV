@@ -80,14 +80,14 @@ python tests\test_retrain.py                      # 扫参管道（不需要 tor
 python run.py verify --main D:\p2_runs_v2 --work D:\p2_verify      # 新代码复现主实验记录？
 python run.py retrain --out-base D:\p2_smoke_v3 --points users=7 --smoke --seeds 4101 --workers 4
 python run.py timing --main D:\p2_runs_v2 --workers 8              # 预计耗时
-python run.py retrain --out-base D:\p2_sweeps_v3 --points cpu_ghz=9 --workers 8   # 试点
-python run.py pilot-check --out-base D:\p2_sweeps_v3 --main D:\p2_runs_v2         # M1 完成后
-python run.py retrain --out-base D:\p2_sweeps_v3 --workers 8                       # 全部点，可续跑
+python run.py retrain --out-base D:\p2_sweeps_v3 --main D:\p2_runs_v2 --workers 8   # 全部点，可续跑
+python run.py pilot-check --out-base D:\p2_sweeps_v3 --main D:\p2_runs_v2         # 试点检查（任务图里会自动做）
 python run.py retrain-report --out-base D:\p2_sweeps_v3 --main D:\p2_runs_v2      # 随时汇总
 ```
 
 - `retrain-report` 输出 `results\retrain_summary.md`（各点完成情况、扫参表、配对检验、训练曲线检查）、`retrain_sweep_<参数>.csv`、`retrain_paired.csv`、`retrain_convergence.csv`、`retrain_stats.json`。
 - 优先级：试点 > CPU > 负载系数 > 用户数，整条曲线依次完成；空闲进程会提前开始后面的点。
+- 试点门控：试点（CPU 9 GHz）三个种子的 M1 完成后，任务 `pilot_gate` 自动运行 `pilot-check`；不通过时其他点全部挂起，只有试点继续（见 PROTOCOL.md 第 5 节）。
 
 ## 重训扫参（设计 v2，已停用）：每个参数点重新训练
 

@@ -62,9 +62,22 @@ def main():
     assert abs(design['demand_over_capacity'] - C.utilization('cpu_ghz', 10.)) < 1e-12 and design['scene_sha256']
 
     # one job graph for all points; pilot first, then cpu > load > users; markers root-local
-    jobs = pipeline.retrain_plan(base, points, d['seeds'], smoke=True)
+    try:
+        pipeline.retrain_plan(base, points, d['seeds'], smoke=True)
+    except ValueError as e:
+        print('refused as expected:', e)
+    else:
+        raise AssertionError('a gated plan needs the nominal root')
+    jobs = pipeline.retrain_plan(base, points, d['seeds'], smoke=True, main=main_root)
+    gate = next(j for j in jobs if j.id == 'pilot_gate')
+    assert sorted(gate.deps) == [f'cpu_ghz=9/s{s}_train_M1' for s in d['seeds']] and gate.args[0] == 'pilot-check'
+    assert all('pilot_gate' in j.deps for j in jobs if j.id.startswith(('load=', 'users=')))
+    assert not any('pilot_gate' in j.deps for j in jobs if j.id.startswith('cpu_ghz=9/'))
+    ungated = pipeline.retrain_plan(base, points, d['seeds'], smoke=True, gate=False)
+    assert not any(j.id == 'pilot_gate' or 'pilot_gate' in j.deps for j in ungated)
+    jobs = [j for j in jobs if j.id != 'pilot_gate']
     ids = [j.id for j in jobs]
-    assert len(ids) == len(set(ids)) and all(dep in ids for j in jobs for dep in j.deps)
+    assert len(ids) == len(set(ids)) and all(dep in ids or dep == 'pilot_gate' for j in jobs for dep in j.deps)
     assert not any('_sweep_' in i or '_burst_' in i or '_sat_' in i for i in ids)
     for j in jobs:
         assert j.id == f'{Path(j.out).name}/{j.marker}', (j.id, j.out, j.marker)

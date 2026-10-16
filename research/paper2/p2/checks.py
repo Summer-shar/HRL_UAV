@@ -63,7 +63,7 @@ def timing(main_root, points, seeds, workers, smoke=False):
     return '\n'.join(lines)
 
 
-def pilot_check(main_root, base, seeds, window=20, ratio=3.0):
+def pilot_check(main_root, base, seeds, window=20, ratio=3.0, smoke=False):
     """PROTOCOL.md section 5: for every seed, the pilot point's M1 must (a) improve
     (last `window` episodes better than the first `window`) and (b) end within
     `ratio` x the nominal M1's last-window delay.  Returns (passed, text) with
@@ -72,7 +72,8 @@ def pilot_check(main_root, base, seeds, window=20, ratio=3.0):
     param, value = C.PILOT_POINT
     name = point_name(param, C.point_value(param, value))
     root = Path(base)/name
-    budget = C.design()['budget']['M1']
+    budget = C.design(smoke)['budget']['M1']
+    window = min(window, max(budget//2, 1))
     lines = [f'Pilot point {name}: M1 trainability check (last {window} episodes; threshold {ratio:g} x nominal)']
     status = []
     for seed in seeds:
@@ -82,7 +83,7 @@ def pilot_check(main_root, base, seeds, window=20, ratio=3.0):
             lines.append(f'  seed {seed}: M1 has {len(rows)}/{budget} episodes - not finished yet')
             status.append('pending')
             continue
-        if len(nominal) < window:
+        if len(nominal) < window or (not smoke and len(nominal) < budget):
             raise ValueError(f'nominal M1 log of seed {seed} not found under {main_root}')
         first = float(np.mean([r['truncated_delay_s'] for r in rows[:window]]))
         last = float(np.mean([r['truncated_delay_s'] for r in rows[-window:]]))

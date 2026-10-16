@@ -14,9 +14,9 @@
   cpu_ghz 9/11/12/14, load 0.6/0.8/0.9/1.1, users 7/10/16/19 (terminals per region)
   python run.py verify --main D:\\p2_runs_v2 --work D:\\p2_verify   # this code reproduces the main run?
   python run.py timing --main D:\\p2_runs_v2 [--workers 8]           # expected duration on this computer
-  python run.py retrain --out-base D:\\p2_sweeps_v3 --points cpu_ghz=9   # pilot point
-  python run.py pilot-check --out-base D:\\p2_sweeps_v3 --main D:\\p2_runs_v2
-  python run.py retrain --out-base D:\\p2_sweeps_v3                 # all points (resumable)
+  python run.py retrain --out-base D:\\p2_sweeps_v3 --main D:\\p2_runs_v2  # all points (resumable); the
+                          # other points wait for the pilot (cpu_ghz=9) to pass pilot-check after its M1
+  python run.py pilot-check --out-base D:\\p2_sweeps_v3 --main D:\\p2_runs_v2  # the same check by hand
   python run.py retrain-report --out-base D:\\p2_sweeps_v3 --main D:\\p2_runs_v2
   python run.py retrain-export --out-base D:\\p2_sweeps_v3 --dest D:\\p2_export_A.zip --machine A
                                                            # zip the finished points' records (no weights)
@@ -67,6 +67,8 @@ def main(argv=None):
     p.add_argument('--dest', default=None, help='retrain-export: zip file to write')
     p.add_argument('--machine', default='A', help='retrain-export: label of this computer')
     p.add_argument('--work', default=None, help='verify: scratch folder (not inside --main)')
+    p.add_argument('--no-pilot-gate', action='store_true',
+                   help='retrain: do not hold the other points until the pilot passes pilot-check')
     a = p.parse_args(argv)
     if a.command == 'verify':
         if not a.main or not a.work:
@@ -87,7 +89,8 @@ def main(argv=None):
         from p2 import checks
         if not a.main or not a.out_base:
             p.error('pilot-check needs --main and --out-base')
-        passed, text = checks.pilot_check(Path(a.main), Path(a.out_base), a.seeds or C.design(a.smoke)['seeds'])
+        passed, text = checks.pilot_check(Path(a.main), Path(a.out_base), a.seeds or C.design(a.smoke)['seeds'],
+                                          smoke=a.smoke)
         print(text)
         return 0 if passed else 1
     if a.command in ('retrain', 'retrain-report', 'retrain-export'):
@@ -112,7 +115,11 @@ def main(argv=None):
             return 0
         for param, value in points:
             retrain.prepare_point(base, param, value, smoke=a.smoke)
-        jobs = pipeline.retrain_plan(base, points, seeds, smoke=a.smoke, first=retrain.parse_points(a.first))
+        try:
+            jobs = pipeline.retrain_plan(base, points, seeds, smoke=a.smoke, first=retrain.parse_points(a.first),
+                                         main=a.main, gate=not a.no_pilot_gate)
+        except ValueError as e:
+            p.error(str(e))
         return pipeline.run(jobs, base, workers=a.workers, dry=a.dry_run)
     if a.command == 'revise':
         from p2 import revise
