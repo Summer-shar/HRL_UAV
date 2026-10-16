@@ -29,7 +29,7 @@ class HotspotIndustrialEnv(IndustrialDeploymentEnv):
         self.physics = IndustrialPhysics(self.config, self._scene.terminals)
         self.parents, self.fragments = {}, {}
         self._reset_active_state()
-        self.upload = [deque() for _ in range(39)]
+        self.upload = [deque() for _ in range(len(self._scene.terminals))]
         self.compute = [[deque() for _ in range(3)] for _ in range(2)]
         self.transfer = [[[deque() for _ in range(3)] for _ in range(3)] for _ in range(2)]
         self.ready, self._recent = deque(), deque()

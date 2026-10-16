@@ -1,6 +1,8 @@
 # 第二个研究点：最终实验流水线（paper2）
 
-依据代码：`research/speedup/src`（v2.4.0，源 commit `25d59ff`）。物理场景、奖励、观测、PPO / SAC / 混合动作分布的实现**全部原样复用，没有修改源码**。本目录只重新组织训练阶段、评估、扫参和画图；以前的结果和存档一律不用。
+依据代码：`research/speedup/src`。主实验（`D:\p2_runs_v2`）用 v2.4.0（源 commit `25d59ff`）跑出；2026-10-17 起为 v2.5.0 = v2.4.0 + 每区终端数参数化（每区 13 个时与 v2.4.0 逐位一致，由 `tests/test_perf_equivalence.py` 与 `run.py verify` 检查）。奖励、观测（上层按终端行数自适应）、PPO / SAC / 混合动作分布不变。本目录组织训练阶段、评估、扫参和画图。
+
+**扫参设计 v3（逐点从零重训，CPU / 负载系数 / 用户数）见 [PROTOCOL.md](PROTOCOL.md)，运行步骤见下文“设计 v3”一节。**
 
 ## 一条命令跑完（Windows PowerShell）
 
@@ -67,7 +69,27 @@ python run.py pipeline --out <新目录>
 
 `revise` 只读旧目录，把与微调无关的部分（M1、M2、三条 PPO 基线的训练；它们和 M1 候选的 dev 结果；TFOO / TOO / NC / CA 的 test 与扫参记录；上层与基线的选档）用硬链接（不支持时复制）带到新目录，并标记对应任务已完成。随后的 pipeline 只重跑 M3、Hover-SAC 微调、它们的 dev 候选与选档、Proposed 与 Hover-SAC 的 test / 扫参 / 饱和点，以及报表。`summary.md` 和 `stats.json` 记录所用配方；`stats.json` 另含每个 seed 的配对数值，`results/selection/` 存各 seed 的选档记录。
 
-## 重训扫参：每个参数点重新训练
+## 设计 v3：逐点从零重训（当前方案，单机）
+
+方案、判据和论文呈现见 [PROTOCOL.md](PROTOCOL.md)。CPU 9/11/12/14 GHz、负载系数 0.6/0.8/0.9/1.1、每区终端数 7/10/16/19（保持总负载不变），共 12 个点；每个点所有学习算法按主实验流程从零训练，在 20 个测试场景上评估；标称点即主实验。
+
+```powershell
+python tests\test_perf_equivalence.py 150         # 加速补丁逐位等价（含用户数场景与 Lite 观测）
+python tests\test_users.py                        # 用户数场景
+python tests\test_retrain.py                      # 扫参管道（不需要 torch）
+python run.py verify --main D:\p2_runs_v2 --work D:\p2_verify      # 新代码复现主实验记录？
+python run.py retrain --out-base D:\p2_smoke_v3 --points users=7 --smoke --seeds 4101 --workers 4
+python run.py timing --main D:\p2_runs_v2 --workers 8              # 预计耗时
+python run.py retrain --out-base D:\p2_sweeps_v3 --points cpu_ghz=9 --workers 8   # 试点
+python run.py pilot-check --out-base D:\p2_sweeps_v3 --main D:\p2_runs_v2         # M1 完成后
+python run.py retrain --out-base D:\p2_sweeps_v3 --workers 8                       # 全部点，可续跑
+python run.py retrain-report --out-base D:\p2_sweeps_v3 --main D:\p2_runs_v2      # 随时汇总
+```
+
+- `retrain-report` 输出 `results\retrain_summary.md`（各点完成情况、扫参表、配对检验、训练曲线检查）、`retrain_sweep_<参数>.csv`、`retrain_paired.csv`、`retrain_convergence.csv`、`retrain_stats.json`。
+- 优先级：试点 > CPU > 负载系数 > 用户数，整条曲线依次完成；空闲进程会提前开始后面的点。
+
+## 重训扫参（设计 v2，已停用）：每个参数点重新训练
 
 场景参数一变，策略就应在新场景下重新训练。`retrain` 为每个非标称点建一个独立输出目录 `<out-base>\<参数>=<取值>\`，其中 `scene.json` 记录该点的参数（`common.load_scene(root)` 据此缩放场景，v2.4.0 源码不动），`recipe.json` 固定为 v2 配方。seed、训练场景、初始权重、探索噪声流、训练阶段和选档规则都与主实验相同，唯一不同的是这一个场景参数。每个点在扫参场景 21–28 上 test（不在点目录里再做嵌套扫参或突发实验）；标称点直接取主实验在同样 8 个场景上的 test 结果。
 
@@ -86,6 +108,8 @@ python run.py retrain-report --out-base D:\p2_retrain --main D:\p2_runs_v2
 - `retrain-report` 只汇总已经完成的点，可以随时运行：`<out-base>\results\retrain_summary.md`（每个点是否完成 + 各参数的重训扫参表）、`retrain_sweep_<参数>.csv`（标称点 + 已完成的点）和 `results\points\<点>.csv`。每个点目录下也有自己的 `results\summary.md`。
 
 ## 速度：做了什么、为什么
+
+v3 补充（2026-10-17）：积压大时，每 0.1 s 和每 0.5 s 都要把系统内全部任务过一遍（U2U 1.5 MHz 的悬停均分回合结束时有 6324 个任务，900 s 仿真 87 s，八成在 `PhysicsAdapter.report`）。`p2/perf.py` 新增四处逐位等价的改写：报告里未变化任务的记录对象复用（按属性对象的同一性判断）、`view` 用纯 Python 浮点按原顺序累加、驻留代价用存活计数精确求和、CPU 频率分配的排队量求和在前缀已超过可用频率时提前结束。重积压的训练回合约快 2.2 倍，标称附近约 1.1–1.5 倍；复制的方法带源代码 SHA-256 保护。
 
 在本机 profile 了一个 900 s 回合，纯仿真约 11 s。
 - **仿真热点**：`_publish` 约占 33%，U2U 资源分配约占 24%。`p2/perf.py` 把它们改成逐位等价的写法（同样顺序的浮点加法，加上纯函数缓存），由 `tests/test_perf_equivalence.py` 逐个报告、逐步核对。实测标称场景快 1.2–1.6 倍。

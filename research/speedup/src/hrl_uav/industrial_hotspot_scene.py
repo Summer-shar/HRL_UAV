@@ -58,8 +58,11 @@ def validate_hotspot_config(wrapper):
         raise ValueError("UAV starts must remain fixed")
     if geometry.get("uav_initial_positions_m") != base["uav_initial_positions_m"]:
         raise ValueError("Geometry and physical UAV starts disagree")
-    if (geometry.get("cluster_count_per_region"), geometry.get("background_count_per_region")) != (9, 4):
-        raise ValueError("Each region requires nine cluster and four background terminals")
+    per_region = base["num_users"] // 3       # K (13 in every v2.4.0 scene)
+    n_cluster, n_background = geometry.get("cluster_count_per_region"), geometry.get("background_count_per_region")
+    if (any(isinstance(v, bool) or not isinstance(v, int) for v in (n_cluster, n_background))
+            or n_cluster < 1 or n_background < 0 or n_cluster + n_background != per_region):
+        raise ValueError("Each region requires cluster + background terminals = num_users / 3")
     radius = geometry.get("cluster_radius_m")
     if isinstance(radius, bool) or not isinstance(radius, (int, float)) or not math.isfinite(radius) or radius <= 0:
         raise ValueError("Invalid cluster radius")
@@ -70,7 +73,7 @@ def validate_hotspot_config(wrapper):
         raise ValueError("The entire cluster disk must remain in its region")
     if geometry.get("coordinate_clipping") is not False or geometry.get("cluster_sampling") != "uniform_disk_area" or geometry.get("background_sampling") != "uniform_region_reject_inside_cluster_disk":
         raise ValueError("Unsupported spatial sampling protocol")
-    if business.get("mode") != "whole_profile_permutation" or business.get("physical_source_rule") != "user_id // 13":
+    if business.get("mode") != "whole_profile_permutation" or business.get("physical_source_rule") != f"user_id // {per_region}":
         raise ValueError("Expected complete profiles with fixed physical source associations")
     if business.get("physical_uav_ids_permuted") is not False or business.get("forced_rotation") is not False or business.get("adjacent_repetition_allowed") is not True:
         raise ValueError("Load roles must be iid, with repetition and fixed physical UAV IDs")
@@ -88,20 +91,20 @@ def validate_hotspot_config(wrapper):
         if counts != base["device_counts"][profile_id]:
             raise ValueError("Profile counts must preserve the registered template")
         quotas = np.asarray(profile.get("cluster_counts_by_type"))
-        if quotas.shape != (3,) or not np.issubdtype(quotas.dtype, np.integer) or np.any(quotas < 0) or np.any(quotas > counts) or quotas.sum() != 9:
+        if quotas.shape != (3,) or not np.issubdtype(quotas.dtype, np.integer) or np.any(quotas < 0) or np.any(quotas > counts) or quotas.sum() != n_cluster:
             raise ValueError("Invalid cluster type quotas")
         if profile.get("business_multiplier") != base["region_multipliers"][profile_id] or profile.get("activity_parameters") != base["activity"]:
             raise ValueError("A whole template must preserve its load and activity parameters")
         slots = profile.get("slots")
         expected_types = [kind for kind, count in zip(TYPES, counts) for _ in range(count)]
-        if not isinstance(slots, list) or len(slots) != 13:
-            raise ValueError("Each business profile requires thirteen slots")
+        if not isinstance(slots, list) or len(slots) != per_region:
+            raise ValueError("Each business profile requires num_users / 3 slots")
         for row, kind in zip(slots, expected_types):
             if set(row) != {"task_type", "parameters"} or row["task_type"] != kind or row["parameters"] != base["task_types"][kind]:
                 raise ValueError("Slot type, priority, bit and cycles definitions must move together")
     totals = np.asarray([p["device_counts_by_type"] for p in catalog]).sum(axis=0).tolist()
-    if totals != [19, 10, 10] or business.get("global_device_counts_by_type") != totals:
-        raise ValueError("The global device type totals must remain 19/10/10")
+    if (per_region == 13 and totals != [19, 10, 10]) or business.get("global_device_counts_by_type") != totals:
+        raise ValueError("The global device type totals must match the catalog (19/10/10 for 13 per region)")
     _json(c)
     return c
 
@@ -144,7 +147,7 @@ def generate_realization(wrapper, layout_seed, load_seed, profile_permutation=No
                         break
                 else:
                     raise RuntimeError("Background rejection sampler exceeded its fixed bound")
-            terminals.append(dict(user_id=region*13+slot, source=region, profile_id=profile_id,
+            terminals.append(dict(user_id=region*len(profile["slots"])+slot, source=region, profile_id=profile_id,
                 slot=slot, task_type=row["task_type"], position_m=position.tolist(), is_cluster=member))
     record = dict(schema=REALIZATION_SCHEMA, config_sha256=_digest(c), layout_seed=layout_seed,
         load_seed=load_seed, profile_permutation_override=override, profile_by_region=chosen,
@@ -206,7 +209,7 @@ class HotspotIndustrialScene:
         self._switch_p = np.asarray([[-math.expm1(-dt/p["activity_parameters"][k])
                                      for k in ("normal_mean_s", "busy_mean_s")] for p in self._profiles])
         self._busy = np.array([r.random() < q[0]/q.sum() for r, q in zip(self._activity_rng, self._switch_p)])
-        self._local_event_index = np.zeros(39, dtype=np.int64)
+        self._local_event_index = np.zeros(len(self.terminals), dtype=np.int64)
         self._frame, self._task_id = -1, 0
         self.event_digest, self.canonical_event_digest = hashlib.sha256(), hashlib.sha256()
         self.last_canonical_events = ()

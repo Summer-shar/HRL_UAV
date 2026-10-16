@@ -76,11 +76,18 @@ def point_name(param, value):
 
 
 def retrain_plan(base, points, seeds, smoke=False, first=()):
-    """All retrained sweep points in one job graph; points in `first` get priority."""
+    """All retrained sweep points in one job graph.  Priorities (higher first):
+    points in `first`, then the pilot point, then the parameters in
+    C.RETRAIN_ORDER, so that on one computer whole curves finish one after the
+    other while idle workers still pick up later points."""
     jobs = []
+    first = {(p, float(v)) for p, v in first}
+    order = {p: len(C.RETRAIN_ORDER)-i for i, p in enumerate(C.RETRAIN_ORDER)}
+    pilot = (C.PILOT_POINT[0], float(C.PILOT_POINT[1]))
     for param, value in points:
         name = point_name(param, value)
-        boost = 1000 if (param, float(value)) in {(p, float(v)) for p, v in first} else 0
+        key = (param, float(value))
+        boost = (10000 if key in first else 0) + (5000 if key == pilot else 0) + 1000*order.get(param, 0)
         jobs += plan(seeds, smoke, include_sweeps=False, include_burst=False, prefix=name+'/',
                      out=Path(base)/name, priority_offset=boost)
     return jobs

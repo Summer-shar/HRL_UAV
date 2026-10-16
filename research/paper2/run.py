@@ -10,10 +10,15 @@
   python run.py sweep --seed 4101 --method Proposed --param cpu_ghz --saturated   # rho >= 0.95 points
   python run.py burst --seed 4101 --method Proposed     # controlled overload burst (p2/burst.py)
   python run.py report [--seeds ...]
-  python run.py retrain --out-base D:\\p2_retrain [--points u2u_mhz=1.5,...] [--first u2u_mhz=1.5,u2u_mhz=2]
-                                                           # retrain every learned method at sweep points
-  python run.py retrain-report --out-base D:\\p2_retrain --main <nominal out>
-  python run.py retrain-export --out-base D:\\p2_retrain --points ... --dest D:\\p2_export_A.zip --machine A
+  Design-v3 retrained sweep (PROTOCOL.md): every learned method trained from scratch at
+  cpu_ghz 9/11/12/14, load 0.6/0.8/0.9/1.1, users 7/10/16/19 (terminals per region)
+  python run.py verify --main D:\\p2_runs_v2 --work D:\\p2_verify   # this code reproduces the main run?
+  python run.py timing --main D:\\p2_runs_v2 [--workers 8]           # expected duration on this computer
+  python run.py retrain --out-base D:\\p2_sweeps_v3 --points cpu_ghz=9   # pilot point
+  python run.py pilot-check --out-base D:\\p2_sweeps_v3 --main D:\\p2_runs_v2
+  python run.py retrain --out-base D:\\p2_sweeps_v3                 # all points (resumable)
+  python run.py retrain-report --out-base D:\\p2_sweeps_v3 --main D:\\p2_runs_v2
+  python run.py retrain-export --out-base D:\\p2_sweeps_v3 --dest D:\\p2_export_A.zip --machine A
                                                            # zip the finished points' records (no weights)
   python run.py revise --from <old out> --out <new out>   # new root, fine-tuning recipe v2,
                                                            # unchanged stages carried over
@@ -38,7 +43,7 @@ def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('command', choices=('pipeline', 'bench', 'train', 'dev', 'select', 'test', 'sweep', 'report', 'plan',
                                         'revise', 'burst', 'retrain', 'retrain-report',
-                                        'retrain-export'))
+                                        'retrain-export', 'verify', 'timing', 'pilot-check'))
     p.add_argument('--out', default=None)
     p.add_argument('--from', dest='source', default=None, help='revise: the finished output root to derive from')
     p.add_argument('--recipe', default='v2', help='revise: fine-tuning recipe of the new root')
@@ -55,13 +60,36 @@ def main(argv=None):
     p.add_argument('--workers', type=int, default=int(os.environ.get('P2_WORKERS', '4')))
     p.add_argument('--no-sweeps', action='store_true')
     p.add_argument('--out-base', default=None, help='retrain: folder that holds one root per sweep point')
-    p.add_argument('--points', default=None, help='retrain: e.g. u2u_mhz=1.5,cpu_ghz=9 (default: all stable points)')
+    p.add_argument('--points', default=None, help='retrain: e.g. cpu_ghz=9,users=7 (default: all design-v3 points)')
     p.add_argument('--first', default='', help='retrain: points scheduled before the others')
     p.add_argument('--main', default=None, help='retrain-report: the nominal output root')
     p.add_argument('--dry-run', action='store_true', help='retrain: list the jobs without running them')
     p.add_argument('--dest', default=None, help='retrain-export: zip file to write')
     p.add_argument('--machine', default='A', help='retrain-export: label of this computer')
+    p.add_argument('--work', default=None, help='verify: scratch folder (not inside --main)')
     a = p.parse_args(argv)
+    if a.command == 'verify':
+        if not a.main or not a.work:
+            p.error('verify needs --main (the finished nominal run) and --work (a scratch folder)')
+        sys.path.insert(0, str(Path(__file__).resolve().parent/'tests'))
+        import verify_regression
+        return verify_regression.main(['--main', a.main, '--work', a.work] +
+                                      (['--seed', str(a.seed)] if a.seed else []))
+    if a.command == 'timing':
+        from p2 import checks, retrain
+        if not a.main:
+            p.error('timing needs --main (the finished nominal run)')
+        seeds = a.seeds or C.design(a.smoke)['seeds']
+        points = retrain.parse_points(a.points) if a.points else retrain.all_points(a.smoke)
+        print(checks.timing(Path(a.main), points, seeds, a.workers, smoke=a.smoke))
+        return 0
+    if a.command == 'pilot-check':
+        from p2 import checks
+        if not a.main or not a.out_base:
+            p.error('pilot-check needs --main and --out-base')
+        passed, text = checks.pilot_check(Path(a.main), Path(a.out_base), a.seeds or C.design(a.smoke)['seeds'])
+        print(text)
+        return 0 if passed else 1
     if a.command in ('retrain', 'retrain-report', 'retrain-export'):
         from p2 import pipeline, report, retrain
         if not a.out_base:

@@ -8,9 +8,10 @@ from hrl_uav.routing import project_rows_to_simplex
 
 def centroid(report,history,*,max_target_step_m):
     r=report
-    observed=np.asarray(history[max(0,r.history_cursor-20):r.history_cursor],dtype=float).reshape(-1,39,6)
+    n=len(r.terminals)
+    observed=np.asarray(history[max(0,r.history_cursor-20):r.history_cursor],dtype=float).reshape(-1,n,6)
     elapsed=min(10.,r.history_cursor*.5)
-    rates=observed.sum(0)/elapsed if elapsed else np.zeros((39,6))
+    rates=observed.sum(0)/elapsed if elapsed else np.zeros((n,6))
     result=[]
     for u in r.uavs:
         terminals=[t for t in r.terminals if t.source==u.key]

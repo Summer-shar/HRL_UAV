@@ -1,0 +1,98 @@
+"""Read-only checks around the design-v3 retrained sweep (torch-free).
+
+  timing       per-stage episode times of the main run -> expected duration of
+               the planned points on this computer (an estimate, printed with
+               its inputs; the v3 code is faster than these logs under backlog)
+  pilot_check  trainability check of the pilot point (PROTOCOL.md section 5),
+               judged on M1 training curves only, never on test results
+"""
+import statistics
+from pathlib import Path
+
+import numpy as np
+
+from . import common as C
+
+SAC_STAGES = ('M1', 'M3', 'HoverSAC')
+PPO_STAGES = ('M2', 'TFOO', 'TOO', 'NC')
+
+
+def _episode_times(main_root, seeds):
+    """Median wall seconds per training episode of each stage, and per evaluation run."""
+    out = {}
+    for stage in SAC_STAGES+PPO_STAGES:
+        vals = [r['wall_seconds'] for s in seeds for r in C.read_jsonl(C.run_dir(main_root, s, stage)/'train.jsonl')
+                if r.get('wall_seconds') is not None]
+        out[stage] = statistics.median(vals) if vals else None
+    evals = {}
+    for s in seeds:
+        for p in sorted((C.seed_dir(main_root, s)/'test').glob('*/[0-9][0-9].json')):
+            r = C.read_json(p)
+            if r.get('wall_seconds') is not None:
+                evals.setdefault(p.parent.name, []).append(r['wall_seconds'])
+    out['eval'] = {m: statistics.median(v) for m, v in evals.items()}
+    return out
+
+
+def timing(main_root, points, seeds, workers, smoke=False):
+    """Expected computer time of the planned points from the main run's own logs."""
+    d = C.design(smoke)
+    t = _episode_times(main_root, seeds)
+    missing = [k for k in SAC_STAGES+PPO_STAGES if t[k] is None]
+    if missing:
+        raise ValueError(f'no training logs for {missing} under {main_root}')
+    b = d['budget']
+    train = (b['M1']*t['M1'] + b['M2']*t['M2'] + b['M3']*t['M3'] + b['HoverSAC']*t['HoverSAC'] +
+             b['PPO']*(t['TFOO'] + t['TOO'] + t['NC']))
+    ev = t['eval']
+    mean_eval = float(np.mean(list(ev.values()))) if ev else 15.
+    dev_runs = len(d['dev'])*(len(d['upper_candidates'])*(1+len(C.PPO_BASELINES)) + 2*len(d['lower_candidates']))
+    test_runs = len(d['test'])*len(C.METHODS)
+    per_seed_point = train + (dev_runs+test_runs)*mean_eval
+    total = per_seed_point*len(seeds)*len(points)
+    lines = ['Episode times of the main run (median wall seconds per 900 s episode):']
+    lines += [f'  {k:8s} {t[k]:7.1f} s x {b["PPO"] if k in PPO_STAGES else b[k]} episodes' for k in SAC_STAGES+PPO_STAGES]
+    lines += [f'  evaluation runs: ' + ', '.join(f'{m} {v:.1f} s' for m, v in sorted(ev.items()))]
+    lines += ['', f'One seed at one point: {per_seed_point/3600:.1f} h of computer time '
+              f'({train/3600:.1f} h training, {dev_runs} dev + {test_runs} test runs).',
+              f'{len(points)} points x {len(seeds)} seeds: {total/3600:.0f} h of computer time; '
+              f'with {workers} parallel workers about {total/3600/workers:.0f} h '
+              f'({total/86400/workers:.1f} days) if the workers do not slow each other down.',
+              'The v3 simulator patches are faster than these logs when the backlog is large (NC, early M1, '
+              'demand close to capacity); measure the first hours with "retrain-report" before relying on it.']
+    return '\n'.join(lines)
+
+
+def pilot_check(main_root, base, seeds, window=20, ratio=3.0):
+    """PROTOCOL.md section 5: for every seed, the pilot point's M1 must (a) improve
+    (last `window` episodes better than the first `window`) and (b) end within
+    `ratio` x the nominal M1's last-window delay.  Returns (passed, text) with
+    passed True / False / None (M1 not finished for every seed yet)."""
+    from .pipeline import point_name
+    param, value = C.PILOT_POINT
+    name = point_name(param, C.point_value(param, value))
+    root = Path(base)/name
+    budget = C.design()['budget']['M1']
+    lines = [f'Pilot point {name}: M1 trainability check (last {window} episodes; threshold {ratio:g} x nominal)']
+    status = []
+    for seed in seeds:
+        rows = C.read_jsonl(C.run_dir(root, seed, 'M1')/'train.jsonl')
+        nominal = C.read_jsonl(C.run_dir(main_root, seed, 'M1')/'train.jsonl')
+        if len(rows) < budget:
+            lines.append(f'  seed {seed}: M1 has {len(rows)}/{budget} episodes - not finished yet')
+            status.append('pending')
+            continue
+        if len(nominal) < window:
+            raise ValueError(f'nominal M1 log of seed {seed} not found under {main_root}')
+        first = float(np.mean([r['truncated_delay_s'] for r in rows[:window]]))
+        last = float(np.mean([r['truncated_delay_s'] for r in rows[-window:]]))
+        ref = float(np.mean([r['truncated_delay_s'] for r in nominal[-window:]]))
+        improve, bounded = last < first, last <= ratio*ref
+        status.append('ok' if improve and bounded else 'fail')
+        lines.append(f'  seed {seed}: first {first:.3f} s -> last {last:.3f} s (nominal last {ref:.3f} s); '
+                     f'improves: {"yes" if improve else "NO"}; within {ratio:g}x nominal: {"yes" if bounded else "NO"}')
+    passed = False if 'fail' in status else None if 'pending' in status else True
+    lines.append('PASS: start the full run' if passed else
+                 'NOT FINISHED: run the check again later' if passed is None else
+                 'FAIL: stop and discuss before running any other point (do not change the protocol silently)')
+    return passed, '\n'.join(lines)

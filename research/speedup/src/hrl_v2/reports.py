@@ -96,8 +96,11 @@ class ReportV2:
     queues: Tuple[Queue, ...]
 
     def __post_init__(self):
-        if len(self.terminals) != 39 or len(self.uavs) != 3 or len(self.queues) != 58:
-            raise ValueError("Report must preserve 39 terminals, 3 UAVs and all 58 queues")
+        # 3 x K terminals (K = 13 in v2.4.0) and their upload queues, plus the
+        # ready queue, 6 CPU queues and 12 directed transfer queues.
+        n = len(self.terminals)
+        if n < 3 or n % 3 or len(self.uavs) != 3 or len(self.queues) != n + 19:
+            raise ValueError("Report must preserve 3 x K terminals, 3 UAVs and all K x 3 + 19 queues")
         if self.tick < 0 or int(self.tick) != self.tick or not math.isfinite(self.physical_dt) or self.physical_dt <= 0:
             raise ValueError("Invalid physical service clock")
         if any(not math.isfinite(x) or x < 0 for x in (self.remaining_macro, self.remaining_adjustment)):

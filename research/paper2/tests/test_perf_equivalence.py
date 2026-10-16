@@ -1,8 +1,11 @@
 """The perf patches must not change a single bit of the simulation.
 
 Runs scripted controllers with and without p2.perf and compares every lower
-report, every physical step reading and the full metrics dictionary.
-Torch is not needed.  Usage:  python tests/test_perf_equivalence.py [seconds]
+report (== and repr, i.e. values and types), every Lite observation vector,
+every physical step reading and the full metrics dictionary, for the nominal
+scene, an overloaded scene, a heavy-backlog scene (U2U 1.5 MHz) and the
+design-v3 terminal counts 7 and 19 per region.
+Usage:  python tests/test_perf_equivalence.py [seconds]
 """
 import sys
 from pathlib import Path
@@ -36,23 +39,30 @@ def controller(kind, rng):
 
 
 def run(kind, scenario, seconds, scene, adapter_class=PhysicsAdapter):
+    from hrl_v2.lite_observation import LiteObserver
     rng = np.random.default_rng(scenario)
     upper, lower = controller(kind, rng)
     a = adapter_class(scene, timing=ClockConfig.from_scene(scene, rollout_seconds=seconds))
     a.reset(**C.scenario_seeds('test', scenario))
     start = snapshot(a)
-    reports, readings = [], []
+    observer = LiteObserver()
+    reports, readings, vectors = [], [], []
+
+    def seen(r):
+        reports.append(r)
+        o = observer.update(r, a.arrivals)
+        vectors.append((o.lower.copy(), o.upper.copy()))
     for macro in range(int(seconds/5)):
         r = a.report()
-        reports.append(r)
+        seen(r)
         a.start_macro(upper(r))
         for frame in range(10):
             rep = a.prepare()
-            reports.append(rep)
+            seen(rep)
             route = lower(rep, frame)
             for _ in range(5):
                 readings.append(a.step(route))
-    return reports, readings, finish(a, start)
+    return reports, readings, finish(a, start), vectors
 
 
 def same(x, y, path='metrics'):
@@ -73,8 +83,11 @@ def same(x, y, path='metrics'):
 
 
 def main(seconds=300.):
-    scenes = [C.load_scene(), C.scaled_scene(C.load_scene(), cpu_ghz=8., load=1.2)]
-    cases = [('hover', 21, 0), ('random', 22, 0), ('local', 21, 0), ('random', 23, 1)]
+    scenes = [C.load_scene(), C.scaled_scene(C.load_scene(), cpu_ghz=8., load=1.2),
+              C.scaled_scene(C.load_scene(), u2u_mhz=1.5), C.scaled_scene(C.load_scene(), users=7),
+              C.scaled_scene(C.load_scene(), users=19)]
+    cases = [('hover', 21, 0), ('random', 22, 0), ('local', 21, 0), ('random', 23, 1),
+             ('hover', 24, 2), ('local', 25, 3), ('random', 26, 4), ('hover', 27, 4)]
     import time
     for kind, scenario, s in cases:
         perf.remove()
@@ -90,6 +103,8 @@ def main(seconds=300.):
             assert repr(a) == repr(b), f'report {i} repr differs'
         same([dict(r) for r in ref[1]], [dict(r) for r in new[1]], 'readings')
         same(ref[2], new[2])
+        for i, (u, v) in enumerate(zip(ref[3], new[3])):
+            assert u[0].tobytes() == v[0].tobytes() and u[1].tobytes() == v[1].tobytes(), f'Lite vector {i} differs'
         print(f'OK {kind:6s} scenario {scenario} scene {s}: identical; '
               f'{t1-t0:.2f}s -> {t2-t1:.2f}s ({(t1-t0)/(t2-t1):.2f}x)', flush=True)
     perf.remove()

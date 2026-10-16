@@ -49,7 +49,7 @@ class PhysicsAdapter:
             return self.report()
         first = len(e.parents)
         e.prepare_frame()
-        arrivals = np.zeros((39, 6), dtype=np.float64)
+        arrivals = np.zeros((len(e.upload), 6), dtype=np.float64)
         for pid in range(first, len(e.parents)):
             a = e.parents[pid].arrival
             arrivals[a.user_id, 3*a.priority:3*a.priority+3] += (a.input_bits, a.compute_cycles, 1)

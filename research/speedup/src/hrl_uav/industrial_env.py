@@ -22,7 +22,7 @@ class IndustrialPhysics:
 
     def __init__(self, c, terminals):
         r = c["resources"]
-        self.N, self.M = 3, 39
+        self.N, self.M = 3, len(terminals)
         self.H, self.beta_0 = c["height_m"], r["reference_gain"]
         self.B_gt_total, self.B_u2u_total = r["uplink_bandwidth_hz"], r["u2u_bandwidth_hz"]
         self.p_gt, self.u2u_tx_budget_w = r["terminal_power_w"], r["u2u_source_power_w"]
@@ -114,7 +114,7 @@ class IndustrialEnv:
         self.physics = IndustrialPhysics(self.config, self._scene.terminals)
         self.parents, self.fragments = {}, {}
         self._reset_active_state()
-        self.upload = [deque() for _ in range(39)]
+        self.upload = [deque() for _ in range(len(self._scene.terminals))]
         self.compute = [[deque() for _ in range(3)] for _ in range(2)]
         self.transfer = [[[deque() for _ in range(3)] for _ in range(3)] for _ in range(2)]
         self.ready = deque()
@@ -141,7 +141,8 @@ class IndustrialEnv:
         load = getattr(s, "load_seed", None)
         entropy = [s.seed, s.layout_seed] + ([] if load is None else [load]) + [7001]
         self._mobility = GaussMarkovMobility(m, self.config["map_size_m"], self.dt,
-                                             np.random.default_rng(np.random.SeedSequence(entropy)))
+                                             np.random.default_rng(np.random.SeedSequence(entropy)),
+                                             count=len(s.terminals))
         self._mobility_start = self.physics.user_coords.copy()
 
     @property
@@ -215,7 +216,7 @@ class IndustrialEnv:
         start = max(0., now-window)
         while self._recent and self._recent[0].birth_s < start:
             self._recent.popleft()
-        recent = np.zeros((39, 2, 3))
+        recent = np.zeros((len(self._scene.terminals), 2, 3))
         for a in self._recent:
             if now > 0 and (a.birth_s > start or (start == 0 and now <= window)):
                 recent[a.user_id, a.priority] += (a.input_bits, a.compute_cycles, 1)

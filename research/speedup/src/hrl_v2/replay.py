@@ -122,11 +122,12 @@ class Episode:
         self.history=pack(np.asarray(history,dtype=np.float64))
         self.metrics=metrics
         if self.encoder=="lite":
-            from .lite_observation import LOWER_DIM, UPPER_DIM
+            from .lite_observation import LOWER_DIM, terminals_in_upper, upper_dim
             self.lower_obs=np.asarray(self.lower_obs,dtype=np.float32)
             self.upper_obs=np.asarray(self.upper_obs,dtype=np.float32)
-            if (self.lower_obs.shape!=(count+1,LOWER_DIM) or
-                self.upper_obs.shape!=(len(self.high)+1,UPPER_DIM) or
+            width=self.upper_obs.shape[-1] if self.upper_obs.ndim==2 else -1
+            if (self.lower_obs.shape!=(count+1,LOWER_DIM) or self.upper_obs.ndim!=2 or
+                self.upper_obs.shape!=(len(self.high)+1,upper_dim(terminals_in_upper(width))) or
                 not np.isfinite(self.lower_obs).all() or not np.isfinite(self.upper_obs).all()):
                 raise ValueError("Lite replay requires all collected observations and true successors")
             self.lower_obs.setflags(write=False); self.upper_obs.setflags(write=False)

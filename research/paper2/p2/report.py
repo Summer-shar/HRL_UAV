@@ -148,18 +148,26 @@ def burst_table(root, seeds, methods, smoke=False):
     return dict(window=win, bins=bins, windows=windows)
 
 
-def retrain_table(main_root, base, seeds, param, d, methods=C.METHODS, values=None):
-    """Sweep table where every non-nominal point comes from its own retrained root.
-    The nominal point is the main root's test runs on the same sweep scenarios."""
+def _point_root(main_root, base, param, value):
     from .pipeline import point_name
-    scen = set(d['sweep_scenarios'])
+    if C.point_value(param, value) == C.point_value(param, C.NOMINAL[param]):
+        return Path(main_root)
+    return Path(base)/point_name(param, value)
+
+
+def retrain_table(main_root, base, seeds, param, d, methods=C.METHODS, values=None):
+    """Design-v3 sweep table: every non-nominal value from its own retrained root,
+    the nominal value from the main run; all on the test split (scenarios 21-40)."""
+    scen = set(d['test'])
     table = []
-    for value in (d['sweeps'][param] if values is None else values):
-        root = Path(main_root) if float(value) == C.NOMINAL[param] else Path(base)/point_name(param, value)
+    for value in (d['retrain_sweeps'][param] if values is None else values):
+        root = _point_root(main_root, base, param, value)
         rows = load_rows(root, seeds, methods, 'test', scenarios=scen)
+        nominal = root == Path(main_root)
         for m in methods:
-            line = dict(param=param, value=value, utilization=C.utilization(param, value), method=m,
-                        retrained=float(value) != C.NOMINAL[param], source=str(root))
+            line = dict(param=param, value=C.point_value(param, value), utilization=C.utilization(param, value),
+                        terminals=3*(C.point_value(param, value) if param == 'users' else C.NOMINAL['users']),
+                        method=m, retrained=not nominal, source=str(root))
             for key, _ in METRICS:
                 seeds_ = per_seed(rows, m, key)
                 if seeds_:
@@ -167,34 +175,83 @@ def retrain_table(main_root, base, seeds, param, d, methods=C.METHODS, values=No
                     line[key] = float(v.mean())
                     line[key+'_std_over_seeds'] = float(v.std(ddof=1)) if len(v) > 1 else 0.
                     line['seeds'] = len(v)
+            line['scenarios'] = len({r['scenario'] for r in rows if r['method'] == m})
             table.append(line)
     return table
 
 
+def retrain_paired(main_root, base, seeds, param, d, methods=C.METHODS, values=None,
+                   metrics=('truncated_delay_s', 'cost_per_s', 'high_truncated_delay_s', 'energy_w_compute_comm')):
+    """Proposed vs every other method at every value of a parameter: the paired
+    Wilcoxon test of the main table (seed-mean per test scenario), per metric."""
+    out = []
+    for value in (d['retrain_sweeps'][param] if values is None else values):
+        root = _point_root(main_root, base, param, value)
+        rows = load_rows(root, seeds, methods, 'test', scenarios=set(d['test']))
+        present = [m for m in methods if any(r['method'] == m for r in rows)]
+        if 'Proposed' not in present:
+            continue
+        for metric in metrics:
+            for other, r in paired(rows, present, metric).items():
+                out.append(dict(param=param, value=C.point_value(param, value), metric=metric, other=other,
+                                **{k: v for k, v in r.items() if k not in ('metric', 'per_seed')}))
+    return out
+
+
+def convergence_rows(root, seeds, window=20):
+    """Training-curve plateau check per stage and seed (reported, never used to drop
+    or extend anything): mean truncated delay and cost of the last `window`
+    episodes vs the `window` before them."""
+    out = []
+    for seed in seeds:
+        for stage in ('M1', 'M2', 'M3', 'HoverSAC', 'TFOO', 'TOO', 'NC'):
+            rows = C.read_jsonl(C.run_dir(root, seed, stage)/'train.jsonl')
+            if len(rows) < 2*window:
+                continue
+            line = dict(root=str(root), seed=seed, stage=stage, episodes=len(rows))
+            for key in ('truncated_delay_s', 'cost_per_s'):
+                last = float(np.mean([r[key] for r in rows[-window:]]))
+                prev = float(np.mean([r[key] for r in rows[-2*window:-window]]))
+                line[f'{key}_last{window}'] = last
+                line[f'{key}_prev{window}'] = prev
+                line[f'{key}_relative_change'] = last/prev-1 if prev else None
+            line['plateau'] = abs(line['cost_per_s_relative_change'] or 0.) <= 0.10
+            out.append(line)
+    return out
+
+
 def retrain_build(main_root, base, seeds, points, smoke=False, methods=C.METHODS):
-    """Tables of the retrained sweep from the points finished so far (nominal = main root)."""
+    """Tables, paired tests and training checks of the design-v3 retrained sweep from
+    the points finished so far (nominal = main run)."""
     from .pipeline import point_name
     d = C.design(smoke)
     res = Path(base)/'results'
-    lines = ['# Retrained sweep', '',
-             'Every learned method retrained at each non-nominal value (same seeds, training scenarios, '
-             'initial weights and fine-tuning recipe as the main run); evaluated on the sweep scenarios '
-             f'{", ".join(map(str, d["sweep_scenarios"]))}. Nominal point: main run {main_root}.', '']
+    res.mkdir(parents=True, exist_ok=True)
+    lines = ['# Retrained sweep (design v3, research/paper2/PROTOCOL.md)', '',
+             'Every learned method trained from scratch at each non-nominal value with the main pipeline '
+             '(same stages, budgets, hyper-parameters, seeds, training scenarios, initial weights, fine-tuning '
+             f'recipe and dev selection); evaluated on the test scenarios {", ".join(map(str, d["test"]))}. '
+             f'Nominal value of each parameter: the main run {main_root}. Values: mean over seeds of scenario '
+             'means (std over seeds in the CSV files). users = terminals per region, nominal computation load.', '']
     status = {}
     for param, value in points:
         root = Path(base)/point_name(param, value)
         status[point_name(param, value)] = all(
             (C.seed_dir(root, s)/'test'/m/f'{sc:02d}.json').exists()
-            for s in seeds for m in methods for sc in d['sweep_scenarios'])
+            for s in seeds for m in methods for sc in d['test'])
     lines += ['| point | finished |', '|---|---|'] + [f'| {k} | {"yes" if v else "no"} |' for k, v in status.items()]
-    for param in d['sweeps']:
-        values = [v for v in d['sweeps'][param]
-                  if float(v) == C.NOMINAL[param] or status.get(point_name(param, v))]
+    tables, pairs = {}, []
+    for param in C.RETRAIN_ORDER:
+        values = [v for v in d['retrain_sweeps'][param]
+                  if C.point_value(param, v) == C.point_value(param, C.NOMINAL[param]) or status.get(point_name(param, v))]
         if len(values) < 2:
             continue
-        complete = len(values) == len(d['sweeps'][param])
+        complete = len(values) == len(d['retrain_sweeps'][param])
         t = retrain_table(main_root, base, seeds, param, d, methods, values)
+        tables[param] = t
         write_csv(res/f'retrain_sweep_{param}.csv', t)
+        pr = retrain_paired(main_root, base, seeds, param, d, methods, values)
+        pairs += pr
         lines += ['', f'## {param} (retrained{"" if complete else ", finished points only"}; '
                   'cells: delay / compute+comm power / joint cost)', '',
                   '| '+param+' | demand/capacity | '+' | '.join(LABELS.get(m, m) for m in methods)+' |',
@@ -202,18 +259,46 @@ def retrain_build(main_root, base, seeds, points, smoke=False, methods=C.METHODS
         for value in values:
             cells = []
             for m in methods:
-                r = next((x for x in t if x['value'] == value and x['method'] == m), {})
+                r = next((x for x in t if x['value'] == C.point_value(param, value) and x['method'] == m), {})
                 cells.append(f'{fmt(r.get("truncated_delay_s"))} s / {fmt(r.get("energy_w_compute_comm"))} W / '
                              f'{fmt(r.get("cost_per_s"))}')
-            lines.append(f'| {value:g} | {C.utilization(param, value):.2f} | '+' | '.join(cells)+' |')
-    # partial results per finished point (useful while the rest is still training)
+            lines.append(f'| {C.point_value(param, value):g} | {C.utilization(param, value):.2f} | '+' | '.join(cells)+' |')
+        lines += ['', f'Proposed vs others ({param}): relative change of the delay / cost, Wilcoxon p (20 scenarios), '
+                  'better seeds', '', '| '+param+' | '+' | '.join(LABELS.get(m, m) for m in methods if m != 'Proposed')+' |',
+                  '|---:|'+'---:|'*(len(methods)-1)]
+        for value in values:
+            cells = []
+            for m in methods:
+                if m == 'Proposed':
+                    continue
+                dl = next((x for x in pr if x['value'] == C.point_value(param, value) and x['other'] == m
+                           and x['metric'] == 'truncated_delay_s'), None)
+                co = next((x for x in pr if x['value'] == C.point_value(param, value) and x['other'] == m
+                           and x['metric'] == 'cost_per_s'), None)
+                cells.append('—' if not dl or not co else
+                             f'{100*dl["relative_change"]:+.1f}% / {100*co["relative_change"]:+.1f}%, '
+                             f'p={fmt(dl["wilcoxon_p"], 2)}/{fmt(co["wilcoxon_p"], 2)}, '
+                             f'{dl["seeds_proposed_better"]}/{dl["seeds"]}')
+            lines.append(f'| {C.point_value(param, value):g} | '+' | '.join(cells)+' |')
+    if pairs:
+        write_csv(res/'retrain_paired.csv', pairs)
+    conv = []
     for name, ok in status.items():
         if ok:
+            conv += convergence_rows(Path(base)/name, seeds)
             root = Path(base)/name
             rows = load_rows(root, seeds, methods, 'test')
             tbl = main_table(rows, [m for m in methods if any(r['method'] == m for r in rows)])
             write_csv(res/'points'/f'{name}.csv', tbl)
-    res.mkdir(parents=True, exist_ok=True)
+    if conv:
+        write_csv(res/'retrain_convergence.csv', conv)
+        flagged = [c for c in conv if not c['plateau']]
+        lines += ['', f'## Training curves: {len(conv)} stage runs checked, {len(flagged)} with a cost change above 10 % '
+                  'between the last two 20-episode windows (reported, nothing dropped or extended)', '']
+        lines += [f'- {Path(c["root"]).name} seed {c["seed"]} {c["stage"]}: cost {fmt(c["cost_per_s_prev20"])} -> '
+                  f'{fmt(c["cost_per_s_last20"])} ({100*c["cost_per_s_relative_change"]:+.1f}%)' for c in flagged]
+    C.write_json(res/'retrain_stats.json', C.clean(dict(design='v3', seeds=list(seeds), test_scenarios=list(d['test']),
+                                                        points=status, tables=tables, paired=pairs, convergence=conv)))
     (res/'retrain_summary.md').write_text('\n'.join(lines)+'\n', encoding='utf-8')
     return res
 

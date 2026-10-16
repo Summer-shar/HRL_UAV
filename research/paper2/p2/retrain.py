@@ -1,22 +1,25 @@
-"""Retrained sweep points: every learned method trained again at each parameter value.
+"""Retrained sweep points: every learned method trained again, from scratch, at each value.
 
-Each point is its own output root  <base>/<param>=<value>/  holding
-  scene.json   {"param", "value", "prune_snapshots": true}  -> common.load_scene(root)
+Design v3 (PROTOCOL.md): cpu_ghz 9/11/12/14, load 0.6/0.8/0.9/1.1 and users
+(terminals per region) 7/10/16/19; the nominal value of each parameter is the
+main run.  Each point is its own output root  <base>/<param>=<value>/  holding
+  scene.json   {"param", "value", "design": "v3", "prune_snapshots": true}
+               -> common.load_scene(root)
   recipe.json  fine-tuning recipe v2 (as the main results)
-and the usual seed_*/ tree.  Training scenarios, seeds, initial weights and
-exploration streams are identical to the nominal run; only the scene
-parameter differs.  Points are evaluated on the sweep scenarios (21-28), the
-same scenarios as the non-retrained sweep, so the two can be compared point by
-point.  No nested sweeps or burst runs.  Resume snapshots (state.pt, which
-carry the replay buffer) are deleted when a stage finishes, to save disk.
+and the usual seed_*/ tree.  Stages, budgets, hyper-parameters, seeds,
+training scenarios, initial weights, exploration streams and the dev
+selection rule are those of the main run; only the scene parameter differs.
+Design-v3 points are evaluated on the full test split (scenarios 21-40, as the
+main table).  No nested sweeps or burst runs.  Resume snapshots (state.pt,
+which carry the replay buffer) are deleted when a stage finishes, to save disk.
 
-    python run.py retrain --out-base D:\\p2_retrain --first u2u_mhz=1.5,u2u_mhz=2
-    python run.py retrain-report --out-base D:\\p2_retrain --main D:\\p2_runs_v2
-    python run.py retrain-export --out-base D:\\p2_retrain --dest D:\\p2_export_A.zip --machine A
+    python run.py retrain --out-base D:\\p2_sweeps_v3 --points cpu_ghz=9     # pilot
+    python run.py pilot-check --out-base D:\\p2_sweeps_v3 --main D:\\p2_runs_v2
+    python run.py retrain --out-base D:\\p2_sweeps_v3                       # everything
+    python run.py retrain-report --out-base D:\\p2_sweeps_v3 --main D:\\p2_runs_v2
 
-Points may be split between computers (--points); each computer exports its
-finished points with retrain-export (records only: no weights, trajectories or
-logs) and the exports are merged into one folder for retrain-report.
+Points may also be split between computers (--points) and merged with
+retrain-export (records only: no weights, trajectories or logs).
 """
 import hashlib
 import json
@@ -31,34 +34,39 @@ from . import common as C
 
 
 def parse_points(text):
-    """'u2u_mhz=1.5,cpu_ghz=9' -> [('u2u_mhz', 1.5), ('cpu_ghz', 9.0)]."""
+    """'cpu_ghz=9,users=7' -> [('cpu_ghz', 9.0), ('users', 7)]."""
     points = []
     for item in filter(None, (t.strip() for t in str(text).split(','))):
         param, _, value = item.partition('=')
-        if param not in C.SWEEPS:
+        if param not in C.RETRAIN_SWEEPS and param not in C.SWEEPS:
             raise ValueError(f'unknown sweep parameter {param!r}')
-        points.append((param, float(value)))
+        points.append((param, C.point_value(param, value)))
     return points
 
 
 def all_points(smoke=False):
-    """Every stable sweep value except the nominal one."""
+    """Every non-nominal value of the design-v3 retrained sweep: the pilot first,
+    then the parameters in C.RETRAIN_ORDER."""
     d = C.design(smoke)
-    return [(p, float(v)) for p, values in d['sweeps'].items() for v in values if float(v) != C.NOMINAL[p]]
+    points = [(p, C.point_value(p, v)) for p in C.RETRAIN_ORDER for v in d['retrain_sweeps'][p]
+              if C.point_value(p, v) != C.point_value(p, C.NOMINAL[p])]
+    pilot = (C.PILOT_POINT[0], C.point_value(*C.PILOT_POINT))
+    return ([pilot] if pilot in points else []) + [pt for pt in points if pt != pilot]
 
 
 def prepare_point(base, param, value, smoke=False, recipe='v2'):
     from .pipeline import point_name
-    if float(value) == C.NOMINAL[param]:
+    value = C.point_value(param, value)
+    if value == C.point_value(param, C.NOMINAL[param]):
         raise ValueError('the nominal point is the main run; it is not retrained here')
     root = Path(base)/point_name(param, value)
     root.mkdir(parents=True, exist_ok=True)
-    scene = dict(param=param, value=float(value), prune_snapshots=True)
+    scene = dict(param=param, value=value, design='v3', prune_snapshots=True)
     path = root/'scene.json'
     if path.exists():
         old = C.read_json(path)
-        if (old.get('param'), float(old.get('value'))) != (param, float(value)):
-            raise ValueError(f'{root} already belongs to {old}')
+        if (old.get('param'), C.point_value(param, old.get('value')), old.get('design')) != (param, value, 'v3'):
+            raise ValueError(f'{root} already belongs to {old} (design v3 needs its own --out-base)')
     else:
         C.write_json(path, dict(scene, created=time.strftime('%Y-%m-%d %H:%M:%S')))
     marker = root/'recipe.json'
@@ -68,17 +76,22 @@ def prepare_point(base, param, value, smoke=False, recipe='v2'):
     else:
         C.write_json(marker, dict(finetune=recipe, parameters=C.FINETUNE_RECIPES[recipe],
                                   note='retrained sweep point; same recipe as the main results'))
+    scene_json = json.dumps(C.load_scene(root), sort_keys=True, separators=(',', ':'))
     C.write_json(root/'design.json', dict(design=C.design(smoke), point=scene, smoke=smoke,
                                           methods=list(C.METHODS), finetune=C.finetune(root),
-                                          test_scenarios=list(C.test_scenarios(root, C.design(smoke)))))
+                                          test_scenarios=list(C.test_scenarios(root, C.design(smoke))),
+                                          demand_over_capacity=C.utilization(param, value),
+                                          scene_sha256=hashlib.sha256(scene_json.encode()).hexdigest(),
+                                          code_sha256=code_fingerprint()[0]))
     return root
 
 
 def point_finished(root, seeds, smoke=False, methods=C.METHODS):
-    """Every method has a test record on every sweep scenario for every seed."""
+    """Every method has a test record on every test scenario of the point for every seed."""
     d = C.design(smoke)
+    scenarios = C.test_scenarios(root, d)
     return all((C.seed_dir(root, s)/'test'/m/f'{sc:02d}.json').exists()
-               for s in seeds for m in methods for sc in d['sweep_scenarios'])
+               for s in seeds for m in methods for sc in scenarios)
 
 
 EXPORT_PATTERNS = ('scene.json', 'recipe.json', 'design.json', 'results/*.md', 'results/*.csv', 'results/*.json',

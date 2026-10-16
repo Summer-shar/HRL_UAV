@@ -17,8 +17,12 @@ def load_config(path):
 
 def validate_config(cfg):
     c = copy.deepcopy(cfg)
-    if c.get("schema") != "industrial_static_v1" or (c["num_uavs"], c["num_users"]) != (3, 39):
-        raise ValueError("Expected industrial_static_v1 with 3 UAVs and 39 fixed terminals")
+    # v2.5.0: the number of terminals is a scene parameter, 3 regions x K terminals
+    # (K = 13 in every v2.4.0 scene; nothing else changes for K = 13).
+    users = c.get("num_users")
+    if (c.get("schema") != "industrial_static_v1" or c["num_uavs"] != 3 or isinstance(users, bool)
+            or not isinstance(users, int) or users < 3 or users % 3):
+        raise ValueError("Expected industrial_static_v1 with 3 UAVs and 3 x K fixed terminals")
     if set(c) - {"schema", "status", "num_uavs", "num_users", "map_size_m", "height_m", "regions_m", "device_counts", "uav_initial_positions_m", "region_multipliers", "activity", "task_types", "time", "motion", "resources", "objective", "parameter_sources", "terminal_mobility"}:
         raise ValueError("Unknown top-level configuration key (legacy overrides are forbidden)")
     def positive(x):
@@ -44,8 +48,8 @@ def validate_config(cfg):
     distances = np.linalg.norm(positions[:, None] - positions[None, :], axis=2)
     if np.any(distances[~np.eye(3, dtype=bool)] < c["motion"]["min_separation_m"]):
         raise ValueError("Initial UAV separation is unsafe")
-    if counts.shape != (3, 3) or np.any(counts < 0) or np.any(counts != np.floor(counts)) or np.any(counts.sum(axis=1) != 13):
-        raise ValueError("Each region must contain 13 explicitly typed devices")
+    if counts.shape != (3, 3) or np.any(counts < 0) or np.any(counts != np.floor(counts)) or np.any(counts.sum(axis=1) != users // 3):
+        raise ValueError("Each region must contain num_users / 3 explicitly typed devices")
     if np.shape(c["region_multipliers"]) != (3,) or set(c["task_types"]) != set(TYPES):
         raise ValueError("Invalid region or device profiles")
     for p in c["task_types"].values():
@@ -119,9 +123,10 @@ class IndustrialScene:
                 for _ in range(count):
                     terminals.append(Terminal(len(terminals), region, kind, tuple(rng.uniform(lo, hi))))
         self.terminals = tuple(terminals)
-        self._activity_rng = [np.random.default_rng(np.random.SeedSequence([self.seed, 2001, k])) for k in range(39)]
-        self._arrival_rng = [np.random.default_rng(np.random.SeedSequence([self.seed, 3001, k])) for k in range(39)]
-        self._mark_rng = [np.random.default_rng(np.random.SeedSequence([self.seed, 4001, k])) for k in range(39)]
+        n = len(self.terminals)
+        self._activity_rng = [np.random.default_rng(np.random.SeedSequence([self.seed, 2001, k])) for k in range(n)]
+        self._arrival_rng = [np.random.default_rng(np.random.SeedSequence([self.seed, 3001, k])) for k in range(n)]
+        self._mark_rng = [np.random.default_rng(np.random.SeedSequence([self.seed, 4001, k])) for k in range(n)]
         a, dt = self.config["activity"], self.config["time"]["routing_s"]
         self._switch_p = np.array([-math.expm1(-dt / a["normal_mean_s"]), -math.expm1(-dt / a["busy_mean_s"])])
         busy_probability = self._switch_p[0] / self._switch_p.sum()

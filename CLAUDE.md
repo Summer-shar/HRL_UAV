@@ -10,6 +10,7 @@
 
 - 根目录 `src/` 是 MAIN 的 v2.3.0 物理候选，源 commit `a9953dc36d9d65f99bcc35044cdfc250ca11bb49`。
 - `research/speedup/src/` 是后续实验使用的 v2.4.0，源 commit `25d59ff9f7c3e27c060c63d462235a30ce28930a`。它加入终端 Gauss-Markov 移动、按每架 UAV 总预算分配 U2U 发射功率和存档优化。分析最新实验应优先读这份源码及 `v2_4_0_lite.json`。
+- 2026-10-17 起该目录为 v2.5.0（分支 `claude/paper2-sweeps-v3`）：每区终端数成为场景参数（每区 13 个时与 v2.4.0 逐位一致，见 `research/paper2/tests/test_perf_equivalence.py`、`run.py verify`），供 `research/paper2/PROTOCOL.md` 的逐点重训扫参使用。
 - `research/experiments/outputs/scene_optimality_20260928/` 保留后续训练、评估与诊断驱动，以及选定实验合同。方案 C/D 和 curriculum 的行为还由这些驱动决定，不能只看核心 `run.py`。
 - `docs/design_specification.md`、`docs/CONTINUING_SERVICE_VALIDATION.md` 和旧安装文档记录早期阶段。关于“固定终端”“train/resume 无条件禁用”“未训练”的文字是当时状态，不是后续实验的现状。具体物理参数以相应版本源码与配置为准。
 

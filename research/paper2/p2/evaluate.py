@@ -129,6 +129,11 @@ def evaluate_one(make_policy, scene, split, scenario, out_json, *, smoke=False, 
                cpu_ghz=scene['base_scene']['resources']['cpu_hz'][0]/1e9,
                u2u_mhz=scene['base_scene']['resources']['u2u_bandwidth_hz']/1e6,
                load=scene['base_scene']['region_multipliers'][0]/C.load_base_scene()['base_scene']['region_multipliers'][0])
+    per_region = scene['base_scene']['num_users']//3
+    if per_region != C.NOMINAL['users']:
+        # design-v3 users points: terminals per region; their region multipliers are
+        # rescaled to keep the nominal load, so the 'load' ratio above is not a load
+        row.update(users=per_region, load=float(env._expected_workload['total_compute_gcycles_s']/C.MEAN_DEMAND_GCYCLES))
     if burst is not None:
         from . import burst as B
         row.update(burst=burst_info, burst_bins=B.record(env, burst['bin_s'], env.time_s,

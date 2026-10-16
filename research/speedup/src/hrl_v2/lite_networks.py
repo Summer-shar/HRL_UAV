@@ -22,7 +22,10 @@ class LiteEncoder(nn.Module):
     def forward(self, obs):
         if not self.upper:
             return obs
-        terminals = obs[..., :39 * TERMINAL_DIM].reshape(*obs.shape[:-1], 3, 13, TERMINAL_DIM)
+        # 3 x K terminal rows (K = 13 in v2.4.0), then the global part; the
+        # per-region mean/max pooling makes the weights independent of K.
+        k = (obs.shape[-1] - GLOBAL_DIM) // (3 * TERMINAL_DIM)
+        terminals = obs[..., :3 * k * TERMINAL_DIM].reshape(*obs.shape[:-1], 3, k, TERMINAL_DIM)
         embedded = self.terminal(terminals)
         pooled = torch.cat((embedded.mean(-2), embedded.max(-2).values), dim=-1)
         return self.body(torch.cat((pooled.flatten(-2), obs[..., -GLOBAL_DIM:]), dim=-1))

@@ -157,8 +157,9 @@ def _sac_policy(name, learner, streams, seed, episode):
     raise ValueError(name)
 
 
-def train_sac_stage(name, seed, root, *, smoke=False, init_paths=None):
-    """Train one SAC stage. init_paths: dict(m1=..., upper=...) for M3/HoverSAC."""
+def train_sac_stage(name, seed, root, *, smoke=False, init_paths=None, stop_after=None):
+    """Train one SAC stage. init_paths: dict(m1=..., upper=...) for M3/HoverSAC.
+    stop_after: run only the first episodes and write no final state (run.py verify)."""
     budget, _, lower_candidates = budgets(smoke)
     episodes = budget[name]
     rd = C.run_dir(root, seed, name)
@@ -208,6 +209,8 @@ def train_sac_stage(name, seed, root, *, smoke=False, init_paths=None):
         replay.set_upper_version(version)
     stage = C.STAGE[name]
     for n in range(completed+1, episodes+1):
+        if stop_after is not None and n > stop_after:
+            return
         started = time.perf_counter()
         streams = Streams(seed, stage, 0, n)
         adapter = perf.TrainingAdapter(scene, timing=clk)
@@ -255,7 +258,7 @@ def train_sac_stage(name, seed, root, *, smoke=False, init_paths=None):
 # ---------------------------------------------------------------------------
 # PPO stages: M2 (frozen deterministic M1 SAC) and the three baselines
 # ---------------------------------------------------------------------------
-def train_ppo_stage(name, seed, root, *, smoke=False, init_paths=None):
+def train_ppo_stage(name, seed, root, *, smoke=False, init_paths=None, stop_after=None):
     budget, upper_candidates, _ = budgets(smoke)
     episodes = budget['PPO']
     rd = C.run_dir(root, seed, name)
@@ -290,6 +293,8 @@ def train_ppo_stage(name, seed, root, *, smoke=False, init_paths=None):
     frozen_sac = parameter_hash(learner.sac.actor) if proposed else None
     stage = C.STAGE['PPO']
     for n in range(completed+1, episodes+1):
+        if stop_after is not None and n > stop_after:
+            return
         started = time.perf_counter()
         streams = Streams(seed, stage, 0, n)
         adapter = perf.TrainingAdapter(scene, timing=clk)
