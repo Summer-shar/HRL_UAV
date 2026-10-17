@@ -1,8 +1,8 @@
 """Retrained sweep points: every learned method trained again, from scratch, at each value.
 
-Design v3 (PROTOCOL.md): cpu_ghz 9/11/12/14, load 0.6/0.8/0.9/1.1 and users
-(terminals per region) 7/10/16/19; the nominal value of each parameter is the
-main run.  Each point is its own output root  <base>/<param>=<value>/  holding
+Design v3 (PROTOCOL.md): cpu_ghz 9/11/12/14, load 0.6/0.8/0.9/1.1, users
+(terminals per region) 7/10/16/19 and u2u_mhz 1.5/2/2.5/4; the nominal value of
+each parameter is the main run.  Each point is its own output root  <base>/<param>=<value>/  holding
   scene.json   {"param", "value", "design": "v3", "prune_snapshots": true}
                -> common.load_scene(root)
   recipe.json  fine-tuning recipe v2 (as the main results)
@@ -13,9 +13,8 @@ Design-v3 points are evaluated on the full test split (scenarios 21-40, as the
 main table).  No nested sweeps or burst runs.  Resume snapshots (state.pt,
 which carry the replay buffer) are deleted when a stage finishes, to save disk.
 
-    python run.py retrain --out-base D:\\p2_sweeps_v3 --points cpu_ghz=9     # pilot
+    python run.py retrain --out-base D:\\p2_sweeps_v3 --main D:\\p2_runs_v2   # everything, pilots gate
     python run.py pilot-check --out-base D:\\p2_sweeps_v3 --main D:\\p2_runs_v2
-    python run.py retrain --out-base D:\\p2_sweeps_v3                       # everything
     python run.py retrain-report --out-base D:\\p2_sweeps_v3 --main D:\\p2_runs_v2
 
 Points may also be split between computers (--points) and merged with
@@ -45,13 +44,14 @@ def parse_points(text):
 
 
 def all_points(smoke=False):
-    """Every non-nominal value of the design-v3 retrained sweep: the pilot first,
-    then the parameters in C.RETRAIN_ORDER."""
+    """Every non-nominal value of the design-v3 retrained sweep: the pilot points
+    first, then the parameters in C.RETRAIN_ORDER."""
     d = C.design(smoke)
     points = [(p, C.point_value(p, v)) for p in C.RETRAIN_ORDER for v in d['retrain_sweeps'][p]
               if C.point_value(p, v) != C.point_value(p, C.NOMINAL[p])]
-    pilot = (C.PILOT_POINT[0], C.point_value(*C.PILOT_POINT))
-    return ([pilot] if pilot in points else []) + [pt for pt in points if pt != pilot]
+    pilots = [(p, C.point_value(p, v)) for p, v in C.PILOT_POINTS]
+    pilots = [pt for pt in pilots if pt in points]
+    return pilots + [pt for pt in points if pt not in pilots]
 
 
 def prepare_point(base, param, value, smoke=False, recipe='v2'):

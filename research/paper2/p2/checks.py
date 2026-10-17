@@ -63,37 +63,45 @@ def timing(main_root, points, seeds, workers, smoke=False):
     return '\n'.join(lines)
 
 
-def pilot_check(main_root, base, seeds, window=20, ratio=3.0, smoke=False):
-    """PROTOCOL.md section 5: for every seed, the pilot point's M1 must (a) improve
+def pilot_check(main_root, base, seeds, window=20, ratio=3.0, smoke=False, pilot=None):
+    """PROTOCOL.md section 5: for every seed, a pilot point's M1 must (a) improve
     (last `window` episodes better than the first `window`) and (b) end within
-    `ratio` x the nominal M1's last-window delay.  Returns (passed, text) with
+    `ratio` x the nominal M1's last-window delay.  pilot: one point name such as
+    'u2u_mhz=1.5' (default: every pilot point).  Returns (passed, text) with
     passed True / False / None (M1 not finished for every seed yet)."""
     from .pipeline import point_name
-    param, value = C.PILOT_POINT
-    name = point_name(param, C.point_value(param, value))
-    root = Path(base)/name
+    pilots = [(p, C.point_value(p, v)) for p, v in C.PILOT_POINTS]
+    if pilot is not None:
+        pilots = [pt for pt in pilots if point_name(*pt) == pilot]
+        if not pilots:
+            raise ValueError(f'{pilot} is not a pilot point ({[point_name(*pt) for pt in C.PILOT_POINTS]})')
     budget = C.design(smoke)['budget']['M1']
     window = min(window, max(budget//2, 1))
-    lines = [f'Pilot point {name}: M1 trainability check (last {window} episodes; threshold {ratio:g} x nominal)']
-    status = []
-    for seed in seeds:
-        rows = C.read_jsonl(C.run_dir(root, seed, 'M1')/'train.jsonl')
-        nominal = C.read_jsonl(C.run_dir(main_root, seed, 'M1')/'train.jsonl')
-        if len(rows) < budget:
-            lines.append(f'  seed {seed}: M1 has {len(rows)}/{budget} episodes - not finished yet')
-            status.append('pending')
-            continue
-        if len(nominal) < window or (not smoke and len(nominal) < budget):
-            raise ValueError(f'nominal M1 log of seed {seed} not found under {main_root}')
-        first = float(np.mean([r['truncated_delay_s'] for r in rows[:window]]))
-        last = float(np.mean([r['truncated_delay_s'] for r in rows[-window:]]))
-        ref = float(np.mean([r['truncated_delay_s'] for r in nominal[-window:]]))
-        improve, bounded = last < first, last <= ratio*ref
-        status.append('ok' if improve and bounded else 'fail')
-        lines.append(f'  seed {seed}: first {first:.3f} s -> last {last:.3f} s (nominal last {ref:.3f} s); '
-                     f'improves: {"yes" if improve else "NO"}; within {ratio:g}x nominal: {"yes" if bounded else "NO"}')
+    lines, status = [], []
+    for param, value in pilots:
+        name = point_name(param, value)
+        root = Path(base)/name
+        gated = sorted({p for p, g in C.GATED_BY.items() if (g[0], C.point_value(*g)) == (param, value)})
+        lines.append(f'Pilot point {name} (gates: {", ".join(gated)}): M1 trainability check '
+                     f'(last {window} episodes; threshold {ratio:g} x nominal)')
+        for seed in seeds:
+            rows = C.read_jsonl(C.run_dir(root, seed, 'M1')/'train.jsonl')
+            nominal = C.read_jsonl(C.run_dir(main_root, seed, 'M1')/'train.jsonl')
+            if len(rows) < budget:
+                lines.append(f'  seed {seed}: M1 has {len(rows)}/{budget} episodes - not finished yet')
+                status.append('pending')
+                continue
+            if len(nominal) < window or (not smoke and len(nominal) < budget):
+                raise ValueError(f'nominal M1 log of seed {seed} not found under {main_root}')
+            first = float(np.mean([r['truncated_delay_s'] for r in rows[:window]]))
+            last = float(np.mean([r['truncated_delay_s'] for r in rows[-window:]]))
+            ref = float(np.mean([r['truncated_delay_s'] for r in nominal[-window:]]))
+            improve, bounded = last < first, last <= ratio*ref
+            status.append('ok' if improve and bounded else 'fail')
+            lines.append(f'  seed {seed}: first {first:.3f} s -> last {last:.3f} s (nominal last {ref:.3f} s); '
+                         f'improves: {"yes" if improve else "NO"}; within {ratio:g}x nominal: {"yes" if bounded else "NO"}')
     passed = False if 'fail' in status else None if 'pending' in status else True
-    lines.append('PASS: start the full run' if passed else
+    lines.append('PASS: the gated points start' if passed else
                  'NOT FINISHED: run the check again later' if passed is None else
-                 'FAIL: stop and discuss before running any other point (do not change the protocol silently)')
+                 'FAIL: the gated points wait; stop and discuss (do not change the protocol silently)')
     return passed, '\n'.join(lines)

@@ -11,11 +11,12 @@
   python run.py burst --seed 4101 --method Proposed     # controlled overload burst (p2/burst.py)
   python run.py report [--seeds ...]
   Design-v3 retrained sweep (PROTOCOL.md): every learned method trained from scratch at
-  cpu_ghz 9/11/12/14, load 0.6/0.8/0.9/1.1, users 7/10/16/19 (terminals per region)
+  cpu_ghz 9/11/12/14, load 0.6/0.8/0.9/1.1, users 7/10/16/19 (terminals per region),
+  u2u_mhz 1.5/2/2.5/4
   python run.py verify --main D:\\p2_runs_v2 --work D:\\p2_verify   # this code reproduces the main run?
   python run.py timing --main D:\\p2_runs_v2 [--workers 8]           # expected duration on this computer
   python run.py retrain --out-base D:\\p2_sweeps_v3 --main D:\\p2_runs_v2  # all points (resumable); the
-                          # other points wait for the pilot (cpu_ghz=9) to pass pilot-check after its M1
+                          # other points wait for their pilot (cpu_ghz=9 or u2u_mhz=1.5) to pass pilot-check
   python run.py pilot-check --out-base D:\\p2_sweeps_v3 --main D:\\p2_runs_v2  # the same check by hand
   python run.py retrain-report --out-base D:\\p2_sweeps_v3 --main D:\\p2_runs_v2
   python run.py retrain-export --out-base D:\\p2_sweeps_v3 --dest D:\\p2_export_A.zip --machine A
@@ -67,6 +68,7 @@ def main(argv=None):
     p.add_argument('--dest', default=None, help='retrain-export: zip file to write')
     p.add_argument('--machine', default='A', help='retrain-export: label of this computer')
     p.add_argument('--work', default=None, help='verify: scratch folder (not inside --main)')
+    p.add_argument('--pilot', default=None, help='pilot-check: one pilot point, e.g. u2u_mhz=1.5 (default: all)')
     p.add_argument('--no-pilot-gate', action='store_true',
                    help='retrain: do not hold the other points until the pilot passes pilot-check')
     a = p.parse_args(argv)
@@ -90,7 +92,7 @@ def main(argv=None):
         if not a.main or not a.out_base:
             p.error('pilot-check needs --main and --out-base')
         passed, text = checks.pilot_check(Path(a.main), Path(a.out_base), a.seeds or C.design(a.smoke)['seeds'],
-                                          smoke=a.smoke)
+                                          smoke=a.smoke, pilot=a.pilot)
         print(text)
         return 0 if passed else 1
     if a.command in ('retrain', 'retrain-report', 'retrain-export'):

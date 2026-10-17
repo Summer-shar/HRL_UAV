@@ -33,9 +33,9 @@ def main():
     d = C.design(smoke=True)
     seed = d['seeds'][0]
     points = retrain.all_points(smoke=True)
-    assert points == [('cpu_ghz', 9.0), ('load', 0.8), ('users', 7)], points
+    assert points == [('cpu_ghz', 9.0), ('u2u_mhz', 1.5), ('load', 0.8), ('users', 7)], points
     full = retrain.all_points()
-    assert full[0] == C.PILOT_POINT and len(full) == 12 and ('users', 19) in full, full
+    assert full[:2] == list(C.PILOT_POINTS) and len(full) == 16 and ('users', 19) in full and ('u2u_mhz', 4.0) in full, full
     roots = [retrain.prepare_point(base, p, v, smoke=True) for p, v in points]
     assert retrain.prepare_point(base, *points[0], smoke=True) == roots[0]          # idempotent
     for bad in (lambda: retrain.prepare_point(base, 'users', 13), lambda: retrain.parse_points('users=7.5')):
@@ -48,9 +48,10 @@ def main():
     assert retrain.parse_points('cpu_ghz=9,users=19') == [('cpu_ghz', 9.0), ('users', 19)]
 
     # scene override is per root, nominal scene untouched
-    cpu_root, load_root, users_root = roots
+    cpu_root, u2u_root, load_root, users_root = roots
     assert C.load_scene(cpu_root)['base_scene']['resources']['cpu_hz'] == [9e9]*3
     assert C.load_scene(users_root)['base_scene']['num_users'] == 21
+    assert C.load_scene(u2u_root)['base_scene']['resources']['u2u_bandwidth_hz'] == 1.5e6
     assert C.load_base_scene()['base_scene']['num_users'] == 39
     assert C.load_scene(main_root) == C.load_base_scene()
     for root in roots + [main_root]:
@@ -69,21 +70,38 @@ def main():
     else:
         raise AssertionError('a gated plan needs the nominal root')
     jobs = pipeline.retrain_plan(base, points, d['seeds'], smoke=True, main=main_root)
-    gate = next(j for j in jobs if j.id == 'pilot_gate')
-    assert sorted(gate.deps) == [f'cpu_ghz=9/s{s}_train_M1' for s in d['seeds']] and gate.args[0] == 'pilot-check'
-    assert all('pilot_gate' in j.deps for j in jobs if j.id.startswith(('load=', 'users=')))
-    assert not any('pilot_gate' in j.deps for j in jobs if j.id.startswith('cpu_ghz=9/'))
+    gates = {j.id: j for j in jobs if j.id.startswith('pilot_gate')}
+    assert set(gates) == {'pilot_gate_cpu_ghz'}, gates        # smoke: no non-pilot U2U point to gate
+    assert sorted(gates['pilot_gate_cpu_ghz'].deps) == [f'cpu_ghz=9/s{s}_train_M1' for s in d['seeds']]
+    assert gates['pilot_gate_cpu_ghz'].args[0] == 'pilot-check' and '--pilot=cpu_ghz=9' in gates['pilot_gate_cpu_ghz'].args
+    assert all('pilot_gate_cpu_ghz' in j.deps for j in jobs if j.id.startswith(('load=', 'users=')))
+    fullplan = pipeline.retrain_plan(base, full, d['seeds'], smoke=True, main=main_root)
+    fgates = {j.id: j for j in fullplan if j.id.startswith('pilot_gate')}
+    assert set(fgates) == {'pilot_gate_cpu_ghz', 'pilot_gate_u2u_mhz'}, fgates
+    assert sorted(fgates['pilot_gate_u2u_mhz'].deps) == [f'u2u_mhz=1.5/s{s}_train_M1' for s in d['seeds']]
+    assert '--pilot=u2u_mhz=1.5' in fgates['pilot_gate_u2u_mhz'].args
+    for j in fullplan:
+        name = j.id.split('/')[0]
+        if name.startswith(('cpu_ghz=1', 'load=', 'users=')):
+            assert 'pilot_gate_cpu_ghz' in j.deps and 'pilot_gate_u2u_mhz' not in j.deps, j.id
+        elif name.startswith('u2u_mhz=') and name != 'u2u_mhz=1.5':
+            assert 'pilot_gate_u2u_mhz' in j.deps and 'pilot_gate_cpu_ghz' not in j.deps, j.id
+    assert not any(dep.startswith('pilot_gate') for j in jobs if j.id.startswith(('cpu_ghz=9/', 'u2u_mhz=1.5/'))
+                   for dep in j.deps)
     ungated = pipeline.retrain_plan(base, points, d['seeds'], smoke=True, gate=False)
-    assert not any(j.id == 'pilot_gate' or 'pilot_gate' in j.deps for j in ungated)
-    jobs = [j for j in jobs if j.id != 'pilot_gate']
+    assert not any(j.id.startswith('pilot_gate') or any(x.startswith('pilot_gate') for x in j.deps) for j in ungated)
+    alone = pipeline.retrain_plan(base, [('load', 0.8)], d['seeds'], smoke=True)     # its pilot not planned
+    assert not any(j.id.startswith('pilot_gate') or any(x.startswith('pilot_gate') for x in j.deps) for j in alone)
+    jobs = [j for j in jobs if not j.id.startswith('pilot_gate')]
     ids = [j.id for j in jobs]
-    assert len(ids) == len(set(ids)) and all(dep in ids or dep == 'pilot_gate' for j in jobs for dep in j.deps)
+    assert len(ids) == len(set(ids)) and all(dep in ids or dep in gates for j in jobs for dep in j.deps)
     assert not any('_sweep_' in i or '_burst_' in i or '_sat_' in i for i in ids)
     for j in jobs:
         assert j.id == f'{Path(j.out).name}/{j.marker}', (j.id, j.out, j.marker)
     prio = {name: {j.priority for j in jobs if j.id.startswith(name+'/')} for name in
             (pipeline.point_name(*p) for p in points)}
-    assert min(prio['cpu_ghz=9']) > max(prio['load=0.8']) and min(prio['load=0.8']) > max(prio['users=7']), prio
+    assert min(prio['cpu_ghz=9']) > max(prio['u2u_mhz=1.5']) > max(prio['load=0.8']) > max(prio['users=7']), prio
+    assert min(prio['u2u_mhz=1.5']) > max(prio['load=0.8']), prio
     print(f'retrain plan: {len(jobs)} jobs for {len(points)} points')
 
     # a point root evaluates its own scene on the test split

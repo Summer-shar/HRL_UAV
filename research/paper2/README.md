@@ -71,23 +71,24 @@ python run.py pipeline --out <新目录>
 
 ## 设计 v3：逐点从零重训（当前方案，单机）
 
-方案、判据和论文呈现见 [PROTOCOL.md](PROTOCOL.md)。CPU 9/11/12/14 GHz、负载系数 0.6/0.8/0.9/1.1、每区终端数 7/10/16/19（保持总负载不变），共 12 个点；每个点所有学习算法按主实验流程从零训练，在 20 个测试场景上评估；标称点即主实验。
+方案、判据和论文呈现见 [PROTOCOL.md](PROTOCOL.md)。CPU 9/11/12/14 GHz、负载系数 0.6/0.8/0.9/1.1、每区终端数 7/10/16/19（保持总负载不变）、U2U 总带宽 1.5/2/2.5/4 MHz，共 16 个点；每个点所有学习算法按主实验流程从零训练，在 20 个测试场景上评估；标称点即主实验。
 
 ```powershell
 python tests\test_perf_equivalence.py 150         # 加速补丁逐位等价（含用户数场景与 Lite 观测）
 python tests\test_users.py                        # 用户数场景
 python tests\test_retrain.py                      # 扫参管道（不需要 torch）
+python tests\test_checks.py                       # 试点检查与耗时估计（不需要 torch）
 python run.py verify --main D:\p2_runs_v2 --work D:\p2_verify      # 新代码复现主实验记录？
-python run.py retrain --out-base D:\p2_smoke_v3 --points users=7 --smoke --seeds 4101 --workers 4
+python run.py retrain --out-base D:\p2_smoke_v3 --points users=7,u2u_mhz=1.5 --smoke --seeds 4101 --workers 4
 python run.py timing --main D:\p2_runs_v2 --workers 8              # 预计耗时
 python run.py retrain --out-base D:\p2_sweeps_v3 --main D:\p2_runs_v2 --workers 8   # 全部点，可续跑
-python run.py pilot-check --out-base D:\p2_sweeps_v3 --main D:\p2_runs_v2         # 试点检查（任务图里会自动做）
+python run.py pilot-check --out-base D:\p2_sweeps_v3 --main D:\p2_runs_v2         # 两个试点的检查（任务图里会自动做）
 python run.py retrain-report --out-base D:\p2_sweeps_v3 --main D:\p2_runs_v2      # 随时汇总
 ```
 
 - `retrain-report` 输出 `results\retrain_summary.md`（各点完成情况、扫参表、配对检验、训练曲线检查）、`retrain_sweep_<参数>.csv`、`retrain_paired.csv`、`retrain_convergence.csv`、`retrain_stats.json`。
-- 优先级：试点 > CPU > 负载系数 > 用户数，整条曲线依次完成；空闲进程会提前开始后面的点。
-- 试点门控：试点（CPU 9 GHz）三个种子的 M1 完成后，任务 `pilot_gate` 自动运行 `pilot-check`；不通过时其他点全部挂起，只有试点继续（见 PROTOCOL.md 第 5 节）。
+- 优先级：两个试点 > CPU > 负载系数 > 用户数 > U2U，整条曲线依次完成；空闲进程会提前开始后面的点。
+- 试点门控（PROTOCOL.md 第 5 节）：CPU 9 GHz 三个种子的 M1 完成后，`pilot_gate_cpu_ghz` 自动检查，放行其余 CPU、负载系数和用户数点；U2U 1.5 MHz 的 M1 完成后，`pilot_gate_u2u_mhz` 放行 U2U 2/2.5/4 MHz。不通过时对应的点挂起（日志 `_jobs\pilot_gate_<参数>.log`），其余照常。
 
 ## 重训扫参（设计 v2，已停用）：每个参数点重新训练
 

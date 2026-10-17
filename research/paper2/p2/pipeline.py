@@ -77,36 +77,47 @@ def point_name(param, value):
 
 def retrain_plan(base, points, seeds, smoke=False, first=(), main=None, gate=True):
     """All retrained sweep points in one job graph.  Priorities (higher first):
-    points in `first`, then the pilot point, then the parameters in
+    points in `first`, then the pilot points, then the parameters in
     C.RETRAIN_ORDER, so that on one computer whole curves finish one after the
     other while idle workers still pick up later points.
 
-    Pilot gate (PROTOCOL.md section 5): when the pilot point is planned together
-    with other points, a job 'pilot_gate' runs `run.py pilot-check` as soon as the
-    pilot's M1 runs are finished, and every job of the other points depends on
-    it; if the check fails, only the pilot point goes on.  `main` is the nominal
-    output root the check compares with."""
+    Pilot gates (PROTOCOL.md section 5): for every pilot point planned together
+    with points it gates (C.GATED_BY), a job 'pilot_gate_<param>' runs
+    `run.py pilot-check --pilot <point>` as soon as that pilot's M1 runs are
+    finished, and every job of the gated points depends on it; if the check
+    fails, those points wait while everything else goes on.  `main` is the
+    nominal output root the check compares with."""
     jobs = []
     first = {(p, float(v)) for p, v in first}
     order = {p: len(C.RETRAIN_ORDER)-i for i, p in enumerate(C.RETRAIN_ORDER)}
-    pilot = (C.PILOT_POINT[0], float(C.PILOT_POINT[1]))
-    gated = gate and any((p, float(v)) == pilot for p, v in points) and len(points) > 1
-    if gated and main is None:
+    pilots = {(p, float(v)) for p, v in C.PILOT_POINTS}
+    planned = {(p, float(v)) for p, v in points}
+    gate_of = {}
+    if gate:
+        for param, value in points:
+            g = C.GATED_BY.get(param)
+            key = (param, float(value))
+            if g is not None and (g[0], float(g[1])) in planned and key not in pilots:
+                gate_of[key] = f'pilot_gate_{g[0]}'
+    if gate_of and main is None:
         raise ValueError('the pilot gate needs the nominal output root (--main), or switch it off (--no-pilot-gate)')
     for param, value in points:
         name = point_name(param, value)
         key = (param, float(value))
-        boost = (10000 if key in first else 0) + (5000 if key == pilot else 0) + 1000*order.get(param, 0)
+        boost = (10000 if key in first else 0) + (5000 if key in pilots else 0) + 1000*order.get(param, 0)
         point_jobs = plan(seeds, smoke, include_sweeps=False, include_burst=False, prefix=name+'/',
                           out=Path(base)/name, priority_offset=boost)
-        if gated and key != pilot:
+        if key in gate_of:
             for j in point_jobs:
-                j.deps.append('pilot_gate')
+                j.deps.append(gate_of[key])
         jobs += point_jobs
-    if gated:
-        pilot_m1 = [f'{point_name(*pilot)}/s{s}_train_M1' for s in seeds]
-        args = ['pilot-check', f'--out-base={base}', f'--main={main}', f'--seeds={",".join(map(str, seeds))}']
-        jobs.append(Job('pilot_gate', args + (['--smoke'] if smoke else []), pilot_m1, 20000, Path(base), 'pilot_gate'))
+    for gate_id in sorted(set(gate_of.values())):
+        param = gate_id[len('pilot_gate_'):]
+        value = next(float(v) for p, v in C.PILOT_POINTS if p == param)
+        pilot_name = point_name(param, value)
+        args = ['pilot-check', f'--out-base={base}', f'--main={main}', f'--pilot={pilot_name}',
+                f'--seeds={",".join(map(str, seeds))}'] + (['--smoke'] if smoke else [])
+        jobs.append(Job(gate_id, args, [f'{pilot_name}/s{s}_train_M1' for s in seeds], 20000, Path(base), gate_id))
     return jobs
 
 

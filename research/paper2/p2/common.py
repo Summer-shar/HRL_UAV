@@ -91,9 +91,16 @@ NOMINAL = dict(cpu_ghz=10.0, load=1.0, u2u_mhz=3.0, users=13)
 # business profile is kept at its nominal value (see users_scene), so all users
 # points share demand/capacity 0.82 and only the number of terminals changes.
 RETRAIN_SWEEPS = dict(cpu_ghz=(9.0, 10.0, 11.0, 12.0, 14.0), load=(0.6, 0.8, 0.9, 1.0, 1.1),
-                      users=(7, 10, 13, 16, 19))
-RETRAIN_ORDER = ('cpu_ghz', 'load', 'users')   # run order on one computer
-PILOT_POINT = ('cpu_ghz', 9.0)                 # hardest point (demand/capacity 0.92), run first
+                      users=(7, 10, 13, 16, 19), u2u_mhz=(1.5, 2.0, 2.5, 3.0, 4.0))
+RETRAIN_ORDER = ('cpu_ghz', 'load', 'users', 'u2u_mhz')   # run order on one computer
+# Pilot points (PROTOCOL.md section 5), run first; each gates the parameters
+# whose trainability risk it represents: CPU 9 GHz (demand/capacity 0.92) for the
+# load-related sweeps, U2U 1.5 MHz (the earlier retrain at 2 MHz had an M1 that
+# did not converge) for the U2U sweep.
+PILOT_POINTS = (('cpu_ghz', 9.0), ('u2u_mhz', 1.5))
+GATED_BY = dict(cpu_ghz=('cpu_ghz', 9.0), load=('cpu_ghz', 9.0), users=('cpu_ghz', 9.0),
+                u2u_mhz=('u2u_mhz', 1.5))
+PILOT_POINT = PILOT_POINTS[0]                  # kept for old imports
 SELECTION_METRIC = 'cost_per_s'             # the objective both layers optimise
 TRAJECTORY_SCENARIO = 21
 
@@ -339,7 +346,7 @@ def design(smoke=False):
                 lower_candidates=(0, 2, 3), dev=(1, 2), test=(21, 22), sweep_scenarios=(21,),
                 sweeps=dict(cpu_ghz=(10.0, 12.0), load=(0.8, 1.0), u2u_mhz=(2.0, 3.0)),
                 saturated=dict(cpu_ghz=(), load=(), u2u_mhz=()),
-                retrain_sweeps=dict(cpu_ghz=(9.0, 10.0), load=(0.8, 1.0), users=(7, 13)),
+                retrain_sweeps=dict(cpu_ghz=(9.0, 10.0), load=(0.8, 1.0), users=(7, 13), u2u_mhz=(1.5, 3.0)),
                 seeds=(4101,))
 
 
