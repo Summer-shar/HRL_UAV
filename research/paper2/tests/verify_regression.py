@@ -42,14 +42,25 @@ def code_digest():
     return h.hexdigest()[:12]
 
 
-def compare(new, old, skip=('wall_seconds',)):
-    """First difference between two JSON-like records, or None."""
+# Top-level record fields that later pipeline versions added on purpose.  The
+# main run's M1 / M2 / TFOO / TOO / NC logs come from the v1 run (commit
+# d458a73, carried into the v2 root by run.py revise) and lack them; a field
+# that exists only in the new record is listed, never treated as a difference.
+ADDED_FIELDS = {'actor_lr': 'SAC rows, commit cfdcf3f (fine-tuning recipe v2)',
+                'users': 'evaluation rows of design-v3 users points (never at 13 per region)'}
+
+
+def compare(new, old, skip=('wall_seconds',), top=True):
+    """First difference between two JSON-like records, or None.  At the top level a
+    field present only in the new record is tolerated when it is in ADDED_FIELDS."""
     if isinstance(new, dict) and isinstance(old, dict):
         keys = (set(new) | set(old)) - set(skip)
         for k in sorted(keys, key=str):
+            if k not in old and k in new and top and k in ADDED_FIELDS:
+                continue
             if k not in new or k not in old:
                 return f'{k}: only in {"new" if k in new else "main run"}'
-            d = compare(new[k], old[k], ())
+            d = compare(new[k], old[k], (), top=False)
             if d:
                 return f'{k}.{d}'
         return None
@@ -57,7 +68,7 @@ def compare(new, old, skip=('wall_seconds',)):
         if len(new) != len(old):
             return f'length {len(new)} != {len(old)}'
         for i, (a, b) in enumerate(zip(new, old)):
-            d = compare(a, b, ())
+            d = compare(a, b, (), top=False)
             if d:
                 return f'[{i}].{d}'
         return None

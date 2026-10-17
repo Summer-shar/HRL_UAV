@@ -73,3 +73,5 @@ CPU 9 GHz（负载率 0.92，最难的点）最先运行。`run.py retrain --mai
 ## 变更记录
 
 （运行开始后如有变更，在此记录日期、原因与受影响的点。）
+
+- 2026-10-17（任何 v3 运行之前）：`tests/verify_regression.py` 修正。主实验中 M1 / M2 / TFOO / TOO / NC 的训练日志来自 v1 运行（commit d458a73，经 `run.py revise` 带入 v2 目录），没有 commit cfdcf3f 才加入的 `actor_lr` 字段；比较时新记录多出的这类字段只列出、不算差异。实验本身不受影响。
