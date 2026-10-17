@@ -1,0 +1,14 @@
+# conda env create -f environment.yml && conda activate mhtpco
+# then install torch (README.md, section 1):
+#   pip install torch==2.7.0 --index-url https://download.pytorch.org/whl/cu128
+name: mhtpco
+channels:
+  - conda-forge
+dependencies:
+  - python=3.9
+  - pip
+  - pip:
+      - numpy==1.26.4
+      - scipy==1.13.1
+      - cvxpy==1.7.1
+      - matplotlib>=3.7,<3.10

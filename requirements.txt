@@ -1,0 +1,8 @@
+# Runtime dependencies (ranges).  Install torch separately with the CUDA build that
+# matches your GPU (README.md, section 1); exact historical versions: requirements-lock.txt
+numpy>=1.26,<2.3
+scipy>=1.11
+cvxpy>=1.6       # TFOO baseline (CLARABEL solver, installed with cvxpy)
+clarabel
+matplotlib>=3.7
+torch>=2.7

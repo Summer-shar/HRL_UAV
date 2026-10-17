@@ -1,0 +1,10 @@
+# Historical validation environment of the v2.x code (Windows, NVIDIA RTX 5060 series, CUDA 12.8):
+#   Python 3.9.25
+# Results are bitwise reproducible only in the environment that produced them; other versions
+# run the same code but may differ in the last digits (torch kernels, CVX solver).
+# python run.py check-env prints the versions of the environment in use; record them with your results.
+numpy==1.26.4
+scipy==1.13.1
+cvxpy==1.7.1
+# torch==2.7.0.dev20250227+cu128 (nightly build, no longer on the index): the closest release is
+#   pip install torch==2.7.0 --index-url https://download.pytorch.org/whl/cu128

@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mhtpco-uav-mec"
+version = "2.5.0"
+description = "Multi-timescale hierarchical RL for multi-UAV mobile edge computing (paper-2 experiments)"
+readme = "README.md"
+requires-python = ">=3.9,<3.13"
+dependencies = ["numpy>=1.26,<2.3", "scipy>=1.11", "cvxpy>=1.6", "clarabel", "matplotlib>=3.7", "torch>=2.7"]
+
+# Optional: "pip install -e ." makes hrl_uav / hrl_v2 / p2 importable from anywhere.
+# Use the editable (-e) install: run.py and the job runner work from this folder.
+[tool.setuptools]
+package-dir = {"" = "src"}
+packages = ["hrl_uav", "hrl_v2", "hrl_v2.design", "p2"]
+
+[tool.setuptools.package-data]
+hrl_v2 = ["configs/*.json"]
