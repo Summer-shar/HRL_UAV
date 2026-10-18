@@ -1,8 +1,8 @@
 # 可行性阶段：状态
 
-**运行中：扫参管道冒烟**
+**运行中：扫参管道冒烟完成**
 
-最后更新：2026-10-18 17:23:31（运行中每 10 分钟更新一次；如果这个时间停在很久以前，说明程序已经退出）
+最后更新：2026-10-18 17:24:39（运行中每 10 分钟更新一次；如果这个时间停在很久以前，说明程序已经退出）
 
 - 主实验目录：`D:\p2_runs_v2`
 - 输出目录：`D:\p2_sweeps_v3`
@@ -14,7 +14,7 @@
 | 1 | 环境检查 | 通过 | 2026-10-18 17:15:11 | 2026-10-18 17:15:36 | 0 分钟 |
 | 2 | 自检脚本 | 通过 | 2026-10-18 17:15:43 | 2026-10-18 17:17:01 | 1 分钟 |
 | 3 | 与主实验记录比较 | 通过 | 2026-10-18 17:17:06 | 2026-10-18 17:23:26 | 6 分钟 |
-| 4 | 扫参管道冒烟 | 运行中 | 2026-10-18 17:23:31 |  |  |
+| 4 | 扫参管道冒烟 | 通过 | 2026-10-18 17:23:31 | 2026-10-18 17:24:39 | 1 分钟 |
 | 5 | 两个试点（3 个种子，完整流程） | 未开始 |  |  |  |
 | 6 | 试点检查、耗时、汇总 | 未开始 |  |  |  |
 
@@ -73,4 +73,21 @@ test  CA       scenarios [21, 22]: identical
 note: actor_lr exists only in the new records (SAC training rows, added in commit cfdcf3f (fine-tuning recipe v2))
 note: u2u_mhz exists only in the new records (evaluation records, added in commit d458a73 (U2U sweep); the main run's TFOO / TOO / NC test records were written before it)
 ALL IDENTICAL -> D:\p2_sweeps_v3\_feasibility\verify\verify_db8c14e65adc.json
+```
+
+## 扫参管道冒烟：输出摘录
+
+```
+START users=7/report
+DONE  u2u_mhz=1.5/s4101_test_TOO (0.1 min) [55/60]
+DONE  u2u_mhz=1.5/s4101_test_CA (0.1 min) [56/60]
+DONE  users=7/report (0.0 min) [57/60]
+DONE  u2u_mhz=1.5/s4101_test_NC (0.1 min) [58/60]
+DONE  u2u_mhz=1.5/s4101_test_HoverSAC (0.1 min) [59/60]
+START u2u_mhz=1.5/report
+DONE  u2u_mhz=1.5/report (0.0 min) [60/60]
+All jobs finished.
+
+=== 2026-10-18 17:24:38  D:\HRL_UAV_V2\.venv\Scripts\python.exe D:\p2_code\run.py retrain-report --out-base=D:\p2_sweeps_v3\_feasibility\smoke --main=D:\p2_runs_v2 --points=users=7,u2u_mhz=1.5 --smoke --seeds=4101
+D:\p2_sweeps_v3\_feasibility\smoke\results
 ```

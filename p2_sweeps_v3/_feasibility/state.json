@@ -25,8 +25,11 @@
       "excerpt": "train M1       3 episodes: identical (fields added after the main run, not compared: actor_lr)\ntrain M2       5 episodes: identical\ntrain M3       3 episodes: identical\ntrain HoverSAC 3 episodes: identical\ntrain TFOO     5 episodes: identical\ntrain TOO      5 episodes: identical\ntrain NC       5 episodes: identical\ntest  Proposed scenarios [21, 22]: identical\ntest  TFOO     scenarios [21, 22]: identical (fields added after the main run, not compared: u2u_mhz)\ntest  TOO      scenarios [21, 22]: identical (fields added after the main run, not compared: u2u_mhz)\ntest  NC       scenarios [21, 22]: identical (fields added after the main run, not compared: u2u_mhz)\ntest  HoverSAC scenarios [21, 22]: identical\ntest  CA       scenarios [21, 22]: identical\nnote: actor_lr exists only in the new records (SAC training rows, added in commit cfdcf3f (fine-tuning recipe v2))\nnote: u2u_mhz exists only in the new records (evaluation records, added in commit d458a73 (U2U sweep); the main run's TFOO / TOO / NC test records were written before it)\nALL IDENTICAL -> D:\\p2_sweeps_v3\\_feasibility\\verify\\verify_db8c14e65adc.json"
     },
     "smoke": {
-      "status": "running",
-      "started": "2026-10-18 17:23:31"
+      "status": "passed",
+      "started": "2026-10-18 17:23:31",
+      "ended": "2026-10-18 17:24:39",
+      "seconds": 63,
+      "excerpt": "START users=7/report\nDONE  u2u_mhz=1.5/s4101_test_TOO (0.1 min) [55/60]\nDONE  u2u_mhz=1.5/s4101_test_CA (0.1 min) [56/60]\nDONE  users=7/report (0.0 min) [57/60]\nDONE  u2u_mhz=1.5/s4101_test_NC (0.1 min) [58/60]\nDONE  u2u_mhz=1.5/s4101_test_HoverSAC (0.1 min) [59/60]\nSTART u2u_mhz=1.5/report\nDONE  u2u_mhz=1.5/report (0.0 min) [60/60]\nAll jobs finished.\n\n=== 2026-10-18 17:24:38  D:\\HRL_UAV_V2\\.venv\\Scripts\\python.exe D:\\p2_code\\run.py retrain-report --out-base=D:\\p2_sweeps_v3\\_feasibility\\smoke --main=D:\\p2_runs_v2 --points=users=7,u2u_mhz=1.5 --smoke --seeds=4101\nD:\\p2_sweeps_v3\\_feasibility\\smoke\\results"
     },
     "pilots": {
       "status": "pending"
