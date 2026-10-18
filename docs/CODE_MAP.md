@@ -53,6 +53,7 @@
 | `pipeline.py` | 带依赖的多进程任务调度（可续跑），主实验与扫参的任务图 |
 | `retrain.py` | 扫参点目录的建立、完成判断、记录导出 |
 | `checks.py` | 耗时估计（`timing`）、试点检查（`pilot-check`）、进度（`progress`） |
+| `feasibility.py` | 可行性阶段一条命令（`feasibility`）：检查、扫参冒烟、两个试点，状态写入 `FEASIBILITY.md` |
 | `perf.py` | 逐位等价的仿真加速 |
 | `burst.py` | 受控突发业务 |
 | `positioning.py` | 轨迹的定位分析（论文未使用） |

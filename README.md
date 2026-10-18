@@ -50,6 +50,8 @@ python tests\test_users.py           # 用户数场景的生成与观测维度
 python tests\test_retrain.py         # 扫参任务图、门控、报表（不需要 torch）
 python tests\test_checks.py          # 试点检查、耗时估计、进度（不需要 torch）
 python tests\test_eval_report.py     # 评估与报表（不需要 torch）
+python tests\test_verify_compare.py  # verify 的记录比较（不需要 torch）
+python tests\test_feasibility.py     # 可行性命令的流程与状态文件（不需要 torch）
 python tests\test_perf_equivalence.py 150   # 加速补丁与原始仿真逐位一致，每行都应是 identical
 python tests\test_identity.py        # 随机数派生与原实现一致（需要 torch）
 ```
@@ -60,7 +62,7 @@ python tests\test_identity.py        # 随机数派生与原实现一致（需�
 python run.py verify --main D:\p2_runs_v2 --work D:\p2_verify     # 半小时到一小时；最后一行应为 ALL IDENTICAL
 ```
 
-它用本代码重跑各训练阶段的前 3–5 个回合和各算法的 2 个测试场景，与主实验记录逐项比较（除耗时外）。主实验目录只读。
+它用本代码重跑各训练阶段的前 3–5 个回合和各算法的 2 个测试场景，与主实验记录逐项比较（除耗时外，每个字段都比，列出全部不同的值）。主实验目录只读。主实验里有些记录由更早版本的流水线写成，缺少后来新增的字段（`actor_lr`、`u2u_mhz`），这些字段会以 `note:` 列出，不算差异。
 
 **设备与进程**：`check-env` 会显示 `P2_DEVICE`（不设时有显卡用 `cuda:0`，否则 `cpu`）和 `P2_THREADS`（不设时 2）。要和已有结果逐位一致，用主实验时的设备：它写在 `<主实验目录>\seed_4101\train\M1\contract.json` 的 `"device"` 字段。`python run.py bench` 可以实测 CPU 与 GPU 哪个快。设置方法：`$env:P2_DEVICE="cuda:0"`、`$env:P2_THREADS="2"`。
 
@@ -91,16 +93,34 @@ python run.py report --out D:\p2_main                            # 只重做表�
 
 共 16 个非标称点。每个点上所有学习算法都按主实验流程、同样的训练量从零训练，在 20 个测试场景上评估。
 
-**第一步：可行性（只跑两个最难的点）**
+**第一步：可行性（一条命令）**
 
 ```powershell
-python run.py retrain --out-base D:\p2_sweeps_v3 --main D:\p2_runs_v2 --points "cpu_ghz=9,u2u_mhz=1.5" --workers 8
-python run.py pilot-check --out-base D:\p2_sweeps_v3 --main D:\p2_runs_v2      # 两个试点的 M1 是否可训练
-python run.py progress --out-base D:\p2_sweeps_v3 --workers 8                  # 实测每点耗时，估计剩余时间
-python run.py retrain-report --out-base D:\p2_sweeps_v3 --main D:\p2_runs_v2   # 汇总表与训练曲线检查
+python run.py feasibility --main D:\p2_runs_v2 --out-base D:\p2_sweeps_v3
 ```
 
-CPU 9 GHz 计算最紧，U2U 1.5 MHz 通信最紧。两个点各 3 个种子跑完整流程，用来确认在最难的条件下能训练、单点耗时可以接受。`pilot-check` 的判据：每个种子的 M1 最后 20 回合比最初 20 回合好，且不超过主实验 M1 的 3 倍。
+依次运行：
+
+1. 环境检查；
+2. 全部自检脚本；
+3. 与主实验记录比较（`verify`）；
+4. 用户数 7 与 U2U 1.5 MHz 的扫参冒烟；
+5. 两个最难的点（CPU 9 GHz 计算最紧，U2U 1.5 MHz 通信最紧），3 个种子跑完整流程；
+6. 试点检查、按实测耗时估计剩余时间、汇总表。
+
+**状态始终写在 `D:\p2_sweeps_v3\FEASIBILITY.md`**：
+
+- 内容包括每一步是否通过、开始与结束时间；第 5 步运行时每 10 分钟更新一次进度；
+- 任何一步失败就停在那一步，文件开头写明哪一步、哪条命令、日志在哪里；
+- 修正后原样重跑同一条命令，已通过的检查自动跳过，第 5 步从断点继续。
+
+其他设置：
+
+- 不设 `P2_DEVICE` 时自动取主实验 M1 的设备；
+- 进程数默认取“逻辑核数 ÷ P2_THREADS”（最多 8），可用 `--workers` 改；
+- 第 5 步推测约半天到一天。
+
+试点检查的判据：每个种子的 M1 最后 20 回合比最初 20 回合好，且不超过主实验 M1 的 3 倍。也可以手动分步运行：`retrain --points "cpu_ghz=9,u2u_mhz=1.5"`、`pilot-check`、`progress`、`retrain-report`。
 
 **第二步：其余点**（第一步通过后）
 

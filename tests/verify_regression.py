@@ -4,7 +4,10 @@ Re-runs, with the code of THIS checkout, the first episodes of every training
 stage of one seed (M1, M3, HoverSAC: 3 episodes; M2, TFOO, TOO, NC: 5 episodes,
 i.e. up to and including the first PPO update) and the test runs of every
 method on two test scenarios, and compares every logged value with the main
-run's own records (everything except wall_seconds).  The main run is only read.
+run's own records (everything except wall_seconds; every field is compared and
+every value difference counted, not only the first).  Fields that the pipeline
+added after the main run was recorded (ADDED_FIELDS) are listed, not compared.
+The main run is only read.
 
     python tests/verify_regression.py --main D:\\p2_runs_v2 --work D:\\p2_verify
 
@@ -43,36 +46,66 @@ def code_digest():
 
 
 # Top-level record fields that later pipeline versions added on purpose.  The
-# main run's M1 / M2 / TFOO / TOO / NC logs come from the v1 run (commit
-# d458a73, carried into the v2 root by run.py revise) and lack them; a field
-# that exists only in the new record is listed, never treated as a difference.
-ADDED_FIELDS = {'actor_lr': 'SAC rows, commit cfdcf3f (fine-tuning recipe v2)',
-                'users': 'evaluation rows of design-v3 users points (never at 13 per region)'}
+# main run carries records of older pipeline versions (run.py revise): its
+# M1 / M2 / TFOO / TOO / NC training logs come from the v1 run (commit d458a73)
+# and its TFOO / TOO / NC test records from the first run before d458a73.  A
+# field that exists only in the new record and is listed here is reported, never
+# treated as a difference.  The list was checked against copies of every
+# main-run record (paper repository results_v2/raw, results_real/raw): these are
+# the only fields the new code writes that some main-run records lack.
+ADDED_FIELDS = {'actor_lr': 'SAC training rows, added in commit cfdcf3f (fine-tuning recipe v2)',
+                'u2u_mhz': 'evaluation records, added in commit d458a73 (U2U sweep); the main run\'s '
+                           'TFOO / TOO / NC test records were written before it',
+                'users': 'evaluation records of design-v3 users points (never at 13 per region)'}
+
+
+def differences(new, old, skip=(), path='', top=True):
+    """Every difference between two JSON-like records, as (kind, path, detail).
+    kind 'added': a top-level field in ADDED_FIELDS present only in the new record;
+    kind 'value': anything else (a different value, or a field missing on one side)."""
+    if isinstance(new, dict) and isinstance(old, dict):
+        out = []
+        for k in sorted((set(new) | set(old)) - set(skip), key=str):
+            p = f'{path}.{k}' if path else str(k)
+            if k not in old:
+                out.append(('added' if top and k in ADDED_FIELDS else 'value', p, 'only in new'))
+            elif k not in new:
+                out.append(('value', p, 'only in main run'))
+            else:
+                out += differences(new[k], old[k], (), p, False)
+        return out
+    if isinstance(new, (list, tuple)) and isinstance(old, (list, tuple)):
+        if len(new) != len(old):
+            return [('value', path, f'length {len(new)} != {len(old)}')]
+        out = []
+        for i, (a, b) in enumerate(zip(new, old)):
+            out += differences(a, b, (), f'{path}[{i}]', False)
+        return out
+    return [] if new == old else [('value', path, f'{new!r} != {old!r}')]
 
 
 def compare(new, old, skip=('wall_seconds',), top=True):
-    """First difference between two JSON-like records, or None.  At the top level a
-    field present only in the new record is tolerated when it is in ADDED_FIELDS."""
-    if isinstance(new, dict) and isinstance(old, dict):
-        keys = (set(new) | set(old)) - set(skip)
-        for k in sorted(keys, key=str):
-            if k not in old and k in new and top and k in ADDED_FIELDS:
-                continue
-            if k not in new or k not in old:
-                return f'{k}: only in {"new" if k in new else "main run"}'
-            d = compare(new[k], old[k], (), top=False)
-            if d:
-                return f'{k}.{d}'
-        return None
-    if isinstance(new, (list, tuple)) and isinstance(old, (list, tuple)):
-        if len(new) != len(old):
-            return f'length {len(new)} != {len(old)}'
-        for i, (a, b) in enumerate(zip(new, old)):
-            d = compare(a, b, (), top=False)
-            if d:
-                return f'[{i}].{d}'
-        return None
-    return None if new == old else f'{new!r} != {old!r}'
+    """First value difference as text, or None (fields in ADDED_FIELDS tolerated)."""
+    d = [x for x in differences(new, old, skip, top=top) if x[0] == 'value']
+    return f'{d[0][1]}: {d[0][2]}' if d else None
+
+
+def summarize(pairs):
+    """pairs: [(label, new, old, skip)] -> (value differences as text, sorted added fields)."""
+    values, added = [], set()
+    for label, new, old, skip in pairs:
+        for kind, path, detail in differences(new, old, skip):
+            if kind == 'added':
+                added.add(path)
+            else:
+                values.append(f'{label}: {path}: {detail}')
+    return values, sorted(added)
+
+
+def verdict(values, added):
+    if values:
+        return f'DIFFERENT ({len(values)} values): ' + values[0]
+    return 'identical' + (f' (fields added after the main run, not compared: {", ".join(added)})' if added else '')
 
 
 def main(argv=None):
@@ -118,18 +151,20 @@ def main(argv=None):
             (learn.train_sac_stage if kind == 'sac' else learn.train_ppo_stage)(name, seed, root, init_paths=init)
             new = C.read_jsonl(C.run_dir(root, seed, name)/'train.jsonl')
             old = C.read_jsonl(msd/'train'/name/'train.jsonl')[:len(new)]
-            diffs = [f'episode {r.get("episode")}: {d}' for r, o in zip(new, old) for d in [compare(r, o)] if d]
+            diffs, added = summarize([(f'episode {r.get("episode")}', r, o, ('wall_seconds',))
+                                      for r, o in zip(new, old)])
             if len(old) < len(new):
                 diffs.append(f'main run has only {len(old)} logged episodes')
-            results['train'][name] = dict(episodes=len(new), identical=not diffs, first_difference=diffs[:3],
+            results['train'][name] = dict(episodes=len(new), identical=not diffs, value_differences=len(diffs),
+                                          first_differences=diffs[:10], added_fields=added,
                                           seconds=round(time.perf_counter()-t0, 1))
-            print(f'train {name:8s} {len(new)} episodes: {"identical" if not diffs else "DIFFERENT: "+diffs[0]}', flush=True)
+            print(f'train {name:8s} {len(new)} episodes: {verdict(diffs, added)}', flush=True)
     scenarios = [int(s) for s in a.scenarios.split(',') if s]
     scene = C.load_scene()
     for method in C.METHODS:
         m_, learner_path, upper_path = evaluate.method_paths(main_root, seed, method)
         make = evaluate.factory(m_, seed, learner_path, upper_path)
-        diffs = []
+        diffs, pairs = [], []
         for sc in scenarios:
             out = work/f'test_{label}'/method/f'{sc:02d}.json'
             if out.exists():
@@ -142,16 +177,21 @@ def main(argv=None):
             if not old_path.exists():
                 diffs.append(f'scenario {sc}: no main-run record')
                 continue
-            d = compare(C.read_json(out), C.read_json(old_path), skip=('wall_seconds', 'learner', 'upper'))
-            if d:
-                diffs.append(f'scenario {sc}: {d}')
-        results['test'][method] = dict(scenarios=scenarios, identical=not diffs, first_difference=diffs[:3])
-        print(f'test  {method:8s} scenarios {scenarios}: {"identical" if not diffs else "DIFFERENT: "+diffs[0]}', flush=True)
+            pairs.append((f'scenario {sc}', C.read_json(out), C.read_json(old_path), ('wall_seconds', 'learner', 'upper')))
+        values, added = summarize(pairs)
+        diffs += values
+        results['test'][method] = dict(scenarios=scenarios, identical=not diffs, value_differences=len(diffs),
+                                       first_differences=diffs[:10], added_fields=added)
+        print(f'test  {method:8s} scenarios {scenarios}: {verdict(diffs, added)}', flush=True)
     results['perf_patches_active'] = perf.apply()
     ok = all(v['identical'] for v in results['train'].values()) and all(v['identical'] for v in results['test'].values())
     results['all_identical'] = ok
+    added = sorted({f for part in ('train', 'test') for v in results[part].values() for f in v['added_fields']})
+    results['added_fields'] = {f: ADDED_FIELDS[f] for f in added}
     out = work/f'verify_{label}.json'
     C.write_json(out, results)
+    for f in added:
+        print(f'note: {f} exists only in the new records ({ADDED_FIELDS[f]})')
     print(('ALL IDENTICAL' if ok else 'DIFFERENCES FOUND') + f' -> {out}')
     return 0 if ok else 1
 
