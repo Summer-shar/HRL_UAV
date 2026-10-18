@@ -1,27 +1,4 @@
-
-=== start 2026-10-18 22:13:53 ===
-[TOO seed 4101 1/400] delay=41.4890s cost/s=279.1976 step=10.8m wall=62.8s
-[TOO seed 4101 2/400] delay=49.1959s cost/s=343.9276 step=10.6m wall=79.0s
-[TOO seed 4101 3/400] delay=50.8901s cost/s=362.3792 step=10.9m wall=80.5s
-[TOO seed 4101 4/400] delay=37.6379s cost/s=267.8334 step=10.7m wall=65.9s
-[TOO seed 4101 5/400] delay=56.0004s cost/s=406.9466 step=10.8m wall=93.1s
-[TOO seed 4101 6/400] delay=46.6454s cost/s=321.7704 step=10.7m wall=72.6s
-[TOO seed 4101 7/400] delay=51.7541s cost/s=377.8104 step=10.8m wall=85.1s
-[TOO seed 4101 8/400] delay=53.1855s cost/s=378.5377 step=11.0m wall=85.7s
-[TOO seed 4101 9/400] delay=51.5280s cost/s=375.8947 step=11.0m wall=85.2s
-[TOO seed 4101 10/400] delay=52.6931s cost/s=366.5420 step=10.3m wall=88.0s
-[TOO seed 4101 11/400] delay=43.9192s cost/s=304.2967 step=10.4m wall=67.6s
-[TOO seed 4101 12/400] delay=53.5129s cost/s=380.6805 step=10.6m wall=84.3s
-[TOO seed 4101 13/400] delay=51.4481s cost/s=355.8104 step=10.5m wall=79.3s
-[TOO seed 4101 14/400] delay=59.8848s cost/s=429.4998 step=11.1m wall=94.6s
-[TOO seed 4101 15/400] delay=49.7980s cost/s=362.4834 step=10.7m wall=83.5s
-[TOO seed 4101 16/400] delay=51.4607s cost/s=374.2637 step=10.4m wall=82.1s
-[TOO seed 4101 17/400] delay=52.5591s cost/s=370.7547 step=10.7m wall=83.4s
-[TOO seed 4101 18/400] delay=43.8472s cost/s=305.6315 step=10.1m wall=71.3s
-[TOO seed 4101 19/400] delay=54.3652s cost/s=388.9101 step=10.8m wall=85.5s
-[TOO seed 4101 20/400] delay=44.7372s cost/s=306.7597 step=10.9m wall=73.0s
-[TOO seed 4101 21/400] delay=59.9273s cost/s=432.0877 step=10.9m wall=90.9s
-[TOO seed 4101 22/400] delay=48.7098s cost/s=338.1264 step=11.1m wall=77.3s
+... (24 earlier lines not published)
 [TOO seed 4101 23/400] delay=45.4852s cost/s=319.1707 step=11.0m wall=73.5s
 [TOO seed 4101 24/400] delay=54.8216s cost/s=363.5437 step=11.4m wall=81.4s
 [TOO seed 4101 25/400] delay=42.6750s cost/s=310.8844 step=10.9m wall=72.0s
@@ -78,3 +55,27 @@
 [TOO seed 4101 76/400] delay=46.4758s cost/s=339.7605 step=10.6m wall=75.1s
 [TOO seed 4101 77/400] delay=38.8998s cost/s=272.6087 step=10.8m wall=65.8s
 [TOO seed 4101 78/400] delay=41.5583s cost/s=304.6898 step=10.4m wall=71.9s
+[TOO seed 4101 79/400] delay=35.4078s cost/s=247.2808 step=10.7m wall=62.0s
+[TOO seed 4101 80/400] delay=42.9429s cost/s=298.9774 step=10.6m wall=72.2s
+[TOO seed 4101 81/400] delay=47.2057s cost/s=325.8735 step=10.7m wall=71.1s
+[TOO seed 4101 82/400] delay=54.3084s cost/s=385.3894 step=11.1m wall=88.6s
+[TOO seed 4101 83/400] delay=41.4168s cost/s=282.0039 step=10.8m wall=69.4s
+[TOO seed 4101 84/400] delay=46.3094s cost/s=329.5246 step=10.3m wall=77.7s
+[TOO seed 4101 85/400] delay=56.2726s cost/s=410.6163 step=10.8m wall=92.9s
+[TOO seed 4101 86/400] delay=34.0362s cost/s=242.8341 step=10.6m wall=58.5s
+[TOO seed 4101 87/400] delay=41.6203s cost/s=295.7992 step=10.5m wall=70.7s
+[TOO seed 4101 88/400] delay=53.7333s cost/s=390.0816 step=11.6m wall=85.2s
+[TOO seed 4101 89/400] delay=47.2795s cost/s=343.6863 step=10.3m wall=80.0s
+[TOO seed 4101 90/400] delay=40.7801s cost/s=284.2517 step=10.3m wall=69.9s
+[TOO seed 4101 91/400] delay=43.2641s cost/s=301.4911 step=11.0m wall=66.1s
+[TOO seed 4101 92/400] delay=42.8707s cost/s=306.1503 step=11.1m wall=71.4s
+[TOO seed 4101 93/400] delay=46.6932s cost/s=330.9708 step=10.8m wall=76.2s
+[TOO seed 4101 94/400] delay=49.6816s cost/s=357.8513 step=10.6m wall=83.0s
+[TOO seed 4101 95/400] delay=41.6412s cost/s=294.0523 step=10.3m wall=74.0s
+[TOO seed 4101 96/400] delay=43.7789s cost/s=304.1679 step=10.9m wall=68.9s
+[TOO seed 4101 97/400] delay=47.3371s cost/s=334.5787 step=10.8m wall=72.2s
+[TOO seed 4101 98/400] delay=45.9189s cost/s=325.7158 step=11.0m wall=75.3s
+[TOO seed 4101 99/400] delay=52.9859s cost/s=390.8653 step=11.3m wall=90.3s
+[TOO seed 4101 100/400] delay=56.6617s cost/s=420.4720 step=10.6m wall=98.8s
+[TOO seed 4101 101/400] delay=48.8116s cost/s=335.2973 step=11.2m wall=73.0s
+[TOO seed 4101 102/400] delay=42.9472s cost/s=298.3581 step=10.5m wall=71.0s
