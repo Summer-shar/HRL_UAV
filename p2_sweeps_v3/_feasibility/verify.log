@@ -1,0 +1,47 @@
+
+=== 2026-10-18 17:17:12  D:\HRL_UAV_V2\.venv\Scripts\python.exe D:\p2_code\run.py verify --main=D:\p2_runs_v2 --work=D:\p2_sweeps_v3\_feasibility\verify
+[M1 seed 4101 1/3] delay=5.0979s cost/s=38.1911 wall=10.6s
+[M1 seed 4101 2/3] delay=1.4477s cost/s=11.9471 wall=11.3s
+[M1 seed 4101 3/3] delay=5.4308s cost/s=39.2433 wall=14.5s
+train M1       3 episodes: identical (fields added after the main run, not compared: actor_lr)
+[M2 seed 4101 1/5] delay=1.8762s cost/s=14.1661 step=10.8m wall=7.8s
+[M2 seed 4101 2/5] delay=1.4287s cost/s=11.6057 step=10.6m wall=7.5s
+[M2 seed 4101 3/5] delay=3.1899s cost/s=24.3249 step=10.9m wall=8.4s
+[M2 seed 4101 4/5] delay=1.6458s cost/s=13.2706 step=10.7m wall=7.7s
+[M2 seed 4101 5/5] delay=3.0838s cost/s=23.9506 step=10.8m wall=9.0s
+train M2       5 episodes: identical
+[M3 seed 4101 1/3] delay=0.6719s cost/s=6.3522 wall=8.8s
+[M3 seed 4101 2/3] delay=0.6937s cost/s=6.6213 wall=10.9s
+[M3 seed 4101 3/3] delay=0.5961s cost/s=5.7877 wall=10.9s
+train M3       3 episodes: identical
+[HoverSAC seed 4101 1/3] delay=1.2997s cost/s=10.6641 wall=8.4s
+[HoverSAC seed 4101 2/3] delay=1.4686s cost/s=12.5010 wall=10.7s
+[HoverSAC seed 4101 3/3] delay=1.6613s cost/s=13.7234 wall=10.8s
+train HoverSAC 3 episodes: identical
+[TFOO seed 4101 1/5] delay=1.9096s cost/s=14.3238 step=10.8m wall=9.9s
+[TFOO seed 4101 2/5] delay=1.4635s cost/s=11.7929 step=10.6m wall=9.5s
+[TFOO seed 4101 3/5] delay=3.2155s cost/s=24.4763 step=10.9m wall=10.3s
+[TFOO seed 4101 4/5] delay=1.6282s cost/s=13.0863 step=10.7m wall=9.5s
+[TFOO seed 4101 5/5] delay=3.1197s cost/s=24.1677 step=10.8m wall=10.8s
+train TFOO     5 episodes: identical
+[TOO seed 4101 1/5] delay=1.9168s cost/s=14.3124 step=10.8m wall=6.4s
+[TOO seed 4101 2/5] delay=1.5890s cost/s=12.6074 step=10.6m wall=6.4s
+[TOO seed 4101 3/5] delay=3.7969s cost/s=28.5418 step=10.9m wall=7.2s
+[TOO seed 4101 4/5] delay=1.6284s cost/s=13.0328 step=10.7m wall=6.5s
+[TOO seed 4101 5/5] delay=9.4455s cost/s=69.9017 step=10.8m wall=10.0s
+train TOO      5 episodes: identical
+[NC seed 4101 1/5] delay=2.9786s cost/s=21.5906 step=10.8m wall=6.2s
+[NC seed 4101 2/5] delay=7.8481s cost/s=56.3459 step=10.6m wall=8.0s
+[NC seed 4101 3/5] delay=10.0435s cost/s=72.9474 step=10.9m wall=8.9s
+[NC seed 4101 4/5] delay=6.0855s cost/s=44.7117 step=10.7m wall=7.5s
+[NC seed 4101 5/5] delay=4.8512s cost/s=36.8081 step=10.8m wall=7.7s
+train NC       5 episodes: identical
+test  Proposed scenarios [21, 22]: identical
+test  TFOO     scenarios [21, 22]: identical (fields added after the main run, not compared: u2u_mhz)
+test  TOO      scenarios [21, 22]: identical (fields added after the main run, not compared: u2u_mhz)
+test  NC       scenarios [21, 22]: identical (fields added after the main run, not compared: u2u_mhz)
+test  HoverSAC scenarios [21, 22]: identical
+test  CA       scenarios [21, 22]: identical
+note: actor_lr exists only in the new records (SAC training rows, added in commit cfdcf3f (fine-tuning recipe v2))
+note: u2u_mhz exists only in the new records (evaluation records, added in commit d458a73 (U2U sweep); the main run's TFOO / TOO / NC test records were written before it)
+ALL IDENTICAL -> D:\p2_sweeps_v3\_feasibility\verify\verify_db8c14e65adc.json
