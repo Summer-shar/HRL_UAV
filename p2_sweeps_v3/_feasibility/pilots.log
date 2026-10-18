@@ -1,14 +1,4 @@
-
-=== 2026-10-18 17:24:51  D:\HRL_UAV_V2\.venv\Scripts\python.exe D:\p2_code\run.py retrain --out-base=D:\p2_sweeps_v3 --main=D:\p2_runs_v2 --points=cpu_ghz=9,u2u_mhz=1.5 --seeds=4101,4102,4103 --workers=8
-0 jobs already done, 248 to run with 8 workers; logs in D:\p2_sweeps_v3\_jobs
-START cpu_ghz=9/s4101_train_M1
-START cpu_ghz=9/s4102_train_M1
-START cpu_ghz=9/s4103_train_M1
-START cpu_ghz=9/s4101_train_TFOO
-START cpu_ghz=9/s4101_train_TOO
-START cpu_ghz=9/s4101_train_NC
-START cpu_ghz=9/s4102_train_TFOO
-START cpu_ghz=9/s4102_train_TOO
+... (11 earlier lines not published)
 DONE  cpu_ghz=9/s4102_train_TOO (82.1 min) [1/248]
 START cpu_ghz=9/s4102_train_NC
 DONE  cpu_ghz=9/s4101_train_TOO (82.4 min) [2/248]
@@ -287,3 +277,25 @@ DONE  u2u_mhz=1.5/s4101_dev_NC_400 (3.5 min) [138/248]
 START u2u_mhz=1.5/s4102_dev_TFOO_100
 DONE  u2u_mhz=1.5/s4102_dev_TFOO_100 (2.5 min) [139/248]
 START u2u_mhz=1.5/s4102_dev_TFOO_200
+DONE  u2u_mhz=1.5/s4102_dev_TFOO_200 (2.5 min) [140/248]
+START u2u_mhz=1.5/s4102_dev_TFOO_300
+DONE  u2u_mhz=1.5/s4102_dev_TFOO_300 (2.5 min) [141/248]
+START u2u_mhz=1.5/s4102_dev_TFOO_400
+DONE  u2u_mhz=1.5/s4102_dev_TFOO_400 (2.5 min) [142/248]
+START u2u_mhz=1.5/s4102_dev_NC_100
+DONE  u2u_mhz=1.5/s4102_dev_NC_100 (3.5 min) [143/248]
+START u2u_mhz=1.5/s4102_dev_NC_200
+DONE  u2u_mhz=1.5/s4102_dev_NC_200 (3.6 min) [144/248]
+START u2u_mhz=1.5/s4102_dev_NC_300
+DONE  u2u_mhz=1.5/s4102_dev_NC_300 (3.6 min) [145/248]
+START u2u_mhz=1.5/s4102_dev_NC_400
+DONE  u2u_mhz=1.5/s4102_dev_NC_400 (3.3 min) [146/248]
+START u2u_mhz=1.5/s4103_dev_TFOO_100
+DONE  u2u_mhz=1.5/s4103_dev_TFOO_100 (2.5 min) [147/248]
+START u2u_mhz=1.5/s4103_dev_TFOO_200
+DONE  u2u_mhz=1.5/s4103_dev_TFOO_200 (2.5 min) [148/248]
+START u2u_mhz=1.5/s4103_dev_TFOO_300
+DONE  u2u_mhz=1.5/s4103_dev_TFOO_300 (2.5 min) [149/248]
+START u2u_mhz=1.5/s4103_dev_TFOO_400
+DONE  u2u_mhz=1.5/s4103_train_NC (157.6 min) [150/248]
+START u2u_mhz=1.5/s4103_dev_NC_100
