@@ -9,3 +9,7 @@ START cpu_ghz=9/s4101_train_TOO
 START cpu_ghz=9/s4101_train_NC
 START cpu_ghz=9/s4102_train_TFOO
 START cpu_ghz=9/s4102_train_TOO
+DONE  cpu_ghz=9/s4102_train_TOO (82.1 min) [1/248]
+START cpu_ghz=9/s4102_train_NC
+DONE  cpu_ghz=9/s4101_train_TOO (82.4 min) [2/248]
+START cpu_ghz=9/s4103_train_TFOO
