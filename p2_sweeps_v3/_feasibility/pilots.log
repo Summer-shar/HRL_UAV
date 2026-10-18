@@ -217,3 +217,7 @@ DONE  cpu_ghz=9/s4103_test_HoverSAC (5.6 min) [103/248]
 START u2u_mhz=1.5/s4101_train_NC
 DONE  cpu_ghz=9/s4103_test_NC (15.5 min) [104/248]
 START u2u_mhz=1.5/s4102_train_TFOO
+DONE  cpu_ghz=9/s4101_train_M2 (145.8 min) [105/248]
+START cpu_ghz=9/s4101_dev_ProposedUpper_100
+DONE  cpu_ghz=9/s4101_dev_ProposedUpper_100 (5.8 min) [106/248]
+START cpu_ghz=9/s4101_dev_ProposedUpper_200
