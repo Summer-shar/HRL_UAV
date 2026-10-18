@@ -20,3 +20,4 @@
 - `src/p2/perf.py` 的补丁带源代码 SHA-256 保护。修改被补丁的仿真方法后必须同步更新，并重新运行 `tests/test_perf_equivalence.py`。
 - 输出目录里已有结果时，不要改代码后接着续跑同一目录。
 - 已有的主实验结果（用户电脑上的 `D:\p2_runs_v2`）只读。
+- 用户电脑上的运行状态在本仓库 `paper2-runs` 分支（`git fetch origin paper2-runs`），给用户电脑的下一步说明写在该分支的 `NEXT.md`。不要让用户手动下载或上传文件。

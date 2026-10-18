@@ -1,8 +1,10 @@
 """MH-TPCO experiments (paper 2): single entry point.  See README.md.
 
   python run.py check-env [--out D:\\p2_check]   # versions, simulator, smoke training on this computer
-  python run.py feasibility --main D:\\p2_runs_v2 --out-base D:\\p2_sweeps_v3   # all checks, then the two
-                          # pilot points; status in <out-base>\\FEASIBILITY.md (p2/feasibility.py)
+  python run.py feasibility --main D:\\p2_runs_v2 --out-base D:\\p2_sweeps_v3   # stage 1: all checks, then the
+                          # two pilot points; status in <out-base>\\FEASIBILITY.md (p2/feasibility.py)
+  python run.py sweep --main D:\\p2_runs_v2 --out-base D:\\p2_sweeps_v3         # stage 2: every point; SWEEP.md
+  python run.py publish --out-base D:\\p2_sweeps_v3      # push the status files to GitHub (p2/publish.py)
   python run.py pipeline [--workers 4] [--seeds 4101,4102,4103] [--smoke]   # main experiment, resumable
   python run.py bench                                                      # CPU vs GPU speed check
   python run.py train --stage M1|M2|M3|HoverSAC|TFOO|TOO|NC --seed 4101
@@ -49,7 +51,7 @@ def main(argv=None):
     p.add_argument('command', choices=('check-env', 'pipeline', 'bench', 'train', 'dev', 'select', 'test', 'sweep',
                                         'report', 'plan', 'revise', 'burst', 'retrain', 'retrain-report',
                                         'retrain-export', 'verify', 'timing', 'pilot-check', 'progress',
-                                        'feasibility'))
+                                        'feasibility', 'sweep', 'publish'))
     p.add_argument('--out', default=None)
     p.add_argument('--from', dest='source', default=None, help='revise: the finished output root to derive from')
     p.add_argument('--recipe', default='v2', help='revise: fine-tuning recipe of the new root')
@@ -76,20 +78,30 @@ def main(argv=None):
     p.add_argument('--machine', default='local', help='retrain-export: label written into the manifest')
     p.add_argument('--work', default=None, help='verify: scratch folder (not inside --main)')
     p.add_argument('--pilot', default=None, help='pilot-check: one pilot point, e.g. u2u_mhz=1.5 (default: all)')
+    p.add_argument('--no-publish', action='store_true', help='feasibility / sweep: do not push status to GitHub')
     p.add_argument('--no-pilot-gate', action='store_true',
                    help='retrain: do not hold the other points until the pilot passes pilot-check')
     a = p.parse_args(argv)
     if a.workers is None:
         auto = max(1, min(8, (os.cpu_count() or 2)//int(os.environ.get('P2_THREADS') or 2)))
-        a.workers = int(os.environ.get('P2_WORKERS') or (auto if a.command == 'feasibility' else 4))
-    if a.command == 'feasibility':
+        a.workers = int(os.environ.get('P2_WORKERS') or (auto if a.command in ('feasibility', 'sweep') else 4))
+    if a.command in ('feasibility', 'sweep'):
         from p2 import feasibility
         if not a.main or not a.out_base:
-            p.error('feasibility needs --main (the finished main run) and --out-base')
+            p.error(f'{a.command} needs --main (the finished main run) and --out-base')
         device = feasibility.device_from_main(a.main)
         if device:
             print(f'P2_DEVICE={device} (from the main run\'s M1 contract)')
-        return feasibility.Feasibility(a.main, a.out_base, a.workers, a.seeds or C.design()['seeds']).run()
+        stage = feasibility.Feasibility if a.command == 'feasibility' else feasibility.Sweep
+        return stage(a.main, a.out_base, a.workers, a.seeds or C.design()['seeds'], publish=not a.no_publish).run()
+    if a.command == 'publish':
+        from p2.publish import Publisher
+        if not a.out_base:
+            p.error('publish needs --out-base')
+        pub = Publisher(a.out_base)
+        ok = pub.publish('manual publish')
+        print(pub.status_line())
+        return 0 if ok else 1
     if a.command == 'check-env':
         return check_env(Path(a.out) if a.out else C.REPO/'outputs'/'_check_env')
     if a.command == 'verify':

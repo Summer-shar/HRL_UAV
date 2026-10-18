@@ -30,7 +30,7 @@ if cmd == 'pilot-check':
 
 
 def run(base, main, fake):
-    f = F.Feasibility(main, base, 2, (4101, 4102, 4103))
+    f = F.Feasibility(main, base, 2, (4101, 4102, 4103), publish=False)
     f.run_py = str(fake)
     return f.run(), (Path(base)/'FEASIBILITY.md').read_text(encoding='utf-8'), \
         json.loads((Path(base)/'_feasibility'/'state.json').read_text())
@@ -71,6 +71,31 @@ def main():
     (tmp/'ok'/'_feasibility'/'state.json').write_text(json.dumps(s))
     code, md, state = run(tmp/'ok', main_root, fake)                    # other code: checks repeated
     assert code == 0 and state['steps']['check-env']['status'] == 'passed'
+    # stage 2 refuses without a passed stage 1, then runs (fake retrain: no records, so points stay unfinished)
+    sweep = F.Sweep(main_root, tmp/'pilot', 2, (4101, 4102, 4103), publish=False)
+    sweep.run_py = str(fake)
+    assert sweep.run() == 2                                            # stage 1 failed there
+    sweep = F.Sweep(main_root, tmp/'ok', 2, (4101, 4102, 4103), publish=False)
+    sweep.run_py = str(fake)
+    assert sweep.run() == 1
+    smd = (tmp/'ok'/'SWEEP.md').read_text(encoding='utf-8')
+    assert '16 个点未完成' in smd and 'cpu_ghz=11' in smd, smd
+
+    # status pushed to a git branch (local bare repository as the remote)
+    import subprocess
+    remote = tmp/'remote.git'
+    subprocess.run(['git', 'init', '-q', '--bare', str(remote)], check=True)
+    f = F.Feasibility(main_root, tmp/'pushed', 2, (4101, 4102, 4103))
+    from p2.publish import Publisher
+    f.publisher = Publisher(tmp/'pushed', remote=str(remote))
+    f.run_py = str(fake)
+    assert f.run() == 0
+    shown = subprocess.run(['git', 'show', 'paper2-runs:pushed/FEASIBILITY.md'], cwd=str(remote), capture_output=True,
+                           text=True, encoding='utf-8', check=True).stdout
+    assert '可行性阶段通过' in shown and 'GitHub 推送：成功' in shown, shown[:400]
+    log = subprocess.run(['git', 'log', '--format=%s', 'paper2-runs'], cwd=str(remote), capture_output=True,
+                         text=True, check=True).stdout
+    assert 'feasibility: PASSED' in log and 'step 3 verify passed' in log, log
     print(md[:1500])
     print('OK; outputs in', tmp)
 

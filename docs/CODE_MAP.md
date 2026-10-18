@@ -53,7 +53,8 @@
 | `pipeline.py` | 带依赖的多进程任务调度（可续跑），主实验与扫参的任务图 |
 | `retrain.py` | 扫参点目录的建立、完成判断、记录导出 |
 | `checks.py` | 耗时估计（`timing`）、试点检查（`pilot-check`）、进度（`progress`） |
-| `feasibility.py` | 可行性阶段一条命令（`feasibility`）：检查、扫参冒烟、两个试点，状态写入 `FEASIBILITY.md` |
+| `feasibility.py` | 两个运行阶段各一条命令：`feasibility`（检查、扫参冒烟、两个试点，`FEASIBILITY.md`）与 `sweep`（全部点，`SWEEP.md`） |
+| `publish.py` | 把状态页、日志末尾和汇总表推送到 GitHub 分支 `paper2-runs` |
 | `perf.py` | 逐位等价的仿真加速 |
 | `burst.py` | 受控突发业务 |
 | `positioning.py` | 轨迹的定位分析（论文未使用） |

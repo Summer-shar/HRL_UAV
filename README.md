@@ -51,7 +51,8 @@ python tests\test_retrain.py         # 扫参任务图、门控、报表（不�
 python tests\test_checks.py          # 试点检查、耗时估计、进度（不需要 torch）
 python tests\test_eval_report.py     # 评估与报表（不需要 torch）
 python tests\test_verify_compare.py  # verify 的记录比较（不需要 torch）
-python tests\test_feasibility.py     # 可行性命令的流程与状态文件（不需要 torch）
+python tests\test_feasibility.py     # 可行性 / 扫参命令的流程与状态文件（不需要 torch）
+python tests\test_publish.py         # 状态推送到 git 分支（需要 git）
 python tests\test_perf_equivalence.py 150   # 加速补丁与原始仿真逐位一致，每行都应是 identical
 python tests\test_identity.py        # 随机数派生与原实现一致（需要 torch）
 ```
@@ -125,10 +126,12 @@ python run.py feasibility --main D:\p2_runs_v2 --out-base D:\p2_sweeps_v3
 **第二步：其余点**（第一步通过后）
 
 ```powershell
-python run.py retrain --out-base D:\p2_sweeps_v3 --main D:\p2_runs_v2 --workers 8
+python run.py sweep --main D:\p2_runs_v2 --out-base D:\p2_sweeps_v3
 ```
 
-用同一个 `--out-base`，试点已完成的任务自动跳过。任务图里有两个门控：`pilot_gate_cpu_ghz` 放行其余 CPU、负载、用户数点，`pilot_gate_u2u_mhz` 放行其余 U2U 点。日志在 `D:\p2_sweeps_v3\_jobs\pilot_gate_*.log`；门控不通过时对应的点挂起，其余照常。
+- 用同一个输出目录，试点已完成的任务自动跳过。第一步没有通过时，这条命令拒绝运行。
+- 任务图里有两个门控：`pilot_gate_cpu_ghz` 放行其余 CPU、负载、用户数点，`pilot_gate_u2u_mhz` 放行其余 U2U 点。日志在 `D:\p2_sweeps_v3\_jobs\pilot_gate_*.log`；门控不通过时对应的点挂起，其余照常。
+- 状态写在 `SWEEP.md`，汇总表每 30 分钟更新一次。全部完成后自动做最终汇总，并打包只含记录的 `records.zip`。
 
 **汇总与出图**
 
@@ -139,7 +142,18 @@ python run.py retrain-export --out-base D:\p2_sweeps_v3 --dest D:\p2_sweeps_v3_r
 
 `results\` 下有 `retrain_summary.md`（完成情况、各点表格、配对检验、训练曲线检查）、`retrain_sweep_<参数>.csv`、`retrain_paired.csv`、`retrain_convergence.csv`、`retrain_stats.json`。论文的扫参图由论文仓库的 `figures_src/build_paper2_figures.py` 读取这些 csv 生成。
 
-## 5 运行注意事项
+## 5 通过 GitHub 跟踪运行
+
+`feasibility` 和 `sweep` 会把状态推送到本仓库的 `paper2-runs` 分支，路径为 `<输出目录名>/`（例如 `p2_sweeps_v3/`）：
+
+- 推送内容：状态页、各步骤日志的末尾、verify 结果、`results\` 下的汇总表、门控日志、未完成任务日志的末尾；不推送权重、轨迹和完整日志。
+- 推送时机：每一步开始和结束时，长步骤运行中每 30 分钟一次。
+- 前提：代码文件夹必须是 `git clone` 得到的，推送用本机已有的 GitHub 登录。推送失败不影响实验，状态页上会显示失败原因。
+- 手动推送一次：`python run.py publish --out-base D:\p2_sweeps_v3`；不想推送时加 `--no-publish`。
+
+同一分支根目录下的 `NEXT.md` 是给本机的下一步说明。
+
+## 6 运行注意事项
 
 - **续跑**：中断（断电、重启、报错）后原样重跑同一条命令。已完成的任务跳过，训练从最近的快照继续。
 - **同一个输出目录同时只能有一个命令在跑**。`report`、`retrain-report`、`progress`、`pilot-check` 只读，可以随时运行。
@@ -148,6 +162,6 @@ python run.py retrain-export --out-base D:\p2_sweeps_v3 --dest D:\p2_sweeps_v3_r
 - **睡眠与磁盘**：长时间运行前把系统睡眠设为“从不”。训练阶段结束后会删除含经验池的续跑快照，只保留最终权重和候选权重。
 - **不要修改** `src/` 下的代码后接着续跑同一个输出目录：已完成的任务不会重跑，结果会混用两版代码。
 
-## 6 版本
+## 7 版本
 
 仿真器 v2.5.0 = v2.4.0（每区终端数成为场景参数，每区 13 个时逐位一致）。本代码包由原仓库分支 `claude/paper2-sweeps-v3` 的 commit `50868ac` 整理而来，仿真器与算法文件逐字节相同。详情、主实验结果的来历和一致性检查见 `docs/HISTORY.md`。
