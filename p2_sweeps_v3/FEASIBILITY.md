@@ -1,8 +1,8 @@
 # 可行性阶段：状态
 
-**运行中：自检脚本**
+**运行中：自检脚本完成**
 
-最后更新：2026-10-18 17:15:43（运行中每 10 分钟更新一次；如果这个时间停在很久以前，说明程序已经退出）
+最后更新：2026-10-18 17:17:01（运行中每 10 分钟更新一次；如果这个时间停在很久以前，说明程序已经退出）
 
 - 主实验目录：`D:\p2_runs_v2`
 - 输出目录：`D:\p2_sweeps_v3`
@@ -12,7 +12,7 @@
 | 步骤 | 内容 | 状态 | 开始 | 结束 | 用时 |
 |---|---|---|---|---|---|
 | 1 | 环境检查 | 通过 | 2026-10-18 17:15:11 | 2026-10-18 17:15:36 | 0 分钟 |
-| 2 | 自检脚本 | 运行中 | 2026-10-18 17:15:43 |  |  |
+| 2 | 自检脚本 | 通过 | 2026-10-18 17:15:43 | 2026-10-18 17:17:01 | 1 分钟 |
 | 3 | 与主实验记录比较 | 未开始 |  |  |  |
 | 4 | 扫参管道冒烟 | 未开始 |  |  |  |
 | 5 | 两个试点（3 个种子，完整流程） | 未开始 |  |  |  |
@@ -35,4 +35,21 @@ smoke training M1: ok in 6 s
 smoke training TFOO: ok in 9 s
 
 ALL CHECKS PASSED
+```
+
+## 自检脚本：输出摘录
+
+```
+OK random scenario 22 scene 0: identical; 1.44s -> 1.13s (1.28x)
+OK local  scenario 21 scene 0: identical; 1.60s -> 1.11s (1.45x)
+OK random scenario 23 scene 1: identical; 3.52s -> 2.26s (1.55x)
+OK hover  scenario 24 scene 2: identical; 3.12s -> 1.76s (1.77x)
+OK local  scenario 25 scene 3: identical; 0.96s -> 0.86s (1.12x)
+OK random scenario 26 scene 4: identical; 2.10s -> 1.85s (1.13x)
+OK hover  scenario 27 scene 4: identical; 1.64s -> 1.38s (1.18x)
+OK training adapter local scenario 21: identical except diagnostics; 1.24s -> 1.22s (1.02x)
+OK training adapter random scenario 22: identical except diagnostics; 1.24s -> 1.27s (0.98x)
+
+=== 2026-10-18 17:16:59  D:\HRL_UAV_V2\.venv\Scripts\python.exe D:\p2_code\tests\test_identity.py
+derive identical
 ```
