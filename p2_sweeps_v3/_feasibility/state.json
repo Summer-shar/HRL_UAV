@@ -32,7 +32,8 @@
       "excerpt": "START users=7/report\nDONE  u2u_mhz=1.5/s4101_test_TOO (0.1 min) [55/60]\nDONE  u2u_mhz=1.5/s4101_test_CA (0.1 min) [56/60]\nDONE  users=7/report (0.0 min) [57/60]\nDONE  u2u_mhz=1.5/s4101_test_NC (0.1 min) [58/60]\nDONE  u2u_mhz=1.5/s4101_test_HoverSAC (0.1 min) [59/60]\nSTART u2u_mhz=1.5/report\nDONE  u2u_mhz=1.5/report (0.0 min) [60/60]\nAll jobs finished.\n\n=== 2026-10-18 17:24:38  D:\\HRL_UAV_V2\\.venv\\Scripts\\python.exe D:\\p2_code\\run.py retrain-report --out-base=D:\\p2_sweeps_v3\\_feasibility\\smoke --main=D:\\p2_runs_v2 --points=users=7,u2u_mhz=1.5 --smoke --seeds=4101\nD:\\p2_sweeps_v3\\_feasibility\\smoke\\results"
     },
     "pilots": {
-      "status": "pending"
+      "status": "running",
+      "started": "2026-10-18 17:24:46"
     },
     "summary": {
       "status": "pending"
