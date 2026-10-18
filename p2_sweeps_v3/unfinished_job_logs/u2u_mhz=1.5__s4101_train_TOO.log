@@ -1,13 +1,4 @@
-... (88 earlier lines not published)
-[TOO seed 4101 87/400] delay=41.6203s cost/s=295.7992 step=10.5m wall=70.7s
-[TOO seed 4101 88/400] delay=53.7333s cost/s=390.0816 step=11.6m wall=85.2s
-[TOO seed 4101 89/400] delay=47.2795s cost/s=343.6863 step=10.3m wall=80.0s
-[TOO seed 4101 90/400] delay=40.7801s cost/s=284.2517 step=10.3m wall=69.9s
-[TOO seed 4101 91/400] delay=43.2641s cost/s=301.4911 step=11.0m wall=66.1s
-[TOO seed 4101 92/400] delay=42.8707s cost/s=306.1503 step=11.1m wall=71.4s
-[TOO seed 4101 93/400] delay=46.6932s cost/s=330.9708 step=10.8m wall=76.2s
-[TOO seed 4101 94/400] delay=49.6816s cost/s=357.8513 step=10.6m wall=83.0s
-[TOO seed 4101 95/400] delay=41.6412s cost/s=294.0523 step=10.3m wall=74.0s
+... (97 earlier lines not published)
 [TOO seed 4101 96/400] delay=43.7789s cost/s=304.1679 step=10.9m wall=68.9s
 [TOO seed 4101 97/400] delay=47.3371s cost/s=334.5787 step=10.8m wall=72.2s
 [TOO seed 4101 98/400] delay=45.9189s cost/s=325.7158 step=11.0m wall=75.3s
@@ -79,3 +70,12 @@
 [TOO seed 4101 164/400] delay=34.8033s cost/s=258.6171 step=11.0m wall=142.0s
 [TOO seed 4101 165/400] delay=41.9972s cost/s=291.0438 step=11.0m wall=173.7s
 [TOO seed 4101 166/400] delay=49.5514s cost/s=349.7631 step=10.5m wall=178.6s
+[TOO seed 4101 167/400] delay=33.2736s cost/s=227.8614 step=11.0m wall=135.2s
+[TOO seed 4101 168/400] delay=46.6202s cost/s=344.3190 step=10.9m wall=211.5s
+[TOO seed 4101 169/400] delay=43.5767s cost/s=307.3948 step=12.0m wall=196.6s
+[TOO seed 4101 170/400] delay=50.4999s cost/s=353.3829 step=10.9m wall=223.9s
+[TOO seed 4101 171/400] delay=43.2072s cost/s=307.6659 step=11.2m wall=187.1s
+[TOO seed 4101 172/400] delay=55.0819s cost/s=389.6645 step=11.3m wall=231.0s
+[TOO seed 4101 173/400] delay=30.2130s cost/s=202.1977 step=11.1m wall=137.7s
+[TOO seed 4101 174/400] delay=39.6243s cost/s=287.7307 step=11.0m wall=188.9s
+[TOO seed 4101 175/400] delay=40.7387s cost/s=279.3541 step=11.1m wall=191.2s
