@@ -18,7 +18,8 @@
       "excerpt": "OK random scenario 22 scene 0: identical; 1.44s -> 1.13s (1.28x)\nOK local  scenario 21 scene 0: identical; 1.60s -> 1.11s (1.45x)\nOK random scenario 23 scene 1: identical; 3.52s -> 2.26s (1.55x)\nOK hover  scenario 24 scene 2: identical; 3.12s -> 1.76s (1.77x)\nOK local  scenario 25 scene 3: identical; 0.96s -> 0.86s (1.12x)\nOK random scenario 26 scene 4: identical; 2.10s -> 1.85s (1.13x)\nOK hover  scenario 27 scene 4: identical; 1.64s -> 1.38s (1.18x)\nOK training adapter local scenario 21: identical except diagnostics; 1.24s -> 1.22s (1.02x)\nOK training adapter random scenario 22: identical except diagnostics; 1.24s -> 1.27s (0.98x)\n\n=== 2026-10-18 17:16:59  D:\\HRL_UAV_V2\\.venv\\Scripts\\python.exe D:\\p2_code\\tests\\test_identity.py\nderive identical"
     },
     "verify": {
-      "status": "pending"
+      "status": "running",
+      "started": "2026-10-18 17:17:06"
     },
     "smoke": {
       "status": "pending"
