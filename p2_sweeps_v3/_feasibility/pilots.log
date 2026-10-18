@@ -1,0 +1,11 @@
+
+=== 2026-10-18 17:24:51  D:\HRL_UAV_V2\.venv\Scripts\python.exe D:\p2_code\run.py retrain --out-base=D:\p2_sweeps_v3 --main=D:\p2_runs_v2 --points=cpu_ghz=9,u2u_mhz=1.5 --seeds=4101,4102,4103 --workers=8
+0 jobs already done, 248 to run with 8 workers; logs in D:\p2_sweeps_v3\_jobs
+START cpu_ghz=9/s4101_train_M1
+START cpu_ghz=9/s4102_train_M1
+START cpu_ghz=9/s4103_train_M1
+START cpu_ghz=9/s4101_train_TFOO
+START cpu_ghz=9/s4101_train_TOO
+START cpu_ghz=9/s4101_train_NC
+START cpu_ghz=9/s4102_train_TFOO
+START cpu_ghz=9/s4102_train_TOO
