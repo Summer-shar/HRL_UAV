@@ -1,14 +1,4 @@
-... (97 earlier lines not published)
-[TOO seed 4101 96/400] delay=43.7789s cost/s=304.1679 step=10.9m wall=68.9s
-[TOO seed 4101 97/400] delay=47.3371s cost/s=334.5787 step=10.8m wall=72.2s
-[TOO seed 4101 98/400] delay=45.9189s cost/s=325.7158 step=11.0m wall=75.3s
-[TOO seed 4101 99/400] delay=52.9859s cost/s=390.8653 step=11.3m wall=90.3s
-[TOO seed 4101 100/400] delay=56.6617s cost/s=420.4720 step=10.6m wall=98.8s
-[TOO seed 4101 101/400] delay=48.8116s cost/s=335.2973 step=11.2m wall=73.0s
-[TOO seed 4101 102/400] delay=42.9472s cost/s=298.3581 step=10.5m wall=71.0s
-[TOO seed 4101 103/400] delay=44.2447s cost/s=323.0723 step=10.7m wall=75.7s
-[TOO seed 4101 104/400] delay=42.8009s cost/s=312.6643 step=10.7m wall=74.2s
-[TOO seed 4101 105/400] delay=50.8154s cost/s=362.2547 step=11.2m wall=86.6s
+... (107 earlier lines not published)
 [TOO seed 4101 106/400] delay=48.1794s cost/s=331.7273 step=11.1m wall=73.9s
 [TOO seed 4101 107/400] delay=50.6690s cost/s=362.9696 step=10.8m wall=81.6s
 [TOO seed 4101 108/400] delay=48.9152s cost/s=347.4297 step=11.1m wall=79.8s
@@ -79,3 +69,13 @@
 [TOO seed 4101 173/400] delay=30.2130s cost/s=202.1977 step=11.1m wall=137.7s
 [TOO seed 4101 174/400] delay=39.6243s cost/s=287.7307 step=11.0m wall=188.9s
 [TOO seed 4101 175/400] delay=40.7387s cost/s=279.3541 step=11.1m wall=191.2s
+[TOO seed 4101 176/400] delay=34.8048s cost/s=252.2465 step=11.1m wall=155.1s
+[TOO seed 4101 177/400] delay=40.4588s cost/s=288.2804 step=11.6m wall=188.6s
+[TOO seed 4101 178/400] delay=38.6529s cost/s=267.6013 step=10.6m wall=175.2s
+[TOO seed 4101 179/400] delay=34.0013s cost/s=250.6463 step=11.1m wall=167.3s
+[TOO seed 4101 180/400] delay=42.1551s cost/s=294.0634 step=10.4m wall=196.9s
+[TOO seed 4101 181/400] delay=48.2277s cost/s=350.9830 step=10.5m wall=209.5s
+[TOO seed 4101 182/400] delay=51.5896s cost/s=367.7739 step=11.0m wall=221.8s
+[TOO seed 4101 183/400] delay=43.2639s cost/s=314.2586 step=11.3m wall=197.6s
+[TOO seed 4101 184/400] delay=48.9613s cost/s=339.3538 step=11.1m wall=206.2s
+[TOO seed 4101 185/400] delay=46.7708s cost/s=333.9856 step=10.6m wall=218.4s

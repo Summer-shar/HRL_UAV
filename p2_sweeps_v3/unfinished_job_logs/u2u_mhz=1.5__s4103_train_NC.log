@@ -1,6 +1,4 @@
-
-=== start 2026-10-19 01:50:08 ===
-[NC seed 4103 1/400] delay=3.9667s cost/s=28.7065 step=10.9m wall=41.2s
+... (3 earlier lines not published)
 [NC seed 4103 2/400] delay=3.3640s cost/s=25.6021 step=10.5m wall=40.7s
 [NC seed 4103 3/400] delay=4.9491s cost/s=37.2310 step=10.9m wall=43.8s
 [NC seed 4103 4/400] delay=8.9728s cost/s=68.4029 step=11.5m wall=54.1s
@@ -45,3 +43,39 @@
 [NC seed 4103 43/400] delay=6.8563s cost/s=48.2575 step=10.6m wall=53.1s
 [NC seed 4103 44/400] delay=3.9630s cost/s=29.8909 step=10.5m wall=44.9s
 [NC seed 4103 45/400] delay=4.6273s cost/s=33.2266 step=10.7m wall=51.9s
+[NC seed 4103 46/400] delay=4.4041s cost/s=32.8832 step=10.7m wall=45.9s
+[NC seed 4103 47/400] delay=3.3436s cost/s=25.0450 step=11.0m wall=42.9s
+[NC seed 4103 48/400] delay=8.8071s cost/s=65.5582 step=10.5m wall=58.2s
+[NC seed 4103 49/400] delay=5.1061s cost/s=37.9039 step=10.5m wall=49.5s
+[NC seed 4103 50/400] delay=3.2282s cost/s=24.9371 step=10.5m wall=49.6s
+[NC seed 4103 51/400] delay=3.0863s cost/s=23.2225 step=11.1m wall=41.9s
+[NC seed 4103 52/400] delay=3.6009s cost/s=26.6395 step=10.9m wall=43.8s
+[NC seed 4103 53/400] delay=5.8773s cost/s=44.1944 step=10.6m wall=50.7s
+[NC seed 4103 54/400] delay=8.4289s cost/s=61.1570 step=10.3m wall=57.2s
+[NC seed 4103 55/400] delay=6.4530s cost/s=46.0971 step=10.7m wall=57.0s
+[NC seed 4103 56/400] delay=4.6329s cost/s=35.4893 step=10.9m wall=46.8s
+[NC seed 4103 57/400] delay=5.8499s cost/s=43.4487 step=10.3m wall=49.9s
+[NC seed 4103 58/400] delay=7.0125s cost/s=50.7607 step=10.6m wall=52.7s
+[NC seed 4103 59/400] delay=5.3314s cost/s=39.2094 step=10.9m wall=49.4s
+[NC seed 4103 60/400] delay=3.8782s cost/s=29.5706 step=11.0m wall=51.6s
+[NC seed 4103 61/400] delay=5.6825s cost/s=41.2902 step=10.8m wall=48.0s
+[NC seed 4103 62/400] delay=3.8443s cost/s=28.6501 step=10.7m wall=44.3s
+[NC seed 4103 63/400] delay=6.6683s cost/s=48.9771 step=11.2m wall=51.5s
+[NC seed 4103 64/400] delay=6.0599s cost/s=45.6177 step=10.6m wall=52.3s
+[NC seed 4103 65/400] delay=7.7832s cost/s=58.9527 step=11.0m wall=61.3s
+[NC seed 4103 66/400] delay=7.0301s cost/s=50.4750 step=10.6m wall=50.8s
+[NC seed 4103 67/400] delay=3.8418s cost/s=29.0589 step=10.4m wall=44.6s
+[NC seed 4103 68/400] delay=4.2273s cost/s=30.3421 step=10.7m wall=45.2s
+[NC seed 4103 69/400] delay=6.5080s cost/s=47.7453 step=10.9m wall=51.5s
+[NC seed 4103 70/400] delay=3.6086s cost/s=27.2900 step=11.1m wall=49.7s
+[NC seed 4103 71/400] delay=4.8869s cost/s=35.1672 step=10.9m wall=45.6s
+[NC seed 4103 72/400] delay=8.3535s cost/s=62.5157 step=11.4m wall=55.2s
+[NC seed 4103 73/400] delay=5.0972s cost/s=38.2044 step=11.1m wall=48.1s
+[NC seed 4103 74/400] delay=7.0738s cost/s=51.3656 step=10.9m wall=52.7s
+[NC seed 4103 75/400] delay=6.3275s cost/s=46.9507 step=10.7m wall=56.9s
+[NC seed 4103 76/400] delay=5.4811s cost/s=39.7647 step=10.6m wall=47.2s
+[NC seed 4103 77/400] delay=7.6143s cost/s=57.8943 step=10.7m wall=54.5s
+[NC seed 4103 78/400] delay=3.4789s cost/s=25.6698 step=10.9m wall=43.7s
+[NC seed 4103 79/400] delay=8.3067s cost/s=61.5473 step=11.2m wall=57.5s
+[NC seed 4103 80/400] delay=6.4716s cost/s=48.8146 step=10.9m wall=58.2s
+[NC seed 4103 81/400] delay=3.3454s cost/s=25.1944 step=11.1m wall=42.6s

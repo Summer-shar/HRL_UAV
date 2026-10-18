@@ -1,11 +1,4 @@
-... (63 earlier lines not published)
-[M1 seed 4103 62/200] delay=59.2369s cost/s=431.2307 wall=104.4s
-[M1 seed 4103 63/200] delay=58.6161s cost/s=411.4981 wall=102.6s
-[M1 seed 4103 64/200] delay=37.5367s cost/s=273.0549 wall=70.3s
-[M1 seed 4103 65/200] delay=52.2213s cost/s=369.7548 wall=83.2s
-[M1 seed 4103 66/200] delay=58.3082s cost/s=416.9880 wall=101.8s
-[M1 seed 4103 67/200] delay=64.5663s cost/s=464.2687 wall=118.1s
-[M1 seed 4103 68/200] delay=48.5022s cost/s=355.7475 wall=96.7s
+... (70 earlier lines not published)
 [M1 seed 4103 69/200] delay=55.8256s cost/s=386.4949 wall=88.8s
 [M1 seed 4103 70/200] delay=69.5813s cost/s=482.5316 wall=109.8s
 [M1 seed 4103 71/200] delay=61.0854s cost/s=415.4357 wall=94.6s
@@ -79,3 +72,10 @@
 [M1 seed 4103 139/200] delay=64.4512s cost/s=460.8225 wall=281.2s
 [M1 seed 4103 140/200] delay=51.9247s cost/s=356.9448 wall=242.3s
 [M1 seed 4103 141/200] delay=70.2141s cost/s=515.3435 wall=304.8s
+[M1 seed 4103 142/200] delay=76.2928s cost/s=532.6903 wall=331.4s
+[M1 seed 4103 143/200] delay=51.3461s cost/s=365.2410 wall=275.4s
+[M1 seed 4103 144/200] delay=63.5064s cost/s=433.3880 wall=273.4s
+[M1 seed 4103 145/200] delay=73.8419s cost/s=530.9509 wall=319.3s
+[M1 seed 4103 146/200] delay=41.6411s cost/s=293.9985 wall=208.9s
+[M1 seed 4103 147/200] delay=32.6615s cost/s=228.3631 wall=188.5s
+[M1 seed 4103 148/200] delay=68.8248s cost/s=483.8071 wall=302.7s
