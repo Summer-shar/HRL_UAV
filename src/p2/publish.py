@@ -144,7 +144,8 @@ class Publisher:
                     continue
                 target = dest/rel
                 target.parent.mkdir(parents=True, exist_ok=True)
-                target.write_text(text, encoding='utf-8', newline='\n')
+                with open(target, 'w', encoding='utf-8', newline='\n') as f:    # Path.write_text(newline=) needs 3.10
+                    f.write(text)
             (dest/'PUBLISHED.txt').write_text(f'{time.strftime("%Y-%m-%d %H:%M:%S")}  {message}\n', encoding='utf-8')
             _git(['add', '-A', self.name], self.repo)
             code, out = _git(['commit', '-q', '-m', f'{self.name}: {message}'], self.repo)
