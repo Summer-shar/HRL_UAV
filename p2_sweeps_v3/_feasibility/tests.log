@@ -1,0 +1,301 @@
+... (421 earlier lines not published)
+
+=== 2026-10-18 16:35:25  D:\HRL_UAV_V2\.venv\Scripts\python.exe C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\fake_run.py check-env --out=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\pilot\_feasibility\check_env
+fake check-env --out=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\pilot\_feasibility\check_env
+```
+
+## �Լ�ű������ժ¼
+
+```
+
+=== 2026-10-18 16:35:25  D:\HRL_UAV_V2\.venv\Scripts\python.exe C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\fake_run.py test
+fake test
+```
+
+## ����ʵ���¼�Ƚϣ����ժ¼
+
+```
+train M1       3 episodes: identical
+test  TFOO     scenarios [21, 22]: identical (fields added after the main run, not compared: u2u_mhz)
+ALL IDENTICAL
+```
+
+## ɨ�ιܵ�ð�̣����ժ¼
+
+```
+
+=== 2026-10-18 16:35:25  D:\HRL_UAV_V2\.venv\Scripts\python.exe C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\fake_run.py retrain --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\pilot\_feasibility\smoke --points=users=7,u2u_mhz=1.5 --smoke --seeds=4101 --workers=2
+fake retrain --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\pilot\_feasibility\smoke --points=users=7,u2u_mhz=1.5 --smoke --seeds=4101 --workers=2
+
+=== 2026-10-18 16:35:25  D:\HRL_UAV_V2\.venv\Scripts\python.exe C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\fake_run.py retrain-report --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\pilot\_feasibility\smoke --main=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\main --points=users=7,u2u_mhz=1.5 --smoke --seeds=4101
+fake retrain-report --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\pilot\_feasibility\smoke --main=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\main --points=users=7,u2u_mhz=1.5 --smoke --seeds=4101
+```
+
+## �����Ե㣨3 �����ӣ��������̣������ժ¼
+
+```
+
+=== 2026-10-18 16:35:25  D:\HRL_UAV_V2\.venv\Scripts\python.exe C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\fake_run.py retrain --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\pilot --main=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\main --points=cpu_ghz=9,u2u_mhz=1.5 --seeds=4101,4102,4103 --workers=2
+fake retrain --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\pilot --main=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\main --points=cpu_ghz=9,u2u_mhz=1.5 --seeds=4101,4102,4103 --workers=2
+```
+
+## �Ե��顢��ʱ�����ܣ����ժ¼
+
+```
+
+=== 2026-10-18 16:35:25  D:\HRL_UAV_V2\.venv\Scripts\python.exe C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\fake_run.py pilot-check --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\pilot --main=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\main --seeds=4101,4102,4103
+fake pilot-check --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\pilot --main=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\main --seeds=4101,4102,4103
+FAIL
+=== exit code 1
+
+=== 2026-10-18 16:35:26  D:\HRL_UAV_V2\.venv\Scripts\python.exe C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\fake_run.py progress --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\pilot --seeds=4101,4102,4103 --workers=2
+fake progress --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\pilot --seeds=4101,4102,4103 --workers=2
+
+=== 2026-10-18 16:35:26  D:\HRL_UAV_V2\.venv\Scripts\python.exe C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\fake_run.py retrain-report --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\pilot --main=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\main --points=cpu_ghz=9,u2u_mhz=1.5 --seeds=4101,4102,4103
+fake retrain-report --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\pilot --main=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\main --points=cpu_ghz=9,u2u_mhz=1.5 --seeds=4101,4102,4103
+```
+
+[2026-10-18 16:35:26] ������� ...  (log: C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\ok\_feasibility\check-env.log)
+[2026-10-18 16:35:26] �������: passed
+[2026-10-18 16:35:26] �Լ�ű� ...  (log: C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\ok\_feasibility\tests.log)
+[2026-10-18 16:35:26] �Լ�ű�: passed
+[2026-10-18 16:35:26] ����ʵ���¼�Ƚ� ...  (log: C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\ok\_feasibility\verify.log)
+[2026-10-18 16:35:26] ����ʵ���¼�Ƚ�: passed
+[2026-10-18 16:35:26] ɨ�ιܵ�ð�� ...  (log: C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\ok\_feasibility\smoke.log)
+[2026-10-18 16:35:26] ɨ�ιܵ�ð��: passed
+[2026-10-18 16:35:26] �����Ե㣨3 �����ӣ��������̣� ...  (log: C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\ok\_feasibility\pilots.log)
+[2026-10-18 16:35:26] �����Ե㣨3 �����ӣ��������̣�: passed
+# �����Խ׶Σ�״̬
+
+**�����Խ׶�ͨ��**
+
+�����£�2026-10-18 16:35:26��������ÿ 10 ���Ӹ���һ�Σ�������ʱ��ͣ�ںܾ���ǰ��˵�������Ѿ��˳���
+
+- ��ʵ��Ŀ¼��`C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\main`
+- ���Ŀ¼��`C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\ok`
+- ����ָ�ƣ�`90ef5a60878e`��P2_DEVICE=cpu��P2_THREADS=δ���ã�2���������� 2
+
+| ���� | ���� | ״̬ | ��ʼ | ���� | ��ʱ |
+|---|---|---|---|---|---|
+| 1 | ������� | ͨ�� | 2026-10-18 16:35:26 | 2026-10-18 16:35:26 | 0 ���� |
+| 2 | �Լ�ű� | ͨ�� | 2026-10-18 16:35:26 | 2026-10-18 16:35:26 | 0 ���� |
+| 3 | ����ʵ���¼�Ƚ� | ͨ�� | 2026-10-18 16:35:26 | 2026-10-18 16:35:26 | 0 ���� |
+| 4 | ɨ�ιܵ�ð�� | ͨ�� | 2026-10-18 16:35:26 | 2026-10-18 16:35:26 | 0 ���� |
+| 5 | �����Ե㣨3 �����ӣ��������̣� | ͨ�� | 2026-10-18 16:35:26 | 2026-10-18 16:35:26 | 0 ���� |
+| 6 | �Ե��顢��ʱ������ | ͨ�� | 2026-10-18 16:35:26 | 2026-10-18 16:35:26 | 0 ���� |
+
+## ���ۣ������Խ׶�ͨ��
+
+�����Ե�� M1 ��ͨ����ѵ���Լ�飨�оݼ� docs/PROTOCOL.md �� 5 �ڣ������ܱ���`C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\ok\results\retrain_summary.md`�����桰�Ե��顢��ʱ�����ܡ���ժ¼���а�ʵ���ʱ���Ƶ�ʣ��ʱ�䣨�����Ե�����������ƫ������ȷ�Ϻ����еڶ��׶Σ�
+
+```
+python run.py sweep --main C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\main --out-base C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\ok
+```
+
+## ������飺���ժ¼
+
+```
+
+=== 2026-10-18 16:35:26  D:\HRL_UAV_V2\.venv\Scripts\python.exe C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\fake_run.py check-env --out=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\ok\_feasibility\check_env
+fake check-env --out=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\ok\_feasibility\check_env
+```
+
+## �Լ�ű������ժ¼
+
+```
+
+=== 2026-10-18 16:35:26  D:\HRL_UAV_V2\.venv\Scripts\python.exe C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\fake_run.py test
+fake test
+```
+
+## ����ʵ���¼�Ƚϣ����ժ¼
+
+```
+train M1       3 episodes: identical
+test  TFOO     scenarios [21, 22]: identical (fields added after the main run, not compared: u2u_mhz)
+ALL IDENTICAL
+```
+
+## ɨ�ιܵ�ð�̣����ժ¼
+
+```
+
+=== 2026-10-18 16:35:26  D:\HRL_UAV_V2\.venv\Scripts\python.exe C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\fake_run.py retrain --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\ok\_feasibility\smoke --points=users=7,u2u_mhz=1.5 --smoke --seeds=4101 --workers=2
+fake retrain --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\ok\_feasibility\smoke --points=users=7,u2u_mhz=1.5 --smoke --seeds=4101 --workers=2
+
+=== 2026-10-18 16:35:26  D:\HRL_UAV_V2\.venv\Scripts\python.exe C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\fake_run.py retrain-report --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\ok\_feasibility\smoke --main=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\main --points=users=7,u2u_mhz=1.5 --smoke --seeds=4101
+fake retrain-report --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\ok\_feasibility\smoke --main=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\main --points=users=7,u2u_mhz=1.5 --smoke --seeds=4101
+```
+
+## �����Ե㣨3 �����ӣ��������̣������ժ¼
+
+```
+
+=== 2026-10-18 16:35:26  D:\HRL_UAV_V2\.venv\Scripts\python.exe C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\fake_run.py retrain --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\ok --main=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\main --points=cpu_ghz=9,u2u_mhz=1.5 --seeds=4101,4102,4103 --workers=2
+fake retrain --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\ok --main=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\main --points=cpu_ghz=9,u2u_mhz=1.5 --seeds=4101,4102,4103 --workers=2
+```
+
+## �Ե��顢��ʱ�����ܣ����ժ¼
+
+```
+
+=== 2026-10-18 16:35:26  D:\HRL_UAV_V2\.venv\Scripts\python.exe C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\fake_run.py pilot-check --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\ok --main=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\main --seeds=4101,4102,4103
+fake pilot-check --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\ok --main=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\main --seeds=4101,4102,4103
+PASS
+
+=== 2026-10-18 16:35:26  D:\HRL_UAV_V2\.venv\Scripts\python.exe C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\fake_run.py progress --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\ok --seeds=4101,4102,4103 --workers=2
+fake progress --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\ok --seeds=4101,4102,4103 --workers=2
+
+=== 2026-10-18 16:35:26  D:\HRL_UAV_V2\.venv\Scripts\python.exe C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\fake_run.py retrain-report --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\ok --main=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\main --points=cpu_ghz=9,u2u_mhz=1.5 --seeds=4101,4102,4103
+fake retrain-report --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\ok --main=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\main --points=cpu_ghz=9,u2u_mhz=1.5 --seeds=4101,4102,4103
+```
+
+Stage 1 (feasibility) has not passed under C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\pilot: run "python run.py feasibility" first (docs/PROTOCOL.md section 4).
+[2026-10-18 16:35:26] ȫ�� 16 ���㣨�������ſأ� ...  (log: C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\ok\_sweep\sweep.log)
+[2026-10-18 16:35:26] ȫ�� 16 ���㣨�������ſأ�: passed
+# ȫ��ɨ�ε㣺״̬
+
+**��ֹͣ��16 ����δ���**
+
+�����£�2026-10-18 16:35:26��������ÿ 10 ���Ӹ���һ�Σ�������ʱ��ͣ�ںܾ���ǰ��˵�������Ѿ��˳���
+
+- ��ʵ��Ŀ¼��`C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\main`
+- ���Ŀ¼��`C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\ok`
+- ����ָ�ƣ�`90ef5a60878e`��P2_DEVICE=cpu��P2_THREADS=δ���ã�2���������� 2
+
+| ���� | ���� | ״̬ | ��ʼ | ���� | ��ʱ |
+|---|---|---|---|---|---|
+| 1 | ȫ�� 16 ���㣨�������ſأ� | ͨ�� | 2026-10-18 16:35:26 | 2026-10-18 16:35:26 | 0 ���� |
+| 2 | ���ջ����뵼�� | ʧ�� | 2026-10-18 16:35:26 | 2026-10-18 16:35:26 | 0 ���� |
+
+## ֹͣԭ��
+
+δ��ɵĵ㣺cpu_ghz=9, u2u_mhz=1.5, cpu_ghz=11, cpu_ghz=12, cpu_ghz=14, load=0.6, load=0.8, load=0.9, load=1.1, users=7, users=10, users=16, users=19, u2u_mhz=2, u2u_mhz=2.5, u2u_mhz=4������ԭ������ʧ�ܣ��� `C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\ok\_sweep\sweep.log` ĩβ�� ��Failed or skipped jobs���������ſ�δͨ����`_jobs/pilot_gate_*.log`����������ԭ����������ͬһ����������ܡ�
+
+## ȫ�� 16 ���㣨�������ſأ������ժ¼
+
+```
+
+=== 2026-10-18 16:35:26  D:\HRL_UAV_V2\.venv\Scripts\python.exe C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\fake_run.py retrain --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\ok --main=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\main --seeds=4101,4102,4103 --workers=2
+fake retrain --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\ok --main=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\main --seeds=4101,4102,4103 --workers=2
+```
+
+## ���ջ����뵼�������ժ¼
+
+```
+
+=== 2026-10-18 16:35:26  D:\HRL_UAV_V2\.venv\Scripts\python.exe C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\fake_run.py progress --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\ok --seeds=4101,4102,4103 --workers=2
+fake progress --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\ok --seeds=4101,4102,4103 --workers=2
+
+=== 2026-10-18 16:35:26  D:\HRL_UAV_V2\.venv\Scripts\python.exe C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\fake_run.py retrain-report --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\ok --main=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\main --seeds=4101,4102,4103
+fake retrain-report --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\ok --main=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\main --seeds=4101,4102,4103
+
+=== 2026-10-18 16:35:26  D:\HRL_UAV_V2\.venv\Scripts\python.exe C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\fake_run.py retrain-export --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\ok --dest=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\ok\records.zip --seeds=4101,4102,4103
+fake retrain-export --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\ok --dest=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\ok\records.zip --seeds=4101,4102,4103
+```
+
+[2026-10-18 16:35:27] ������� ...  (log: C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\pushed\_feasibility\check-env.log)
+[2026-10-18 16:35:27] �������: passed
+[2026-10-18 16:35:27] �Լ�ű� ...  (log: C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\pushed\_feasibility\tests.log)
+[2026-10-18 16:35:27] �Լ�ű�: passed
+[2026-10-18 16:35:27] ����ʵ���¼�Ƚ� ...  (log: C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\pushed\_feasibility\verify.log)
+[2026-10-18 16:35:27] ����ʵ���¼�Ƚ�: passed
+[2026-10-18 16:35:27] ɨ�ιܵ�ð�� ...  (log: C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\pushed\_feasibility\smoke.log)
+[2026-10-18 16:35:27] ɨ�ιܵ�ð��: passed
+[2026-10-18 16:35:27] �����Ե㣨3 �����ӣ��������̣� ...  (log: C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\pushed\_feasibility\pilots.log)
+[2026-10-18 16:35:27] �����Ե㣨3 �����ӣ��������̣�: passed
+# �����Խ׶Σ�״̬
+
+**�����Խ׶�ͨ��**
+
+�����£�2026-10-18 16:35:27��������ÿ 10 ���Ӹ���һ�Σ�������ʱ��ͣ�ںܾ���ǰ��˵�������Ѿ��˳���
+
+- ��ʵ��Ŀ¼��`C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\main`
+- ���Ŀ¼��`C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\pushed`
+- ����ָ�ƣ�`90ef5a60878e`��P2_DEVICE=cpu��P2_THREADS=δ���ã�2���������� 2
+- **GitHub ���ͣ�ʧ�ܣ�ʵ�鲻��Ӱ�죬�������У���TypeError: write_text() got an unexpected keyword argument 'newline'**
+
+| ���� | ���� | ״̬ | ��ʼ | ���� | ��ʱ |
+|---|---|---|---|---|---|
+| 1 | ������� | ͨ�� | 2026-10-18 16:35:26 | 2026-10-18 16:35:27 | 0 ���� |
+| 2 | �Լ�ű� | ͨ�� | 2026-10-18 16:35:27 | 2026-10-18 16:35:27 | 0 ���� |
+| 3 | ����ʵ���¼�Ƚ� | ͨ�� | 2026-10-18 16:35:27 | 2026-10-18 16:35:27 | 0 ���� |
+| 4 | ɨ�ιܵ�ð�� | ͨ�� | 2026-10-18 16:35:27 | 2026-10-18 16:35:27 | 0 ���� |
+| 5 | �����Ե㣨3 �����ӣ��������̣� | ͨ�� | 2026-10-18 16:35:27 | 2026-10-18 16:35:27 | 0 ���� |
+| 6 | �Ե��顢��ʱ������ | ͨ�� | 2026-10-18 16:35:27 | 2026-10-18 16:35:27 | 0 ���� |
+
+## ���ۣ������Խ׶�ͨ��
+
+�����Ե�� M1 ��ͨ����ѵ���Լ�飨�оݼ� docs/PROTOCOL.md �� 5 �ڣ������ܱ���`C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\pushed\results\retrain_summary.md`�����桰�Ե��顢��ʱ�����ܡ���ժ¼���а�ʵ���ʱ���Ƶ�ʣ��ʱ�䣨�����Ե�����������ƫ������ȷ�Ϻ����еڶ��׶Σ�
+
+```
+python run.py sweep --main C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\main --out-base C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\pushed
+```
+
+## ������飺���ժ¼
+
+```
+
+=== 2026-10-18 16:35:27  D:\HRL_UAV_V2\.venv\Scripts\python.exe C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\fake_run.py check-env --out=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\pushed\_feasibility\check_env
+fake check-env --out=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\pushed\_feasibility\check_env
+```
+
+## �Լ�ű������ժ¼
+
+```
+
+=== 2026-10-18 16:35:27  D:\HRL_UAV_V2\.venv\Scripts\python.exe C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\fake_run.py test
+fake test
+```
+
+## ����ʵ���¼�Ƚϣ����ժ¼
+
+```
+train M1       3 episodes: identical
+test  TFOO     scenarios [21, 22]: identical (fields added after the main run, not compared: u2u_mhz)
+ALL IDENTICAL
+```
+
+## ɨ�ιܵ�ð�̣����ժ¼
+
+```
+
+=== 2026-10-18 16:35:27  D:\HRL_UAV_V2\.venv\Scripts\python.exe C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\fake_run.py retrain --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\pushed\_feasibility\smoke --points=users=7,u2u_mhz=1.5 --smoke --seeds=4101 --workers=2
+fake retrain --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\pushed\_feasibility\smoke --points=users=7,u2u_mhz=1.5 --smoke --seeds=4101 --workers=2
+
+=== 2026-10-18 16:35:27  D:\HRL_UAV_V2\.venv\Scripts\python.exe C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\fake_run.py retrain-report --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\pushed\_feasibility\smoke --main=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\main --points=users=7,u2u_mhz=1.5 --smoke --seeds=4101
+fake retrain-report --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\pushed\_feasibility\smoke --main=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\main --points=users=7,u2u_mhz=1.5 --smoke --seeds=4101
+```
+
+## �����Ե㣨3 �����ӣ��������̣������ժ¼
+
+```
+
+=== 2026-10-18 16:35:27  D:\HRL_UAV_V2\.venv\Scripts\python.exe C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\fake_run.py retrain --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\pushed --main=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\main --points=cpu_ghz=9,u2u_mhz=1.5 --seeds=4101,4102,4103 --workers=2
+fake retrain --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\pushed --main=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\main --points=cpu_ghz=9,u2u_mhz=1.5 --seeds=4101,4102,4103 --workers=2
+```
+
+## �Ե��顢��ʱ�����ܣ����ժ¼
+
+```
+
+=== 2026-10-18 16:35:27  D:\HRL_UAV_V2\.venv\Scripts\python.exe C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\fake_run.py pilot-check --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\pushed --main=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\main --seeds=4101,4102,4103
+fake pilot-check --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\pushed --main=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\main --seeds=4101,4102,4103
+PASS
+
+=== 2026-10-18 16:35:27  D:\HRL_UAV_V2\.venv\Scripts\python.exe C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\fake_run.py progress --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\pushed --seeds=4101,4102,4103 --workers=2
+fake progress --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\pushed --seeds=4101,4102,4103 --workers=2
+
+=== 2026-10-18 16:35:27  D:\HRL_UAV_V2\.venv\Scripts\python.exe C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\fake_run.py retrain-report --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\pushed --main=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\main --points=cpu_ghz=9,u2u_mhz=1.5 --seeds=4101,4102,4103
+fake retrain-report --out-base=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\pushed --main=C:\Users\PC\AppData\Local\Temp\p2feas_eo6jwxsn\main --points=cpu_ghz=9,u2u_mhz=1.5 --seeds=4101,4102,4103
+```
+
+Traceback (most recent call last):
+  File "D:\p2_code\tests\test_feasibility.py", line 104, in <module>
+    main()
+  File "D:\p2_code\tests\test_feasibility.py", line 93, in main
+    shown = subprocess.run(['git', 'show', 'paper2-runs:pushed/FEASIBILITY.md'], cwd=str(remote), capture_output=True,
+  File "D:\Anaconda3\envs\pytorch-gpu\lib\subprocess.py", line 528, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['git', 'show', 'paper2-runs:pushed/FEASIBILITY.md']' returned non-zero exit status 128.
+=== exit code 1
