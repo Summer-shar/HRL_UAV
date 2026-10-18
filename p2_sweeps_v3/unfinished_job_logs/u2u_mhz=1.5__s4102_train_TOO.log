@@ -1,11 +1,4 @@
-
-=== start 2026-10-18 23:55:21 ===
-[TOO seed 4102 1/400] delay=60.0427s cost/s=433.5622 step=10.3m wall=93.7s
-[TOO seed 4102 2/400] delay=40.6566s cost/s=280.0235 step=10.7m wall=67.0s
-[TOO seed 4102 3/400] delay=46.5513s cost/s=327.8836 step=11.0m wall=75.6s
-[TOO seed 4102 4/400] delay=55.6362s cost/s=395.0491 step=10.7m wall=88.2s
-[TOO seed 4102 5/400] delay=42.7434s cost/s=306.5227 step=10.7m wall=74.9s
-[TOO seed 4102 6/400] delay=51.7318s cost/s=378.9373 step=10.9m wall=79.2s
+... (8 earlier lines not published)
 [TOO seed 4102 7/400] delay=52.7698s cost/s=377.4749 step=10.8m wall=83.7s
 [TOO seed 4102 8/400] delay=36.3511s cost/s=257.7067 step=10.8m wall=60.7s
 [TOO seed 4102 9/400] delay=51.4516s cost/s=354.7888 step=11.1m wall=82.5s
@@ -72,3 +65,17 @@
 [TOO seed 4102 70/400] delay=45.1943s cost/s=319.1730 step=10.3m wall=80.2s
 [TOO seed 4102 71/400] delay=47.2645s cost/s=341.9560 step=10.5m wall=76.8s
 [TOO seed 4102 72/400] delay=53.6553s cost/s=367.0165 step=10.8m wall=84.4s
+[TOO seed 4102 73/400] delay=48.2312s cost/s=342.5187 step=10.8m wall=81.0s
+[TOO seed 4102 74/400] delay=47.3602s cost/s=336.7838 step=10.4m wall=81.0s
+[TOO seed 4102 75/400] delay=45.0176s cost/s=321.0624 step=10.3m wall=77.4s
+[TOO seed 4102 76/400] delay=40.7352s cost/s=282.0033 step=9.9m wall=68.0s
+[TOO seed 4102 77/400] delay=50.8764s cost/s=362.0568 step=10.3m wall=90.9s
+[TOO seed 4102 78/400] delay=36.5797s cost/s=263.9413 step=10.9m wall=70.2s
+[TOO seed 4102 79/400] delay=45.3976s cost/s=315.9880 step=10.6m wall=80.5s
+[TOO seed 4102 80/400] delay=51.9461s cost/s=381.3392 step=11.0m wall=187.2s
+[TOO seed 4102 81/400] delay=52.5611s cost/s=374.4565 step=9.8m wall=191.8s
+[TOO seed 4102 82/400] delay=49.8832s cost/s=347.0664 step=10.9m wall=185.4s
+[TOO seed 4102 83/400] delay=43.0524s cost/s=307.0635 step=11.0m wall=171.0s
+[TOO seed 4102 84/400] delay=44.6826s cost/s=315.4982 step=11.0m wall=173.2s
+[TOO seed 4102 85/400] delay=50.0388s cost/s=346.6314 step=10.3m wall=190.0s
+[TOO seed 4102 86/400] delay=49.4737s cost/s=352.5940 step=11.0m wall=184.4s

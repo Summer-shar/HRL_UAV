@@ -263,3 +263,5 @@ DONE  cpu_ghz=9/s4101_test_CA (4.2 min) [126/248]
 START cpu_ghz=9/report
 DONE  cpu_ghz=9/report (0.0 min) [127/248]
 START u2u_mhz=1.5/s4103_train_TOO
+DONE  u2u_mhz=1.5/s4102_train_NC (104.7 min) [128/248]
+START u2u_mhz=1.5/s4103_train_NC
