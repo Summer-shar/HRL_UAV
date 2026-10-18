@@ -1,11 +1,4 @@
-
-=== start 2026-10-19 04:46:29 ===
-[HoverSAC seed 4103 1/100] delay=61.8059s cost/s=452.1540 wall=79.9s
-[HoverSAC seed 4103 2/100] delay=57.9433s cost/s=402.6089 wall=77.6s
-[HoverSAC seed 4103 3/100] delay=62.4368s cost/s=430.3766 wall=82.7s
-[HoverSAC seed 4103 4/100] delay=64.4820s cost/s=475.4613 wall=89.1s
-[HoverSAC seed 4103 5/100] delay=58.4124s cost/s=418.7846 wall=83.2s
-[HoverSAC seed 4103 6/100] delay=62.4196s cost/s=444.7335 wall=88.1s
+... (8 earlier lines not published)
 [HoverSAC seed 4103 7/100] delay=52.5388s cost/s=381.0637 wall=78.5s
 [HoverSAC seed 4103 8/100] delay=56.8388s cost/s=397.9622 wall=80.3s
 [HoverSAC seed 4103 9/100] delay=60.2960s cost/s=427.1001 wall=86.9s
@@ -66,3 +59,23 @@
 [HoverSAC seed 4103 64/100] delay=54.5451s cost/s=381.1345 wall=89.0s
 [HoverSAC seed 4103 65/100] delay=61.1940s cost/s=443.9568 wall=100.1s
 [HoverSAC seed 4103 66/100] delay=58.1023s cost/s=415.0848 wall=94.1s
+[HoverSAC seed 4103 67/100] delay=66.0103s cost/s=440.8279 wall=98.8s
+[HoverSAC seed 4103 68/100] delay=51.8353s cost/s=365.6919 wall=84.4s
+[HoverSAC seed 4103 69/100] delay=61.7476s cost/s=443.1079 wall=98.3s
+[HoverSAC seed 4103 70/100] delay=54.4712s cost/s=396.7816 wall=96.4s
+[HoverSAC seed 4103 71/100] delay=62.7857s cost/s=452.8615 wall=99.0s
+[HoverSAC seed 4103 72/100] delay=41.6902s cost/s=280.1667 wall=75.8s
+[HoverSAC seed 4103 73/100] delay=58.2689s cost/s=399.4178 wall=97.7s
+[HoverSAC seed 4103 74/100] delay=36.1992s cost/s=264.2143 wall=73.3s
+[HoverSAC seed 4103 75/100] delay=53.6811s cost/s=385.9752 wall=93.3s
+[HoverSAC seed 4103 76/100] delay=61.3828s cost/s=445.4124 wall=100.8s
+[HoverSAC seed 4103 77/100] delay=63.9448s cost/s=451.9288 wall=109.1s
+[HoverSAC seed 4103 78/100] delay=46.9761s cost/s=353.2461 wall=89.5s
+[HoverSAC seed 4103 79/100] delay=48.3125s cost/s=334.6161 wall=83.4s
+[HoverSAC seed 4103 80/100] delay=54.0805s cost/s=370.3340 wall=86.9s
+[HoverSAC seed 4103 81/100] delay=57.0902s cost/s=403.2803 wall=96.3s
+[HoverSAC seed 4103 82/100] delay=40.2306s cost/s=288.8562 wall=71.6s
+[HoverSAC seed 4103 83/100] delay=40.4378s cost/s=286.3443 wall=73.2s
+[HoverSAC seed 4103 84/100] delay=51.8238s cost/s=360.0248 wall=85.0s
+[HoverSAC seed 4103 85/100] delay=34.5199s cost/s=239.2065 wall=66.6s
+[HoverSAC seed 4103 86/100] delay=36.9784s cost/s=255.0047 wall=67.4s
