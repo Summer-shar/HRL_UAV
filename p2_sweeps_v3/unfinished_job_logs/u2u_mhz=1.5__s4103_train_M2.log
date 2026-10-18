@@ -1,8 +1,4 @@
-
-=== start 2026-10-19 04:41:40 ===
-[M2 seed 4103 1/400] delay=64.5645s cost/s=441.8459 step=10.9m wall=76.0s
-[M2 seed 4103 2/400] delay=49.1779s cost/s=352.0538 step=10.5m wall=65.7s
-[M2 seed 4103 3/400] delay=59.2380s cost/s=428.0600 step=10.9m wall=77.4s
+... (5 earlier lines not published)
 [M2 seed 4103 4/400] delay=67.4883s cost/s=502.5666 step=11.5m wall=90.1s
 [M2 seed 4103 5/400] delay=51.7784s cost/s=376.3408 step=10.8m wall=71.4s
 [M2 seed 4103 6/400] delay=66.5177s cost/s=482.9297 step=10.7m wall=82.6s
@@ -60,3 +56,26 @@
 [M2 seed 4103 58/400] delay=61.2662s cost/s=430.3505 step=11.3m wall=77.9s
 [M2 seed 4103 59/400] delay=53.9677s cost/s=381.1674 step=11.3m wall=71.7s
 [M2 seed 4103 60/400] delay=53.7839s cost/s=388.5506 step=10.9m wall=73.6s
+[M2 seed 4103 61/400] delay=56.8870s cost/s=398.2968 step=11.2m wall=69.0s
+[M2 seed 4103 62/400] delay=61.2421s cost/s=430.8413 step=11.3m wall=75.1s
+[M2 seed 4103 63/400] delay=59.7377s cost/s=424.9468 step=11.6m wall=77.9s
+[M2 seed 4103 64/400] delay=64.7624s cost/s=471.1599 step=10.9m wall=84.0s
+[M2 seed 4103 65/400] delay=66.9190s cost/s=493.4777 step=11.3m wall=90.1s
+[M2 seed 4103 66/400] delay=66.5156s cost/s=463.3284 step=10.5m wall=83.4s
+[M2 seed 4103 67/400] delay=58.3491s cost/s=417.2694 step=11.0m wall=73.3s
+[M2 seed 4103 68/400] delay=60.1107s cost/s=409.7013 step=11.2m wall=74.5s
+[M2 seed 4103 69/400] delay=62.3620s cost/s=442.6387 step=11.2m wall=79.2s
+[M2 seed 4103 70/400] delay=52.2550s cost/s=372.5778 step=11.2m wall=72.1s
+[M2 seed 4103 71/400] delay=56.4531s cost/s=388.1966 step=10.6m wall=69.9s
+[M2 seed 4103 72/400] delay=61.4740s cost/s=448.9353 step=11.0m wall=81.1s
+[M2 seed 4103 73/400] delay=62.2992s cost/s=447.8269 step=11.3m wall=78.6s
+[M2 seed 4103 74/400] delay=61.2438s cost/s=430.9589 step=11.1m wall=78.1s
+[M2 seed 4103 75/400] delay=57.8441s cost/s=415.0032 step=10.9m wall=77.8s
+[M2 seed 4103 76/400] delay=56.5972s cost/s=395.0481 step=11.0m wall=68.3s
+[M2 seed 4103 77/400] delay=61.2798s cost/s=453.4318 step=11.1m wall=79.9s
+[M2 seed 4103 78/400] delay=65.2735s cost/s=451.6425 step=11.3m wall=80.3s
+[M2 seed 4103 79/400] delay=65.1294s cost/s=470.5152 step=10.8m wall=87.9s
+[M2 seed 4103 80/400] delay=67.1638s cost/s=490.1234 step=11.2m wall=87.3s
+[M2 seed 4103 81/400] delay=67.1910s cost/s=474.2762 step=10.7m wall=81.8s
+[M2 seed 4103 82/400] delay=67.2784s cost/s=491.3739 step=10.5m wall=83.3s
+[M2 seed 4103 83/400] delay=62.6314s cost/s=447.3795 step=11.2m wall=78.8s
