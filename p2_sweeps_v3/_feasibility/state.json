@@ -4,8 +4,11 @@
   "started": "2026-10-18 17:15:11",
   "steps": {
     "check-env": {
-      "status": "running",
-      "started": "2026-10-18 17:15:11"
+      "status": "passed",
+      "started": "2026-10-18 17:15:11",
+      "ended": "2026-10-18 17:15:36",
+      "seconds": 18,
+      "excerpt": "  torch      2.7.0.dev20250227+cu128\n  cvxpy      1.7.1\n  clarabel   0.11.1\n  matplotlib 3.9.4\ntorch CUDA available: True (NVIDIA GeForce RTX 5060, CUDA 12.8)\nP2_DEVICE=cpu  P2_THREADS=(not set: 2)\ncvxpy solvers: CLARABEL, OSQP, SCIPY, SCS\nsimulator: 20 s of the nominal scene in 0.1 s, 39 terminals\nsmoke training M1: ok in 6 s\nsmoke training TFOO: ok in 9 s\n\nALL CHECKS PASSED"
     },
     "tests": {
       "status": "pending"
