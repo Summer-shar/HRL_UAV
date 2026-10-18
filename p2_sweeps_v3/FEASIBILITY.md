@@ -2,7 +2,7 @@
 
 **运行中：两个试点（3 个种子，完整流程）**
 
-最后更新：2026-10-19 00:56:59（运行中每 10 分钟更新一次；如果这个时间停在很久以前，说明程序已经退出）
+最后更新：2026-10-19 01:27:10（运行中每 10 分钟更新一次；如果这个时间停在很久以前，说明程序已经退出）
 
 - 主实验目录：`D:\p2_runs_v2`
 - 输出目录：`D:\p2_sweeps_v3`
@@ -24,10 +24,12 @@
 
 ```
 point           jobs done  job-hours  state
-cpu_ghz=9       120/124         40.9  running
+cpu_ghz=9       124/124         41.4  finished
 u2u_mhz=1.5       3/124          5.3  running
 
-no point has finished yet: no extrapolation (see "timing" for the estimate from the main run)
+finished points: 1, mean 41.4 job-hours per point (41.4-41.4)
+remaining: 1 points, about 36 job-hours; with 8 workers about 5 h (0.2 days) if every worker stays busy
+Low-U2U and high-load points run slower than the average; read this as an estimate.
 ```
 
 ## 环境检查：输出摘录
