@@ -2,7 +2,7 @@
 
 **运行中：两个试点（3 个种子，完整流程）**
 
-最后更新：2026-10-18 21:56:02（运行中每 10 分钟更新一次；如果这个时间停在很久以前，说明程序已经退出）
+最后更新：2026-10-18 22:26:11（运行中每 10 分钟更新一次；如果这个时间停在很久以前，说明程序已经退出）
 
 - 主实验目录：`D:\p2_runs_v2`
 - 输出目录：`D:\p2_sweeps_v3`
@@ -24,7 +24,7 @@
 
 ```
 point           jobs done  job-hours  state
-cpu_ghz=9        80/124         34.4  running
+cpu_ghz=9       104/124         36.2  running
 u2u_mhz=1.5       0/124          0.0  not started
 
 no point has finished yet: no extrapolation (see "timing" for the estimate from the main run)
