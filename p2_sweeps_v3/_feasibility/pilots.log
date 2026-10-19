@@ -1,14 +1,4 @@
-... (89 earlier lines not published)
-DONE  cpu_ghz=9/s4102_dev_ProposedUpper_100 (2.4 min) [40/248]
-START cpu_ghz=9/s4102_dev_ProposedUpper_200
-DONE  cpu_ghz=9/s4102_dev_ProposedUpper_200 (2.4 min) [41/248]
-START cpu_ghz=9/s4102_dev_ProposedUpper_300
-DONE  cpu_ghz=9/s4103_train_M2 (98.9 min) [42/248]
-START cpu_ghz=9/s4102_dev_ProposedUpper_400
-DONE  cpu_ghz=9/s4102_train_NC (134.8 min) [43/248]
-START cpu_ghz=9/s4103_dev_ProposedUpper_100
-DONE  cpu_ghz=9/s4102_dev_ProposedUpper_300 (2.5 min) [44/248]
-START cpu_ghz=9/s4103_dev_ProposedUpper_200
+... (99 earlier lines not published)
 DONE  cpu_ghz=9/s4102_dev_ProposedUpper_400 (2.4 min) [45/248]
 START cpu_ghz=9/s4103_dev_ProposedUpper_300
 DONE  cpu_ghz=9/s4103_dev_ProposedUpper_100 (2.3 min) [46/248]
@@ -299,3 +289,13 @@ DONE  u2u_mhz=1.5/s4102_train_TOO (507.8 min) [188/248]
 START u2u_mhz=1.5/s4102_dev_TOO_100
 DONE  u2u_mhz=1.5/s4102_dev_HoverSAC_100 (10.4 min) [189/248]
 START u2u_mhz=1.5/s4102_dev_TOO_200
+DONE  u2u_mhz=1.5/s4103_dev_HoverSAC_0 (29.6 min) [190/248]
+START u2u_mhz=1.5/s4102_dev_TOO_300
+DONE  u2u_mhz=1.5/s4103_dev_HoverSAC_25 (27.6 min) [191/248]
+START u2u_mhz=1.5/s4102_dev_TOO_400
+DONE  u2u_mhz=1.5/s4103_dev_HoverSAC_50 (27.5 min) [192/248]
+START u2u_mhz=1.5/s4103_dev_HoverSAC_75
+DONE  u2u_mhz=1.5/s4102_dev_TOO_200 (24.8 min) [193/248]
+START u2u_mhz=1.5/s4103_dev_HoverSAC_100
+DONE  u2u_mhz=1.5/s4102_dev_TOO_100 (34.1 min) [194/248]
+START u2u_mhz=1.5/s4101_test_Proposed
