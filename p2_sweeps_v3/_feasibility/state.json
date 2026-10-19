@@ -18,8 +18,11 @@
       "excerpt": "OK random scenario 22 scene 0: identical; 1.72s -> 1.30s (1.32x)\nOK local  scenario 21 scene 0: identical; 1.94s -> 1.34s (1.45x)\nOK random scenario 23 scene 1: identical; 4.32s -> 2.82s (1.53x)\nOK hover  scenario 24 scene 2: identical; 3.77s -> 2.26s (1.67x)\nOK local  scenario 25 scene 3: identical; 1.10s -> 0.95s (1.16x)\nOK random scenario 26 scene 4: identical; 1.78s -> 1.57s (1.14x)\nOK hover  scenario 27 scene 4: identical; 1.74s -> 1.51s (1.15x)\nOK training adapter local scenario 21: identical except diagnostics; 1.45s -> 1.36s (1.06x)\nOK training adapter random scenario 22: identical except diagnostics; 1.37s -> 1.41s (0.97x)\n\n=== 2026-10-19 13:29:18  D:\\HRL_UAV_V2\\.venv\\Scripts\\python.exe D:\\p2_code\\tests\\test_identity.py\nderive identical"
     },
     "verify": {
-      "status": "running",
-      "started": "2026-10-19 13:29:25"
+      "status": "passed",
+      "started": "2026-10-19 13:29:25",
+      "ended": "2026-10-19 13:40:26",
+      "seconds": 657,
+      "excerpt": "train M1       3 episodes: identical (fields added after the main run, not compared: actor_lr)\ntrain M2       5 episodes: identical\ntrain M3       3 episodes: identical\ntrain HoverSAC 3 episodes: identical\ntrain TFOO     5 episodes: identical\ntrain TOO      5 episodes: identical\ntrain NC       5 episodes: identical\ntest  Proposed scenarios [21, 22]: identical\ntest  TFOO     scenarios [21, 22]: identical (fields added after the main run, not compared: u2u_mhz)\ntest  TOO      scenarios [21, 22]: identical (fields added after the main run, not compared: u2u_mhz)\ntest  NC       scenarios [21, 22]: identical (fields added after the main run, not compared: u2u_mhz)\ntest  HoverSAC scenarios [21, 22]: identical\ntest  CA       scenarios [21, 22]: identical\nnote: actor_lr exists only in the new records (SAC training rows, added in commit cfdcf3f (fine-tuning recipe v2))\nnote: u2u_mhz exists only in the new records (evaluation records, added in commit d458a73 (U2U sweep); the main run's TFOO / TOO / NC test records were written before it)\nALL IDENTICAL -> D:\\p2_sweeps_v3\\_feasibility\\verify\\verify_9bcb1b2fbd6c.json"
     },
     "smoke": {
       "status": "pending"

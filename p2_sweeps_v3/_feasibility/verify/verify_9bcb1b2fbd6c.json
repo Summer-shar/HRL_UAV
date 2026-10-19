@@ -1,0 +1,146 @@
+{
+  "code": "9bcb1b2fbd6c",
+  "environment": {
+    "python": "3.9.25",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "numpy": "1.26.4",
+    "torch": "2.7.0.dev20250227+cu128"
+  },
+  "main": "D:\\p2_runs_v2",
+  "seed": 4101,
+  "train": {
+    "M1": {
+      "episodes": 3,
+      "identical": true,
+      "value_differences": 0,
+      "first_differences": [],
+      "added_fields": [
+        "actor_lr"
+      ],
+      "seconds": 49.5
+    },
+    "M2": {
+      "episodes": 5,
+      "identical": true,
+      "value_differences": 0,
+      "first_differences": [],
+      "added_fields": [],
+      "seconds": 51.8
+    },
+    "M3": {
+      "episodes": 3,
+      "identical": true,
+      "value_differences": 0,
+      "first_differences": [],
+      "added_fields": [],
+      "seconds": 38.8
+    },
+    "HoverSAC": {
+      "episodes": 3,
+      "identical": true,
+      "value_differences": 0,
+      "first_differences": [],
+      "added_fields": [],
+      "seconds": 44.6
+    },
+    "TFOO": {
+      "episodes": 5,
+      "identical": true,
+      "value_differences": 0,
+      "first_differences": [],
+      "added_fields": [],
+      "seconds": 71.8
+    },
+    "TOO": {
+      "episodes": 5,
+      "identical": true,
+      "value_differences": 0,
+      "first_differences": [],
+      "added_fields": [],
+      "seconds": 54.0
+    },
+    "NC": {
+      "episodes": 5,
+      "identical": true,
+      "value_differences": 0,
+      "first_differences": [],
+      "added_fields": [],
+      "seconds": 70.2
+    }
+  },
+  "test": {
+    "Proposed": {
+      "scenarios": [
+        21,
+        22
+      ],
+      "identical": true,
+      "value_differences": 0,
+      "first_differences": [],
+      "added_fields": []
+    },
+    "TFOO": {
+      "scenarios": [
+        21,
+        22
+      ],
+      "identical": true,
+      "value_differences": 0,
+      "first_differences": [],
+      "added_fields": [
+        "u2u_mhz"
+      ]
+    },
+    "TOO": {
+      "scenarios": [
+        21,
+        22
+      ],
+      "identical": true,
+      "value_differences": 0,
+      "first_differences": [],
+      "added_fields": [
+        "u2u_mhz"
+      ]
+    },
+    "NC": {
+      "scenarios": [
+        21,
+        22
+      ],
+      "identical": true,
+      "value_differences": 0,
+      "first_differences": [],
+      "added_fields": [
+        "u2u_mhz"
+      ]
+    },
+    "HoverSAC": {
+      "scenarios": [
+        21,
+        22
+      ],
+      "identical": true,
+      "value_differences": 0,
+      "first_differences": [],
+      "added_fields": []
+    },
+    "CA": {
+      "scenarios": [
+        21,
+        22
+      ],
+      "identical": true,
+      "value_differences": 0,
+      "first_differences": [],
+      "added_fields": []
+    }
+  },
+  "started": "2026-10-19 13:29:31",
+  "perf_patches_active": true,
+  "all_identical": true,
+  "added_fields": {
+    "actor_lr": "SAC training rows, added in commit cfdcf3f (fine-tuning recipe v2)",
+    "u2u_mhz": "evaluation records, added in commit d458a73 (U2U sweep); the main run's TFOO / TOO / NC test records were written before it"
+  }
+}

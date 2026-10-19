@@ -1,8 +1,8 @@
 # 可行性阶段：状态
 
-**运行中：与主实验记录比较**
+**运行中：与主实验记录比较完成**
 
-最后更新：2026-10-19 13:29:25（运行中每 10 分钟更新一次；如果这个时间停在很久以前，说明程序已经退出）
+最后更新：2026-10-19 13:40:26（运行中每 10 分钟更新一次；如果这个时间停在很久以前，说明程序已经退出）
 
 - 主实验目录：`D:\p2_runs_v2`
 - 输出目录：`D:\p2_sweeps_v3`
@@ -13,7 +13,7 @@
 |---|---|---|---|---|---|
 | 1 | 环境检查 | 通过 | 2026-10-19 13:27:16 | 2026-10-19 13:27:43 | 0 分钟 |
 | 2 | 自检脚本 | 通过 | 2026-10-19 13:27:47 | 2026-10-19 13:29:20 | 1 分钟 |
-| 3 | 与主实验记录比较 | 运行中 | 2026-10-19 13:29:25 |  |  |
+| 3 | 与主实验记录比较 | 通过 | 2026-10-19 13:29:25 | 2026-10-19 13:40:26 | 11 分钟 |
 | 4 | 扫参管道冒烟 | 未开始 |  |  |  |
 | 5 | 两个试点（3 个种子，完整流程） | 未开始 |  |  |  |
 | 6 | 试点检查、耗时、汇总 | 未开始 |  |  |  |
@@ -52,4 +52,25 @@ OK training adapter random scenario 22: identical except diagnostics; 1.37s -> 1
 
 === 2026-10-19 13:29:18  D:\HRL_UAV_V2\.venv\Scripts\python.exe D:\p2_code\tests\test_identity.py
 derive identical
+```
+
+## 与主实验记录比较：输出摘录
+
+```
+train M1       3 episodes: identical (fields added after the main run, not compared: actor_lr)
+train M2       5 episodes: identical
+train M3       3 episodes: identical
+train HoverSAC 3 episodes: identical
+train TFOO     5 episodes: identical
+train TOO      5 episodes: identical
+train NC       5 episodes: identical
+test  Proposed scenarios [21, 22]: identical
+test  TFOO     scenarios [21, 22]: identical (fields added after the main run, not compared: u2u_mhz)
+test  TOO      scenarios [21, 22]: identical (fields added after the main run, not compared: u2u_mhz)
+test  NC       scenarios [21, 22]: identical (fields added after the main run, not compared: u2u_mhz)
+test  HoverSAC scenarios [21, 22]: identical
+test  CA       scenarios [21, 22]: identical
+note: actor_lr exists only in the new records (SAC training rows, added in commit cfdcf3f (fine-tuning recipe v2))
+note: u2u_mhz exists only in the new records (evaluation records, added in commit d458a73 (U2U sweep); the main run's TFOO / TOO / NC test records were written before it)
+ALL IDENTICAL -> D:\p2_sweeps_v3\_feasibility\verify\verify_9bcb1b2fbd6c.json
 ```
