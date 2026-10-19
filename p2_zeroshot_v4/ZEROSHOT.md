@@ -2,12 +2,12 @@
 
 **运行中：全部 16 个点的测试**
 
-最后更新：2026-10-20 06:10:27（运行中每 10 分钟更新一次；如果这个时间停在很久以前，说明程序已经退出）
+最后更新：2026-10-20 06:41:10（运行中每 10 分钟更新一次；如果这个时间停在很久以前，说明程序已经退出）
 
 - 主实验目录：`D:\p2_runs_v2`
 - 输出目录：`D:\p2_zeroshot_v4`
 - 代码指纹：`4cdb31407064`；P2_DEVICE=cpu；P2_THREADS=未设置（2）；进程数 8
-- GitHub 推送：成功（分支 paper2-runs，文件夹 p2_zeroshot_v4/）
+- **GitHub 推送：失败（实验不受影响，继续运行）：git push: fatal: unable to access 'https://github.com/Summer-shar/HRL_UAV.git/': TLS connect error: error:0A000126:SSL routines::unexpected eof while reading**
 
 | 步骤 | 内容 | 状态 | 开始 | 结束 | 用时 |
 |---|---|---|---|---|---|
@@ -28,18 +28,18 @@ cpu_ghz=12       360/360
 cpu_ghz=14       360/360   
 load=0.6         360/360   
 load=0.8         360/360   
-load=0.9         134/360   
-load=1.1          60/360   
-users=7           60/360   
-users=10          60/360   
+load=0.9         360/360   
+load=1.1         360/360   
+users=7          360/360   
+users=10         264/360   
 users=16          60/360   
 users=19          60/360   
 u2u_mhz=2        180/360   
 u2u_mhz=2.5       60/360   
 u2u_mhz=4         60/360   
 
-records: 3074/5760
-about 3.1 h left at the rate so far (slow jobs run first, so this estimate is pessimistic early on)
+records: 4104/5760
+about 1.6 h left at the rate so far (slow jobs run first, so this estimate is pessimistic early on)
 ```
 
 ## 管道冒烟（users=7、u2u_mhz=1.5，1 个种子）：输出摘录
