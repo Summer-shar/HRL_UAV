@@ -4,8 +4,11 @@
   "started": "2026-10-20 02:38:24",
   "steps": {
     "smoke": {
-      "status": "running",
-      "started": "2026-10-20 02:38:24"
+      "status": "passed",
+      "started": "2026-10-20 02:38:24",
+      "ended": "2026-10-20 02:38:47",
+      "seconds": 15,
+      "excerpt": "START u2u_mhz=1.5/s4101_zeroshot_TFOO\nSTART u2u_mhz=1.5/s4101_zeroshot_HoverSAC\nDONE  u2u_mhz=1.5/s4101_zeroshot_TOO (0.2 min) [7/12]\nDONE  users=7/s4101_zeroshot_TFOO (0.2 min) [8/12]\nDONE  users=7/s4101_zeroshot_CA (0.1 min) [9/12]\nDONE  u2u_mhz=1.5/s4101_zeroshot_Proposed (0.1 min) [10/12]\nDONE  u2u_mhz=1.5/s4101_zeroshot_TFOO (0.1 min) [11/12]\nDONE  u2u_mhz=1.5/s4101_zeroshot_HoverSAC (0.1 min) [12/12]\nAll jobs finished.\n\n=== 2026-10-20 02:38:47  D:\\HRL_UAV_V2\\.venv\\Scripts\\python.exe D:\\p2_code\\run.py zeroshot-report --out-base=D:\\p2_zeroshot_v4\\_zeroshot\\smoke --main=D:\\p2_runs_v2 --points=users=7,u2u_mhz=1.5 --smoke --seeds=4101\nD:\\p2_zeroshot_v4\\_zeroshot\\smoke\\results"
     },
     "zeroshot": {
       "status": "pending"
