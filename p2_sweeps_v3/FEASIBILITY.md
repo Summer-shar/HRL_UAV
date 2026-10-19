@@ -2,7 +2,7 @@
 
 **运行中：两个试点（3 个种子，完整流程）**
 
-最后更新：2026-10-19 13:42:48（运行中每 10 分钟更新一次；如果这个时间停在很久以前，说明程序已经退出）
+最后更新：2026-10-19 14:12:59（运行中每 10 分钟更新一次；如果这个时间停在很久以前，说明程序已经退出）
 
 - 主实验目录：`D:\p2_runs_v2`
 - 输出目录：`D:\p2_sweeps_v3`
@@ -25,10 +25,10 @@
 ```
 point           jobs done  job-hours  estimate  state
 cpu_ghz=9       124/124         41.4      41.4  finished
-u2u_mhz=1.5     110/124        100.5     113.3  running
+u2u_mhz=1.5     111/124        100.8     112.6  running
 
 finished points: 1 (41.4 job-hours each on average)
-remaining: 1 running and 0 waiting points, about 13 job-hours; with 8 workers about 2 h (0.1 days) if every worker stays busy
+remaining: 1 running and 0 waiting points, about 12 job-hours; with 8 workers about 1 h (0.1 days) if every worker stays busy
 Estimates from job counts: long training jobs make early estimates of a running point too low.
 ```
 

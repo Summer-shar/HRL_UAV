@@ -8,3 +8,22 @@
 [M3 seed 4103 6/100] delay=59.9461s cost/s=435.4273 wall=53.8s
 [M3 seed 4103 7/100] delay=70.0261s cost/s=481.4181 wall=58.8s
 [M3 seed 4103 8/100] delay=62.2026s cost/s=441.5705 wall=56.7s
+
+=== start 2026-10-19 13:42:56 ===
+[M3 seed 4103 1/100] delay=68.5786s cost/s=479.9890 wall=96.9s
+[M3 seed 4103 2/100] delay=64.5035s cost/s=455.4266 wall=102.7s
+[M3 seed 4103 3/100] delay=61.3109s cost/s=444.2870 wall=103.1s
+[M3 seed 4103 4/100] delay=62.0149s cost/s=414.1734 wall=98.7s
+[M3 seed 4103 5/100] delay=59.0117s cost/s=422.1359 wall=101.1s
+[M3 seed 4103 6/100] delay=59.9461s cost/s=435.4273 wall=103.9s
+[M3 seed 4103 7/100] delay=70.0261s cost/s=481.4181 wall=113.4s
+[M3 seed 4103 8/100] delay=62.2026s cost/s=441.5705 wall=108.8s
+[M3 seed 4103 9/100] delay=60.8241s cost/s=442.1294 wall=105.3s
+[M3 seed 4103 10/100] delay=53.5396s cost/s=376.7535 wall=94.9s
+[M3 seed 4103 11/100] delay=52.6319s cost/s=381.5474 wall=97.5s
+[M3 seed 4103 12/100] delay=51.1705s cost/s=356.4670 wall=94.3s
+[M3 seed 4103 13/100] delay=59.2615s cost/s=415.7571 wall=104.0s
+[M3 seed 4103 14/100] delay=50.6714s cost/s=361.3213 wall=94.6s
+[M3 seed 4103 15/100] delay=60.8051s cost/s=417.7081 wall=105.2s
+[M3 seed 4103 16/100] delay=51.7772s cost/s=376.5160 wall=109.1s
+[M3 seed 4103 17/100] delay=50.2978s cost/s=341.9570 wall=104.2s
