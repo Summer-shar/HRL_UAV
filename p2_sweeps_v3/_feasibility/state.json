@@ -25,7 +25,8 @@
       "excerpt": "train M1       3 episodes: identical (fields added after the main run, not compared: actor_lr)\ntrain M2       5 episodes: identical\ntrain M3       3 episodes: identical\ntrain HoverSAC 3 episodes: identical\ntrain TFOO     5 episodes: identical\ntrain TOO      5 episodes: identical\ntrain NC       5 episodes: identical\ntest  Proposed scenarios [21, 22]: identical\ntest  TFOO     scenarios [21, 22]: identical (fields added after the main run, not compared: u2u_mhz)\ntest  TOO      scenarios [21, 22]: identical (fields added after the main run, not compared: u2u_mhz)\ntest  NC       scenarios [21, 22]: identical (fields added after the main run, not compared: u2u_mhz)\ntest  HoverSAC scenarios [21, 22]: identical\ntest  CA       scenarios [21, 22]: identical\nnote: actor_lr exists only in the new records (SAC training rows, added in commit cfdcf3f (fine-tuning recipe v2))\nnote: u2u_mhz exists only in the new records (evaluation records, added in commit d458a73 (U2U sweep); the main run's TFOO / TOO / NC test records were written before it)\nALL IDENTICAL -> D:\\p2_sweeps_v3\\_feasibility\\verify\\verify_9bcb1b2fbd6c.json"
     },
     "smoke": {
-      "status": "pending"
+      "status": "running",
+      "started": "2026-10-19 13:40:38"
     },
     "pilots": {
       "status": "pending"
