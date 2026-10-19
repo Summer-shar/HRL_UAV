@@ -206,6 +206,24 @@ def test_job(root, seed, method, smoke=False):
                                    upper=str(upper_path) if upper_path else None))
 
 
+def zeroshot_test_job(root, main_root, seed, method, smoke=False):
+    """Design v4: the policy trained at the nominal point (the main run's dev-selected
+    checkpoints) evaluated, unchanged, in the scene of this point root."""
+    override = C.scene_override(root)
+    if not override or override.get('design') != 'v4':
+        raise ValueError(f'{root} is not a design-v4 (zero-shot) point root')
+    d = C.design(smoke)
+    method_, learner_path, upper_path = method_paths(main_root, seed, method)
+    make = factory(method_, seed, learner_path, upper_path)
+    scene = C.load_scene(root)
+    folder = C.seed_dir(root, seed)/'test'/method
+    for scenario in C.test_scenarios(root, d):
+        evaluate_one(make, scene, 'test', scenario, folder/f'{scenario:02d}.json', smoke=smoke,
+                     identity=dict(seed=seed, method=method, trained_at='nominal point (main run)',
+                                   learner=str(learner_path) if learner_path else None,
+                                   upper=str(upper_path) if upper_path else None))
+
+
 def burst_job(root, seed, method, smoke=False):
     """Controlled burst (p2.burst) on the sweep scenarios, nominal parameters."""
     from . import burst as B

@@ -63,10 +63,10 @@ class Publisher:
     def files(self):
         """[(source, path inside the branch folder, tail lines or None)]"""
         b, out = self.base, []
-        for name in ('FEASIBILITY.md', 'SWEEP.md'):
+        for name in ('FEASIBILITY.md', 'SWEEP.md', 'ZEROSHOT.md'):
             if (b/name).exists():
                 out.append((b/name, name, None))
-        for stage in ('_feasibility', '_sweep'):
+        for stage in ('_feasibility', '_sweep', '_zeroshot'):
             d = b/stage
             if not d.exists():
                 continue
@@ -89,9 +89,10 @@ class Publisher:
         for log in b.glob('*/_jobs/*.log'):
             if not log.with_suffix('.done').exists():
                 pending.append(log)
-        for d in (b/'_feasibility'/'smoke').glob('*/_jobs/*.log') if (b/'_feasibility'/'smoke').exists() else []:
-            if not d.with_suffix('.done').exists():
-                pending.append(d)
+        for stage in ('_feasibility', '_zeroshot'):
+            for d in (b/stage/'smoke').glob('*/_jobs/*.log') if (b/stage/'smoke').exists() else []:
+                if not d.with_suffix('.done').exists():
+                    pending.append(d)
         pending.sort(key=lambda p: p.stat().st_mtime, reverse=True)
         for log in pending[:MAX_JOB_LOGS]:
             rel = log.relative_to(b).as_posix()

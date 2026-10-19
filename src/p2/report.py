@@ -220,17 +220,26 @@ def convergence_rows(root, seeds, window=20):
     return out
 
 
-def retrain_build(main_root, base, seeds, points, smoke=False, methods=C.METHODS):
+def retrain_build(main_root, base, seeds, points, smoke=False, methods=C.METHODS, kind='retrain'):
     """Tables, paired tests and training checks of the design-v3 retrained sweep from
-    the points finished so far (nominal = main run)."""
+    the points finished so far (nominal = main run).  kind='zeroshot': design v4, the
+    policies trained at the nominal point evaluated unchanged at every point (files
+    zeroshot_*; no training checks)."""
     from .pipeline import point_name
     d = C.design(smoke)
     res = Path(base)/'results'
     res.mkdir(parents=True, exist_ok=True)
-    lines = ['# Retrained sweep (design v3, docs/PROTOCOL.md)', '',
-             'Every learned method trained from scratch at each non-nominal value with the main pipeline '
-             '(same stages, budgets, hyper-parameters, seeds, training scenarios, initial weights, fine-tuning '
-             f'recipe and dev selection); evaluated on the test scenarios {", ".join(map(str, d["test"]))}. '
+    tag = 'retrained' if kind == 'retrain' else 'zero-shot'
+    if kind == 'retrain':
+        head = ['# Retrained sweep (design v3, docs/PROTOCOL.md)', '',
+                'Every learned method trained from scratch at each non-nominal value with the main pipeline '
+                '(same stages, budgets, hyper-parameters, seeds, training scenarios, initial weights, fine-tuning '
+                'recipe and dev selection); ']
+    else:
+        head = ['# Zero-shot sweep (design v4, docs/PROTOCOL.md)', '',
+                'Every method is the policy trained once at the nominal point (main run, dev-selected checkpoints), '
+                'evaluated unchanged at each value; ']
+    lines = head[:-1] + [head[-1] + f'evaluated on the test scenarios {", ".join(map(str, d["test"]))}. '
              f'Nominal value of each parameter: the main run {main_root}. Values: mean over seeds of scenario '
              'means (std over seeds in the CSV files). users = terminals per region, nominal computation load.', '']
     status = {}
@@ -249,10 +258,10 @@ def retrain_build(main_root, base, seeds, points, smoke=False, methods=C.METHODS
         complete = len(values) == len(d['retrain_sweeps'][param])
         t = retrain_table(main_root, base, seeds, param, d, methods, values)
         tables[param] = t
-        write_csv(res/f'retrain_sweep_{param}.csv', t)
+        write_csv(res/f'{kind}_sweep_{param}.csv', t)
         pr = retrain_paired(main_root, base, seeds, param, d, methods, values)
         pairs += pr
-        lines += ['', f'## {param} (retrained{"" if complete else ", finished points only"}; '
+        lines += ['', f'## {param} ({tag}{"" if complete else ", finished points only"}; '
                   'cells: delay / compute+comm power / joint cost)', '',
                   '| '+param+' | demand/capacity | '+' | '.join(LABELS.get(m, m) for m in methods)+' |',
                   '|---:|---:|'+'---:|'*len(methods)]
@@ -281,11 +290,12 @@ def retrain_build(main_root, base, seeds, points, smoke=False, methods=C.METHODS
                              f'{dl["seeds_proposed_better"]}/{dl["seeds"]}')
             lines.append(f'| {C.point_value(param, value):g} | '+' | '.join(cells)+' |')
     if pairs:
-        write_csv(res/'retrain_paired.csv', pairs)
+        write_csv(res/f'{kind}_paired.csv', pairs)
     conv = []
     for name, ok in status.items():
         if ok:
-            conv += convergence_rows(Path(base)/name, seeds)
+            if kind == 'retrain':
+                conv += convergence_rows(Path(base)/name, seeds)
             root = Path(base)/name
             rows = load_rows(root, seeds, methods, 'test')
             tbl = main_table(rows, [m for m in methods if any(r['method'] == m for r in rows)])
@@ -297,9 +307,10 @@ def retrain_build(main_root, base, seeds, points, smoke=False, methods=C.METHODS
                   'between the last two 20-episode windows (reported, nothing dropped or extended)', '']
         lines += [f'- {Path(c["root"]).name} seed {c["seed"]} {c["stage"]}: cost {fmt(c["cost_per_s_prev20"])} -> '
                   f'{fmt(c["cost_per_s_last20"])} ({100*c["cost_per_s_relative_change"]:+.1f}%)' for c in flagged]
-    C.write_json(res/'retrain_stats.json', C.clean(dict(design='v3', seeds=list(seeds), test_scenarios=list(d['test']),
-                                                        points=status, tables=tables, paired=pairs, convergence=conv)))
-    (res/'retrain_summary.md').write_text('\n'.join(lines)+'\n', encoding='utf-8')
+    C.write_json(res/f'{kind}_stats.json', C.clean(dict(design='v3' if kind == 'retrain' else 'v4', seeds=list(seeds),
+                                                       test_scenarios=list(d['test']), points=status, tables=tables,
+                                                       paired=pairs, convergence=conv)))
+    (res/f'{kind}_summary.md').write_text('\n'.join(lines)+'\n', encoding='utf-8')
     return res
 
 

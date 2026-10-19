@@ -44,6 +44,9 @@ STAGES = {
                                'summary': '试点检查、耗时、汇总'}),
     'sweep': dict(page='SWEEP.md', dir='_sweep', title='全部扫参点',
                   steps={'sweep': '全部 16 个点（含两个门控）', 'summary': '最终汇总与导出'}),
+    'zeroshot': dict(page='ZEROSHOT.md', dir='_zeroshot', title='零样本泛化扫参（方案 v4）',
+                     steps={'smoke': '管道冒烟（users=7、u2u_mhz=1.5，1 个种子）', 'zeroshot': '全部 16 个点的测试',
+                            'summary': '汇总表与配对检验'}),
 }
 STATUS_TEXT = {'pending': '未开始', 'running': '运行中', 'passed': '通过', 'failed': '失败',
                'skipped': '已通过（沿用上次）'}
@@ -307,6 +310,76 @@ class Sweep(Stage):
         return self.finish(False, f'已停止：{len(missing)} 个点未完成', (
             f'## 停止原因\n\n未完成的点：{", ".join(missing) or "无"}。可能原因：任务失败（见 `{self.dir/"sweep.log"}` 末尾的 '
             '“Failed or skipped jobs”），或门控未通过（`_jobs/pilot_gate_*.log`）。修正后原样重新运行同一条命令即可续跑。'),
+            f'STOPPED: {len(missing)} points unfinished')
+
+
+def zeroshot_progress(base, points, seeds, started=None, smoke=False):
+    """Test records written so far for the zero-shot sweep, per point, and the time left at the
+    rate measured since `started` (epoch seconds)."""
+    from .pipeline import point_name
+    d = C.design(smoke)
+    per_point = len(seeds)*len(C.METHODS)*len(d['test'])
+    lines = [f'{"point":14s} {"records":>12s}']
+    total = 0
+    for param, value in points:
+        root = Path(base)/point_name(param, value)
+        n = sum(len(list((C.seed_dir(root, s)/'test'/m).glob('[0-9][0-9].json'))) for s in seeds for m in C.METHODS)
+        total += n
+        lines.append(f'{point_name(param, value):14s} {n:5d}/{per_point:<6d}')
+    want = per_point*len(points)
+    lines += ['', f'records: {total}/{want}']
+    if started and total:
+        rate = total/max(time.time()-started, 1.)
+        lines.append(f'about {(want-total)/rate/3600:.1f} h left at the rate so far (slow jobs run first, so this '
+                     'estimate is pessimistic early on)')
+    return '\n'.join(lines)
+
+
+class ZeroShot(Stage):
+    kind = 'zeroshot'
+
+    def run(self):
+        from .retrain import all_points, point_finished
+        py, run = sys.executable, self.run_py
+        seeds = ','.join(map(str, self.seeds))
+        points = all_points()
+        self.note = self.disk_note(10)
+        smoke = self.dir/'smoke'
+        if not self.step('smoke', [[py, run, 'zeroshot-run', f'--out-base={smoke}', f'--main={self.main}',
+                                    f'--points={SMOKE}', '--smoke', '--seeds=4101', f'--workers={self.workers}'],
+                                   [py, run, 'zeroshot-report', f'--out-base={smoke}', f'--main={self.main}',
+                                    f'--points={SMOKE}', '--smoke', '--seeds=4101']]):
+            return 1
+        started = time.time()
+        running = '运行中：全部 16 个点的测试'
+
+        def poll():
+            self.progress_text = zeroshot_progress(self.base, points, self.seeds, started)
+            if self.publisher and time.time()-self.publisher.last >= self.publisher.interval:
+                self.run_commands('report', [[py, run, 'zeroshot-report', f'--out-base={self.base}',
+                                              f'--main={self.main}', f'--seeds={seeds}']])
+            self.save(running, 'progress', force=False)
+        poll()
+        self.step('zeroshot', [[py, run, 'zeroshot-run', f'--out-base={self.base}', f'--main={self.main}',
+                                f'--seeds={seeds}', f'--workers={self.workers}']], poll=poll, skippable=False)
+        self.state['steps']['summary'] = dict(status='running', started=now())
+        self.save('运行中：汇总表与配对检验', 'summary started')
+        self.fresh_log('summary')
+        t0 = time.time()
+        ok, _ = self.run_commands('summary', [[py, run, 'zeroshot-report', f'--out-base={self.base}',
+                                               f'--main={self.main}', f'--seeds={seeds}']])
+        records = '\n\n```\n' + zeroshot_progress(self.base, points, self.seeds) + '\n```'
+        missing = [f'{p}={v:g}' for p, v in points if not point_finished(self.base/f'{p}={v:g}', self.seeds)]
+        self.state['steps']['summary'].update(status='passed' if ok and not missing else 'failed', ended=now(),
+                                              seconds=round(time.time()-t0), excerpt=tail(self.dir/'summary.log', 30))
+        report = self.base/'results'/'zeroshot_summary.md'
+        if ok and not missing:
+            return self.finish(True, '零样本扫参完成', (
+                f'## 结论：全部 {len(points)} 个点完成\n\n汇总表：`{report}`，各参数表 '
+                '`results/zeroshot_sweep_<参数>.csv`，配对检验 `results/zeroshot_paired.csv`。' + records), 'FINISHED')
+        return self.finish(False, f'已停止：{len(missing)} 个点未完成', (
+            f'## 停止原因\n\n未完成的点：{", ".join(missing) or "无"}（见 `{self.dir/"zeroshot.log"}` 末尾的 '
+            '“Failed or skipped jobs”）。修正后原样重新运行同一条命令即可续跑。' + records),
             f'STOPPED: {len(missing)} points unfinished')
 
 

@@ -81,7 +81,20 @@ python run.py report --out D:\p2_main                            # 只重做表�
 - 已有的主实验结果 `D:\p2_runs_v2` 就是这一步的产物（来历见 `docs/HISTORY.md`），不需要重跑。
 - 结果在 `<out>\results\`：`summary.md`（主表、配对检验）、`main_table.csv`、`stats.json`、`burst_*.csv`，图在 `results\figures\`。
 
-## 4 逐点重训扫参（分两步）
+## 4 扫参
+
+**主结果：零样本泛化扫参（方案 v4）**。只用主实验在标称参数下训练好的模型，不再训练，直接在 16 个参数点上测试（20 个测试场景 × 3 个种子，配对检验），用来衡量部署后参数变化时各方法的鲁棒性：
+
+```powershell
+python run.py zeroshot --main D:\p2_runs_v2 --out-base D:\p2_zeroshot_v4
+```
+
+- 状态写在 `ZEROSHOT.md`，并推送到 GitHub。
+- 结果在 `results\zeroshot_summary.md`、`zeroshot_sweep_<参数>.csv`、`zeroshot_paired.csv`。
+
+下面的逐点从零重训（方案 v3）只完成了两个试点，原因见 `docs/PROTOCOL.md` 的“方案 v4”一节。
+
+## 4b 逐点重训扫参（方案 v3，已停在试点）
 
 方案见 `docs/PROTOCOL.md`。4 个参数各 5 个取值，标称值即主实验：
 

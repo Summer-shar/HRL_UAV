@@ -121,6 +121,25 @@ def retrain_plan(base, points, seeds, smoke=False, first=(), main=None, gate=Tru
     return jobs
 
 
+def zeroshot_plan(base, points, seeds, main, smoke=False):
+    """Design v4: one evaluation job per point, seed and method (the policies of the
+    main run, unchanged).  Longest jobs first: TOO and CA at low U2U bandwidth and NC
+    build long backlogs, which makes their 900 s runs slow."""
+    jobs = []
+    order = {p: len(C.RETRAIN_ORDER)-i for i, p in enumerate(C.RETRAIN_ORDER)}
+    for param, value in points:
+        name = point_name(param, value)
+        for seed in seeds:
+            for method in C.METHODS:
+                slow = (param == 'u2u_mhz' and float(value) <= 2.0 and method in ('TOO', 'CA'))
+                priority = (3000 if slow else 2000 if method == 'NC' else 1000) + 10*order.get(param, 0)
+                marker = f's{seed}_zeroshot_{method}'
+                args = ['zeroshot-test', f'--seed={seed}', f'--method={method}', f'--main={main}'] + \
+                    (['--smoke'] if smoke else [])
+                jobs.append(Job(f'{name}/{marker}', args, [], priority, Path(base)/name, marker))
+    return jobs
+
+
 def run(jobs, out, workers=4, dry=False):
     out = Path(out)
     jd = out/'_jobs'

@@ -4,6 +4,8 @@
   python run.py feasibility --main D:\\p2_runs_v2 --out-base D:\\p2_sweeps_v3   # stage 1: all checks, then the
                           # two pilot points; status in <out-base>\\FEASIBILITY.md (p2/feasibility.py)
   python run.py sweep --main D:\\p2_runs_v2 --out-base D:\\p2_sweeps_v3         # stage 2: every point; SWEEP.md
+  python run.py zeroshot --main D:\\p2_runs_v2 --out-base D:\\p2_zeroshot_v4    # design v4: nominal policies
+                          # evaluated unchanged at all 16 points (ZEROSHOT.md); zeroshot-report for the tables
   python run.py publish --out-base D:\\p2_sweeps_v3      # push the status files to GitHub (p2/publish.py)
   python run.py pipeline [--workers 4] [--seeds 4101,4102,4103] [--smoke]   # main experiment, resumable
   python run.py bench                                                      # CPU vs GPU speed check
@@ -51,7 +53,8 @@ def main(argv=None):
     p.add_argument('command', choices=('check-env', 'pipeline', 'bench', 'train', 'dev', 'select', 'test', 'sweep',
                                         'report', 'plan', 'revise', 'burst', 'retrain', 'retrain-report',
                                         'retrain-export', 'verify', 'timing', 'pilot-check', 'progress',
-                                        'feasibility', 'sweep', 'publish'))
+                                        'feasibility', 'sweep', 'publish', 'zeroshot', 'zeroshot-run',
+                                        'zeroshot-test', 'zeroshot-report'))
     p.add_argument('--out', default=None)
     p.add_argument('--from', dest='source', default=None, help='revise: the finished output root to derive from')
     p.add_argument('--recipe', default='v2', help='revise: fine-tuning recipe of the new root')
@@ -84,15 +87,30 @@ def main(argv=None):
     a = p.parse_args(argv)
     if a.workers is None:
         auto = max(1, min(8, (os.cpu_count() or 2)//int(os.environ.get('P2_THREADS') or 2)))
-        a.workers = int(os.environ.get('P2_WORKERS') or (auto if a.command in ('feasibility', 'sweep') else 4))
-    if a.command in ('feasibility', 'sweep'):
+        a.workers = int(os.environ.get('P2_WORKERS') or
+                        (auto if a.command in ('feasibility', 'sweep', 'zeroshot', 'zeroshot-run') else 4))
+    if a.command in ('zeroshot-run', 'zeroshot-report'):
+        from p2 import pipeline, report, retrain
+        if not a.out_base or not a.main:
+            p.error(f'{a.command} needs --out-base and --main')
+        seeds = a.seeds or C.design(a.smoke)['seeds']
+        points = retrain.parse_points(a.points) if a.points else retrain.all_points(a.smoke)
+        if a.command == 'zeroshot-report':
+            print(report.retrain_build(Path(a.main), Path(a.out_base), seeds, points, smoke=a.smoke, kind='zeroshot'))
+            return 0
+        for param, value in points:
+            retrain.prepare_zeroshot_point(Path(a.out_base), param, value, a.main, smoke=a.smoke)
+        jobs = pipeline.zeroshot_plan(Path(a.out_base), points, seeds, Path(a.main).resolve(), smoke=a.smoke)
+        return pipeline.run(jobs, Path(a.out_base), workers=a.workers, dry=a.dry_run)
+    if a.command in ('feasibility', 'sweep', 'zeroshot'):
         from p2 import feasibility
         if not a.main or not a.out_base:
             p.error(f'{a.command} needs --main (the finished main run) and --out-base')
         device = feasibility.device_from_main(a.main)
         if device:
             print(f'P2_DEVICE={device} (from the main run\'s M1 contract)')
-        stage = feasibility.Feasibility if a.command == 'feasibility' else feasibility.Sweep
+        stage = dict(feasibility=feasibility.Feasibility, sweep=feasibility.Sweep,
+                     zeroshot=feasibility.ZeroShot)[a.command]
         return stage(a.main, a.out_base, a.workers, a.seeds or C.design()['seeds'], publish=not a.no_publish).run()
     if a.command == 'publish':
         from p2.publish import Publisher
@@ -214,6 +232,10 @@ def main(argv=None):
         print(evaluate.select(root, a.seed, a.labels.split(','), smoke=a.smoke))
     elif a.command == 'test':
         evaluate.test_job(root, a.seed, a.method, smoke=a.smoke)
+    elif a.command == 'zeroshot-test':
+        if not a.main:
+            p.error('zeroshot-test needs --main')
+        evaluate.zeroshot_test_job(root, Path(a.main), a.seed, a.method, smoke=a.smoke)
     elif a.command == 'burst':
         evaluate.burst_job(root, a.seed, a.method, smoke=a.smoke)
     elif a.command == 'sweep':

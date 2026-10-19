@@ -215,7 +215,7 @@ def test_scenarios(root, d):
     test split; design-v2 retrained points (scene.json without "design") on the
     sweep scenarios of the earlier, non-retrained sweep."""
     override = scene_override(root)
-    if override and override.get('design') != 'v3':
+    if override and override.get('design') not in ('v3', 'v4'):
         return tuple(d['sweep_scenarios'])
     return tuple(d['test'])
 

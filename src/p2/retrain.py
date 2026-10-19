@@ -86,6 +86,31 @@ def prepare_point(base, param, value, smoke=False, recipe='v2'):
     return root
 
 
+def prepare_zeroshot_point(base, param, value, main, smoke=False):
+    """Root of a design-v4 (zero-shot) point: scene.json {param, value, design: v4, main}."""
+    from .pipeline import point_name
+    value = C.point_value(param, value)
+    if value == C.point_value(param, C.NOMINAL[param]):
+        raise ValueError('the nominal point is the main run itself')
+    root = Path(base)/point_name(param, value)
+    root.mkdir(parents=True, exist_ok=True)
+    path = root/'scene.json'
+    scene = dict(param=param, value=value, design='v4', main=str(Path(main).resolve()))
+    if path.exists():
+        old = C.read_json(path)
+        if (old.get('param'), C.point_value(param, old.get('value')), old.get('design')) != (param, value, 'v4'):
+            raise ValueError(f'{root} already belongs to {old} (design v4 needs its own --out-base)')
+    else:
+        C.write_json(path, dict(scene, created=time.strftime('%Y-%m-%d %H:%M:%S')))
+    scene_json = json.dumps(C.load_scene(root), sort_keys=True, separators=(',', ':'))
+    C.write_json(root/'design.json', dict(design=C.design(smoke), point=scene, smoke=smoke, methods=list(C.METHODS),
+                                          test_scenarios=list(C.test_scenarios(root, C.design(smoke))),
+                                          demand_over_capacity=C.utilization(param, value),
+                                          scene_sha256=hashlib.sha256(scene_json.encode()).hexdigest(),
+                                          code_sha256=code_fingerprint()[0]))
+    return root
+
+
 def point_finished(root, seeds, smoke=False, methods=C.METHODS):
     """Every method has a test record on every test scenario of the point for every seed."""
     d = C.design(smoke)
