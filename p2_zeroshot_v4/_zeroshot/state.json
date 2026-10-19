@@ -18,8 +18,11 @@
       "excerpt": "START u2u_mhz=4/s4103_zeroshot_HoverSAC\nDONE  u2u_mhz=4/s4102_zeroshot_TOO (4.3 min) [280/288]\nSTART u2u_mhz=4/s4103_zeroshot_CA\nDONE  u2u_mhz=4/s4102_zeroshot_CA (3.7 min) [281/288]\nDONE  u2u_mhz=4/s4102_zeroshot_HoverSAC (4.9 min) [282/288]\nDONE  u2u_mhz=4/s4103_zeroshot_Proposed (4.9 min) [283/288]\nDONE  u2u_mhz=4/s4102_zeroshot_TFOO (5.9 min) [284/288]\nDONE  u2u_mhz=4/s4103_zeroshot_TOO (3.8 min) [285/288]\nDONE  u2u_mhz=4/s4103_zeroshot_HoverSAC (4.1 min) [286/288]\nDONE  u2u_mhz=4/s4103_zeroshot_CA (2.9 min) [287/288]\nDONE  u2u_mhz=4/s4103_zeroshot_TFOO (5.0 min) [288/288]\nAll jobs finished."
     },
     "summary": {
-      "status": "running",
-      "started": "2026-10-20 07:39:38"
+      "status": "passed",
+      "started": "2026-10-20 07:39:38",
+      "ended": "2026-10-20 07:39:45",
+      "seconds": 3,
+      "excerpt": "\n=== 2026-10-20 07:39:43  D:\\HRL_UAV_V2\\.venv\\Scripts\\python.exe D:\\p2_code\\run.py zeroshot-report --out-base=D:\\p2_zeroshot_v4 --main=D:\\p2_runs_v2 --seeds=4101,4102,4103\nD:\\p2_zeroshot_v4\\results"
     }
   }
 }

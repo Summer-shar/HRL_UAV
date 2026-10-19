@@ -1,8 +1,8 @@
 # 零样本泛化扫参（方案 v4）：状态
 
-**运行中：汇总表与配对检验**
+**零样本扫参完成**
 
-最后更新：2026-10-20 07:39:38（运行中每 10 分钟更新一次；如果这个时间停在很久以前，说明程序已经退出）
+最后更新：2026-10-20 07:39:45（运行中每 10 分钟更新一次；如果这个时间停在很久以前，说明程序已经退出）
 
 - 主实验目录：`D:\p2_runs_v2`
 - 输出目录：`D:\p2_zeroshot_v4`
@@ -13,11 +13,11 @@
 |---|---|---|---|---|---|
 | 1 | 管道冒烟（users=7、u2u_mhz=1.5，1 个种子） | 通过 | 2026-10-20 02:38:24 | 2026-10-20 02:38:47 | 0 分钟 |
 | 2 | 全部 16 个点的测试 | 通过 | 2026-10-20 02:38:52 | 2026-10-20 07:39:33 | 5.0 小时 |
-| 3 | 汇总表与配对检验 | 运行中 | 2026-10-20 07:39:38 |  |  |
+| 3 | 汇总表与配对检验 | 通过 | 2026-10-20 07:39:38 | 2026-10-20 07:39:45 | 0 分钟 |
 
-输出目录所在磁盘剩余 388 GB。
+## 结论：全部 16 个点完成
 
-## 进度（run.py progress）
+汇总表：`D:\p2_zeroshot_v4\results\zeroshot_summary.md`，各参数表 `results/zeroshot_sweep_<参数>.csv`，配对检验 `results/zeroshot_paired.csv`。
 
 ```
 point               records
@@ -35,11 +35,10 @@ users=10         360/360
 users=16         360/360   
 users=19         360/360   
 u2u_mhz=2        360/360   
-u2u_mhz=2.5      349/360   
-u2u_mhz=4        149/360   
+u2u_mhz=2.5      360/360   
+u2u_mhz=4        360/360   
 
-records: 5538/5760
-about 0.2 h left at the rate so far (slow jobs run first, so this estimate is pessimistic early on)
+records: 5760/5760
 ```
 
 ## 管道冒烟（users=7、u2u_mhz=1.5，1 个种子）：输出摘录
@@ -74,4 +73,12 @@ DONE  u2u_mhz=4/s4103_zeroshot_HoverSAC (4.1 min) [286/288]
 DONE  u2u_mhz=4/s4103_zeroshot_CA (2.9 min) [287/288]
 DONE  u2u_mhz=4/s4103_zeroshot_TFOO (5.0 min) [288/288]
 All jobs finished.
+```
+
+## 汇总表与配对检验：输出摘录
+
+```
+
+=== 2026-10-20 07:39:43  D:\HRL_UAV_V2\.venv\Scripts\python.exe D:\p2_code\run.py zeroshot-report --out-base=D:\p2_zeroshot_v4 --main=D:\p2_runs_v2 --seeds=4101,4102,4103
+D:\p2_zeroshot_v4\results
 ```
