@@ -1,0 +1,51 @@
+{
+  "design": "v4",
+  "seeds": [
+    4101,
+    4102,
+    4103
+  ],
+  "test_scenarios": [
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40
+  ],
+  "points": {
+    "cpu_ghz=9": false,
+    "u2u_mhz=1.5": false,
+    "cpu_ghz=11": false,
+    "cpu_ghz=12": false,
+    "cpu_ghz=14": false,
+    "load=0.6": false,
+    "load=0.8": false,
+    "load=0.9": false,
+    "load=1.1": false,
+    "users=7": false,
+    "users=10": false,
+    "users=16": false,
+    "users=19": false,
+    "u2u_mhz=2": false,
+    "u2u_mhz=2.5": false,
+    "u2u_mhz=4": false
+  },
+  "tables": {},
+  "paired": [],
+  "convergence": []
+}
