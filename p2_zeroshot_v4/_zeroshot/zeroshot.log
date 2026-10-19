@@ -13,3 +13,7 @@ DONE  u2u_mhz=2/s4101_zeroshot_TOO (22.5 min) [1/288]
 START u2u_mhz=2/s4102_zeroshot_TOO
 DONE  u2u_mhz=2/s4101_zeroshot_CA (55.0 min) [2/288]
 START u2u_mhz=2/s4102_zeroshot_CA
+DONE  u2u_mhz=2/s4102_zeroshot_TOO (43.2 min) [3/288]
+START u2u_mhz=2/s4103_zeroshot_TOO
+DONE  u2u_mhz=1.5/s4101_zeroshot_TOO (86.8 min) [4/288]
+START u2u_mhz=2/s4103_zeroshot_CA
