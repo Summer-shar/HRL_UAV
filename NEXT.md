@@ -1,37 +1,29 @@
-# 下一步说明（第 2 号，2026-10-18）
+# 下一步说明（第 3 号，2026-10-20 凌晨）
 
 **给用户电脑上的 Claude。** 读完照做，做完向用户用一两句话汇报，然后结束，不要等实验跑完。
 
 ## 规则
 
 - 不修改任何代码文件；不安装或升级任何包；
-- `D:\p2_runs_v2`、`D:\p2_runs` 只读；不删除任何文件；
-- 同一个输出目录同时只能有一个实验命令在运行；
-- 实验命令一律用新窗口启动，启动后不要等待它结束。
+- `D:\p2_runs_v2`、`D:\p2_runs`、`D:\p2_sweeps_v3` 只读；不删除任何文件；
+- 新窗口启动后不要等待它结束。
 
 ## 背景
 
-第 1 号说明启动的运行在第 2 步失败，GitHub 推送也失败了。原因是代码里有一处只在 Python 3.10 以上可用的写法，而本机环境是 Python 3.9。已在 commit `47bfdf4` 修复，并在 Python 3.9.25 下测试过。原样重跑同一条命令即可。
+- 可行性阶段已经结束（CPU 9 GHz 通过，U2U 1.5 MHz 未通过）。用户已决定改做零样本泛化扫参（方案 v4）：用主实验在标称参数下训练好的模型，直接在全部 16 个参数点上测试，不再训练。
+- 这一步只启动一个“值守程序”（`tools/watch.py`）。它每 3 分钟查看 GitHub 上的 `RUN_REQUEST.json`，云端 Claude 写好代码并测试后会放上请求，值守程序随即拉取代码、开始运行。用户可以直接去睡觉。
+- 值守程序只会运行固定的几条实验命令，参数都写在下面的启动命令里。
 
 ## 步骤
 
-1. **关掉旧窗口**：关闭第 1 号说明打开的那个 PowerShell 窗口（里面的程序已经停止）。确认没有正在运行 `run.py` 的 python 进程。
+1. **确认没有实验在运行**：确认没有正在运行 `run.py` 的 python 进程。
 2. **更新代码**：
    - `git -C D:\p2_code pull --ff-only`
-   - 检查：`git -C D:\p2_code merge-base --is-ancestor 47bfdf4 HEAD` 的退出码应为 0。
-3. **用新窗口重新启动**（Python 与上次相同；`D:\p2_sweeps_v3` 保留不动）：
+   - 检查：`git -C D:\p2_code merge-base --is-ancestor c50e086 HEAD` 的退出码应为 0。
+3. **确认防睡眠**：`powercfg /change standby-timeout-ac 0`。
+4. **用新窗口启动值守程序**（窗口保持打开，不要关）：
    ```powershell
-   Start-Process powershell -ArgumentList '-NoExit','-Command',"Set-Location D:\p2_code; & 'D:\HRL_UAV_V2\.venv\Scripts\python.exe' run.py feasibility --main D:\p2_runs_v2 --out-base D:\p2_sweeps_v3"
+   Start-Process powershell -ArgumentList '-NoExit','-Command',"Set-Location D:\p2_code; & 'D:\HRL_UAV_V2\.venv\Scripts\python.exe' tools\watch.py --main D:\p2_runs_v2 --zeroshot-out D:\p2_zeroshot_v4 --sweep-out D:\p2_sweeps_v3"
    ```
-4. **确认状态已推送**：约 3 分钟后运行：
-   ```powershell
-   git -C D:\p2_code fetch origin paper2-runs
-   git -C D:\p2_code log origin/paper2-runs -3 --format="%h %ci %s"
-   ```
-   应看到以 `p2_sweeps_v3: feasibility:` 开头的提交。如果没有，打开 `D:\p2_sweeps_v3\FEASIBILITY.md`，把“GitHub 推送”那一行和步骤表告诉用户。
-5. **汇报并结束**：用一两句话告诉用户“已重新启动，GitHub 上已看到状态”（或看到的错误），然后结束。
-
-## 之后
-
-- 整个可行性阶段推测约半天到一天，期间不需要任何操作。
-- 云端 Claude 从本分支读取进度。有新的说明时，这个文件会更新（编号加一）。
+5. **确认在运行**：约 1 分钟后，新窗口里应出现 `watching origin/paper2-release:RUN_REQUEST.json`，后面跟着 `waiting: ...` 或 `started zeroshot ...`。状态文件在 `D:\p2_watch\state.json`。
+6. **汇报并结束**：用一两句话告诉用户“值守程序已启动，正在等待/已开始零样本扫参”，然后结束。
