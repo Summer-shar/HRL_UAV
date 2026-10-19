@@ -7,3 +7,6 @@ D:\p2_zeroshot_v4\results
 
 === 2026-10-20 04:09:18  D:\HRL_UAV_V2\.venv\Scripts\python.exe D:\p2_code\run.py zeroshot-report --out-base=D:\p2_zeroshot_v4 --main=D:\p2_runs_v2 --seeds=4101,4102,4103
 D:\p2_zeroshot_v4\results
+
+=== 2026-10-20 04:39:33  D:\HRL_UAV_V2\.venv\Scripts\python.exe D:\p2_code\run.py zeroshot-report --out-base=D:\p2_zeroshot_v4 --main=D:\p2_runs_v2 --seeds=4101,4102,4103
+D:\p2_zeroshot_v4\results
