@@ -2,7 +2,7 @@
 
 **运行中：全部 16 个点的测试**
 
-最后更新：2026-10-20 05:39:53（运行中每 10 分钟更新一次；如果这个时间停在很久以前，说明程序已经退出）
+最后更新：2026-10-20 06:10:27（运行中每 10 分钟更新一次；如果这个时间停在很久以前，说明程序已经退出）
 
 - 主实验目录：`D:\p2_runs_v2`
 - 输出目录：`D:\p2_zeroshot_v4`
@@ -24,11 +24,11 @@ point               records
 cpu_ghz=9        360/360   
 u2u_mhz=1.5      180/360   
 cpu_ghz=11       360/360   
-cpu_ghz=12       227/360   
-cpu_ghz=14        60/360   
-load=0.6          60/360   
-load=0.8          60/360   
-load=0.9          60/360   
+cpu_ghz=12       360/360   
+cpu_ghz=14       360/360   
+load=0.6         360/360   
+load=0.8         360/360   
+load=0.9         134/360   
 load=1.1          60/360   
 users=7           60/360   
 users=10          60/360   
@@ -38,8 +38,8 @@ u2u_mhz=2        180/360
 u2u_mhz=2.5       60/360   
 u2u_mhz=4         60/360   
 
-records: 1967/5760
-about 5.8 h left at the rate so far (slow jobs run first, so this estimate is pessimistic early on)
+records: 3074/5760
+about 3.1 h left at the rate so far (slow jobs run first, so this estimate is pessimistic early on)
 ```
 
 ## 管道冒烟（users=7、u2u_mhz=1.5，1 个种子）：输出摘录
