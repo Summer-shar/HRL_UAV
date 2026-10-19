@@ -97,9 +97,17 @@ def main():
     text = checks.progress(base, pts, seeds, 8)
     print(text)
     n = len([j for j in jobs if j.id.startswith('cpu_ghz=9/')])
-    assert f'{n:4d}/{n:<5d} {n*0.5:10.1f}  finished' in text, text
-    assert 'running' in text and 'not started' in text and 'remaining: 2 points' in text, text
+    assert f'{n:4d}/{n:<5d} {n*0.5:10.1f} {n*0.5:9.1f}  finished' in text, text
+    assert 'remaining: 1 running and 1 waiting points, about 93 job-hours' in text, text   # 31 + 62
     assert abs(checks.job_hours(base/'cpu_ghz=9')[jobs[0].marker] - 0.5) < 1e-9
+    # a running point slower than the finished one (1.5 h per job): extrapolated from its own share,
+    # never "0 job-hours left" (the estimate the first version printed)
+    for j in [j for j in jobs if j.id.startswith('u2u_mhz=1.5/')][:n//2]:
+        (base/'u2u_mhz=1.5'/'_jobs'/f'{j.marker}.done').write_text('2026-10-18 10:30:00\n', encoding='utf-8')
+    text = checks.progress(base, pts, seeds, 8)
+    print(text)
+    assert f'{n//2*1.5:10.1f} {n*1.5:9.1f}  running' in text, text
+    assert f'about {n//2*1.5 + (n*0.5+n*1.5)/2:.0f} job-hours' in text, text          # 93 left + 124 waiting
     print('OK; outputs in', tmp)
 
 

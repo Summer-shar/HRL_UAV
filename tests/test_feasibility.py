@@ -71,15 +71,25 @@ def main():
     (tmp/'ok'/'_feasibility'/'state.json').write_text(json.dumps(s))
     code, md, state = run(tmp/'ok', main_root, fake)                    # other code: checks repeated
     assert code == 0 and state['steps']['check-env']['status'] == 'passed'
-    # stage 2 refuses without a passed stage 1, then runs (fake retrain: no records, so points stay unfinished)
+    # stage 2 refuses unless stage 1 ran its pilots and the pilot check (passed or failed)
+    os.environ['FAKE_VERIFY'] = '1'
+    assert run(tmp/'early', main_root, fake)[0] == 1                    # stopped at verify: no pilots
+    os.environ['FAKE_VERIFY'] = '0'
+    sweep = F.Sweep(main_root, tmp/'early', 2, (4101, 4102, 4103), publish=False)
+    sweep.run_py = str(fake)
+    assert sweep.run() == 2
+    # after a failed pilot check stage 2 runs; gates hold their points (fake retrain: nothing finishes)
     sweep = F.Sweep(main_root, tmp/'pilot', 2, (4101, 4102, 4103), publish=False)
     sweep.run_py = str(fake)
-    assert sweep.run() == 2                                            # stage 1 failed there
-    sweep = F.Sweep(main_root, tmp/'ok', 2, (4101, 4102, 4103), publish=False)
-    sweep.run_py = str(fake)
     assert sweep.run() == 1
-    smd = (tmp/'ok'/'SWEEP.md').read_text(encoding='utf-8')
-    assert '16 个点未完成' in smd and 'cpu_ghz=11' in smd, smd
+    smd = (tmp/'pilot'/'SWEEP.md').read_text(encoding='utf-8')
+    assert '2 个点未完成' in smd and 'cpu_ghz=9, u2u_mhz=1.5' in smd, smd
+    from p2.retrain import all_points
+    pts = all_points()
+    assert len(F.held_points(tmp/'ok', pts)) == 14                      # no gate has passed there
+    (tmp/'ok'/'_jobs').mkdir(exist_ok=True)
+    (tmp/'ok'/'_jobs'/'pilot_gate_cpu_ghz.done').write_text('x', encoding='utf-8')
+    assert F.held_points(tmp/'ok', pts) == ['u2u_mhz=2', 'u2u_mhz=2.5', 'u2u_mhz=4'], F.held_points(tmp/'ok', pts)
 
     # status pushed to a git branch (local bare repository as the remote)
     import subprocess

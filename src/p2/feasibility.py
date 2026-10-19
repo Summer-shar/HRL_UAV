@@ -261,11 +261,13 @@ class Sweep(Stage):
 
     def run(self):
         feas = self.base/'_feasibility'/'state.json'
-        summary = (C.read_json(feas)['steps'].get('summary', {}) if feas.exists() else {})
-        if summary.get('status') != 'passed':
-            print(f'Stage 1 (feasibility) has not passed under {self.base}: run "python run.py feasibility" first '
+        steps = C.read_json(feas)['steps'] if feas.exists() else {}
+        if steps.get('pilots', {}).get('status') != 'passed' or \
+                steps.get('summary', {}).get('status') not in ('passed', 'failed'):
+            print(f'Stage 1 (feasibility) has not finished under {self.base}: run "python run.py feasibility" first '
                   f'(docs/PROTOCOL.md section 4).', flush=True)
             return 2
+        # a pilot that failed its check holds only the points it gates (pilot_gate_* in the job graph)
         from .retrain import all_points, point_finished
         py, run = sys.executable, self.run_py
         seeds = ','.join(map(str, self.seeds))
@@ -287,14 +289,17 @@ class Sweep(Stage):
             [py, run, 'retrain-export', f'--out-base={self.base}', f'--dest={self.base/"records.zip"}',
              f'--seeds={seeds}']])
         finished = [f'{p}={v:g}' for p, v in points if point_finished(self.base/f'{p}={v:g}', self.seeds)]
-        missing = [f'{p}={v:g}' for p, v in points if f'{p}={v:g}' not in finished]
+        held = held_points(self.base, points)
+        missing = [f'{p}={v:g}' for p, v in points if f'{p}={v:g}' not in finished and f'{p}={v:g}' not in held]
         self.state['steps']['summary'].update(status='passed' if ok and not missing else 'failed', ended=now(),
                                               seconds=round(time.time()-t0), excerpt=tail(self.dir/'summary.log', 40))
         report = self.base/'results'/'retrain_summary.md'
-        if swept_ok and ok and not missing:
-            return self.finish(True, '全部扫参点完成', (
-                f'## 结论：全部 {len(points)} 个点完成\n\n汇总表：`{report}`，各参数表 `results/retrain_sweep_<参数>.csv`，'
-                f'只含记录的压缩包：`{self.base/"records.zip"}`。'), 'FINISHED')
+        held_text = (f'\n\n因试点检查未通过而挂起的点（按 docs/PROTOCOL.md 第 5 节先讨论）：{", ".join(held)}。'
+                     if held else '')
+        if not missing and ok:
+            return self.finish(True, '扫参完成' + ('（部分点因门控挂起）' if held else ''), (
+                f'## 结论：{len(finished)} 个点完成\n\n汇总表：`{report}`，各参数表 `results/retrain_sweep_<参数>.csv`，'
+                f'只含记录的压缩包：`{self.base/"records.zip"}`。' + held_text), 'FINISHED')
         if not missing:
             return self.finish(False, '已停止：最终汇总失败', (
                 f'## 停止原因\n\n全部点已完成，但汇总或导出失败，见 `{self.dir/"summary.log"}`。'
@@ -303,6 +308,19 @@ class Sweep(Stage):
             f'## 停止原因\n\n未完成的点：{", ".join(missing) or "无"}。可能原因：任务失败（见 `{self.dir/"sweep.log"}` 末尾的 '
             '“Failed or skipped jobs”），或门控未通过（`_jobs/pilot_gate_*.log`）。修正后原样重新运行同一条命令即可续跑。'),
             f'STOPPED: {len(missing)} points unfinished')
+
+
+def held_points(base, points):
+    """Points whose pilot gate has not passed (no pilot_gate_<param>.done in <base>/_jobs)."""
+    from .pipeline import point_name
+    held = []
+    for param, value in points:
+        gate_param, gate_value = C.GATED_BY[param]
+        if (param, C.point_value(param, value)) == (gate_param, C.point_value(gate_param, gate_value)):
+            continue                                            # the pilot itself is never held
+        if not (Path(base)/'_jobs'/f'pilot_gate_{gate_param}.done').exists():
+            held.append(point_name(param, value))
+    return held
 
 
 def device_from_main(main):

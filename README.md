@@ -129,7 +129,7 @@ python run.py feasibility --main D:\p2_runs_v2 --out-base D:\p2_sweeps_v3
 python run.py sweep --main D:\p2_runs_v2 --out-base D:\p2_sweeps_v3
 ```
 
-- 用同一个输出目录，试点已完成的任务自动跳过。第一步没有通过时，这条命令拒绝运行。
+- 用同一个输出目录，试点已完成的任务自动跳过。第一步的两个试点和试点检查没有跑完时，这条命令拒绝运行；某个试点检查未通过时，只挂起它门控的点，其余照常（PROTOCOL 第 5 节）。
 - 任务图里有两个门控：`pilot_gate_cpu_ghz` 放行其余 CPU、负载、用户数点，`pilot_gate_u2u_mhz` 放行其余 U2U 点。日志在 `D:\p2_sweeps_v3\_jobs\pilot_gate_*.log`；门控不通过时对应的点挂起，其余照常。
 - 状态写在 `SWEEP.md`，汇总表每 30 分钟更新一次。全部完成后自动做最终汇总，并打包只含记录的 `records.zip`。
 

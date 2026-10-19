@@ -134,12 +134,15 @@ def job_hours(root):
 
 
 def progress(base, points, seeds, workers, smoke=False):
-    """Text table: per point jobs done / planned and job-hours; remaining time extrapolated from the
-    finished points (mean job-hours per point / workers, i.e. assuming every worker stays busy)."""
+    """Text table: per point jobs done / planned and job-hours, and the remaining time.  A running
+    point is extrapolated from its own share of finished jobs (never below the mean finished point);
+    a point not started yet costs the mean of the finished and extrapolated points.  Assumes every
+    worker stays busy, so it is a lower bound when few jobs are left."""
     from .pipeline import point_name, retrain_plan
     jobs = [j for j in retrain_plan(base, points, seeds, smoke=smoke, gate=False)]
-    lines = [f'{"point":14s} {"jobs done":>10s} {"job-hours":>10s}  state']
-    finished_hours, remaining_points, partial_hours = [], 0, 0.
+    lines = [f'{"point":14s} {"jobs done":>10s} {"job-hours":>10s} {"estimate":>9s}  state']
+    finished, running, waiting = [], [], 0
+    rows = []
     for param, value in points:
         name = point_name(param, value)
         planned = [j.marker for j in jobs if j.id.startswith(name+'/')]
@@ -148,21 +151,28 @@ def progress(base, points, seeds, workers, smoke=False):
         h = sum(hours[m] for m in done)
         state = 'finished' if len(done) == len(planned) else 'running' if done else 'not started'
         if state == 'finished':
-            finished_hours.append(h)
+            finished.append(h)
+        elif state == 'running':
+            running.append((h, h*len(planned)/len(done)))
         else:
-            remaining_points += 1
-            partial_hours += h
-        lines.append(f'{name:14s} {len(done):4d}/{len(planned):<5d} {h:10.1f}  {state}')
+            waiting += 1
+        rows.append((name, len(done), len(planned), h, state))
+    floor = statistics.mean(finished) if finished else 0.
+    running = [(h, max(est, floor)) for h, est in running]
+    totals = finished + [est for _, est in running]
+    per_point = statistics.mean(totals) if totals else None
+    for name, nd, npl, h, state in rows:
+        est = h if state == 'finished' else next((e for hh, e in running if hh == h), None) if state == 'running' \
+            else per_point
+        lines.append(f'{name:14s} {nd:4d}/{npl:<5d} {h:10.1f} {"" if est is None else f"{est:9.1f}"}  {state}')
     lines.append('')
-    if finished_hours:
-        per_point = statistics.mean(finished_hours)
-        left = max(per_point*remaining_points - partial_hours, 0.)
-        lines.append(f'finished points: {len(finished_hours)}, mean {per_point:.1f} job-hours per point '
-                     f'({min(finished_hours):.1f}-{max(finished_hours):.1f})')
-        lines.append(f'remaining: {remaining_points} points, about {left:.0f} job-hours; with {workers} workers about '
-                     f'{left/workers:.0f} h ({left/workers/24:.1f} days) if every worker stays busy')
-        lines.append('Low-U2U and high-load points run slower than the average; read this as an estimate.')
-    else:
-        lines.append('no point has finished yet: no extrapolation (see "timing" for the estimate from the main run)')
+    if per_point is None:
+        lines.append('no job has finished yet: no extrapolation (see "timing" for the estimate from the main run)')
+        return '\n'.join(lines)
+    left = sum(est-h for h, est in running) + waiting*per_point
+    lines.append(f'finished points: {len(finished)}' + (f' ({statistics.mean(finished):.1f} job-hours each on average)'
+                                                       if finished else ''))
+    lines.append(f'remaining: {len(running)} running and {waiting} waiting points, about {left:.0f} job-hours; with '
+                 f'{workers} workers about {left/workers:.0f} h ({left/workers/24:.1f} days) if every worker stays busy')
+    lines.append('Estimates from job counts: long training jobs make early estimates of a running point too low.')
     return '\n'.join(lines)
-
