@@ -1,0 +1,17 @@
+{
+  "code": "4cdb31407064197dcf5816f1ce115111f13db9dfdb1b7fe6f7b72faee810474b",
+  "main": "D:\\p2_runs_v2",
+  "started": "2026-10-20 02:38:24",
+  "steps": {
+    "smoke": {
+      "status": "running",
+      "started": "2026-10-20 02:38:24"
+    },
+    "zeroshot": {
+      "status": "pending"
+    },
+    "summary": {
+      "status": "pending"
+    }
+  }
+}
