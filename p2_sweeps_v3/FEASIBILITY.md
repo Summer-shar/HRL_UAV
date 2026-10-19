@@ -2,12 +2,12 @@
 
 **运行中：两个试点（3 个种子，完整流程）**
 
-最后更新：2026-10-19 16:45:08（运行中每 10 分钟更新一次；如果这个时间停在很久以前，说明程序已经退出）
+最后更新：2026-10-19 17:15:35（运行中每 10 分钟更新一次；如果这个时间停在很久以前，说明程序已经退出）
 
 - 主实验目录：`D:\p2_runs_v2`
 - 输出目录：`D:\p2_sweeps_v3`
 - 代码指纹：`9734a775ee4e`；P2_DEVICE=cpu；P2_THREADS=未设置（2）；进程数 8
-- **GitHub 推送：失败（实验不受影响，继续运行）：git push: fatal: unable to access 'https://github.com/Summer-shar/HRL_UAV.git/': TLS connect error: error:0A000126:SSL routines::unexpected eof while reading**
+- GitHub 推送：成功（分支 paper2-runs，文件夹 p2_sweeps_v3/）
 
 | 步骤 | 内容 | 状态 | 开始 | 结束 | 用时 |
 |---|---|---|---|---|---|
@@ -25,10 +25,10 @@
 ```
 point           jobs done  job-hours  estimate  state
 cpu_ghz=9       124/124         41.4      41.4  finished
-u2u_mhz=1.5     111/124        100.8     112.6  running
+u2u_mhz=1.5     112/124        104.1     115.3  running
 
 finished points: 1 (41.4 job-hours each on average)
-remaining: 1 running and 0 waiting points, about 12 job-hours; with 8 workers about 1 h (0.1 days) if every worker stays busy
+remaining: 1 running and 0 waiting points, about 11 job-hours; with 8 workers about 1 h (0.1 days) if every worker stays busy
 Estimates from job counts: long training jobs make early estimates of a running point too low.
 ```
 

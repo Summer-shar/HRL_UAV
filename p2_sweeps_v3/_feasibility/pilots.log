@@ -4,3 +4,8 @@
 START u2u_mhz=1.5/s4103_train_M3
 START u2u_mhz=1.5/s4103_dev_ProposedLower_0
 DONE  u2u_mhz=1.5/s4103_dev_ProposedLower_0 (17.6 min) [235/248]
+DONE  u2u_mhz=1.5/s4103_train_M3 (196.0 min) [236/248]
+START u2u_mhz=1.5/s4103_dev_ProposedLower_25
+START u2u_mhz=1.5/s4103_dev_ProposedLower_50
+START u2u_mhz=1.5/s4103_dev_ProposedLower_75
+START u2u_mhz=1.5/s4103_dev_ProposedLower_100
