@@ -2,7 +2,7 @@
 
 **运行中：两个试点（3 个种子，完整流程）**
 
-最后更新：2026-10-19 08:59:29（运行中每 10 分钟更新一次；如果这个时间停在很久以前，说明程序已经退出）
+最后更新：2026-10-19 09:29:40（运行中每 10 分钟更新一次；如果这个时间停在很久以前，说明程序已经退出）
 
 - 主实验目录：`D:\p2_runs_v2`
 - 输出目录：`D:\p2_sweeps_v3`
@@ -25,7 +25,7 @@
 ```
 point           jobs done  job-hours  state
 cpu_ghz=9       124/124         41.4  finished
-u2u_mhz=1.5      70/124         66.4  running
+u2u_mhz=1.5      83/124         73.2  running
 
 finished points: 1, mean 41.4 job-hours per point (41.4-41.4)
 remaining: 1 points, about 0 job-hours; with 8 workers about 0 h (0.0 days) if every worker stays busy
