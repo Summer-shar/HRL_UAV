@@ -18,7 +18,8 @@
       "excerpt": "START u2u_mhz=4/s4103_zeroshot_HoverSAC\nDONE  u2u_mhz=4/s4102_zeroshot_TOO (4.3 min) [280/288]\nSTART u2u_mhz=4/s4103_zeroshot_CA\nDONE  u2u_mhz=4/s4102_zeroshot_CA (3.7 min) [281/288]\nDONE  u2u_mhz=4/s4102_zeroshot_HoverSAC (4.9 min) [282/288]\nDONE  u2u_mhz=4/s4103_zeroshot_Proposed (4.9 min) [283/288]\nDONE  u2u_mhz=4/s4102_zeroshot_TFOO (5.9 min) [284/288]\nDONE  u2u_mhz=4/s4103_zeroshot_TOO (3.8 min) [285/288]\nDONE  u2u_mhz=4/s4103_zeroshot_HoverSAC (4.1 min) [286/288]\nDONE  u2u_mhz=4/s4103_zeroshot_CA (2.9 min) [287/288]\nDONE  u2u_mhz=4/s4103_zeroshot_TFOO (5.0 min) [288/288]\nAll jobs finished."
     },
     "summary": {
-      "status": "pending"
+      "status": "running",
+      "started": "2026-10-20 07:39:38"
     }
   }
 }
