@@ -1,8 +1,8 @@
 # 可行性阶段：状态
 
-**运行中：扫参管道冒烟完成**
+**运行中：两个试点（3 个种子，完整流程）**
 
-最后更新：2026-10-19 13:42:39（运行中每 10 分钟更新一次；如果这个时间停在很久以前，说明程序已经退出）
+最后更新：2026-10-19 13:42:48（运行中每 10 分钟更新一次；如果这个时间停在很久以前，说明程序已经退出）
 
 - 主实验目录：`D:\p2_runs_v2`
 - 输出目录：`D:\p2_sweeps_v3`
@@ -15,10 +15,22 @@
 | 2 | 自检脚本 | 通过 | 2026-10-19 13:27:47 | 2026-10-19 13:29:20 | 1 分钟 |
 | 3 | 与主实验记录比较 | 通过 | 2026-10-19 13:29:25 | 2026-10-19 13:40:26 | 11 分钟 |
 | 4 | 扫参管道冒烟 | 通过 | 2026-10-19 13:40:38 | 2026-10-19 13:42:39 | 2 分钟 |
-| 5 | 两个试点（3 个种子，完整流程） | 未开始 |  |  |  |
+| 5 | 两个试点（3 个种子，完整流程） | 运行中 | 2026-10-19 13:42:48 |  |  |
 | 6 | 试点检查、耗时、汇总 | 未开始 |  |  |  |
 
 输出目录所在磁盘剩余 388 GB。
+
+## 进度（run.py progress）
+
+```
+point           jobs done  job-hours  estimate  state
+cpu_ghz=9       124/124         41.4      41.4  finished
+u2u_mhz=1.5     110/124        100.5     113.3  running
+
+finished points: 1 (41.4 job-hours each on average)
+remaining: 1 running and 0 waiting points, about 13 job-hours; with 8 workers about 2 h (0.1 days) if every worker stays busy
+Estimates from job counts: long training jobs make early estimates of a running point too low.
+```
 
 ## 环境检查：输出摘录
 
