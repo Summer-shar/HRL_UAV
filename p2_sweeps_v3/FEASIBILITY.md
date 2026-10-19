@@ -1,8 +1,8 @@
 # 可行性阶段：状态
 
-**运行中：两个试点（3 个种子，完整流程）**
+**运行中：两个试点（3 个种子，完整流程）完成**
 
-最后更新：2026-10-19 18:48:08（运行中每 10 分钟更新一次；如果这个时间停在很久以前，说明程序已经退出）
+最后更新：2026-10-19 18:58:52（运行中每 10 分钟更新一次；如果这个时间停在很久以前，说明程序已经退出）
 
 - 主实验目录：`D:\p2_runs_v2`
 - 输出目录：`D:\p2_sweeps_v3`
@@ -15,7 +15,7 @@
 | 2 | 自检脚本 | 通过 | 2026-10-19 13:27:47 | 2026-10-19 13:29:20 | 1 分钟 |
 | 3 | 与主实验记录比较 | 通过 | 2026-10-19 13:29:25 | 2026-10-19 13:40:26 | 11 分钟 |
 | 4 | 扫参管道冒烟 | 通过 | 2026-10-19 13:40:38 | 2026-10-19 13:42:39 | 2 分钟 |
-| 5 | 两个试点（3 个种子，完整流程） | 运行中 | 2026-10-19 13:42:48 |  |  |
+| 5 | 两个试点（3 个种子，完整流程） | 通过 | 2026-10-19 13:42:48 | 2026-10-19 18:58:52 | 5.3 小时 |
 | 6 | 试点检查、耗时、汇总 | 未开始 |  |  |  |
 
 输出目录所在磁盘剩余 388 GB。
@@ -102,4 +102,21 @@ All jobs finished.
 
 === 2026-10-19 13:42:38  D:\HRL_UAV_V2\.venv\Scripts\python.exe D:\p2_code\run.py retrain-report --out-base=D:\p2_sweeps_v3\_feasibility\smoke --main=D:\p2_runs_v2 --points=users=7,u2u_mhz=1.5 --smoke --seeds=4101
 D:\p2_sweeps_v3\_feasibility\smoke\results
+```
+
+## 两个试点（3 个种子，完整流程）：输出摘录
+
+```
+START u2u_mhz=1.5/s4103_test_NC
+START u2u_mhz=1.5/s4103_test_HoverSAC
+START u2u_mhz=1.5/s4103_test_CA
+DONE  u2u_mhz=1.5/s4103_test_TFOO (14.9 min) [242/248]
+DONE  u2u_mhz=1.5/s4103_test_NC (17.8 min) [243/248]
+DONE  u2u_mhz=1.5/s4103_test_HoverSAC (51.2 min) [244/248]
+DONE  u2u_mhz=1.5/s4103_test_Proposed (58.1 min) [245/248]
+DONE  u2u_mhz=1.5/s4103_test_TOO (77.0 min) [246/248]
+DONE  u2u_mhz=1.5/s4103_test_CA (88.1 min) [247/248]
+START u2u_mhz=1.5/report
+DONE  u2u_mhz=1.5/report (0.0 min) [248/248]
+All jobs finished.
 ```

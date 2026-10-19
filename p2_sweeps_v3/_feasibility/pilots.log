@@ -26,3 +26,7 @@ DONE  u2u_mhz=1.5/s4103_test_NC (17.8 min) [243/248]
 DONE  u2u_mhz=1.5/s4103_test_HoverSAC (51.2 min) [244/248]
 DONE  u2u_mhz=1.5/s4103_test_Proposed (58.1 min) [245/248]
 DONE  u2u_mhz=1.5/s4103_test_TOO (77.0 min) [246/248]
+DONE  u2u_mhz=1.5/s4103_test_CA (88.1 min) [247/248]
+START u2u_mhz=1.5/report
+DONE  u2u_mhz=1.5/report (0.0 min) [248/248]
+All jobs finished.
