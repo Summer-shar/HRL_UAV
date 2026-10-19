@@ -1,8 +1,8 @@
 # 零样本泛化扫参（方案 v4）：状态
 
-**运行中：全部 16 个点的测试**
+**运行中：全部 16 个点的测试完成**
 
-最后更新：2026-10-20 07:11:21（运行中每 10 分钟更新一次；如果这个时间停在很久以前，说明程序已经退出）
+最后更新：2026-10-20 07:39:33（运行中每 10 分钟更新一次；如果这个时间停在很久以前，说明程序已经退出）
 
 - 主实验目录：`D:\p2_runs_v2`
 - 输出目录：`D:\p2_zeroshot_v4`
@@ -12,7 +12,7 @@
 | 步骤 | 内容 | 状态 | 开始 | 结束 | 用时 |
 |---|---|---|---|---|---|
 | 1 | 管道冒烟（users=7、u2u_mhz=1.5，1 个种子） | 通过 | 2026-10-20 02:38:24 | 2026-10-20 02:38:47 | 0 分钟 |
-| 2 | 全部 16 个点的测试 | 运行中 | 2026-10-20 02:38:52 |  |  |
+| 2 | 全部 16 个点的测试 | 通过 | 2026-10-20 02:38:52 | 2026-10-20 07:39:33 | 5.0 小时 |
 | 3 | 汇总表与配对检验 | 未开始 |  |  |  |
 
 输出目录所在磁盘剩余 388 GB。
@@ -22,7 +22,7 @@
 ```
 point               records
 cpu_ghz=9        360/360   
-u2u_mhz=1.5      345/360   
+u2u_mhz=1.5      360/360   
 cpu_ghz=11       360/360   
 cpu_ghz=12       360/360   
 cpu_ghz=14       360/360   
@@ -34,12 +34,12 @@ users=7          360/360
 users=10         360/360   
 users=16         360/360   
 users=19         360/360   
-u2u_mhz=2        219/360   
-u2u_mhz=2.5       60/360   
-u2u_mhz=4         60/360   
+u2u_mhz=2        360/360   
+u2u_mhz=2.5      349/360   
+u2u_mhz=4        149/360   
 
-records: 5004/5760
-about 0.7 h left at the rate so far (slow jobs run first, so this estimate is pessimistic early on)
+records: 5538/5760
+about 0.2 h left at the rate so far (slow jobs run first, so this estimate is pessimistic early on)
 ```
 
 ## 管道冒烟（users=7、u2u_mhz=1.5，1 个种子）：输出摘录
@@ -57,4 +57,21 @@ All jobs finished.
 
 === 2026-10-20 02:38:47  D:\HRL_UAV_V2\.venv\Scripts\python.exe D:\p2_code\run.py zeroshot-report --out-base=D:\p2_zeroshot_v4\_zeroshot\smoke --main=D:\p2_runs_v2 --points=users=7,u2u_mhz=1.5 --smoke --seeds=4101
 D:\p2_zeroshot_v4\_zeroshot\smoke\results
+```
+
+## 全部 16 个点的测试：输出摘录
+
+```
+START u2u_mhz=4/s4103_zeroshot_HoverSAC
+DONE  u2u_mhz=4/s4102_zeroshot_TOO (4.3 min) [280/288]
+START u2u_mhz=4/s4103_zeroshot_CA
+DONE  u2u_mhz=4/s4102_zeroshot_CA (3.7 min) [281/288]
+DONE  u2u_mhz=4/s4102_zeroshot_HoverSAC (4.9 min) [282/288]
+DONE  u2u_mhz=4/s4103_zeroshot_Proposed (4.9 min) [283/288]
+DONE  u2u_mhz=4/s4102_zeroshot_TFOO (5.9 min) [284/288]
+DONE  u2u_mhz=4/s4103_zeroshot_TOO (3.8 min) [285/288]
+DONE  u2u_mhz=4/s4103_zeroshot_HoverSAC (4.1 min) [286/288]
+DONE  u2u_mhz=4/s4103_zeroshot_CA (2.9 min) [287/288]
+DONE  u2u_mhz=4/s4103_zeroshot_TFOO (5.0 min) [288/288]
+All jobs finished.
 ```
