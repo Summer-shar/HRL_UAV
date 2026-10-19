@@ -22,3 +22,4 @@ START u2u_mhz=1.5/s4103_test_NC
 START u2u_mhz=1.5/s4103_test_HoverSAC
 START u2u_mhz=1.5/s4103_test_CA
 DONE  u2u_mhz=1.5/s4103_test_TFOO (14.9 min) [242/248]
+DONE  u2u_mhz=1.5/s4103_test_NC (17.8 min) [243/248]
