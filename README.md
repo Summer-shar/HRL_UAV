@@ -153,6 +153,8 @@ python run.py retrain-export --out-base D:\p2_sweeps_v3 --dest D:\p2_sweeps_v3_r
 
 同一分支根目录下的 `NEXT.md` 是给本机的下一步说明。
 
+**无人值守**：`tools/watch.py` 每 3 分钟查看本分支（`paper2-release`）上的 `RUN_REQUEST.json`。出现新的请求编号、且它启动的命令都已结束时，它先拉取代码，再运行请求里指定的固定命令（`zeroshot`、`feasibility` 或 `sweep`，参数都来自 watch.py 自己的命令行）。这样可以在没人操作电脑时开始下一步，或修复问题后重新开始。
+
 ## 6 运行注意事项
 
 - **续跑**：中断（断电、重启、报错）后原样重跑同一条命令。已完成的任务跳过，训练从最近的快照继续。
