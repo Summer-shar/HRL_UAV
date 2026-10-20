@@ -1,8 +1,8 @@
 # 零样本泛化扫参（方案 v4）：状态
 
-**运行中：全部 16 个点的测试**
+**运行中：全部 16 个点的测试完成**
 
-最后更新：2026-10-20 14:01:47（运行中每 10 分钟更新一次；如果这个时间停在很久以前，说明程序已经退出）
+最后更新：2026-10-20 14:25:04（运行中每 10 分钟更新一次；如果这个时间停在很久以前，说明程序已经退出）
 
 - 主实验目录：`D:\p2_runs_v2`
 - 输出目录：`D:\p2_zeroshot_v4`
@@ -13,7 +13,7 @@
 |---|---|---|---|---|---|
 | 1 | 管道冒烟（terminals=7、u2u_mhz=1.5，1 个种子） | 通过 | 2026-10-20 13:07:41 | 2026-10-20 13:07:56 | 0 分钟 |
 | 2 | 逐位一致性检查（标称点对主实验；新代码重算已有点） | 通过 | 2026-10-20 13:08:01 | 2026-10-20 13:31:30 | 23 分钟 |
-| 3 | 全部 16 个点的测试 | 运行中 | 2026-10-20 13:31:35 |  |  |
+| 3 | 全部 16 个点的测试 | 通过 | 2026-10-20 13:31:35 | 2026-10-20 14:25:04 | 53 分钟 |
 | 4 | 汇总表与配对检验 | 未开始 |  |  |  |
 
 输出目录所在磁盘剩余 388 GB。
@@ -31,16 +31,16 @@ load=0.8         360/360
 load=0.9         360/360   
 load=1.1         360/360   
 terminals=7      360/360   
-terminals=9      339/360   
-terminals=11      84/360   
-terminals=15      60/360   
+terminals=9      360/360   
+terminals=11     360/360   
+terminals=15     312/360   
 u2u_mhz=1.5      360/360   
 u2u_mhz=2        360/360   
 u2u_mhz=2.5      360/360   
 u2u_mhz=4        360/360   
 
-records: 5163/5760
-about 0.1 h left at the rate so far (slow jobs run first, so this estimate is pessimistic early on)
+records: 5712/5760
+about 0.0 h left at the rate so far (slow jobs run first, so this estimate is pessimistic early on)
 ```
 
 ## 管道冒烟（terminals=7、u2u_mhz=1.5，1 个种子）：输出摘录
@@ -70,4 +70,21 @@ regression users=10         40 records vs D:\p2_zeroshot_v4\users=10: IDENTICAL
 regression u2u_mhz=2.5      40 records vs D:\p2_zeroshot_v4\u2u_mhz=2.5: IDENTICAL
 note: u2u_mhz exists only in the new records (evaluation records, added in commit d458a73 (U2U sweep); the main run's TFOO / TOO / NC test records were written before it)
 ALL IDENTICAL (520 records) -> D:\p2_zeroshot_v4\_zeroshot\consistency.json
+```
+
+## 全部 16 个点的测试：输出摘录
+
+```
+START terminals=15/s4103_zeroshot_HoverSAC
+DONE  terminals=15/s4102_zeroshot_TFOO (7.4 min) [280/288]
+START terminals=15/s4103_zeroshot_CA
+DONE  terminals=15/s4102_zeroshot_TOO (7.8 min) [281/288]
+DONE  terminals=15/s4102_zeroshot_HoverSAC (6.1 min) [282/288]
+DONE  terminals=15/s4102_zeroshot_CA (6.9 min) [283/288]
+DONE  terminals=15/s4103_zeroshot_Proposed (5.7 min) [284/288]
+DONE  terminals=15/s4103_zeroshot_TOO (5.2 min) [285/288]
+DONE  terminals=15/s4103_zeroshot_TFOO (6.7 min) [286/288]
+DONE  terminals=15/s4103_zeroshot_HoverSAC (5.1 min) [287/288]
+DONE  terminals=15/s4103_zeroshot_CA (5.4 min) [288/288]
+All jobs finished.
 ```

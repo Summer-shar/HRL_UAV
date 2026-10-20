@@ -18,8 +18,11 @@
       "excerpt": "nominal    nominal         360 records vs D:\\p2_runs_v2: IDENTICAL\nregression cpu_ghz=11       40 records vs D:\\p2_zeroshot_v4\\cpu_ghz=11: IDENTICAL\nregression load=0.8         40 records vs D:\\p2_zeroshot_v4\\load=0.8: IDENTICAL\nregression users=10         40 records vs D:\\p2_zeroshot_v4\\users=10: IDENTICAL\nregression u2u_mhz=2.5      40 records vs D:\\p2_zeroshot_v4\\u2u_mhz=2.5: IDENTICAL\nnote: u2u_mhz exists only in the new records (evaluation records, added in commit d458a73 (U2U sweep); the main run's TFOO / TOO / NC test records were written before it)\nALL IDENTICAL (520 records) -> D:\\p2_zeroshot_v4\\_zeroshot\\consistency.json"
     },
     "zeroshot": {
-      "status": "running",
-      "started": "2026-10-20 13:31:35"
+      "status": "passed",
+      "started": "2026-10-20 13:31:35",
+      "ended": "2026-10-20 14:25:04",
+      "seconds": 3204,
+      "excerpt": "START terminals=15/s4103_zeroshot_HoverSAC\nDONE  terminals=15/s4102_zeroshot_TFOO (7.4 min) [280/288]\nSTART terminals=15/s4103_zeroshot_CA\nDONE  terminals=15/s4102_zeroshot_TOO (7.8 min) [281/288]\nDONE  terminals=15/s4102_zeroshot_HoverSAC (6.1 min) [282/288]\nDONE  terminals=15/s4102_zeroshot_CA (6.9 min) [283/288]\nDONE  terminals=15/s4103_zeroshot_Proposed (5.7 min) [284/288]\nDONE  terminals=15/s4103_zeroshot_TOO (5.2 min) [285/288]\nDONE  terminals=15/s4103_zeroshot_TFOO (6.7 min) [286/288]\nDONE  terminals=15/s4103_zeroshot_HoverSAC (5.1 min) [287/288]\nDONE  terminals=15/s4103_zeroshot_CA (5.4 min) [288/288]\nAll jobs finished."
     },
     "summary": {
       "status": "pending"
