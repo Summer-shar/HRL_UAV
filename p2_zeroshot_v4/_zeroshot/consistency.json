@@ -1,0 +1,101 @@
+{
+  "checks": [
+    {
+      "kind": "nominal",
+      "root": "D:\\p2_zeroshot_v4\\_zeroshot\\consistency\\nominal",
+      "reference": "D:\\p2_runs_v2",
+      "seeds": [
+        4101,
+        4102,
+        4103
+      ],
+      "methods": [
+        "Proposed",
+        "TFOO",
+        "TOO",
+        "NC",
+        "HoverSAC",
+        "CA"
+      ],
+      "compared": 360,
+      "missing": [],
+      "differences": [],
+      "identical": true
+    },
+    {
+      "kind": "regression",
+      "root": "D:\\p2_zeroshot_v4\\_zeroshot\\consistency\\regression\\cpu_ghz=11",
+      "reference": "D:\\p2_zeroshot_v4\\cpu_ghz=11",
+      "seeds": [
+        4101
+      ],
+      "methods": [
+        "Proposed",
+        "TFOO"
+      ],
+      "compared": 40,
+      "missing": [],
+      "differences": [],
+      "identical": true
+    },
+    {
+      "kind": "regression",
+      "root": "D:\\p2_zeroshot_v4\\_zeroshot\\consistency\\regression\\load=0.8",
+      "reference": "D:\\p2_zeroshot_v4\\load=0.8",
+      "seeds": [
+        4101
+      ],
+      "methods": [
+        "Proposed",
+        "TFOO"
+      ],
+      "compared": 40,
+      "missing": [],
+      "differences": [],
+      "identical": true
+    },
+    {
+      "kind": "regression",
+      "root": "D:\\p2_zeroshot_v4\\_zeroshot\\consistency\\regression\\users=10",
+      "reference": "D:\\p2_zeroshot_v4\\users=10",
+      "seeds": [
+        4101
+      ],
+      "methods": [
+        "Proposed",
+        "TFOO"
+      ],
+      "compared": 40,
+      "missing": [],
+      "differences": [],
+      "identical": true
+    },
+    {
+      "kind": "regression",
+      "root": "D:\\p2_zeroshot_v4\\_zeroshot\\consistency\\regression\\u2u_mhz=2.5",
+      "reference": "D:\\p2_zeroshot_v4\\u2u_mhz=2.5",
+      "seeds": [
+        4101
+      ],
+      "methods": [
+        "Proposed",
+        "TFOO"
+      ],
+      "compared": 40,
+      "missing": [],
+      "differences": [],
+      "identical": true
+    }
+  ],
+  "value_differences": 0,
+  "missing": 0,
+  "compared": 520,
+  "added_fields": {
+    "u2u_mhz": "evaluation records, added in commit d458a73 (U2U sweep); the main run's TFOO / TOO / NC test records were written before it"
+  },
+  "all_identical": true,
+  "code_sha256": "f3aab1118cdf1b2e2ccc23b79630d55cb7893589d81ba3108cad1b1bb02c8e0f",
+  "jobs_exit": 0,
+  "finished": "2026-10-20 13:31:30",
+  "skipped_regression_points": []
+}

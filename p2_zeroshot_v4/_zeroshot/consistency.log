@@ -1,0 +1,64 @@
+
+=== 2026-10-20 13:08:06  D:\HRL_UAV_V2\.venv\Scripts\python.exe D:\p2_code\run.py zeroshot-check --out-base=D:\p2_zeroshot_v4 --main=D:\p2_runs_v2 --seeds=4101,4102,4103 --workers=8
+5 check roots: nominal nominal, regression cpu_ghz=11, regression load=0.8, regression users=10, regression u2u_mhz=2.5
+0 jobs already done, 26 to run with 8 workers; logs in D:\p2_zeroshot_v4\_zeroshot\consistency\_jobs
+START nominal/nominal/s4101_check_TFOO
+START nominal/nominal/s4101_check_NC
+START nominal/nominal/s4102_check_TFOO
+START nominal/nominal/s4102_check_NC
+START nominal/nominal/s4103_check_TFOO
+START nominal/nominal/s4103_check_NC
+START regression/cpu_ghz=11/s4101_check_TFOO
+START regression/load=0.8/s4101_check_TFOO
+DONE  regression/load=0.8/s4101_check_TFOO (6.7 min) [1/26]
+START regression/users=10/s4101_check_TFOO
+DONE  regression/cpu_ghz=11/s4101_check_TFOO (7.2 min) [2/26]
+START regression/u2u_mhz=2.5/s4101_check_TFOO
+DONE  nominal/nominal/s4101_check_TFOO (7.3 min) [3/26]
+DONE  nominal/nominal/s4103_check_TFOO (7.3 min) [4/26]
+START nominal/nominal/s4101_check_Proposed
+START nominal/nominal/s4101_check_TOO
+DONE  nominal/nominal/s4102_check_TFOO (7.4 min) [5/26]
+START nominal/nominal/s4101_check_HoverSAC
+DONE  nominal/nominal/s4103_check_NC (10.9 min) [6/26]
+START nominal/nominal/s4101_check_CA
+DONE  nominal/nominal/s4101_check_NC (10.9 min) [7/26]
+START nominal/nominal/s4102_check_Proposed
+DONE  nominal/nominal/s4102_check_NC (10.9 min) [8/26]
+START nominal/nominal/s4102_check_TOO
+DONE  nominal/nominal/s4101_check_TOO (5.5 min) [9/26]
+START nominal/nominal/s4102_check_HoverSAC
+DONE  nominal/nominal/s4101_check_HoverSAC (6.0 min) [10/26]
+START nominal/nominal/s4102_check_CA
+DONE  regression/users=10/s4101_check_TFOO (6.7 min) [11/26]
+START nominal/nominal/s4103_check_Proposed
+DONE  nominal/nominal/s4101_check_Proposed (6.2 min) [12/26]
+START nominal/nominal/s4103_check_TOO
+DONE  regression/u2u_mhz=2.5/s4101_check_TFOO (7.4 min) [13/26]
+START nominal/nominal/s4103_check_HoverSAC
+DONE  nominal/nominal/s4101_check_CA (4.8 min) [14/26]
+START nominal/nominal/s4103_check_CA
+DONE  nominal/nominal/s4102_check_TOO (5.3 min) [15/26]
+START regression/cpu_ghz=11/s4101_check_Proposed
+DONE  nominal/nominal/s4102_check_Proposed (6.0 min) [16/26]
+START regression/load=0.8/s4101_check_Proposed
+DONE  nominal/nominal/s4102_check_CA (4.8 min) [17/26]
+START regression/users=10/s4101_check_Proposed
+DONE  nominal/nominal/s4102_check_HoverSAC (6.0 min) [18/26]
+DONE  nominal/nominal/s4103_check_TOO (5.4 min) [19/26]
+START regression/u2u_mhz=2.5/s4101_check_Proposed
+DONE  nominal/nominal/s4103_check_Proposed (6.0 min) [20/26]
+DONE  nominal/nominal/s4103_check_CA (4.7 min) [21/26]
+DONE  nominal/nominal/s4103_check_HoverSAC (5.9 min) [22/26]
+DONE  regression/cpu_ghz=11/s4101_check_Proposed (5.5 min) [23/26]
+DONE  regression/load=0.8/s4101_check_Proposed (5.2 min) [24/26]
+DONE  regression/users=10/s4101_check_Proposed (4.7 min) [25/26]
+DONE  regression/u2u_mhz=2.5/s4101_check_Proposed (4.5 min) [26/26]
+All jobs finished.
+nominal    nominal         360 records vs D:\p2_runs_v2: IDENTICAL
+regression cpu_ghz=11       40 records vs D:\p2_zeroshot_v4\cpu_ghz=11: IDENTICAL
+regression load=0.8         40 records vs D:\p2_zeroshot_v4\load=0.8: IDENTICAL
+regression users=10         40 records vs D:\p2_zeroshot_v4\users=10: IDENTICAL
+regression u2u_mhz=2.5      40 records vs D:\p2_zeroshot_v4\u2u_mhz=2.5: IDENTICAL
+note: u2u_mhz exists only in the new records (evaluation records, added in commit d458a73 (U2U sweep); the main run's TFOO / TOO / NC test records were written before it)
+ALL IDENTICAL (520 records) -> D:\p2_zeroshot_v4\_zeroshot\consistency.json
