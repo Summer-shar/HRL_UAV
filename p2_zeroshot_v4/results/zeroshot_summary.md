@@ -1,11 +1,10 @@
 # Zero-shot sweep (design v4, docs/PROTOCOL.md)
 
-Every method is the policy trained once at the nominal point (main run, dev-selected checkpoints), evaluated unchanged at each value; evaluated on the test scenarios 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40. Nominal value of each parameter: the main run D:\p2_runs_v2. Values: mean over seeds of scenario means (std over seeds in the CSV files). users = terminals per region, nominal computation load.
+Every method is the policy trained once at the nominal point (main run, dev-selected checkpoints), evaluated unchanged at each value; evaluated on the test scenarios 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40. Nominal value of each parameter: the main run D:\p2_runs_v2. Values: mean over seeds of scenario means (std, min and max over seeds in the CSV files; every seed in zeroshot_per_seed.csv). terminals = terminals per region, nominal load per terminal (the total load grows with the number of terminals; demand/capacity column).
 
 | point | finished |
 |---|---|
 | cpu_ghz=9 | yes |
-| u2u_mhz=1.5 | yes |
 | cpu_ghz=11 | yes |
 | cpu_ghz=12 | yes |
 | cpu_ghz=14 | yes |
@@ -13,10 +12,11 @@ Every method is the policy trained once at the nominal point (main run, dev-sele
 | load=0.8 | yes |
 | load=0.9 | yes |
 | load=1.1 | yes |
-| users=7 | yes |
-| users=10 | yes |
-| users=16 | yes |
-| users=19 | yes |
+| terminals=7 | yes |
+| terminals=9 | no |
+| terminals=11 | no |
+| terminals=15 | no |
+| u2u_mhz=1.5 | yes |
 | u2u_mhz=2 | yes |
 | u2u_mhz=2.5 | yes |
 | u2u_mhz=4 | yes |
@@ -41,6 +41,16 @@ Proposed vs others (cpu_ghz): relative change of the delay / cost, Wilcoxon p (2
 | 12 | -11.2% / -5.3%, p=1.9e-06/3.8e-06, 3/3 | -25.9% / -14.4%, p=1.9e-06/1.9e-06, 3/3 | -53.6% / -42.6%, p=1.9e-06/1.9e-06, 3/3 | -54.2% / -42.7%, p=1.9e-06/1.9e-06, 3/3 | -59.2% / -46.1%, p=1.9e-06/1.9e-06, 3/3 |
 | 14 | -10.7% / -3.0%, p=1.9e-06/0.00059, 3/3 | -29.6% / -13.2%, p=1.9e-06/5.7e-06, 3/3 | -39.5% / -28.4%, p=1.9e-06/1.9e-06, 3/3 | -54.0% / -40.2%, p=1.9e-06/1.9e-06, 3/3 | -59.6% / -42.6%, p=1.9e-06/1.9e-06, 3/3 |
 
+Weighted delay per training seed (cpu_ghz; seeds 4101, 4102, 4103)
+
+| cpu_ghz | Proposed (HRL) | TFOO (PPO+CVX) |
+|---:|---:|---:|
+| 9 | 1.033 / 1.023 / 0.9472 | 1.11 / 1.118 / 1.171 |
+| 10 | 0.6196 / 0.6226 / 0.5957 | 0.6838 / 0.704 / 0.665 |
+| 11 | 0.5595 / 0.5548 / 0.5455 | 0.6268 / 0.6375 / 0.6029 |
+| 12 | 0.547 / 0.5306 / 0.5343 | 0.6153 / 0.6166 / 0.5835 |
+| 14 | 0.5523 / 0.5113 / 0.5299 | 0.6116 / 0.6003 / 0.5724 |
+
 ## load (zero-shot; cells: delay / compute+comm power / joint cost)
 
 | load | demand/capacity | Proposed (HRL) | TFOO (PPO+CVX) | TOO (PPO+Equal) | NC (no cooperation) | Hover-SAC | CA (hover+equal) |
@@ -61,25 +71,36 @@ Proposed vs others (load): relative change of the delay / cost, Wilcoxon p (20 s
 | 1 | -10.5% / -7.1%, p=1.9e-06/1.9e-06, 3/3 | -16.3% / -11.0%, p=1.9e-06/1.9e-06, 3/3 | -89.6% / -86.1%, p=1.9e-06/1.9e-06, 3/3 | -51.2% / -43.0%, p=1.9e-06/1.9e-06, 3/3 | -54.2% / -45.4%, p=1.9e-06/1.9e-06, 3/3 |
 | 1.1 | -17.4% / -14.1%, p=1.9e-06/1.9e-06, 3/3 | -48.6% / -42.8%, p=1.9e-06/1.9e-06, 3/3 | -92.2% / -90.4%, p=1.9e-06/1.9e-06, 3/3 | -45.0% / -39.3%, p=1.9e-06/1.9e-06, 3/3 | -63.2% / -57.7%, p=1.9e-06/1.9e-06, 3/3 |
 
-## users (zero-shot; cells: delay / compute+comm power / joint cost)
+Weighted delay per training seed (load; seeds 4101, 4102, 4103)
 
-| users | demand/capacity | Proposed (HRL) | TFOO (PPO+CVX) | TOO (PPO+Equal) | NC (no cooperation) | Hover-SAC | CA (hover+equal) |
+| load | Proposed (HRL) | TFOO (PPO+CVX) |
+|---:|---:|---:|
+| 0.6 | 0.4716 / 0.4859 / 0.4817 | 0.5496 / 0.5283 / 0.5355 |
+| 0.8 | 0.5123 / 0.5214 / 0.5113 | 0.5815 / 0.5732 / 0.5655 |
+| 0.9 | 0.5431 / 0.55 / 0.5363 | 0.6121 / 0.613 / 0.5897 |
+| 1 | 0.6196 / 0.6226 / 0.5957 | 0.6838 / 0.704 / 0.665 |
+| 1.1 | 1.008 / 0.9317 / 0.9346 | 1.138 / 1.139 / 1.201 |
+
+## terminals (zero-shot, finished points only; cells: delay / compute+comm power / joint cost)
+
+| terminals | demand/capacity | Proposed (HRL) | TFOO (PPO+CVX) | TOO (PPO+Equal) | NC (no cooperation) | Hover-SAC | CA (hover+equal) |
 |---:|---:|---:|---:|---:|---:|---:|---:|
-| 7 | 0.82 | 1.041 s / 231.6 W / 8.459 | 1.154 s / 227.6 W / 9.15 | 1.873 s / 216.5 W / 13.75 | 7.339 s / 223.8 W / 49.71 | 2.418 s / 225.8 W / 17.41 | 2.523 s / 209.5 W / 17.99 |
-| 10 | 0.82 | 0.65 s / 235 W / 6.041 | 0.7809 s / 230.8 W / 6.889 | 0.8046 s / 221.8 W / 6.984 | 7.025 s / 225.5 W / 48.98 | 1.629 s / 231.1 W / 12.6 | 1.731 s / 215.1 W / 13.17 |
+| 7 | 0.46 | 0.4135 s / 112.7 W / 2.336 | 0.4652 s / 98.85 W / 2.428 | 0.511 s / 90.02 W / 2.534 | 0.8434 s / 119.9 W / 3.974 | 0.5983 s / 116.3 W / 3.044 | 0.6356 s / 89.85 W / 2.993 |
 | 13 | 0.82 | 0.6126 s / 234.4 W / 5.993 | 0.6843 s / 228 W / 6.452 | 0.7319 s / 220.9 W / 6.737 | 5.881 s / 227.1 W / 43.2 | 1.256 s / 232.4 W / 10.52 | 1.337 s / 216.4 W / 10.98 |
-| 16 | 0.82 | 0.6331 s / 234.5 W / 6.301 | 0.6846 s / 226.9 W / 6.621 | 0.7186 s / 221.1 W / 6.827 | 5.153 s / 227 W / 39.37 | 1.194 s / 233 W / 10.39 | 1.252 s / 217.1 W / 10.7 |
-| 19 | 0.82 | 0.657 s / 233.8 W / 6.493 | 0.7234 s / 227.4 W / 6.934 | 0.7401 s / 220.4 W / 7.005 | 4.712 s / 227.3 W / 36.26 | 1.088 s / 233.1 W / 9.648 | 1.152 s / 217 W / 10 |
 
-Proposed vs others (users): relative change of the delay / cost, Wilcoxon p (20 scenarios), better seeds
+Proposed vs others (terminals): relative change of the delay / cost, Wilcoxon p (20 scenarios), better seeds
 
-| users | TFOO (PPO+CVX) | TOO (PPO+Equal) | NC (no cooperation) | Hover-SAC | CA (hover+equal) |
+| terminals | TFOO (PPO+CVX) | TOO (PPO+Equal) | NC (no cooperation) | Hover-SAC | CA (hover+equal) |
 |---:|---:|---:|---:|---:|---:|
-| 7 | -9.8% / -7.5%, p=0.058/0.064, 3/3 | -44.5% / -38.5%, p=1.9e-06/1.9e-06, 2/3 | -85.8% / -83.0%, p=1.9e-06/1.9e-06, 3/3 | -57.0% / -51.4%, p=9.5e-06/9.5e-06, 3/3 | -58.8% / -53.0%, p=9.5e-06/9.5e-06, 3/3 |
-| 10 | -16.8% / -12.3%, p=1.9e-06/1.9e-06, 3/3 | -19.2% / -13.5%, p=1.9e-06/1.9e-06, 3/3 | -90.7% / -87.7%, p=1.9e-06/1.9e-06, 3/3 | -60.1% / -52.1%, p=1.9e-06/1.9e-06, 3/3 | -62.4% / -54.1%, p=1.9e-06/1.9e-06, 3/3 |
+| 7 | -11.1% / -3.8%, p=1.9e-06/1.9e-06, 3/3 | -19.1% / -7.8%, p=1.9e-06/1.9e-06, 3/3 | -51.0% / -41.2%, p=1.9e-06/1.9e-06, 3/3 | -30.9% / -23.3%, p=1.9e-06/1.9e-06, 3/3 | -34.9% / -22.0%, p=1.9e-06/1.9e-06, 3/3 |
 | 13 | -10.5% / -7.1%, p=1.9e-06/1.9e-06, 3/3 | -16.3% / -11.0%, p=1.9e-06/1.9e-06, 3/3 | -89.6% / -86.1%, p=1.9e-06/1.9e-06, 3/3 | -51.2% / -43.0%, p=1.9e-06/1.9e-06, 3/3 | -54.2% / -45.4%, p=1.9e-06/1.9e-06, 3/3 |
-| 16 | -7.5% / -4.8%, p=1.9e-06/3.8e-06, 3/3 | -11.9% / -7.7%, p=1.9e-06/1.9e-06, 3/3 | -87.7% / -84.0%, p=1.9e-06/1.9e-06, 3/3 | -47.0% / -39.4%, p=1.9e-06/1.9e-06, 3/3 | -49.4% / -41.1%, p=1.9e-06/1.9e-06, 3/3 |
-| 19 | -9.2% / -6.4%, p=1.9e-06/1.9e-06, 3/3 | -11.2% / -7.3%, p=1.9e-06/1.9e-06, 3/3 | -86.1% / -82.1%, p=1.9e-06/1.9e-06, 3/3 | -39.6% / -32.7%, p=1.9e-06/1.9e-06, 3/3 | -43.0% / -35.1%, p=1.9e-06/1.9e-06, 3/3 |
+
+Weighted delay per training seed (terminals; seeds 4101, 4102, 4103)
+
+| terminals | Proposed (HRL) | TFOO (PPO+CVX) |
+|---:|---:|---:|
+| 7 | 0.3957 / 0.4155 / 0.4293 | 0.4787 / 0.4585 / 0.4585 |
+| 13 | 0.6196 / 0.6226 / 0.5957 | 0.6838 / 0.704 / 0.665 |
 
 ## u2u_mhz (zero-shot; cells: delay / compute+comm power / joint cost)
 
@@ -100,3 +121,13 @@ Proposed vs others (u2u_mhz): relative change of the delay / cost, Wilcoxon p (2
 | 2.5 | -12.3% / -8.6%, p=1.9e-06/1.9e-06, 3/3 | -81.1% / -75.5%, p=1.9e-06/1.9e-06, 3/3 | -89.5% / -86.1%, p=1.9e-06/1.9e-06, 3/3 | -51.3% / -43.1%, p=1.9e-06/1.9e-06, 3/3 | -90.7% / -87.6%, p=1.9e-06/1.9e-06, 3/3 |
 | 3 | -10.5% / -7.1%, p=1.9e-06/1.9e-06, 3/3 | -16.3% / -11.0%, p=1.9e-06/1.9e-06, 3/3 | -89.6% / -86.1%, p=1.9e-06/1.9e-06, 3/3 | -51.2% / -43.0%, p=1.9e-06/1.9e-06, 3/3 | -54.2% / -45.4%, p=1.9e-06/1.9e-06, 3/3 |
 | 4 | -9.5% / -6.3%, p=1.9e-06/1.9e-06, 3/3 | -11.4% / -7.2%, p=1.9e-06/1.9e-06, 3/3 | -89.6% / -86.1%, p=1.9e-06/1.9e-06, 3/3 | -51.0% / -42.9%, p=1.9e-06/1.9e-06, 3/3 | -50.0% / -41.2%, p=1.9e-06/1.9e-06, 3/3 |
+
+Weighted delay per training seed (u2u_mhz; seeds 4101, 4102, 4103)
+
+| u2u_mhz | Proposed (HRL) | TFOO (PPO+CVX) |
+|---:|---:|---:|
+| 1.5 | 0.6472 / 4.361 / 0.6407 | 0.7984 / 0.8067 / 0.7653 |
+| 2 | 0.6233 / 0.639 / 0.6127 | 0.729 / 0.7449 / 0.7091 |
+| 2.5 | 0.6175 / 0.6257 / 0.6016 | 0.7038 / 0.7214 / 0.6793 |
+| 3 | 0.6196 / 0.6226 / 0.5957 | 0.6838 / 0.704 / 0.665 |
+| 4 | 0.6256 / 0.621 / 0.5918 | 0.6746 / 0.6989 / 0.6579 |
