@@ -25,7 +25,8 @@
       "excerpt": "START terminals=15/s4103_zeroshot_HoverSAC\nDONE  terminals=15/s4102_zeroshot_TFOO (7.4 min) [280/288]\nSTART terminals=15/s4103_zeroshot_CA\nDONE  terminals=15/s4102_zeroshot_TOO (7.8 min) [281/288]\nDONE  terminals=15/s4102_zeroshot_HoverSAC (6.1 min) [282/288]\nDONE  terminals=15/s4102_zeroshot_CA (6.9 min) [283/288]\nDONE  terminals=15/s4103_zeroshot_Proposed (5.7 min) [284/288]\nDONE  terminals=15/s4103_zeroshot_TOO (5.2 min) [285/288]\nDONE  terminals=15/s4103_zeroshot_TFOO (6.7 min) [286/288]\nDONE  terminals=15/s4103_zeroshot_HoverSAC (5.1 min) [287/288]\nDONE  terminals=15/s4103_zeroshot_CA (5.4 min) [288/288]\nAll jobs finished."
     },
     "summary": {
-      "status": "pending"
+      "status": "running",
+      "started": "2026-10-20 14:25:10"
     }
   }
 }
