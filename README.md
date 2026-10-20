@@ -89,8 +89,10 @@ python run.py report --out D:\p2_main                            # 只重做表�
 python run.py zeroshot --main D:\p2_runs_v2 --out-base D:\p2_zeroshot_v4
 ```
 
+- 参数：CPU 频率 9/11/12/14 GHz，负载系数 0.6/0.8/0.9/1.1，每区终端数 7/9/11/15（`terminals`：每个终端负载不变，终端越多总负载越大），U2U 总带宽 1.5/2/2.5/4 MHz；标称值即主实验。
+- 步骤：管道冒烟 → 逐位一致性检查（标称点对主实验，新代码重算已有点，`p2/consistency.py`；任一不同即停止）→ 全部点的测试（已完成的点跳过）→ 汇总。
 - 状态写在 `ZEROSHOT.md`，并推送到 GitHub。
-- 结果在 `results\zeroshot_summary.md`、`zeroshot_sweep_<参数>.csv`、`zeroshot_paired.csv`。
+- 结果在 `results\zeroshot_summary.md`、`zeroshot_sweep_<参数>.csv`（含种子间最小/最大值）、`zeroshot_per_seed.csv`、`zeroshot_paired.csv`；一致性检查结果在 `_zeroshot\consistency.json`。
 
 下面的逐点从零重训（方案 v3）只完成了两个试点，原因见 `docs/PROTOCOL.md` 的“方案 v4”一节。
 

@@ -37,7 +37,7 @@ def parse_points(text):
     points = []
     for item in filter(None, (t.strip() for t in str(text).split(','))):
         param, _, value = item.partition('=')
-        if param not in C.RETRAIN_SWEEPS and param not in C.SWEEPS:
+        if param not in C.RETRAIN_SWEEPS and param not in C.SWEEPS and param not in C.ZEROSHOT_SWEEPS:
             raise ValueError(f'unknown sweep parameter {param!r}')
         points.append((param, C.point_value(param, value)))
     return points
@@ -52,6 +52,14 @@ def all_points(smoke=False):
     pilots = [(p, C.point_value(p, v)) for p, v in C.PILOT_POINTS]
     pilots = [pt for pt in pilots if pt in points]
     return pilots + [pt for pt in points if pt not in pilots]
+
+
+def zeroshot_points(smoke=False):
+    """Every non-nominal value of the design-v4 zero-shot sweep, parameters in C.ZEROSHOT_ORDER
+    (terminals, not the superseded users design)."""
+    d = C.design(smoke)
+    return [(p, C.point_value(p, v)) for p in C.ZEROSHOT_ORDER for v in d['zeroshot_sweeps'][p]
+            if C.point_value(p, v) != C.point_value(p, C.NOMINAL[p])]
 
 
 def prepare_point(base, param, value, smoke=False, recipe='v2'):
@@ -103,11 +111,20 @@ def prepare_zeroshot_point(base, param, value, main, smoke=False):
     else:
         C.write_json(path, dict(scene, created=time.strftime('%Y-%m-%d %H:%M:%S')))
     scene_json = json.dumps(C.load_scene(root), sort_keys=True, separators=(',', ':'))
-    C.write_json(root/'design.json', dict(design=C.design(smoke), point=scene, smoke=smoke, methods=list(C.METHODS),
-                                          test_scenarios=list(C.test_scenarios(root, C.design(smoke))),
-                                          demand_over_capacity=C.utilization(param, value),
-                                          scene_sha256=hashlib.sha256(scene_json.encode()).hexdigest(),
-                                          code_sha256=code_fingerprint()[0]))
+    info = dict(design=C.design(smoke), point=scene, smoke=smoke, methods=list(C.METHODS),
+                test_scenarios=list(C.test_scenarios(root, C.design(smoke))),
+                demand_over_capacity=C.utilization(param, value),
+                scene_sha256=hashlib.sha256(scene_json.encode()).hexdigest(), code_sha256=code_fingerprint()[0])
+    path = root/'design.json'
+    if path.exists():                       # keep the record of the code that wrote this point's records
+        old = C.read_json(path)
+        if old.get('scene_sha256') != info['scene_sha256']:
+            raise ValueError(f'{root}: the scene of this point changed since its records were written')
+        if old.get('code_sha256') != info['code_sha256']:
+            C.write_json(root/f'design_{info["code_sha256"][:12]}.json', dict(info, note='later code; the records '
+                         'of this point were written by the code in design.json (see _zeroshot/consistency.json)'))
+    else:
+        C.write_json(path, info)
     return root
 
 

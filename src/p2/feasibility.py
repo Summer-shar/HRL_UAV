@@ -34,6 +34,7 @@ from . import common as C
 
 PILOTS = (('cpu_ghz', 9.0), ('u2u_mhz', 1.5))
 SMOKE = 'users=7,u2u_mhz=1.5'
+ZEROSHOT_SMOKE = 'terminals=7,u2u_mhz=1.5'
 TESTS = (['test_users.py'], ['test_retrain.py'], ['test_checks.py'], ['test_eval_report.py'],
          ['test_verify_compare.py'], ['test_feasibility.py'], ['test_publish.py'], ['test_perf_equivalence.py', '150'],
          ['test_identity.py'])
@@ -45,8 +46,9 @@ STAGES = {
     'sweep': dict(page='SWEEP.md', dir='_sweep', title='全部扫参点',
                   steps={'sweep': '全部 16 个点（含两个门控）', 'summary': '最终汇总与导出'}),
     'zeroshot': dict(page='ZEROSHOT.md', dir='_zeroshot', title='零样本泛化扫参（方案 v4）',
-                     steps={'smoke': '管道冒烟（users=7、u2u_mhz=1.5，1 个种子）', 'zeroshot': '全部 16 个点的测试',
-                            'summary': '汇总表与配对检验'}),
+                     steps={'smoke': '管道冒烟（terminals=7、u2u_mhz=1.5，1 个种子）',
+                            'consistency': '逐位一致性检查（标称点对主实验；新代码重算已有点）',
+                            'zeroshot': '全部 16 个点的测试', 'summary': '汇总表与配对检验'}),
 }
 STATUS_TEXT = {'pending': '未开始', 'running': '运行中', 'passed': '通过', 'failed': '失败',
                'skipped': '已通过（沿用上次）'}
@@ -335,21 +337,46 @@ def zeroshot_progress(base, points, seeds, started=None, smoke=False):
     return '\n'.join(lines)
 
 
+def consistency_progress(base, seeds):
+    """Records written so far by the consistency checks (p2/consistency.py)."""
+    work = Path(base)/'_zeroshot'/'consistency'
+    n = len(list(work.glob('**/seed_*/test/*/[0-9][0-9].json'))) if work.exists() else 0
+    per = len(seeds)*len(C.METHODS)*len(C.design()['test'])
+    return f'consistency records so far: {n} (nominal check: {per}; regression: up to 160)'
+
+
 class ZeroShot(Stage):
     kind = 'zeroshot'
 
     def run(self):
-        from .retrain import all_points, point_finished
+        from .retrain import zeroshot_points, point_finished
         py, run = sys.executable, self.run_py
         seeds = ','.join(map(str, self.seeds))
-        points = all_points()
+        points = zeroshot_points()
         self.note = self.disk_note(10)
         smoke = self.dir/'smoke'
         if not self.step('smoke', [[py, run, 'zeroshot-run', f'--out-base={smoke}', f'--main={self.main}',
-                                    f'--points={SMOKE}', '--smoke', '--seeds=4101', f'--workers={self.workers}'],
+                                    f'--points={ZEROSHOT_SMOKE}', '--smoke', '--seeds=4101',
+                                    f'--workers={self.workers}'],
                                    [py, run, 'zeroshot-report', f'--out-base={smoke}', f'--main={self.main}',
-                                    f'--points={SMOKE}', '--smoke', '--seeds=4101']]):
+                                    f'--points={ZEROSHOT_SMOKE}', '--smoke', '--seeds=4101']]):
             return 1
+        checking = '运行中：逐位一致性检查'
+
+        def poll_check():
+            self.progress_text = consistency_progress(self.base, self.seeds)
+            self.save(checking, 'progress', force=False)
+        if not self.step('consistency', [[py, run, 'zeroshot-check', f'--out-base={self.base}', f'--main={self.main}',
+                                          f'--seeds={seeds}', f'--workers={self.workers}']],
+                         excerpt=lambda t: '\n'.join(x for x in t.splitlines()
+                                                     if x.startswith(('nominal', 'regression', 'note:', 'ALL', 'DIFF',
+                                                                      '    seed', 'regression points'))),
+                         poll=poll_check):
+            self.note += ('\n\n一致性检查没有通过：新代码在标称点算出的结果与主实验不完全相同，或重算的已有点与原记录不同。'
+                          f'差异明细：`{self.base/"_zeroshot"/"consistency.json"}`。按方案先停下讨论，不评估新点。')
+            self.save('已停止：一致性检查未通过', 'STOPPED: consistency check')
+            return 1
+        self.progress_text = ''
         started = time.time()
         running = '运行中：全部 16 个点的测试'
 

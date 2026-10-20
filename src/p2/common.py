@@ -83,7 +83,7 @@ SWEEPS = dict(cpu_ghz=(9.0, 10.0, 11.0, 12.0, 13.0, 14.0), load=(0.6, 0.7, 0.8, 
               u2u_mhz=(1.5, 2.0, 3.0, 4.5, 6.0))
 SATURATED = dict(cpu_ghz=(8.0,), load=(1.2,), u2u_mhz=())
 MEAN_DEMAND_GCYCLES = 24.725   # hrl_uav workload_summary, nominal load, 3 UAVs share it
-NOMINAL = dict(cpu_ghz=10.0, load=1.0, u2u_mhz=3.0, users=13)
+NOMINAL = dict(cpu_ghz=10.0, load=1.0, u2u_mhz=3.0, users=13, terminals=13)
 
 # Retrained sweep, design v3 (docs/PROTOCOL.md, fixed before any v3
 # run).  Every learned method is trained from scratch at every value with the
@@ -102,6 +102,19 @@ PILOT_POINTS = (('cpu_ghz', 9.0), ('u2u_mhz', 1.5))
 GATED_BY = dict(cpu_ghz=('cpu_ghz', 9.0), load=('cpu_ghz', 9.0), users=('cpu_ghz', 9.0),
                 u2u_mhz=('u2u_mhz', 1.5))
 PILOT_POINT = PILOT_POINTS[0]                  # kept for old imports
+
+# Zero-shot sweep, design v4 (docs/PROTOCOL.md): the policies of the main run
+# evaluated unchanged at every point.  terminals = terminals per region with the
+# nominal task load of every terminal (business multipliers unchanged), so the
+# total load grows with the number of terminals: demand/capacity 0.46, 0.61,
+# 0.67, 0.82, 0.93 for 7, 9, 11, 13, 15 per region (16 per region exceeds the
+# total UAV capacity).  It replaces the first users design (users_scene with the
+# total load held at its nominal value), amended on 2026-10-20 after its results
+# had been seen (PROTOCOL change log); those records are kept, not reported.
+ZEROSHOT_SWEEPS = dict(cpu_ghz=(9.0, 10.0, 11.0, 12.0, 14.0), load=(0.6, 0.8, 0.9, 1.0, 1.1),
+                       terminals=(7, 9, 11, 13, 15), u2u_mhz=(1.5, 2.0, 2.5, 3.0, 4.0))
+ZEROSHOT_ORDER = ('cpu_ghz', 'load', 'terminals', 'u2u_mhz')
+INTEGER_PARAMS = ('users', 'terminals')
 SELECTION_METRIC = 'cost_per_s'             # the objective both layers optimise
 TRAJECTORY_SCENARIO = 21
 
@@ -124,10 +137,12 @@ def finetune(root, smoke=False, episodes=None):
 
 def utilization(param, value):
     """Mean computation demand / total UAV CPU capacity at a sweep point
-    (users points keep the nominal demand by construction)."""
+    (users points keep the nominal demand by construction; terminals points
+    scale it with the number of terminals, see terminals_demand)."""
     cpu = float(value) if param == 'cpu_ghz' else NOMINAL['cpu_ghz']
     load = float(value) if param == 'load' else NOMINAL['load']
-    return MEAN_DEMAND_GCYCLES*load/(3*cpu)
+    demand = terminals_demand(int(value)) if param == 'terminals' else MEAN_DEMAND_GCYCLES
+    return demand*load/(3*cpu)
 
 
 def out_root(path=None):
@@ -204,10 +219,10 @@ def load_scene(root=None):
     override = scene_override(root)
     if not override:
         return base
-    if override['param'] not in SWEEPS and override['param'] not in RETRAIN_SWEEPS:
+    if override['param'] not in SWEEPS and override['param'] not in RETRAIN_SWEEPS and \
+            override['param'] not in ZEROSHOT_SWEEPS:
         raise ValueError(f'unknown sweep parameter {override["param"]!r}')
-    value = override['value']
-    return scaled_scene(base, **{override['param']: int(value) if override['param'] == 'users' else float(value)})
+    return scaled_scene(base, **{override['param']: point_value(override['param'], override['value'])})
 
 
 def test_scenarios(root, d):
@@ -225,10 +240,19 @@ def prune_snapshots(root):
     return bool(override and override.get('prune_snapshots'))
 
 
-def scaled_scene(scene, cpu_ghz=None, load=None, u2u_mhz=None, users=None):
+def scaled_scene(scene, cpu_ghz=None, load=None, u2u_mhz=None, users=None, terminals=None):
     """Copy of the scene with every UAV CPU at cpu_ghz, all arrival rates x load,
-    the total U2U bandwidth at u2u_mhz and `users` terminals per region."""
-    s = copy.deepcopy(scene) if users is None or int(users) == NOMINAL['users'] else users_scene(scene, int(users))
+    the total U2U bandwidth at u2u_mhz, and `users` terminals per region at the
+    nominal total load (first design) or `terminals` per region at the nominal
+    load per terminal (design v4)."""
+    if users is not None and terminals is not None:
+        raise ValueError('users and terminals are two designs of the same parameter; give one')
+    if terminals is not None and int(terminals) != NOMINAL['terminals']:
+        s = users_scene(scene, int(terminals), keep_total_load=False)
+    elif users is not None and int(users) != NOMINAL['users']:
+        s = users_scene(scene, int(users))
+    else:
+        s = copy.deepcopy(scene)
     base = s['base_scene']
     if u2u_mhz is not None and float(u2u_mhz) != NOMINAL['u2u_mhz']:
         base['resources']['u2u_bandwidth_hz'] = float(u2u_mhz)*1e6
@@ -342,26 +366,29 @@ def design(smoke=False):
         return dict(budget=dict(BUDGET), upper_candidates=UPPER_CANDIDATES, lower_candidates=LOWER_CANDIDATES,
                     dev=DEV_SCENARIOS, test=TEST_SCENARIOS, sweep_scenarios=SWEEP_SCENARIOS,
                     sweeps={k: tuple(v) for k, v in SWEEPS.items()}, saturated={k: tuple(v) for k, v in SATURATED.items()},
-                    retrain_sweeps={k: tuple(v) for k, v in RETRAIN_SWEEPS.items()}, seeds=SEEDS)
+                    retrain_sweeps={k: tuple(v) for k, v in RETRAIN_SWEEPS.items()},
+                    zeroshot_sweeps={k: tuple(v) for k, v in ZEROSHOT_SWEEPS.items()}, seeds=SEEDS)
     return dict(budget=dict(M1=4, M2=10, M3=3, HoverSAC=3, PPO=10), upper_candidates=(5, 10),
                 lower_candidates=(0, 2, 3), dev=(1, 2), test=(21, 22), sweep_scenarios=(21,),
                 sweeps=dict(cpu_ghz=(10.0, 12.0), load=(0.8, 1.0), u2u_mhz=(2.0, 3.0)),
                 saturated=dict(cpu_ghz=(), load=(), u2u_mhz=()),
                 retrain_sweeps=dict(cpu_ghz=(9.0, 10.0), load=(0.8, 1.0), users=(7, 13), u2u_mhz=(1.5, 3.0)),
+                zeroshot_sweeps=dict(cpu_ghz=(9.0, 10.0), load=(0.8, 1.0), terminals=(7, 13), u2u_mhz=(1.5, 3.0)),
                 seeds=(4101,))
 
 
 def point_value(param, value):
-    """Canonical value of a sweep point (users = whole terminals per region)."""
-    if param == 'users':
+    """Canonical value of a sweep point (users, terminals = whole terminals per region)."""
+    if param in INTEGER_PARAMS:
         if float(value) != int(float(value)):
-            raise ValueError(f'users must be a whole number of terminals per region, got {value}')
+            raise ValueError(f'{param} must be a whole number of terminals per region, got {value}')
         return int(float(value))
     return float(value)
 
 
 # ---------------------------------------------------------------------------
-# Number of terminals per region (design v3 users sweep)
+# Number of terminals per region (users: design v3 / first v4 design, nominal total
+# load; terminals: design v4, nominal load per terminal)
 # ---------------------------------------------------------------------------
 TYPES = ('sensor', 'controller', 'vision')
 
@@ -406,15 +433,35 @@ def expected_profile_cycles(task_types, counts):
     return total
 
 
-def users_scene(scene, per_region):
+def terminals_demand(per_region):
+    """Mean computation demand (Gcycles/s, all three regions) with `per_region`
+    terminals per region at the nominal load per terminal (users_scene with
+    keep_total_load=False).  The activity factor is common to every profile, so
+    the nominal demand scales by the ratio of the expected profile cycles; the
+    simulator's own workload_summary gives the same value (tests/test_users.py)."""
+    scene = load_base_scene()
+    task_types = scene['base_scene']['task_types']
+    new = old = 0.
+    for profile in scene['business_profiles']['catalog']:
+        counts = profile['device_counts_by_type']
+        new += expected_profile_cycles(task_types, largest_remainder(counts, int(per_region)))*profile['business_multiplier']
+        old += expected_profile_cycles(task_types, counts)*profile['business_multiplier']
+    return MEAN_DEMAND_GCYCLES*new/old
+
+
+def users_scene(scene, per_region, keep_total_load=True):
     """Scene with `per_region` terminals in each of the three regions.
 
     Per business profile: type counts = nominal counts scaled to per_region
     (largest remainder); cluster members = round(9 per_region / 13), with type
     quotas scaled from the nominal 3/3/3; every slot keeps its type's task
-    parameters; and the business multiplier is rescaled so that the profile's
-    expected computation load equals its nominal value exactly (the sum over the
-    three regions, 24.725 Gcycles/s, is unchanged for every profile permutation).
+    parameters.  keep_total_load=True (users sweep, first design): the business
+    multiplier is rescaled so that the profile's expected computation load equals
+    its nominal value exactly (the sum over the three regions, 24.725 Gcycles/s,
+    is unchanged for every profile permutation).  keep_total_load=False
+    (terminals sweep, design v4): business multipliers unchanged, i.e. every
+    terminal keeps its nominal task load and the total load follows the number
+    of terminals (terminals_demand).
     Terminal sampling (cluster disk, background rejection), mobility, uplink
     bandwidth per terminal (B_G / number of terminals), seeds and RNG binding
     follow the v2.5.0 simulator.  per_region == 13 returns an unchanged copy.
@@ -437,7 +484,8 @@ def users_scene(scene, per_region):
         old_counts = profile['device_counts_by_type']
         counts = largest_remainder(old_counts, k)
         quotas = cluster_quotas(profile['cluster_counts_by_type'], counts, n_cluster)
-        scale = expected_profile_cycles(task_types, old_counts)/expected_profile_cycles(task_types, counts)
+        scale = expected_profile_cycles(task_types, old_counts)/expected_profile_cycles(task_types, counts) \
+            if keep_total_load else 1.
         multiplier = base['region_multipliers'][pid]*scale
         profile['device_counts_by_type'] = counts
         profile['cluster_counts_by_type'] = quotas
@@ -453,5 +501,8 @@ def users_scene(scene, per_region):
     geometry['background_count_per_region'] = k-n_cluster
     business['physical_source_rule'] = f'user_id // {k}'
     business['global_device_counts_by_type'] = [int(x) for x in np.asarray(counts_all).sum(axis=0)]
-    s['status'] = f'{scene.get("status", "")}; v2.5.0 users sweep: {k} terminals per region, nominal load'
+    s['status'] = (f'{scene.get("status", "")}; v2.5.0 users sweep: {k} terminals per region, nominal load'
+                   if keep_total_load else
+                   f'{scene.get("status", "")}; v2.5.0 terminals sweep: {k} terminals per region, nominal load per '
+                   'terminal')
     return s

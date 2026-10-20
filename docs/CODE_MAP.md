@@ -46,14 +46,15 @@
 
 | 文件 | 内容 |
 |---|---|
-| `common.py` | 实验设计常量（种子、算法、训练量、扫参点、试点）、随机数派生、场景缩放（CPU、负载、U2U、终端数）、汇总（不需要 torch） |
+| `common.py` | 实验设计常量（种子、算法、训练量、扫参点、试点）、随机数派生、场景缩放（CPU、负载、U2U、终端数：`users` 总负载固定 / `terminals` 每终端负载固定）、汇总（不需要 torch） |
 | `learn.py` | M1 / M2 / M3 / HoverSAC / PPO 基线的训练与权重读写 |
 | `evaluate.py` | 900 s 闭环评估、dev 选档、测试、固定策略扫参、突发实验、轨迹记录 |
 | `report.py`、`plots.py` | 表格、配对检验、图 |
 | `pipeline.py` | 带依赖的多进程任务调度（可续跑），主实验与扫参的任务图 |
 | `retrain.py` | 扫参点目录的建立、完成判断、记录导出 |
 | `checks.py` | 耗时估计（`timing`）、试点检查（`pilot-check`）、进度（`progress`） |
-| `feasibility.py` | 两个运行阶段各一条命令：`feasibility`（检查、扫参冒烟、两个试点，`FEASIBILITY.md`）与 `sweep`（全部点，`SWEEP.md`） |
+| `feasibility.py` | 两个运行阶段各一条命令：`feasibility`（检查、扫参冒烟、两个试点，`FEASIBILITY.md`）、`sweep`（全部点，`SWEEP.md`）与零样本扫参 `zeroshot`（`ZEROSHOT.md`） |
+| `consistency.py` | 零样本扫参的逐位一致性检查（`zeroshot-check`）：标称点对主实验记录，新代码重算已有点对原记录 |
 | `publish.py` | 把状态页、日志末尾和汇总表推送到 GitHub 分支 `paper2-runs` |
 | `perf.py` | 逐位等价的仿真加速 |
 | `burst.py` | 受控突发业务 |

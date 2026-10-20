@@ -93,6 +93,10 @@ class Publisher:
             for d in (b/stage/'smoke').glob('*/_jobs/*.log') if (b/stage/'smoke').exists() else []:
                 if not d.with_suffix('.done').exists():
                     pending.append(d)
+        check = b/'_zeroshot'/'consistency'                      # consistency-check roots (p2/consistency.py)
+        for d in check.glob('**/_jobs/*.log') if check.exists() else []:
+            if not d.with_suffix('.done').exists():
+                pending.append(d)
         pending.sort(key=lambda p: p.stat().st_mtime, reverse=True)
         for log in pending[:MAX_JOB_LOGS]:
             rel = log.relative_to(b).as_posix()

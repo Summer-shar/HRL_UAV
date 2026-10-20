@@ -5,7 +5,8 @@
                           # two pilot points; status in <out-base>\\FEASIBILITY.md (p2/feasibility.py)
   python run.py sweep --main D:\\p2_runs_v2 --out-base D:\\p2_sweeps_v3         # stage 2: every point; SWEEP.md
   python run.py zeroshot --main D:\\p2_runs_v2 --out-base D:\\p2_zeroshot_v4    # design v4: nominal policies
-                          # evaluated unchanged at all 16 points (ZEROSHOT.md); zeroshot-report for the tables
+                          # evaluated unchanged at all 16 points (ZEROSHOT.md); zeroshot-report for the tables,
+                          # zeroshot-check for the bitwise consistency checks (p2/consistency.py)
   python run.py publish --out-base D:\\p2_sweeps_v3      # push the status files to GitHub (p2/publish.py)
   python run.py pipeline [--workers 4] [--seeds 4101,4102,4103] [--smoke]   # main experiment, resumable
   python run.py bench                                                      # CPU vs GPU speed check
@@ -54,7 +55,7 @@ def main(argv=None):
                                         'report', 'plan', 'revise', 'burst', 'retrain', 'retrain-report',
                                         'retrain-export', 'verify', 'timing', 'pilot-check', 'progress',
                                         'feasibility', 'sweep', 'publish', 'zeroshot', 'zeroshot-run',
-                                        'zeroshot-test', 'zeroshot-report'))
+                                        'zeroshot-test', 'zeroshot-report', 'zeroshot-check'))
     p.add_argument('--out', default=None)
     p.add_argument('--from', dest='source', default=None, help='revise: the finished output root to derive from')
     p.add_argument('--recipe', default='v2', help='revise: fine-tuning recipe of the new root')
@@ -88,13 +89,17 @@ def main(argv=None):
     if a.workers is None:
         auto = max(1, min(8, (os.cpu_count() or 2)//int(os.environ.get('P2_THREADS') or 2)))
         a.workers = int(os.environ.get('P2_WORKERS') or
-                        (auto if a.command in ('feasibility', 'sweep', 'zeroshot', 'zeroshot-run') else 4))
-    if a.command in ('zeroshot-run', 'zeroshot-report'):
+                        (auto if a.command in ('feasibility', 'sweep', 'zeroshot', 'zeroshot-run', 'zeroshot-check')
+                         else 4))
+    if a.command in ('zeroshot-run', 'zeroshot-report', 'zeroshot-check'):
         from p2 import pipeline, report, retrain
         if not a.out_base or not a.main:
             p.error(f'{a.command} needs --out-base and --main')
         seeds = a.seeds or C.design(a.smoke)['seeds']
-        points = retrain.parse_points(a.points) if a.points else retrain.all_points(a.smoke)
+        if a.command == 'zeroshot-check':
+            from p2 import consistency
+            return consistency.run(Path(a.out_base), Path(a.main), seeds, a.workers, smoke=a.smoke)
+        points = retrain.parse_points(a.points) if a.points else retrain.zeroshot_points(a.smoke)
         if a.command == 'zeroshot-report':
             print(report.retrain_build(Path(a.main), Path(a.out_base), seeds, points, smoke=a.smoke, kind='zeroshot'))
             return 0

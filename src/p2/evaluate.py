@@ -131,8 +131,8 @@ def evaluate_one(make_policy, scene, split, scenario, out_json, *, smoke=False, 
                load=scene['base_scene']['region_multipliers'][0]/C.load_base_scene()['base_scene']['region_multipliers'][0])
     per_region = scene['base_scene']['num_users']//3
     if per_region != C.NOMINAL['users']:
-        # design-v3 users points: terminals per region; their region multipliers are
-        # rescaled to keep the nominal load, so the 'load' ratio above is not a load
+        # users / terminals points: terminals per region; the 'load' ratio above is not a load there
+        # (users: multipliers rescaled), so it is replaced by mean demand / nominal mean demand
         row.update(users=per_region, load=float(env._expected_workload['total_compute_gcycles_s']/C.MEAN_DEMAND_GCYCLES))
     if burst is not None:
         from . import burst as B

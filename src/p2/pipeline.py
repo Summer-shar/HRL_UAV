@@ -126,7 +126,7 @@ def zeroshot_plan(base, points, seeds, main, smoke=False):
     main run, unchanged).  Longest jobs first: TOO and CA at low U2U bandwidth and NC
     build long backlogs, which makes their 900 s runs slow."""
     jobs = []
-    order = {p: len(C.RETRAIN_ORDER)-i for i, p in enumerate(C.RETRAIN_ORDER)}
+    order = {p: len(C.ZEROSHOT_ORDER)-i for i, p in enumerate(C.ZEROSHOT_ORDER)}
     for param, value in points:
         name = point_name(param, value)
         for seed in seeds:

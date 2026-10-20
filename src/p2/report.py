@@ -1,5 +1,6 @@
 """Tables and paired statistics from the test and sweep records (torch-free)."""
 import csv
+import os
 from pathlib import Path
 
 import numpy as np
@@ -155,37 +156,57 @@ def _point_root(main_root, base, param, value):
     return Path(base)/point_name(param, value)
 
 
-def retrain_table(main_root, base, seeds, param, d, methods=C.METHODS, values=None):
-    """Design-v3 sweep table: every non-nominal value from its own retrained root,
-    the nominal value from the main run; all on the test split (scenarios 21-40)."""
+def retrain_table(main_root, base, seeds, param, d, methods=C.METHODS, values=None, kind='retrain', seed_rows=None):
+    """Sweep table: every non-nominal value from its own point root, the nominal value
+    from the main run; all on the test split (scenarios 21-40).  kind='retrain' (design
+    v3): the learned methods were retrained at the point; kind='zeroshot' (design v4):
+    the main run's policies evaluated unchanged.  Mean, std, min and max over seeds of
+    the scenario means; seed_rows (a list) receives one row per seed."""
     scen = set(d['test'])
+    sweeps = d['retrain_sweeps'] if kind == 'retrain' else d['zeroshot_sweeps']
     table = []
-    for value in (d['retrain_sweeps'][param] if values is None else values):
+    for value in (sweeps[param] if values is None else values):
         root = _point_root(main_root, base, param, value)
         rows = load_rows(root, seeds, methods, 'test', scenarios=scen)
         nominal = root == Path(main_root)
+        v_ = C.point_value(param, value)
         for m in methods:
-            line = dict(param=param, value=C.point_value(param, value), utilization=C.utilization(param, value),
-                        terminals=3*(C.point_value(param, value) if param == 'users' else C.NOMINAL['users']),
-                        method=m, retrained=not nominal, source=str(root))
+            line = dict(param=param, value=v_, utilization=C.utilization(param, value),
+                        terminals=3*(v_ if param in C.INTEGER_PARAMS else C.NOMINAL['users']),
+                        method=m, retrained=(not nominal) if kind == 'retrain' else False,
+                        policy='main run' if nominal else ('retrained at this value' if kind == 'retrain' else
+                                                           'trained at the nominal point, evaluated unchanged'),
+                        source=str(root))
+            per = {}
             for key, _ in METRICS:
                 seeds_ = per_seed(rows, m, key)
                 if seeds_:
                     v = np.asarray(list(seeds_.values()))
                     line[key] = float(v.mean())
                     line[key+'_std_over_seeds'] = float(v.std(ddof=1)) if len(v) > 1 else 0.
+                    line[key+'_min_over_seeds'] = float(v.min())
+                    line[key+'_max_over_seeds'] = float(v.max())
                     line['seeds'] = len(v)
+                    for s, x in seeds_.items():
+                        per.setdefault(s, {})[key] = x
             line['scenarios'] = len({r['scenario'] for r in rows if r['method'] == m})
             table.append(line)
+            if seed_rows is not None:
+                for s in sorted(per):
+                    seed_rows.append(dict(param=param, value=v_, method=m, seed=s,
+                                          scenarios=len({r['scenario'] for r in rows
+                                                         if r['method'] == m and r['seed'] == s}), **per[s]))
     return table
 
 
 def retrain_paired(main_root, base, seeds, param, d, methods=C.METHODS, values=None,
-                   metrics=('truncated_delay_s', 'cost_per_s', 'high_truncated_delay_s', 'energy_w_compute_comm')):
+                   metrics=('truncated_delay_s', 'cost_per_s', 'high_truncated_delay_s', 'energy_w_compute_comm'),
+                   kind='retrain'):
     """Proposed vs every other method at every value of a parameter: the paired
     Wilcoxon test of the main table (seed-mean per test scenario), per metric."""
     out = []
-    for value in (d['retrain_sweeps'][param] if values is None else values):
+    sweeps = d['retrain_sweeps'] if kind == 'retrain' else d['zeroshot_sweeps']
+    for value in (sweeps[param] if values is None else values):
         root = _point_root(main_root, base, param, value)
         rows = load_rows(root, seeds, methods, 'test', scenarios=set(d['test']))
         present = [m for m in methods if any(r['method'] == m for r in rows)]
@@ -230,6 +251,11 @@ def retrain_build(main_root, base, seeds, points, smoke=False, methods=C.METHODS
     res = Path(base)/'results'
     res.mkdir(parents=True, exist_ok=True)
     tag = 'retrained' if kind == 'retrain' else 'zero-shot'
+    order = C.RETRAIN_ORDER if kind == 'retrain' else C.ZEROSHOT_ORDER
+    sweeps = d['retrain_sweeps'] if kind == 'retrain' else d['zeroshot_sweeps']
+    for old in res.glob(f'{kind}_sweep_*.csv'):         # a parameter no longer in the design (users -> terminals)
+        if old.stem[len(f'{kind}_sweep_'):] not in order:
+            os.replace(old, old.with_name('superseded_'+old.name))
     if kind == 'retrain':
         head = ['# Retrained sweep (design v3, docs/PROTOCOL.md)', '',
                 'Every learned method trained from scratch at each non-nominal value with the main pipeline '
@@ -241,7 +267,11 @@ def retrain_build(main_root, base, seeds, points, smoke=False, methods=C.METHODS
                 'evaluated unchanged at each value; ']
     lines = head[:-1] + [head[-1] + f'evaluated on the test scenarios {", ".join(map(str, d["test"]))}. '
              f'Nominal value of each parameter: the main run {main_root}. Values: mean over seeds of scenario '
-             'means (std over seeds in the CSV files). users = terminals per region, nominal computation load.', '']
+             'means (std, min and max over seeds in the CSV files; every seed in '
+             f'{kind}_per_seed.csv). ' +
+             ('users = terminals per region, nominal total computation load.' if kind == 'retrain' else
+              'terminals = terminals per region, nominal load per terminal (the total load grows with the number '
+              'of terminals; demand/capacity column).'), '']
     status = {}
     for param, value in points:
         root = Path(base)/point_name(param, value)
@@ -249,17 +279,17 @@ def retrain_build(main_root, base, seeds, points, smoke=False, methods=C.METHODS
             (C.seed_dir(root, s)/'test'/m/f'{sc:02d}.json').exists()
             for s in seeds for m in methods for sc in d['test'])
     lines += ['| point | finished |', '|---|---|'] + [f'| {k} | {"yes" if v else "no"} |' for k, v in status.items()]
-    tables, pairs = {}, []
-    for param in C.RETRAIN_ORDER:
-        values = [v for v in d['retrain_sweeps'][param]
+    tables, pairs, seed_rows = {}, [], []
+    for param in order:
+        values = [v for v in sweeps[param]
                   if C.point_value(param, v) == C.point_value(param, C.NOMINAL[param]) or status.get(point_name(param, v))]
         if len(values) < 2:
             continue
-        complete = len(values) == len(d['retrain_sweeps'][param])
-        t = retrain_table(main_root, base, seeds, param, d, methods, values)
+        complete = len(values) == len(sweeps[param])
+        t = retrain_table(main_root, base, seeds, param, d, methods, values, kind=kind, seed_rows=seed_rows)
         tables[param] = t
         write_csv(res/f'{kind}_sweep_{param}.csv', t)
-        pr = retrain_paired(main_root, base, seeds, param, d, methods, values)
+        pr = retrain_paired(main_root, base, seeds, param, d, methods, values, kind=kind)
         pairs += pr
         lines += ['', f'## {param} ({tag}{"" if complete else ", finished points only"}; '
                   'cells: delay / compute+comm power / joint cost)', '',
@@ -289,8 +319,21 @@ def retrain_build(main_root, base, seeds, points, smoke=False, methods=C.METHODS
                              f'p={fmt(dl["wilcoxon_p"], 2)}/{fmt(co["wilcoxon_p"], 2)}, '
                              f'{dl["seeds_proposed_better"]}/{dl["seeds"]}')
             lines.append(f'| {C.point_value(param, value):g} | '+' | '.join(cells)+' |')
+        shown = [m for m in ('Proposed', 'TFOO') if m in methods]
+        lines += ['', f'Weighted delay per training seed ({param}; seeds {", ".join(map(str, seeds))})', '',
+                  '| '+param+' | '+' | '.join(LABELS.get(m, m) for m in shown)+' |', '|---:|'+'---:|'*len(shown)]
+        for value in values:
+            cells = []
+            for m in shown:
+                per = [x for x in seed_rows if x['param'] == param and x['value'] == C.point_value(param, value)
+                       and x['method'] == m and x.get('truncated_delay_s') is not None]
+                cells.append(' / '.join(f'{fmt(x["truncated_delay_s"])}' for x in sorted(per, key=lambda x: x['seed']))
+                             or '—')
+            lines.append(f'| {C.point_value(param, value):g} | '+' | '.join(cells)+' |')
     if pairs:
         write_csv(res/f'{kind}_paired.csv', pairs)
+    if seed_rows:
+        write_csv(res/f'{kind}_per_seed.csv', seed_rows)
     conv = []
     for name, ok in status.items():
         if ok:
