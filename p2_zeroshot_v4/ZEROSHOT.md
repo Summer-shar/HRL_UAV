@@ -1,84 +1,19 @@
 # 零样本泛化扫参（方案 v4）：状态
 
-**零样本扫参完成**
+**运行中：管道冒烟（terminals=7、u2u_mhz=1.5，1 个种子）**
 
-最后更新：2026-10-20 07:39:45（运行中每 10 分钟更新一次；如果这个时间停在很久以前，说明程序已经退出）
+最后更新：2026-10-20 13:07:41（运行中每 10 分钟更新一次；如果这个时间停在很久以前，说明程序已经退出）
 
 - 主实验目录：`D:\p2_runs_v2`
 - 输出目录：`D:\p2_zeroshot_v4`
-- 代码指纹：`4cdb31407064`；P2_DEVICE=cpu；P2_THREADS=未设置（2）；进程数 8
-- GitHub 推送：成功（分支 paper2-runs，文件夹 p2_zeroshot_v4/）
+- 代码指纹：`f3aab1118cdf`；P2_DEVICE=cpu；P2_THREADS=未设置（2）；进程数 8
+- GitHub 推送：尚未推送（分支 paper2-runs，文件夹 p2_zeroshot_v4/）
 
 | 步骤 | 内容 | 状态 | 开始 | 结束 | 用时 |
 |---|---|---|---|---|---|
-| 1 | 管道冒烟（users=7、u2u_mhz=1.5，1 个种子） | 通过 | 2026-10-20 02:38:24 | 2026-10-20 02:38:47 | 0 分钟 |
-| 2 | 全部 16 个点的测试 | 通过 | 2026-10-20 02:38:52 | 2026-10-20 07:39:33 | 5.0 小时 |
-| 3 | 汇总表与配对检验 | 通过 | 2026-10-20 07:39:38 | 2026-10-20 07:39:45 | 0 分钟 |
+| 1 | 管道冒烟（terminals=7、u2u_mhz=1.5，1 个种子） | 运行中 | 2026-10-20 13:07:41 |  |  |
+| 2 | 逐位一致性检查（标称点对主实验；新代码重算已有点） | 未开始 |  |  |  |
+| 3 | 全部 16 个点的测试 | 未开始 |  |  |  |
+| 4 | 汇总表与配对检验 | 未开始 |  |  |  |
 
-## 结论：全部 16 个点完成
-
-汇总表：`D:\p2_zeroshot_v4\results\zeroshot_summary.md`，各参数表 `results/zeroshot_sweep_<参数>.csv`，配对检验 `results/zeroshot_paired.csv`。
-
-```
-point               records
-cpu_ghz=9        360/360   
-u2u_mhz=1.5      360/360   
-cpu_ghz=11       360/360   
-cpu_ghz=12       360/360   
-cpu_ghz=14       360/360   
-load=0.6         360/360   
-load=0.8         360/360   
-load=0.9         360/360   
-load=1.1         360/360   
-users=7          360/360   
-users=10         360/360   
-users=16         360/360   
-users=19         360/360   
-u2u_mhz=2        360/360   
-u2u_mhz=2.5      360/360   
-u2u_mhz=4        360/360   
-
-records: 5760/5760
-```
-
-## 管道冒烟（users=7、u2u_mhz=1.5，1 个种子）：输出摘录
-
-```
-START u2u_mhz=1.5/s4101_zeroshot_TFOO
-START u2u_mhz=1.5/s4101_zeroshot_HoverSAC
-DONE  u2u_mhz=1.5/s4101_zeroshot_TOO (0.2 min) [7/12]
-DONE  users=7/s4101_zeroshot_TFOO (0.2 min) [8/12]
-DONE  users=7/s4101_zeroshot_CA (0.1 min) [9/12]
-DONE  u2u_mhz=1.5/s4101_zeroshot_Proposed (0.1 min) [10/12]
-DONE  u2u_mhz=1.5/s4101_zeroshot_TFOO (0.1 min) [11/12]
-DONE  u2u_mhz=1.5/s4101_zeroshot_HoverSAC (0.1 min) [12/12]
-All jobs finished.
-
-=== 2026-10-20 02:38:47  D:\HRL_UAV_V2\.venv\Scripts\python.exe D:\p2_code\run.py zeroshot-report --out-base=D:\p2_zeroshot_v4\_zeroshot\smoke --main=D:\p2_runs_v2 --points=users=7,u2u_mhz=1.5 --smoke --seeds=4101
-D:\p2_zeroshot_v4\_zeroshot\smoke\results
-```
-
-## 全部 16 个点的测试：输出摘录
-
-```
-START u2u_mhz=4/s4103_zeroshot_HoverSAC
-DONE  u2u_mhz=4/s4102_zeroshot_TOO (4.3 min) [280/288]
-START u2u_mhz=4/s4103_zeroshot_CA
-DONE  u2u_mhz=4/s4102_zeroshot_CA (3.7 min) [281/288]
-DONE  u2u_mhz=4/s4102_zeroshot_HoverSAC (4.9 min) [282/288]
-DONE  u2u_mhz=4/s4103_zeroshot_Proposed (4.9 min) [283/288]
-DONE  u2u_mhz=4/s4102_zeroshot_TFOO (5.9 min) [284/288]
-DONE  u2u_mhz=4/s4103_zeroshot_TOO (3.8 min) [285/288]
-DONE  u2u_mhz=4/s4103_zeroshot_HoverSAC (4.1 min) [286/288]
-DONE  u2u_mhz=4/s4103_zeroshot_CA (2.9 min) [287/288]
-DONE  u2u_mhz=4/s4103_zeroshot_TFOO (5.0 min) [288/288]
-All jobs finished.
-```
-
-## 汇总表与配对检验：输出摘录
-
-```
-
-=== 2026-10-20 07:39:43  D:\HRL_UAV_V2\.venv\Scripts\python.exe D:\p2_code\run.py zeroshot-report --out-base=D:\p2_zeroshot_v4 --main=D:\p2_runs_v2 --seeds=4101,4102,4103
-D:\p2_zeroshot_v4\results
-```
+输出目录所在磁盘剩余 388 GB。
