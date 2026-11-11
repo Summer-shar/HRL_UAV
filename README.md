@@ -13,4 +13,6 @@
 
   不含权重、轨迹和完整日志。
 
+- `p2_v26/`：v2.6（分支 `paper2-v26`，`python run_v26.py go`）自动推送的状态：`V26.md` 状态页、`DECISION.md`、`results/` 汇总表与合并后的评估记录。
+
 推送由代码包的 `src/p2/publish.py` 完成，使用用户电脑上已有的 GitHub 登录。推送失败不影响实验。

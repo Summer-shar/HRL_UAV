@@ -1,32 +1,54 @@
-# 下一步说明（第 4 号，2026-10-20 13:10）
+# 下一步说明（第 5 号，2026-11-11 23:45）
 
-**给用户电脑上的 Claude。** 读完照做，做完向用户用一两句话汇报，然后结束，不要等实验跑完。
+**给用户电脑上的 Claude。** 读完照做，做完向用户用两三句话汇报，然后结束。只等第 1 步（冒烟，10–20 分钟）结束，不要等整个实验跑完。
 
 ## 规则
 
 - 不修改任何代码文件；不安装或升级任何包；
-- `D:\p2_runs_v2`、`D:\p2_runs`、`D:\p2_sweeps_v3` 只读；不删除任何文件（`D:\p2_zeroshot_v4` 里的已有结果也不删）；
-- 新窗口启动后不要等待它结束。
+- `D:\p2_runs_v2`、`D:\p2_runs`、`D:\p2_sweeps_v3`、`D:\p2_zeroshot_v4` 只读，不删除、不改动其中任何文件；
+- **不动现有代码目录 `D:\p2_code`**（不 pull、不切换分支）。新版本放在新目录 `D:\p2_code_v26`；
+- 新窗口启动后只等冒烟一步，不等整个实验结束。
 
 ## 背景
 
-- 第一次零样本扫参（请求 v4-1）已于 10 月 20 日早上完成，16 个点全部完成。
-- 之后修订了用户数扫参的设计：改为 `terminals`（每区终端数 7、9、11、15，每个终端的业务量不变，终端越多总负载越大）。同时加入逐位一致性检查（标称点对主实验，新代码重算 4 个已有点对原记录），汇总表增加每个种子的数值。代码 commit `4764624`，运行请求 `RUN_REQUEST.json` 的编号为 `v4-2`（commit `6d86acf`）。
-- 如果值守程序（`tools/watch.py`）还开着，它会在 3 分钟内自动拉取代码并运行 `run.py zeroshot`：管道冒烟 → 一致性检查（约 30 分钟）→ 4 个新点（约 1.5 小时；已完成的 12 个点自动跳过）→ 汇总。状态推送到 GitHub 分支 `paper2-runs` 的 `p2_zeroshot_v4/ZEROSHOT.md`。
+- 新版本 v2.6 在 GitHub 分支 `paper2-v26`（commit `a39827c` 或之后）。它只新增文件（`run_v26.py`、`src/v26/`、`tests/test_v26.py`、`docs/V26.md`），原有代码逐字节不变。
+- 内容：把主实验第三阶段（SAC 微调）从第 100 个窗口的快照继续训练到 300 个窗口，分两个版本（ext：照原样继续；burst：训练窗口中加入区域突发），在验证场景上选择，再对选中的版本做测试、突发实验和零样本扫参；另外评估“无第三阶段”的消融。设计与选择规则见该分支的 `docs/V26.md`。
+- 主实验目录只读，所有新文件写到 `D:\p2_v26`。状态自动推送到本分支的 `p2_v26/`（状态页 `p2_v26/V26.md`）。
+- 预计总耗时约 5 小时（估计值）。
 
 ## 步骤
 
-1. **先看是否已经在运行**：查看 `D:\p2_watch\state.json`。
-   - 如果其中 `started` 里已有 `v4-2`，或者有 python 进程正在运行 `run.py zeroshot`：说明已经自动开始了，**什么都不要做**，直接跳到第 6 步汇报。
-   - 如果有 python 进程正在运行 `tools\watch.py`（值守程序开着），但 `state.json` 里还没有 `v4-2`：等 3–5 分钟再看一次 `state.json`；出现 `v4-2` 后跳到第 6 步。
-2. **只有在值守程序没有运行时才继续**：确认没有正在运行 `run.py` 或 `tools\watch.py` 的 python 进程。
-3. **更新代码**：
-   - `git -C D:\p2_code pull --ff-only`
-   - 检查：`git -C D:\p2_code merge-base --is-ancestor 6d86acf HEAD` 的退出码应为 0。
-4. **确认防睡眠**：`powercfg /change standby-timeout-ac 0`。
-5. **用新窗口启动值守程序**（窗口保持打开，不要关）：
+1. **确认没有别的实验在跑**：查看是否有 python 进程正在运行 `run.py` 或 `run_v26.py`。
+   - 有 `run_v26.py go` 在跑：说明已经开始，什么都不要做，跳到第 8 步汇报。
+   - 有 `run.py` 的训练或评估在跑：不要启动，向用户汇报后结束。
+   - 只有 `tools\watch.py`（值守程序，空闲）在跑：不用管它，继续。
+2. **检查主实验的快照是否齐全**。下面 6 个文件都应存在，并记下它们的大小之和 S：
+   `D:\p2_runs_v2\seed_4101\train\M3\state.pt`、`...\seed_4101\train\HoverSAC\state.pt`，以及种子 4102、4103 的同名文件。
+   - 任何一个不存在：不要启动，把缺少的文件名告诉用户后结束。
+3. **检查磁盘空间**：D 盘可用空间应大于 2 × S + 10 GB（快照会各复制两份）。不够就告诉用户后结束。
+4. **取得新版本代码**（如果 `D:\p2_code_v26` 已存在，改为 `git -C D:\p2_code_v26 pull --ff-only`）：
    ```powershell
-   Start-Process powershell -ArgumentList '-NoExit','-Command',"Set-Location D:\p2_code; & 'D:\HRL_UAV_V2\.venv\Scripts\python.exe' tools\watch.py --main D:\p2_runs_v2 --zeroshot-out D:\p2_zeroshot_v4 --sweep-out D:\p2_sweeps_v3"
+   $url = git -C D:\p2_code remote get-url origin
+   git clone --branch paper2-v26 --single-branch $url D:\p2_code_v26
+   git -C D:\p2_code_v26 merge-base --is-ancestor a39827c HEAD     # 退出码应为 0
    ```
-   约 1 分钟后，新窗口里应出现 `watching origin/paper2-release:RUN_REQUEST.json`，随后出现 `started zeroshot for request v4-2`。
-6. **汇报并结束**：用一两句话告诉用户“v4-2 已开始（或：值守程序已启动，v4-2 已开始）”，然后结束。
+5. **运行不需要 torch 的自检**（1–2 分钟），最后一行应为 `OK`：
+   ```powershell
+   Set-Location D:\p2_code_v26
+   & 'D:\HRL_UAV_V2\.venv\Scripts\python.exe' tests\test_v26.py
+   ```
+   - 最后一行不是 `OK`：不要启动，把最后 20 行输出告诉用户后结束。
+6. **确认防睡眠**：`powercfg /change standby-timeout-ac 0`。
+7. **用新窗口启动**（窗口保持打开，不要关）：
+   ```powershell
+   Start-Process powershell -ArgumentList '-NoExit','-Command',"Set-Location D:\p2_code_v26; & 'D:\HRL_UAV_V2\.venv\Scripts\python.exe' run_v26.py go --main D:\p2_runs_v2 --out-base D:\p2_v26 --zeroshot-main D:\p2_zeroshot_v4"
+   ```
+   然后等第 1 步“管道冒烟”结束（通常 10–20 分钟）：每隔几分钟查看一次 `D:\p2_v26\V26.md`，最多等 40 分钟。
+   - 第 1 步显示“通过”、后面的步骤开始运行：正常，进入第 8 步。
+   - 状态页写着“已停止”：把状态页里“停止原因”一节和 `D:\p2_v26\_v26\smoke.log` 的最后 40 行告诉用户，然后结束（不要自己改代码）。
+   - 40 分钟后第 1 步仍是“运行中”：照实告诉用户，然后结束。
+8. **汇报并结束**：告诉用户“v2.6 已启动，状态页在 `D:\p2_v26\V26.md`，也会推送到 GitHub 分支 paper2-runs 的 `p2_v26/V26.md`”，然后结束。
+
+## 中断后怎么办
+
+电脑重启或窗口被关掉后，原样再执行第 7 步的命令即可：已完成的任务会跳过，训练从最近的快照（每 10 个窗口一次）继续。
