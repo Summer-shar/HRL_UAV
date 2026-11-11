@@ -20,6 +20,7 @@ import numpy as np
 
 from p2 import common as C
 from . import core as V
+from . import nosupport as NS
 
 ORDER = ('NC', 'CA', 'HoverSAC', 'TOO', 'TFOO', 'Proposed')
 KEYS = (('D', lambda r: V._mean_delay(r)), ('DH', lambda r: r['high_truncated_delay_s']),
@@ -158,6 +159,20 @@ def build(base, main, seeds, smoke=False, zeroshot_main=None):
         for scenario, r in _records(base/'ablation'/'NoStage3'/f'seed_{seed}').items():
             ablation[(seed, scenario)] = r
     C.write_json(out/'v26_records_ablation.json', list(ablation.values()))
+    nosup = {}
+    for seed in seeds:
+        for scenario, r in _records(NS.test_dir(base, seed)).items():
+            nosup[(seed, scenario)] = r
+    C.write_json(out/'v26_records_nosupport.json', list(nosup.values()))
+    ns_rows = []
+    for seed in seeds:
+        path = C.seed_dir(NS.root(base), seed)/'selection.json'
+        if path.exists():
+            r = C.read_json(path)
+            ns_rows.append(f'| {seed} | {r["selected"]} | ' + ' '.join(f'{c}:{v:.3f}' for c, v in r['scores'].items()) + ' |')
+    if ns_rows:
+        lines += ['', '## 无支撑集选择消融（NoSupport）的验证集选择', '', '| 种子 | 选中的窗口 | 各候选验证代价 |',
+                  '|---|---|---|'] + ns_rows
 
     # ---- main table ----------------------------------------------------------------------
     stats, new_test = {}, []
@@ -167,6 +182,8 @@ def build(base, main, seeds, smoke=False, zeroshot_main=None):
             stats[method if method != 'Proposed' else 'Proposed（现有）'] = _stats(rec)
     if ablation:
         stats['NoStage3（无第三阶段）'] = _stats(ablation)
+    if nosup:
+        stats['NoSupport（无支撑集选择）'] = _stats(nosup)
     if adopted != 'main':
         for method, name in (('HoverSAC', 'HoverSAC（v2.6）'), ('Proposed', 'v2.6')):
             rec, new = merged(base, main, adopted, seeds, method, 'test')
@@ -177,7 +194,7 @@ def build(base, main, seeds, smoke=False, zeroshot_main=None):
     if stats:
         _table(lines, f'标称参数，测试场景（{reference} 为比较基准）', stats, reference)
         lines += ['', '各种子的 MH-TPCO（D / DH / C）：', '']
-        for name in ('Proposed（现有）', 'NoStage3（无第三阶段）', 'v2.6'):
+        for name in ('Proposed（现有）', 'NoStage3（无第三阶段）', 'NoSupport（无支撑集选择）', 'v2.6'):
             if name in stats:
                 lines.append(f'- {name}：' + '；'.join(f'{seed}: {v["D"]:.4f} / {v["DH"]:.4f} / {v["C"]:.3f}'
                                                     for seed, v in stats[name]['per_seed'].items()))

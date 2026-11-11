@@ -5,11 +5,11 @@
 Steps (status page <out-base>/V26.md; re-running the same command resumes):
   1 smoke     tiny main run + tiny v2.6 run in <out-base>/_smoke (plumbing with real networks)
   2 prepare   copy the window-100 snapshots and dev records from the main root (read only)
-  3 phase1    continue M3 / HoverSAC to 300 windows (variants ext and burst), dev evaluation of
-              the new candidates, selection, burst experiment on dev, no-stage-3 ablation
-  4 decide    choose ext / burst / main from dev data only (DECISION.md)
-  5 phase2    test, burst experiment and zero-shot sweep of the adopted variant
-  6 report    results/v26_summary.md and the consolidated records
+  3 run       one job graph: continue M3 / HoverSAC to 300 windows (variants ext and burst), dev
+              evaluation, selection, burst experiment on dev; the decision job (dev data only,
+              DECISION.md); test / burst / zero-shot of the adopted variant; the no-stage-3
+              ablation; the NoSupport ablation (src/v26/nosupport.py)
+  4 report    results/v26_summary.md and the consolidated records
 """
 import hashlib
 import os
@@ -23,9 +23,9 @@ from p2.publish import Publisher, _tail_text  # noqa: F401  (unchanged publisher
 from . import core as V
 from . import report as R
 
-STEPS = dict(smoke='管道冒烟（极小训练量，1 个种子）', prepare='从主实验目录复制第 100 个窗口的快照（只读）',
-             phase1='继续微调到 300 个窗口（ext、burst 两个版本）+ 验证集评估与选择 + 无第三阶段消融',
-             decide='按验证集数据选择版本', phase2='所选版本的测试、突发实验与零样本扫参', report='汇总')
+STEPS = dict(smoke='管道冒烟（极小训练量，1 个种子，含两个消融）', prepare='从主实验目录复制第 100 个窗口的快照（只读）',
+             run='全部任务：继续微调（ext、burst）、验证集选择、选择版本、所选版本的测试/突发/零样本扫参、'
+                 '无第三阶段消融、无支撑集选择消融', report='汇总')
 STATUS = dict(pending='未开始', running='运行中', passed='通过', failed='失败', skipped='已通过（沿用上次）')
 
 
@@ -139,7 +139,8 @@ class Go:
         def poll(progress):
             self.progress = progress
             self.save(headline, 'progress', force=False)
-        failed = V.run_jobs(jobs, self.base, self.main, workers=self.workers, smoke=self.smoke, poll=poll)
+        failed = V.run_jobs(jobs, self.base, self.main, workers=self.workers, smoke=self.smoke, poll=poll,
+                            seeds=self.seeds)
         return ('failed or skipped jobs: '+', '.join(failed)) if failed else None
 
     # ---- steps ----------------------------------------------------------------------------
@@ -168,24 +169,17 @@ class Go:
                 return 1
         else:
             self.state['steps']['smoke'] = dict(status='skipped')
-        if not self.step('prepare', lambda: V.prepare(self.main, self.base, self.seeds, self.smoke) and None):
+        from . import nosupport
+        if not self.step('prepare', lambda: (V.prepare(self.main, self.base, self.seeds, self.smoke),
+                                             nosupport.prepare(self.main, self.base, self.seeds, self.smoke)) and None):
             return 1
-        if not self.step('phase1', lambda: self.jobs(V.plan_phase1(self.seeds, self.smoke), '运行中：继续微调与验证集评估'),
+        if not self.step('run', lambda: self.jobs(V.plan_all(self.seeds, self.smoke), '运行中：全部任务'),
                          skippable=False):
-            return 1
-        force = 'ext' if self.smoke else None                    # smoke: always exercise the evaluation path
-        if not self.step('decide', lambda: V.decide(self.base, self.seeds, self.smoke, force=force) and None,
-                         skippable=False):
-            return 1
-        decision = C.read_json(self.base/'results'/'v26_decision.json')
-        if not self.step('phase2', lambda: self.jobs(V.plan_phase2(self.base, decision, self.seeds, self.smoke,
-                                                                 force=self.smoke),
-                                                     f'运行中：{decision["adopted"]} 的测试与扫参'), skippable=False):
             return 1
         if not self.step('report', lambda: R.build(self.base, self.main, self.seeds, self.smoke,
                                                    self.zeroshot_main) and None, skippable=False):
             return 1
-        adopted = decision['adopted']
+        adopted = C.read_json(self.base/'results'/'v26_decision.json')['adopted']
         self.progress = None
         self.note = ('## 完成\n\n' + ('按验证集数据，没有比现有模型更好的候选，现有结果保持不变。' if adopted == 'main'
                                      else f'采用版本 `{adopted}`。') +

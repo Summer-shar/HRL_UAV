@@ -16,7 +16,9 @@ Single steps (used by `go`; --main and --out-base always required):
   python run_v26.py test | burst --variant ext|burst --method Proposed|HoverSAC --seed 4101
   python run_v26.py zeroshot --variant ext|burst --method Proposed|HoverSAC --seed 4101 --point cpu_ghz=9
   python run_v26.py report [--zeroshot-main D:\\p2_zeroshot_v4]
-  python run_v26.py plan                                   # list the jobs of phase 1
+  python run_v26.py ns-train --stage M1|M3 --seed 4101   # NoSupport ablation (src/v26/nosupport.py)
+  python run_v26.py ns-dev --candidate 25 --seed 4101 | ns-select --seed 4101 | ns-test --seed 4101
+  python run_v26.py plan                                   # list all jobs after prepare
 
 Design and decision rule: docs/V26.md.  The main output root is only read.
 """
@@ -37,12 +39,13 @@ def seeds_arg(text):
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('command', choices=('go', 'prepare', 'train', 'dev', 'select', 'burstdev', 'ablation', 'decide',
-                                        'test', 'burst', 'zeroshot', 'report', 'plan'))
+                                        'test', 'burst', 'zeroshot', 'report', 'plan',
+                                        'ns-train', 'ns-dev', 'ns-select', 'ns-test'))
     p.add_argument('--main', required=True, help='finished main output root (read only)')
     p.add_argument('--out-base', required=True, help='new folder for everything v2.6 writes')
     p.add_argument('--zeroshot-main', default=None, help='report: the finished zero-shot sweep of the main run')
     p.add_argument('--variant', choices=('main',)+V.VARIANTS)
-    p.add_argument('--stage', choices=tuple(V.LABELS.values()))
+    p.add_argument('--stage', choices=tuple(V.LABELS.values())+('M1',))
     p.add_argument('--label', choices=tuple(V.LABELS))
     p.add_argument('--method', choices=tuple(V.METHOD_LABEL))
     p.add_argument('--candidate', type=int)
@@ -72,7 +75,7 @@ def main(argv=None):
         return Go(main_root, base, a.workers, seeds, smoke=a.smoke, publish=not a.no_publish,
                   zeroshot_main=a.zeroshot_main).run()
     if a.command == 'plan':
-        for j in V.plan_phase1(seeds, a.smoke):
+        for j in V.plan_all(seeds, a.smoke):
             print(j.priority, j.id, ' '.join(j.args), 'deps=', ','.join(j.deps))
         return 0
     if a.command == 'prepare':
@@ -93,7 +96,20 @@ def main(argv=None):
         need('seed')
         V.ablation_job(base, main_root, a.seed, a.smoke)
     elif a.command == 'decide':
-        print(V.decision_text(V.decide(base, seeds, a.smoke)))
+        print(V.decision_text(V.decide(base, seeds, a.smoke, force='ext' if a.smoke else None)))
+    elif a.command.startswith('ns-'):
+        from v26 import nosupport as NS
+        need('seed')
+        if a.command == 'ns-train':
+            need('stage')
+            NS.train_job(base, main_root, a.stage, a.seed, a.smoke)
+        elif a.command == 'ns-dev':
+            need('candidate')
+            print(NS.dev_job(base, main_root, a.seed, a.candidate, a.smoke))
+        elif a.command == 'ns-select':
+            print(NS.select_job(base, a.seed, a.smoke))
+        else:
+            NS.test_job(base, main_root, a.seed, a.smoke)
     elif a.command in ('test', 'burst'):
         need('variant', 'method', 'seed')
         (V.test_job if a.command == 'test' else V.burst_job)(base, main_root, a.variant, a.seed, a.method, a.smoke)

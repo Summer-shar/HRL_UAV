@@ -352,7 +352,25 @@ def zeroshot_dir(base, variant, point, seed, method):
     return Path(base)/'zeroshot'/variant/point/f'seed_{seed}'/method
 
 
+def should_run(base, variant, seed, method, smoke=False):
+    """Evaluation jobs of phase 2 run only for the adopted variant and only where its selected
+    model differs from the main run (smoke runs: always, to exercise the path)."""
+    decision = C.read_json(Path(base)/'results'/'v26_decision.json')
+    if decision['adopted'] != variant:
+        return False
+    return bool(smoke or changed(base, variant, seed, method))
+
+
+def _skip(base, variant, seed, method, smoke):
+    if should_run(base, variant, seed, method, smoke):
+        return False
+    print(f'not needed: variant {variant} not adopted or seed {seed} {method} unchanged', flush=True)
+    return True
+
+
 def test_job(base, main, variant, seed, method, smoke=False):
+    if _skip(base, variant, seed, method, smoke):
+        return
     d, scene = _ORIGINAL_DESIGN(smoke), C.load_base_scene()
     folder = test_dir(base, variant, seed, method)
     _evaluate(base, main, variant, seed, method, smoke,
@@ -361,6 +379,8 @@ def test_job(base, main, variant, seed, method, smoke=False):
 
 
 def burst_job(base, main, variant, seed, method, smoke=False):
+    if _skip(base, variant, seed, method, smoke):
+        return
     from p2 import burst as B
     d, scene = _ORIGINAL_DESIGN(smoke), C.load_base_scene()
     folder = burst_dir(base, variant, seed, method)
@@ -375,6 +395,8 @@ def zeroshot_points(smoke=False):
 
 
 def zeroshot_job(base, main, variant, seed, method, point, smoke=False):
+    if _skip(base, variant, seed, method, smoke):
+        return
     d = _ORIGINAL_DESIGN(smoke)
     name, param, value = next(x for x in zeroshot_points(smoke) if x[0] == point)
     scene = C.scaled_scene(C.load_base_scene(), **{param: value})
@@ -506,28 +528,35 @@ def plan_phase1(seeds, smoke=False):
     return jobs
 
 
-def plan_phase2(base, decision, seeds, smoke=False, force=False):
-    """Test, burst experiment and zero-shot sweep of the adopted variant, only for the
-    seeds and methods whose selected model differs from the main run."""
-    variant = decision['adopted']
-    if variant == 'main':
-        return []
-    jobs, V = [], f'--variant={variant}'
-    for seed in seeds:
-        S = f'--seed={seed}'
-        for method in METHOD_LABEL:
-            if not (force or changed(base, variant, seed, method)):
-                continue
-            M = f'--method={method}'
-            jobs.append(Job(f'{variant}_s{seed}_test_{method}', ['test', V, S, M], [], 50))
-            jobs.append(Job(f'{variant}_s{seed}_burst_{method}', ['burst', V, S, M], [], 40))
-            for name, _, _ in zeroshot_points(smoke):
-                jobs.append(Job(f'{variant}_s{seed}_zeroshot_{method}_{name}', ['zeroshot', V, S, M, f'--point={name}'],
-                                [], 30 if method == 'Proposed' else 20))
+def plan_phase2(seeds, smoke=False, deps=('decide',)):
+    """Test, burst experiment and zero-shot sweep for both variants; each job checks at run
+    time (should_run) whether it is needed, so the whole run is one job graph."""
+    jobs = []
+    for variant in VARIANTS:
+        V_ = f'--variant={variant}'
+        for seed in seeds:
+            S = f'--seed={seed}'
+            for method in METHOD_LABEL:
+                M = f'--method={method}'
+                jobs.append(Job(f'{variant}_s{seed}_test_{method}', ['test', V_, S, M], deps, 50))
+                jobs.append(Job(f'{variant}_s{seed}_burst_{method}', ['burst', V_, S, M], deps, 40))
+                for name, _, _ in zeroshot_points(smoke):
+                    jobs.append(Job(f'{variant}_s{seed}_zeroshot_{method}_{name}',
+                                    ['zeroshot', V_, S, M, f'--point={name}'], deps,
+                                    30 if method == 'Proposed' else 20))
     return jobs
 
 
-def run_jobs(jobs, base, main, workers=4, smoke=False, poll=None, poll_seconds=600):
+def plan_all(seeds, smoke=False):
+    """Everything after `prepare` in one job graph: phase 1, the decision (a job that waits for
+    phase 1), the phase-2 evaluations, the no-stage-3 ablation and the NoSupport ablation."""
+    from . import nosupport
+    first = plan_phase1(seeds, smoke)
+    decide = Job('decide', ['decide'], [j.id for j in first if not j.id.endswith('_ablation_NoStage3')], 79)
+    return first + [decide] + plan_phase2(seeds, smoke) + nosupport.jobs(seeds, Job, smoke)
+
+
+def run_jobs(jobs, base, main, workers=4, smoke=False, poll=None, poll_seconds=600, seeds=None):
     """Dependency-aware runner (p2.pipeline.run for run_v26.py).  Returns the failed job ids."""
     base = Path(base)
     jd = base/'_jobs'
@@ -536,7 +565,8 @@ def run_jobs(jobs, base, main, workers=4, smoke=False, poll=None, poll_seconds=6
     done = {j.id for j in jobs if marker[j.id].exists()}
     failed, running = set(), {}
     pending = [j for j in jobs if j.id not in done]
-    common = [f'--main={main}', f'--out-base={base}'] + (['--smoke'] if smoke else [])
+    common = [f'--main={main}', f'--out-base={base}'] + (['--smoke'] if smoke else []) + \
+        ([f'--seeds={",".join(map(str, seeds))}'] if seeds else [])
     print(f'[{now()}] {len(done)} jobs already done, {len(pending)} to run with {workers} workers; logs in {jd}',
           flush=True)
     last_poll = time.time()

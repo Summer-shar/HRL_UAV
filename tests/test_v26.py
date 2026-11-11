@@ -59,7 +59,17 @@ def test_design_and_plans():
     assert len(ids) == len(set(ids)) and all(dep in ids for j in jobs for dep in j.deps)
     assert sum('_train_' in i for i in ids) == 12 and sum('_dev_' in i for i in ids) == 96, len(ids)
     assert sum(i.endswith('_select') for i in ids) == 6 and sum('burstdev' in i for i in ids) == 9
-    print(f'phase 1: {len(ids)} jobs')
+    every = V.plan_all(d0['seeds'])
+    all_ids = [j.id for j in every]
+    assert len(all_ids) == len(set(all_ids)) and all(dep in all_ids for j in every for dep in j.deps)
+    decide = next(j for j in every if j.id == 'decide')
+    assert set(decide.deps) == set(ids) - {f's{s}_ablation_NoStage3' for s in d0['seeds']}
+    phase2 = [j for j in every if j.deps == ['decide']]
+    assert len(phase2) == 2*3*2*(2+16), len(phase2)
+    ns = [j for j in every if j.id.startswith('ns_')]
+    assert len(ns) == 3*(2+5+2) and all(not set(j.deps) & set(ids) for j in ns)
+    assert next(j for j in ns if j.id == 'ns_s4101_dev_0').deps == ['ns_s4101_train_M1']
+    print(f'phase 1: {len(ids)} jobs; all: {len(all_ids)} jobs')
 
 
 def test_burst_plan():
@@ -132,6 +142,8 @@ def fake_main(root, seed, scores):
                                              for label in V.LABELS}))
     (C.run_dir(root, seed, 'M1')).mkdir(parents=True)
     (C.run_dir(root, seed, 'M1')/'final.pt').write_bytes(b'm1')
+    (C.run_dir(root, seed, 'M2')/'ckpt').mkdir(parents=True)
+    (C.run_dir(root, seed, 'M2')/'ckpt'/'ep0005.pt').write_bytes(b'm2')
     for label, stage in V.LABELS.items():
         rd = C.run_dir(root, seed, stage)
         rd.mkdir(parents=True)
@@ -225,6 +237,7 @@ def test_flow():
 
     V.policy_paths = fake_paths
     evaluate.candidate_paths = lambda root, seed_, label, candidate, selected=None: ('CA', None, None)
+    real_factory = evaluate.factory
     try:
         for variant in ('main',)+V.VARIANTS:
             V.burstdev_job(base, main, variant, seed, smoke=True)
@@ -232,19 +245,39 @@ def test_flow():
         # CA is the same policy in all three "variants": equal burst cost -> burst is not better -> ext
         assert decision['adopted'] == 'ext' and decision['table']['ext']['J'] == 5.8, decision
         assert decision['table']['main']['J'] == 6.0 and (base/'DECISION.md').exists()
-        jobs = V.plan_phase2(base, decision, seeds, smoke=True)
         points = V.zeroshot_points(smoke=True)
-        assert [j.id for j in jobs] == [f'ext_s{seed}_test_Proposed', f'ext_s{seed}_burst_Proposed'] + \
-            [f'ext_s{seed}_zeroshot_Proposed_{n}' for n, _, _ in points], [j.id for j in jobs]
-        assert len(V.plan_phase2(base, decision, seeds, smoke=True, force=True)) == 2*len(jobs)
-        assert V.plan_phase2(base, dict(adopted='main'), seeds, smoke=True) == []
+        assert len(V.plan_phase2(seeds, smoke=True)) == 2*2*(2+len(points))
+        assert V.should_run(base, 'ext', seed, 'Proposed') and not V.should_run(base, 'ext', seed, 'HoverSAC')
+        assert V.should_run(base, 'ext', seed, 'HoverSAC', smoke=True)
+        assert not V.should_run(base, 'burst', seed, 'Proposed', smoke=True)
+        V.test_job(base, main, 'burst', seed, 'Proposed', smoke=True)         # not adopted: nothing written
+        V.test_job(base, main, 'ext', seed, 'HoverSAC', smoke=False)          # unchanged: nothing written
+        assert not V.test_dir(base, 'burst', seed, 'Proposed').exists()
+        assert not V.test_dir(base, 'ext', seed, 'HoverSAC').exists()
         V.test_job(base, main, 'ext', seed, 'Proposed', smoke=True)
         V.burst_job(base, main, 'ext', seed, 'Proposed', smoke=True)
         for name, _, _ in points:
             V.zeroshot_job(base, main, 'ext', seed, 'Proposed', name, smoke=True)
         V.ablation_job(base, main, seed, smoke=True)
+        # NoSupport ablation (torch-free here: the network patch is replaced, the scripted CA policy stands in)
+        from v26 import nosupport as NS
+        NS.prepare(main, base, seeds, smoke=True)
+        assert C.read_json(C.seed_dir(NS.root(base), seed)/'main_selected.json')['ProposedUpper'] == 5
+        assert NS.candidate_paths(base, main, seed, 0)[2] == C.run_dir(main, seed, 'M2')/'ckpt'/'ep0005.pt'
+        assert NS.candidate_paths(base, main, seed, 3)[1] == C.run_dir(NS.root(base), seed, 'M3')/'ckpt'/'ep0003.pt'
+        saved_patch = NS.patch
+        NS.patch = lambda: None
+        evaluate.factory = lambda *a, **k: real_factory('CA', seed, None, None)
+        try:
+            for c in V._ORIGINAL_DESIGN(smoke=True)['lower_candidates']:
+                NS.dev_job(base, main, seed, c, smoke=True)
+            assert NS.select_job(base, seed, smoke=True)['selected'] == 3      # equal scores: the later candidate
+            NS.test_job(base, main, seed, smoke=True)
+        finally:
+            NS.patch = saved_patch
+        assert len(list(NS.test_dir(base, seed).glob('*.json'))) == len(V._ORIGINAL_DESIGN(smoke=True)['test'])
     finally:
-        V.policy_paths, evaluate.candidate_paths = real_paths, real_candidate
+        V.policy_paths, evaluate.candidate_paths, evaluate.factory = real_paths, real_candidate, real_factory
     # new candidates resolve to the variant root, the main run to the main root
     resolved = {(v, m): p for v, m, p in paths_seen}
     assert 'ep0006.pt' in resolved[('ext', 'Proposed')] and str(base) in resolved[('ext', 'Proposed')]
@@ -277,13 +310,14 @@ def test_flow():
 
     summary = R.build(base, main, seeds, smoke=True)
     text = summary.read_text(encoding='utf-8')
-    assert 'v2.6' in text and 'NoStage3' in text and '零样本扫参' in text, text
+    assert 'v2.6' in text and 'NoStage3' in text and 'NoSupport（无支撑集选择）' in text and '零样本扫参' in text, text
     out = base/'results'
     d = V._ORIGINAL_DESIGN(smoke=True)
     assert len(C.read_json(out/'v26_records_test.json')) == len(d['test'])
     assert len(C.read_json(out/'v26_records_burst.json')) == len(d['sweep_scenarios'])
     assert len(C.read_json(out/'v26_records_zeroshot.json')) == len(points)*len(d['test'])
     assert len(C.read_json(out/'v26_records_ablation.json')) == len(d['test'])
+    assert len(C.read_json(out/'v26_records_nosupport.json')) == len(d['test'])
     assert len(C.read_json(out/'v26_records_burstdev.json')) == 3*len(d['dev'])
     assert len(C.read_json(out/'v26_train_logs.json')) == 2*2*3
     assert tree_hash(main) == snapshot, 'the main root was modified'
@@ -334,6 +368,18 @@ if command == 'train':
                                               actor_relative_entropy=-2.5))
         if n in s['new']:
             (rd/'ckpt'/('ep%04d.pt' % n)).write_bytes(b'ckpt')
+elif command == 'ns-train':
+    r = C.run_dir(V.variant_root(arg['out-base'], 'ext').parent/'nosupport', int(arg['seed']), arg['stage'])
+    (r/'ckpt').mkdir(parents=True, exist_ok=True)
+    (r/'final.pt').write_bytes(b'x')
+    for c in C.design(True)['lower_candidates']:
+        (r/'ckpt'/('ep%04d.pt' % c)).write_bytes(b'x')
+elif command in ('ns-dev', 'ns-test'):
+    from v26 import nosupport as NS
+    NS.patch = lambda: None
+    real = evaluate.factory
+    evaluate.factory = lambda *a, **k: real('CA', int(arg['seed']), None, None)
+    sys.exit(run_v26.main(sys.argv[1:]))
 elif command == 'dev':
     c = int(arg['candidate'])
     score = 5.0 + c/10 + (0.0 if arg['variant'] == 'ext' else 0.01)
@@ -367,6 +413,9 @@ def test_go():
         decision = C.read_json(base/'results'/'v26_decision.json')
         assert decision['adopted'] == 'ext' and decision['table']['ext']['per_seed'][str(seed)]['selected'] == 5
         assert (base/'results'/'v26_summary.md').exists() and len(C.read_json(base/'results'/'v26_records_test.json')) == 4
+        assert len(C.read_json(base/'results'/'v26_records_nosupport.json')) == 2
+        assert (base/'_jobs'/'decide.done').exists() and (base/'_jobs'/f'burst_s{seed}_test_Proposed.done').exists()
+        assert not V.test_dir(base, 'burst', seed, 'Proposed').exists()
         done = len(list((base/'_jobs').glob('*.done')))
         assert stage.Go(main, base, 3, (seed,), smoke=True, publish=False).run() == 0      # resume: nothing to redo
         assert len(list((base/'_jobs').glob('*.done'))) == done
@@ -375,6 +424,7 @@ def test_go():
         # a failing job stops the run and is named on the status page
         (base/'_jobs'/f'ext_s{seed}_test_Proposed.done').unlink()
         fake.write_text('import sys\nsys.exit(1 if sys.argv[1] == "test" else 0)\n')
+        (base/'_jobs'/f'burst_s{seed}_test_Proposed.done').unlink()
         assert stage.Go(main, base, 3, (seed,), smoke=True, publish=False).run() == 1
         page = (base/V.STATUS_PAGE).read_text(encoding='utf-8')
         assert '已停止' in page and f'ext_s{seed}_test_Proposed' in page, page
