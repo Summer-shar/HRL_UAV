@@ -1,0 +1,186 @@
+
+=== 2026-11-12 09:54:32  D:\HRL_UAV_V2\.venv\Scripts\python.exe D:\p2_code_v26\run.py pipeline --smoke --no-sweeps --seeds=4101 --workers=8 --out=D:\p2_v26\_smoke\main
+0 jobs already done, 36 to run with 8 workers; logs in D:\p2_v26\_smoke\main\_jobs
+START s4101_train_M1
+START s4101_train_TFOO
+START s4101_train_TOO
+START s4101_train_NC
+DONE  s4101_train_M1 (0.2 min) [1/36]
+START s4101_train_M2
+START s4101_train_HoverSAC
+START s4101_dev_HoverSAC_0
+DONE  s4101_train_TOO (0.2 min) [2/36]
+DONE  s4101_train_NC (0.2 min) [3/36]
+START s4101_dev_TOO_5
+START s4101_dev_TOO_10
+START s4101_dev_NC_5
+START s4101_dev_NC_10
+DONE  s4101_train_TFOO (0.3 min) [4/36]
+DONE  s4101_dev_HoverSAC_0 (0.1 min) [5/36]
+DONE  s4101_dev_NC_10 (0.1 min) [6/36]
+START s4101_dev_TFOO_5
+START s4101_dev_TFOO_10
+DONE  s4101_train_HoverSAC (0.2 min) [7/36]
+DONE  s4101_dev_TOO_5 (0.1 min) [8/36]
+DONE  s4101_dev_TOO_10 (0.1 min) [9/36]
+DONE  s4101_dev_NC_5 (0.1 min) [10/36]
+START s4101_dev_HoverSAC_2
+START s4101_dev_HoverSAC_3
+DONE  s4101_train_M2 (0.2 min) [11/36]
+DONE  s4101_dev_TFOO_5 (0.1 min) [12/36]
+START s4101_dev_ProposedUpper_5
+START s4101_dev_ProposedUpper_10
+DONE  s4101_dev_TFOO_10 (0.1 min) [13/36]
+DONE  s4101_dev_HoverSAC_2 (0.1 min) [14/36]
+DONE  s4101_dev_HoverSAC_3 (0.1 min) [15/36]
+DONE  s4101_dev_ProposedUpper_5 (0.1 min) [16/36]
+DONE  s4101_dev_ProposedUpper_10 (0.1 min) [17/36]
+START s4101_select_upper
+DONE  s4101_select_upper (0.0 min) [18/36]
+START s4101_train_M3
+START s4101_dev_ProposedLower_0
+DONE  s4101_train_M3 (0.1 min) [19/36]
+DONE  s4101_dev_ProposedLower_0 (0.1 min) [20/36]
+START s4101_dev_ProposedLower_2
+START s4101_dev_ProposedLower_3
+DONE  s4101_dev_ProposedLower_2 (0.1 min) [21/36]
+DONE  s4101_dev_ProposedLower_3 (0.1 min) [22/36]
+START s4101_select_all
+DONE  s4101_select_all (0.0 min) [23/36]
+START s4101_test_Proposed
+START s4101_test_TFOO
+START s4101_test_TOO
+START s4101_test_NC
+START s4101_test_HoverSAC
+START s4101_test_CA
+START s4101_burst_Proposed
+START s4101_burst_TFOO
+DONE  s4101_test_CA (0.1 min) [24/36]
+START s4101_burst_TOO
+DONE  s4101_test_TOO (0.1 min) [25/36]
+DONE  s4101_test_NC (0.1 min) [26/36]
+DONE  s4101_burst_Proposed (0.1 min) [27/36]
+START s4101_burst_NC
+START s4101_burst_HoverSAC
+START s4101_burst_CA
+DONE  s4101_test_Proposed (0.1 min) [28/36]
+DONE  s4101_test_TFOO (0.1 min) [29/36]
+DONE  s4101_test_HoverSAC (0.1 min) [30/36]
+DONE  s4101_burst_TFOO (0.1 min) [31/36]
+DONE  s4101_burst_TOO (0.1 min) [32/36]
+DONE  s4101_burst_NC (0.1 min) [33/36]
+DONE  s4101_burst_HoverSAC (0.1 min) [34/36]
+DONE  s4101_burst_CA (0.1 min) [35/36]
+START report
+DONE  report (0.1 min) [36/36]
+All jobs finished.
+
+=== 2026-11-12 09:55:35  D:\HRL_UAV_V2\.venv\Scripts\python.exe D:\p2_code_v26\run_v26.py go --smoke --main=D:\p2_v26\_smoke\main --out-base=D:\p2_v26\_smoke\v26 --seeds=4101 --workers=8 --no-publish
+[2026-11-12 09:55:35] ����ʵ��Ŀ¼���Ƶ� 100 �����ڵĿ��գ�ֻ���� ...
+[2026-11-12 09:55:35] ����ʵ��Ŀ¼���Ƶ� 100 �����ڵĿ��գ�ֻ����: passed
+[2026-11-12 09:55:35] ȫ�����񣺼���΢����ext��burst������֤��ѡ��ѡ��汾����ѡ�汾�Ĳ���/ͻ��/������ɨ�Ρ��޵����׶����ڡ���֧�ż�ѡ������ ...
+[2026-11-12 09:55:35] 0 jobs already done, 50 to run with 8 workers; logs in D:\p2_v26\_smoke\v26\_jobs
+START ns_s4101_train_M1
+START ext_s4101_train_M3
+START burst_s4101_train_M3
+START ext_s4101_train_HoverSAC
+START burst_s4101_train_HoverSAC
+START s4101_burstdev_main
+START s4101_ablation_NoStage3
+DONE  s4101_ablation_NoStage3 (0.1 min) [1/50]
+DONE  s4101_burstdev_main (0.1 min) [2/50]
+DONE  ext_s4101_train_HoverSAC (0.1 min) [3/50]
+DONE  burst_s4101_train_HoverSAC (0.1 min) [4/50]
+START ext_s4101_dev_HoverSAC_5
+START ext_s4101_dev_HoverSAC_6
+START burst_s4101_dev_HoverSAC_5
+START burst_s4101_dev_HoverSAC_6
+DONE  ext_s4101_train_M3 (0.1 min) [5/50]
+DONE  burst_s4101_train_M3 (0.1 min) [6/50]
+START ext_s4101_dev_ProposedLower_5
+START ext_s4101_dev_ProposedLower_6
+START burst_s4101_dev_ProposedLower_5
+DONE  ns_s4101_train_M1 (0.2 min) [7/50]
+START ns_s4101_train_M3
+DONE  ext_s4101_dev_HoverSAC_5 (0.1 min) [8/50]
+DONE  ext_s4101_dev_HoverSAC_6 (0.1 min) [9/50]
+DONE  burst_s4101_dev_HoverSAC_5 (0.1 min) [10/50]
+DONE  burst_s4101_dev_HoverSAC_6 (0.1 min) [11/50]
+START ns_s4101_dev_0
+START burst_s4101_dev_ProposedLower_6
+DONE  ext_s4101_dev_ProposedLower_6 (0.1 min) [12/50]
+DONE  burst_s4101_dev_ProposedLower_5 (0.1 min) [13/50]
+DONE  ext_s4101_dev_ProposedLower_5 (0.1 min) [14/50]
+START ext_s4101_select
+DONE  ext_s4101_select (0.0 min) [15/50]
+START ext_s4101_burstdev
+DONE  ns_s4101_train_M3 (0.1 min) [16/50]
+START ns_s4101_dev_2
+START ns_s4101_dev_3
+DONE  ns_s4101_dev_0 (0.1 min) [17/50]
+DONE  burst_s4101_dev_ProposedLower_6 (0.1 min) [18/50]
+START burst_s4101_select
+DONE  burst_s4101_select (0.0 min) [19/50]
+START burst_s4101_burstdev
+DONE  ext_s4101_burstdev (0.1 min) [20/50]
+DONE  ns_s4101_dev_2 (0.1 min) [21/50]
+DONE  ns_s4101_dev_3 (0.1 min) [22/50]
+START ns_s4101_select
+DONE  ns_s4101_select (0.0 min) [23/50]
+START ns_s4101_test
+DONE  burst_s4101_burstdev (0.1 min) [24/50]
+START decide
+DONE  decide (0.0 min) [25/50]
+START ext_s4101_test_Proposed
+START ext_s4101_test_HoverSAC
+START burst_s4101_test_Proposed
+START burst_s4101_test_HoverSAC
+START ext_s4101_burst_Proposed
+START ext_s4101_burst_HoverSAC
+START burst_s4101_burst_Proposed
+DONE  burst_s4101_test_Proposed (0.0 min) [26/50]
+DONE  burst_s4101_test_HoverSAC (0.0 min) [27/50]
+DONE  burst_s4101_burst_Proposed (0.0 min) [28/50]
+START burst_s4101_burst_HoverSAC
+START ext_s4101_zeroshot_Proposed_cpu_ghz=9
+START ext_s4101_zeroshot_Proposed_load=0.8
+DONE  burst_s4101_burst_HoverSAC (0.0 min) [29/50]
+START ext_s4101_zeroshot_Proposed_terminals=7
+DONE  ns_s4101_test (0.1 min) [30/50]
+START ext_s4101_zeroshot_Proposed_u2u_mhz=1.5
+DONE  ext_s4101_burst_HoverSAC (0.1 min) [31/50]
+START burst_s4101_zeroshot_Proposed_cpu_ghz=9
+DONE  ext_s4101_burst_Proposed (0.1 min) [32/50]
+DONE  burst_s4101_zeroshot_Proposed_cpu_ghz=9 (0.0 min) [33/50]
+START burst_s4101_zeroshot_Proposed_load=0.8
+START burst_s4101_zeroshot_Proposed_terminals=7
+DONE  ext_s4101_zeroshot_Proposed_terminals=7 (0.1 min) [34/50]
+DONE  burst_s4101_zeroshot_Proposed_load=0.8 (0.0 min) [35/50]
+DONE  burst_s4101_zeroshot_Proposed_terminals=7 (0.0 min) [36/50]
+START burst_s4101_zeroshot_Proposed_u2u_mhz=1.5
+START ext_s4101_zeroshot_HoverSAC_cpu_ghz=9
+START ext_s4101_zeroshot_HoverSAC_load=0.8
+DONE  burst_s4101_zeroshot_Proposed_u2u_mhz=1.5 (0.0 min) [37/50]
+START ext_s4101_zeroshot_HoverSAC_terminals=7
+DONE  ext_s4101_test_HoverSAC (0.1 min) [38/50]
+DONE  ext_s4101_zeroshot_Proposed_load=0.8 (0.1 min) [39/50]
+START ext_s4101_zeroshot_HoverSAC_u2u_mhz=1.5
+START burst_s4101_zeroshot_HoverSAC_cpu_ghz=9
+DONE  ext_s4101_test_Proposed (0.1 min) [40/50]
+START burst_s4101_zeroshot_HoverSAC_load=0.8
+DONE  ext_s4101_zeroshot_Proposed_cpu_ghz=9 (0.1 min) [41/50]
+DONE  burst_s4101_zeroshot_HoverSAC_cpu_ghz=9 (0.0 min) [42/50]
+DONE  burst_s4101_zeroshot_HoverSAC_load=0.8 (0.0 min) [43/50]
+START burst_s4101_zeroshot_HoverSAC_terminals=7
+START burst_s4101_zeroshot_HoverSAC_u2u_mhz=1.5
+DONE  burst_s4101_zeroshot_HoverSAC_terminals=7 (0.0 min) [44/50]
+DONE  burst_s4101_zeroshot_HoverSAC_u2u_mhz=1.5 (0.0 min) [45/50]
+DONE  ext_s4101_zeroshot_Proposed_u2u_mhz=1.5 (0.1 min) [46/50]
+DONE  ext_s4101_zeroshot_HoverSAC_terminals=7 (0.1 min) [47/50]
+DONE  ext_s4101_zeroshot_HoverSAC_load=0.8 (0.1 min) [48/50]
+DONE  ext_s4101_zeroshot_HoverSAC_cpu_ghz=9 (0.1 min) [49/50]
+DONE  ext_s4101_zeroshot_HoverSAC_u2u_mhz=1.5 (0.1 min) [50/50]
+[2026-11-12 09:56:12] ȫ�����񣺼���΢����ext��burst������֤��ѡ��ѡ��汾����ѡ�汾�Ĳ���/ͻ��/������ɨ�Ρ��޵����׶����ڡ���֧�ż�ѡ������: passed
+[2026-11-12 09:56:12] ���� ...
+[2026-11-12 09:56:13] ����: passed
+[2026-11-12 09:56:13] FINISHED: adopted ext; summary D:\p2_v26\_smoke\v26\results\v26_summary.md
