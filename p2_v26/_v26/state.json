@@ -10,8 +10,10 @@
       "seconds": 100
     },
     "prepare": {
-      "status": "running",
-      "started": "2026-11-12 09:56:17"
+      "status": "passed",
+      "started": "2026-11-12 09:56:17",
+      "ended": "2026-11-12 09:56:26",
+      "seconds": 4
     },
     "run": {
       "status": "pending"
