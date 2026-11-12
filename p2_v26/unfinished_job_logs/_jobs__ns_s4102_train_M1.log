@@ -64,3 +64,5 @@
 [M1 seed 4102 62/200] delay=8.8566s cost/s=65.1246 wall=148.2s
 [M1 seed 4102 63/200] delay=1.8852s cost/s=14.9328 wall=115.4s
 [M1 seed 4102 64/200] delay=2.1966s cost/s=17.2505 wall=125.3s
+[M1 seed 4102 65/200] delay=11.1870s cost/s=81.6551 wall=157.3s
+[M1 seed 4102 66/200] delay=31.5079s cost/s=224.5651 wall=238.1s
