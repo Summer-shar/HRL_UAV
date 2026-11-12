@@ -16,7 +16,8 @@
       "seconds": 4
     },
     "run": {
-      "status": "pending"
+      "status": "running",
+      "started": "2026-11-12 09:56:30"
     },
     "report": {
       "status": "pending"
