@@ -1,0 +1,20 @@
+{
+  "code": "2a5a411d7ec866a8f6b00cf7cbc030c07f74c2e3ff3e236f55a8e8bd04eb23e8",
+  "main": "D:\\p2_runs_v2",
+  "started": "2026-11-12 09:44:04",
+  "steps": {
+    "smoke": {
+      "status": "running",
+      "started": "2026-11-12 09:44:04"
+    },
+    "prepare": {
+      "status": "pending"
+    },
+    "run": {
+      "status": "pending"
+    },
+    "report": {
+      "status": "pending"
+    }
+  }
+}
