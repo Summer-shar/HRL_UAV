@@ -16,11 +16,16 @@
       "seconds": 4
     },
     "run": {
-      "status": "running",
-      "started": "2026-11-12 13:15:20"
+      "status": "passed",
+      "started": "2026-11-12 13:15:20",
+      "ended": "2026-11-12 17:18:17",
+      "seconds": 14571
     },
     "report": {
-      "status": "pending"
+      "status": "passed",
+      "started": "2026-11-12 17:18:17",
+      "ended": "2026-11-12 17:18:20",
+      "seconds": 3
     }
   }
 }

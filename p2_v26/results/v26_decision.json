@@ -1,0 +1,127 @@
+{
+  "adopted": "ext",
+  "reason": "burst does not meet both conditions; ext lowers the nominal dev cost",
+  "rule": "Rule fixed in docs/V26.md before the run:\n    J = mean dev cost of the selected MH-TPCO model (nominal dev scenarios, mean over seeds);\n    B = mean cost of the same models in the burst experiment on the dev scenarios.\n    burst is adopted if its selection differs from the main run, J_burst <= (1+1 %) J_ext and\n    B_burst < B_ext; otherwise ext if its selection differs from the main run; otherwise main\n    (nothing changes).  J_ext <= J_main and J_burst <= J_main hold by construction.",
+  "tolerance": 0.01,
+  "table": {
+    "main": {
+      "per_seed": {
+        "4101": {
+          "selected": 100,
+          "dev_cost": 5.995441110313089,
+          "changed": false,
+          "hover_selected": 25,
+          "hover_changed": false,
+          "burst_cost": 8.3987819420991,
+          "burst_delay_s": 1.8806074455764872,
+          "burst_high_delay_s": 0.49645789203793156
+        },
+        "4102": {
+          "selected": 75,
+          "dev_cost": 6.1122691447153095,
+          "changed": false,
+          "hover_selected": 0,
+          "hover_changed": false,
+          "burst_cost": 8.870459310546677,
+          "burst_delay_s": 2.130837775909858,
+          "burst_high_delay_s": 0.48067347716701747
+        },
+        "4103": {
+          "selected": 100,
+          "dev_cost": 5.933385320814676,
+          "changed": false,
+          "hover_selected": 75,
+          "hover_changed": false,
+          "burst_cost": 8.063508134999584,
+          "burst_delay_s": 1.787828508687055,
+          "burst_high_delay_s": 0.47046984283378956
+        }
+      },
+      "J": 6.013698525281025,
+      "B": 8.444249795881786,
+      "changed": false
+    },
+    "ext": {
+      "per_seed": {
+        "4101": {
+          "selected": 150,
+          "dev_cost": 5.918224485793794,
+          "changed": true,
+          "hover_selected": 200,
+          "hover_changed": true,
+          "burst_cost": 8.329587422549448,
+          "burst_delay_s": 1.841520548628291,
+          "burst_high_delay_s": 0.5004754957291173
+        },
+        "4102": {
+          "selected": 125,
+          "dev_cost": 6.004608005619765,
+          "changed": true,
+          "hover_selected": 275,
+          "hover_changed": true,
+          "burst_cost": 9.152352811623334,
+          "burst_delay_s": 2.2899649718458095,
+          "burst_high_delay_s": 0.46932950172667853
+        },
+        "4103": {
+          "selected": 150,
+          "dev_cost": 5.91098215761659,
+          "changed": true,
+          "hover_selected": 200,
+          "hover_changed": true,
+          "burst_cost": 8.207074062709811,
+          "burst_delay_s": 1.8501792309873344,
+          "burst_high_delay_s": 0.4734576654612481
+        }
+      },
+      "J": 5.94460488301005,
+      "B": 8.56300476562753,
+      "changed": true
+    },
+    "burst": {
+      "per_seed": {
+        "4101": {
+          "selected": 100,
+          "dev_cost": 5.995441110313089,
+          "changed": false,
+          "hover_selected": 300,
+          "hover_changed": true,
+          "burst_cost": 8.3987819420991,
+          "burst_delay_s": 1.8806074455764872,
+          "burst_high_delay_s": 0.49645789203793156
+        },
+        "4102": {
+          "selected": 150,
+          "dev_cost": 5.974026610635651,
+          "changed": true,
+          "hover_selected": 275,
+          "hover_changed": true,
+          "burst_cost": 20.31819521489263,
+          "burst_delay_s": 7.520298190777779,
+          "burst_high_delay_s": 0.47188243042989025
+        },
+        "4103": {
+          "selected": 100,
+          "dev_cost": 5.933385320814676,
+          "changed": false,
+          "hover_selected": 75,
+          "hover_changed": false,
+          "burst_cost": 8.063508134999584,
+          "burst_delay_s": 1.787828508687055,
+          "burst_high_delay_s": 0.47046984283378956
+        }
+      },
+      "J": 5.9676176805878045,
+      "B": 12.260161763997104,
+      "changed": true
+    }
+  },
+  "forced_from": null,
+  "seeds": [
+    4101,
+    4102,
+    4103
+  ],
+  "smoke": false,
+  "decided": "2026-11-12 16:23:27"
+}
